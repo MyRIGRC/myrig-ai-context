@@ -1,18 +1,22 @@
 # カテゴリ名 突き合わせ表 v4 — DB正典 ↔ MyRIG画面表示
 
-更新: 2026-08-20 (JST) / パーツ子カテゴリ命名基準・event_tags進捗を反映
+更新: 2026-08-21 (JST) — docs精査で size_class / event_tags / log_type を実DB確認結果に合わせて改訂
+前回更新: 2026-08-20 / パーツ子カテゴリ命名基準・event_tags進捗を反映
 元: `cross-ref-category-names-v3.md`
 
 ---
 
-## 更新差分（v2→v3）
+## 更新差分（v2→v3 時点の記録）
 
-| 軸 | v2時点 | v3（確定） |
-|---|---|---|
-| `size_class` | Research正典未定義 | **確定済み**（7/30主査裁定・13値）。正典文書への収載はv1.5で実施予定（引用先誤りの訂正含む） |
-| `mini-micro`（build_tags, deprecated） | 置換先未定で宙に浮いていた | 置換先=`size_class`に確定。**個々データの移行は件数READ待ちで継続HOLD** |
-| Research未定義軸の分類 | 5軸を一括りに「未定義」としていた | 再分類：`event_tags`のみ**Research管轄・未確定**／`log_type` `surface` `weather`は**App管轄（元から確定していたものの誤分類）** |
-| `rig_type=drone-fpv` 表示 | 表記ゆれ（中点/スラッシュ無し/スラッシュ有り混在） | 正は **「ドローン / FPV」**（前後スペース＋スラッシュ）に統一。slugは`drone-fpv`のまま変更なし |
+> ⚠️ **2026-08-21 監査: 本表は v3 策定時点の記録であり、`size_class` と `event_tags` は
+> その後の実DB確認で覆っている。**現在の状態は下の「その他の固定値」表を見ること。
+
+| 軸 | v2時点 | v3時点の記録 | 2026-08-21 実DB確認後 |
+|---|---|---|---|
+| `size_class` | Research正典未定義 | 確定済み（7/30主査裁定・13値） | ⚠️ **HOLD。**13値の出典は db-schema-answers-v1 §2 に実在するが、実データは18パターンでenum運用されていない |
+| `mini-micro`（build_tags, deprecated） | 置換先未定で宙に浮いていた | 置換先=`size_class`に確定 | `size_class` 自体がHOLDのため継続HOLD |
+| Research未定義軸の分類 | 5軸を一括りに「未定義」 | `event_tags`のみResearch管轄・未確定／`log_type` `surface` `weather`はApp管轄 | ⚠️ `event_tags` は**列が物理的に存在せず**owner未確定。`log_type` は4/5値でHOLD |
+| `rig_type=drone-fpv` 表示 | 表記ゆれ | 正は「ドローン / FPV」に統一。slugは`drone-fpv` | 変更なし（有効） |
 
 ---
 
@@ -21,15 +25,16 @@
 | 軸 | 値の数 | 状態 | 値 |
 |---|---|---|---|
 | `rig_type` | 5 | 確定 | RCカー / ミニ四駆（予定） / **ドローン / FPV** / RC飛行機 / RCボート |
-| `size_class` | 13 | **確定（7/30裁定）** | `1/5` `1/6` `1/7` `1/8` `1/10` `1/12` `1/14` `1/16` `1/18` `1/24` `1/27` `mini-z`（表示Mini-Z） `other`（表示その他） |
-| `log_type` | 4 | 確定（App管轄） | 整備 / 走行 / カスタム / メモ |
+| `size_class` | **不明（実データ18パターン）** | ⚠️ **HOLD（2026-08-21 実DB確認で「13値確定」の裏付けが崩れた）** | 旧記載の13値: `1/5` `1/6` `1/7` `1/8` `1/10` `1/12` `1/14` `1/16` `1/18` `1/24` `1/27` `mini-z` `other`<br>⚠️ **13値そのものの出典は存在する** — `db-schema-answers-v1.md`（2026-07-30 主査裁定・App側の写し）§2 に固定値集合として明記。**HOLDの主因は実装実態との乖離**:<br>`_decisions/2026-08-21_db-inquiry-002-realdata.md` J-2: **実データは18パターン**（`NULL` 639件が最多 / `1/10` 341 / `1/8` 62 / `1/12` 50 … `M-chassis` 2 / `mini` 1 等の自由記述が混在）で、**13値enumとして運用されていない**。<br>副次的な不確かさ: J-1 の記録どおり **DB Research PJ が保持する7/30裁定書の原本は未確認**（App側の写しのみ）で、**`MyRIG_Category_Structure_v1.4`（6/16改訂・7/30より前）は TEXT 自由記述として定義**している。<br>App側提案は「実データ主導（18パターンを土台に再確定）へ切替」。イタヤ裁定待ち |
+| `log_type` | 4 or 5 | ⚠️ **HOLD**（App管轄） | 整備 / 走行 / カスタム / メモ ＋ **セッティング（要裁定）**。PC正本 log-composer の種別タブは5種。詳細は `myrig_db_schema_v1_6.md` の `log_type` 項 |
 | `surface` | 10 | 確定（App管轄） | 岩 / 土 / 芝 / アスファルト / カーペット / 砂 / 雪 / 屋内コース / 屋外コース / その他 |
 | `weather` | 6 | 確定（App管轄） | 晴れ / 曇り / 雨 / 雪 / 屋内 / その他 |
-| `event_tags` | 12（4件のみ判明・残8件復元中） | **未確定（Research管轄）** | RECON G6 / ヒルクライム / 耐久 / デモリション ほか |
+| `event_tags` | **不明（列が物理的に存在しない）** | ⚠️ **HOLD・owner未確定** | 2026-08-21 実DB確認（`_decisions/2026-08-21_db-inquiry-002-realdata.md` I-3）: **`event_tags` という列名はDB全体のどのテーブルにも存在しない（0件）。** Category v1.4「確定値12種」も本表の旧記載「4件判明・残8件復元中」も、**どちらも未実装の机上記述**と判明。値の議論より先に owner（App実装かResearch管轄か）の確認が必要 |
 | `power_source` | 7 | 確定・UI非表示 | （データ層のみ） |
 | `build_tags` | 5（うち1件deprecated） | 確定 | コンペ / ロックレーサー / スケール / トレイル / ミニマイクロ(deprecated→size_class) |
 
-part_categories親14・rig_categories24は前版（v2）のまま変更なし（`cross-ref-category-names-v2.md`参照）。
+part_categories親14・rig_categories24は前版（v2）のまま変更なし
+（`cross-ref-category-names-v2.md` 参照。⚠️ただし同ファイルは**本repo内に存在しない** — 下の「関連」参照）。
 
 ---
 
@@ -49,23 +54,34 @@ App側UIには現状未表示。将来表示する際の命名基準として、
 
 ## 残っているオープン事項
 
-1. `event_tags` 残8件の復元 — **未着手**。週次ゲート優先度2（優先度1はsize_class正典収載）。
-   復元方法はSession 40記録の発掘 or 再定義、着手後でないと確定しない
-2. `mini-micro`件数READ後の移行判断（Research側作業、待ちのみ）
-3. パーツ子カテゴリ90件の個別点検（Research側作業、待ちのみ。App側UI未表示のため急ぎではない）
+1. **`size_class` の値集合の再確定** — 13値の出典は db-schema-answers-v1 §2（7/30主査裁定の写し）に実在するが、
+   実データは18パターンでenum運用されていない（実DB確認J-2）。
+   実データ18パターンを土台に再確定する案をイタヤ裁定待ち
+2. **`event_tags` の owner 確認** — 列が物理的に存在しない（実DB確認I-3）。
+   App未実装機能の先行記述なのか、Research管轄の未構築なのかを先に決める
+3. **`log_type` 4値/5値の裁定** — `setting`（セッティング）の要否。App管轄
+4. `mini-micro`件数READ後の移行判断（`size_class` 確定が前提のため上記1に従属）
+5. パーツ子カテゴリ90件の個別点検（Research側作業、待ちのみ）。
+   ⚠️ ただし実DB確認E-3で `part_categories` は**0行（空）**と判明。点検以前にデータ投入が未了
 
 ## 反映済み・クローズ
 
 - drone-fpv表示統一
-- size_class 13値の確定
-- 未定義軸の管轄分離
-- パーツ子カテゴリ90件の命名基準（点検自体は上記オープン事項3として継続）
+- 未定義軸の管轄分離（※`event_tags` の管轄は上記2で再確認中）
+- パーツ子カテゴリ90件の命名基準（点検自体は上記オープン事項5として継続）
+
+（2026-08-21 監査: 旧「反映済み」にあった「size_class 13値の確定」は**クローズ扱いを撤回**し、
+オープン事項1へ差し戻した）
 
 ---
 
 ## 関連
 
 - `cross-ref-category-names-v2.md`（part_categories親14・rig_categories24の詳細一覧はこちらが正）
-- `db-schema-answers-v1.md`（2026-07-30 主査裁定・size_class根拠）
+  ⚠️ **2026-08-21 監査: 本repo内に存在しない**（`_archive` にも v3 のみ）。
+  親14・子90・RIG24 の詳細一覧を参照する必要が生じた場合は、所在の確認が先
+- `db-schema-answers-v1.md`（2026-07-30 主査裁定・**size_class 13値の出典**。App側の写し）
+- **`_decisions/2026-08-21_db-inquiry-002-realdata.md`（実DB確認。size_class / event_tags /
+  spec_data / part_categories の実体はこちらが最新の一次記録）**
 - `myrig_vocab_export_20260820_rev2.csv/json`（Research側エクスポート）
 - `parts-category-naming-questions-v1.md`（Q5・今回で回答クローズ）

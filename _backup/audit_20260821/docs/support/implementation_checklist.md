@@ -1,8 +1,5 @@
 # MyRIG RC — 実装初期設定チェックリスト
 
-**最終更新:** 2026-08-21（docs精査: 認証方式をHOLD化 / signup後の遷移をonboarding経由に訂正 /
-sitemap の旧URL `/subcategory/[slug]` を是正 / 物理DELETE禁止との関係を注記）
-
 Next.js + Supabase + Vercel + Cloudflare Images の実装開始時に必ず対応する項目。
 Claude Codeに渡す前にこのリストを確認し、順番に実装する。
 
@@ -59,34 +56,21 @@ RAKUTEN_AFFILIATE_ID=
 ## Phase 1: 認証・セキュリティ基盤
 
 ### 1-1. Supabase Auth設定
+- Google OAuth有効化
+- メール/パスワード認証有効化
+- メール確認（Email Confirmation）有効化
+- リダイレクトURL設定（本番 + localhost）
 
-> ⚠️ **HOLD: 認証方式は未裁定**（2026-08-21 監査・3AIクロスチェックで検出）
-> プロバイダとメール認証の有無が**5系統に割れている**（App_Ready_Design_Rules.md Rule 6 の HOLD 表を参照）。
-> **実装フェーズで裁定する。**それまで下記の具体設定を確定事項として扱わない。
-
-- OAuth プロバイダ有効化（**どのプロバイダかは裁定待ち**）
-- メール/パスワード認証を採用するか（**裁定待ち**）
-- リダイレクトURL設定（本番 `https://myrigrc.com/auth/callback` + localhost）
-
-### 1-2. signup後の遷移フロー
-
-**新規ユーザーは `/onboarding` を経由する**（auth-guard-spec-v1 §4.3 が正）:
-
+### 1-2. メール確認フロー
+signup後の遷移:
 ```
-signup（OAuth成功）
-→ username 未設定なら /onboarding（next は session に退避）
-→ onboarding 完了後 → safeNext(next)（next 無しなら /garage）
+signup → /auth/verify-email（「確認メールを送りました」画面）
+→ ユーザーがメール内リンクをクリック
+→ /auth/callback → /garage（ガレージトップへ）
 ```
-
-既存ユーザーは `/auth/callback` → `safeNext(next)`（next 無しなら `/garage`）。
-
 必要なページ:
+- `/auth/verify-email` — メール確認待ち画面（新規作成）
 - `/auth/callback` — Supabase Auth callbackハンドラー
-- `/onboarding` — 初期設定ウィザード（ユーザー名・表示名・国/地域・興味カテゴリ）
-
-（2026-08-21 監査で訂正: 旧記載は `signup → /auth/verify-email → /auth/callback → /garage` で
-**onboarding を素通りしていた**ほか、未裁定のメール確認フローを前提にしていた。
-`/auth/verify-email` の要否はメール認証採用の裁定後に決める）
 
 ### 1-3. 管理者アクセス制御
 Supabase Auth のカスタムクレーム:
@@ -153,10 +137,7 @@ export default function robots() {
 ```typescript
 // app/sitemap.ts — 公開ページのみ
 // /rig/[id], /parts/[id], /log/[id], /user/[username]
-// /category/[rigType], /category/[rigType]/[categorySlug]
-// /parts, /parts/category/[partCategorySlug]
-// /library/rigs/[masterSlug], /library/parts/[masterSlug], /library/makers/[makerSlug]
-// ※2026-08-21 監査で訂正: 旧記載の /subcategory/[slug] は page-role-matrix に存在しないURL
+// /category/[slug], /subcategory/[slug]
 ```
 
 ### 2-4. canonical URL
@@ -252,8 +233,6 @@ Claude Codeへの指示には以下を常に含める:
 2. SUPABASE_SERVICE_ROLE_KEY をクライアント側コード（app/以下のClient Component、useEffect内等）に書かない
 3. NEXT_PUBLIC_ プレフィックスのない環境変数をクライアントに露出させない
 4. DELETE / DROP / TRUNCATE を含むSQLは実行前に内容を表示して確認を求める
-   （※データ行の物理DELETEは CORE.md で**禁止**。削除は `deleted_at` の UPDATE で行う。
-   本項は DDL・移行作業時の最終手段に対する確認ゲートであり、物理DELETEの許可ではない）
 5. node_modules/ や .next/ をgit addしない
 6. 本番DBのURLが指定されている場合、書き込み操作の前に必ず確認する
 ```

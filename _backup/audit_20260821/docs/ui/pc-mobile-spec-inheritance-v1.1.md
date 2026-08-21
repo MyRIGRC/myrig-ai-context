@@ -2,10 +2,8 @@
 
 **ID:** pc-mobile-spec-inheritance-v1
 **作成:** 2026-07-24 (JST) / Claude
-**状態:** v1.1（GPTクロスチェック反映）
-⚠️ 2026-08-21 監査: 本書は長らく「イタヤ承認待ち」と自己申告しながら、CURRENT.md では docs/（ACTIVE正典）として
-運用されていた。**承認の有無が未確定**。正典として運用を続けるか、承認まで参考文書に落とすかはイタヤ裁定待ち。
-**入力:** アーカイフ_.zip（PC版V3 39ページ現物を機械抽出＋目視照合）/ mobile-coverage-matrix v1.2 / page-role-matrix v1.4 / mobile-component-contract v0.5 / mobile-feedback-ledger
+**状態:** v1.1（GPTクロスチェック反映・イタヤ承認待ち）
+**入力:** アーカイフ_.zip（PC版V3 39ページ現物を機械抽出＋目視照合）/ mobile-coverage-matrix v1.2 / page-role-matrix v1.3 / mobile-component-contract v0.5 / mobile-feedback-ledger
 
 ---
 
@@ -19,8 +17,8 @@
 
 | 文書 | 粒度 |
 |---|---|
-| page-role-matrix v1.4 | ページの役割・URL |
-| mobile-coverage-matrix v1.2 | ページ単位の処遇（full mock / skeleton / direct）<br>⚠️ 実体は `_archive/knowledge-20260821/mobile-coverage-matrix-v1.md`（退役場所）にある。参照版数も contract v0.5 は v1.1、本書は v1.2 と不一致。**要確認** |
+| page-role-matrix v1.3 | ページの役割・URL |
+| mobile-coverage-matrix v1.2 | ページ単位の処遇（full mock / skeleton / direct） |
 | mobile-component-contract v0.5 | 部品（Shell・カード）の契約 |
 | **本書** | **ページ内セクションの構成順と引き継ぎ処遇** |
 
@@ -77,20 +75,7 @@
 - **G4 パンくず:** Header戻る導線へ写像。階層ラベルが意味を持つページはチップ等で残す判断可（宣言必須）。
 - **G5 hover専用情報:** tap / 明示UIへ置換。表示手段を宣言。
 - **G6 PCモーダル・ドロワー:** 契約のbottom-sheet / Dialog Controller管理へ。
-- **G7 追加ロード:** ページング／もっと見るが基本。無限スクロールは**限定例外**であり、
-  例外の追加は正規の裁定を経ること（勝手に広げない）。現時点の例外は以下2つ。
-  - **Feed**（台帳 #25）
-  - **検索の種別タブ**（#26。search-page-plan-v2 §確定仕様。※「すべて」タブは増量ダイジェスト29件で無限にしない）
-
-  （2026-08-21 監査で訂正: 旧記載「無限スクロールはFeedのみ」は、本書作成の前日に確定していた
-  search-page-plan v2 の #26 裁定を取り込めておらず矛盾していた）
-
-  ⚠️ **台帳#25 と 台帳#26 の関係は要調停**（※ここでの #25/#26 は **mobile-feedback-ledger の番号**。
-  §6 のページ番号とは別体系）: **台帳#26** は「モバイルの一覧系はページネーション**原則廃止**」
-  （「次へ」が出た時点で離脱するため）という、より広い原則として裁定されている。
-  一方 **台帳#25** は無限スクロールを「Feed限定例外」と位置づけている。**両者は同日付で食い違っており、
-  「ページングが基本」という本 G7 の前提自体が台帳#26 と整合しない可能性がある。**
-  現状は既裁定の2例外のみを列挙し、それ以外へ広げるにはイタヤ裁定を要する扱いとする。
+- **G7 追加ロード:** ページング／もっと見るが基本。無限スクロールは**Feedのみ**（台帳#25の限定例外）。
 - **G8 セクションヘッダ文法:** 英字タイトル＋件数＋右肩リンク（もっと見る→ / View all→）はワンセットでcarry。
 - **G9 AD枠:** PC版の `ad-placeholder` / `ad-slot-section` / `feed-ad-slot` 等、広告・アフィリエイト枠はクラス名にかかわらず「存在」をcarry。位置はモバイル側で裁定。
 - **G10 空状態・skeleton:** PC版に定義がある場合はcarry（empty-state-spec-v1準拠）。
@@ -99,7 +84,7 @@
 
 ## 5. 参照優先順位（coverage matrix §2に本書を挿入した形）
 
-1. r14凍結Home → 2. Coverage Matrix → 3. Page Role Matrix v1.4 → 4. auth-guard等の現行仕様 → **5. 本書§6設計図** → 6. PC版39ページHTML現物 → 7. v0.2 9ページ版等（参考のみ）
+1. r14凍結Home → 2. Coverage Matrix → 3. Page Role Matrix v1.3 → 4. auth-guard等の現行仕様 → **5. 本書§6設計図** → 6. PC版39ページHTML現物 → 7. v0.2 9ページ版等（参考のみ）
 
 - feedback ledgerの確定裁定は該当箇所で常に優先。
 - 5と6が食い違えば6が正（本書改訂を起票）。

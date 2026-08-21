@@ -2,8 +2,6 @@
 
 **作成:** 2026-07-16 (JST) / Claude
 **状態:** v0.5（2026-07-17。#18＝検索入口設計のイタヤ実機指摘とGPT裁定4点を反映。**v0.4は上書きせず版上げ**（既に実装・_INDEX登録済みのため）。_INDEX更新・v0.4の_archive退避はMR-MOBILE-P12実装バッチに含む。配布キューは#17裁定どおりナレッジ差し替えで代替）
-**最終更新:** 2026-08-21（docs精査: §2 の `--cat-*` を v7→**v8** へ訂正【最重要】/ §3.5 の search-page-plan
-参照を v1→v2 / §7 の pixel diff baseline に注記。詳細は §8 冒頭）
 **根拠:** r14凍結Home実資産の直接棚卸し ＋ Coverage Matrix v1.1 ＋ auth-guard-spec-v1 ＋ SoT_tokens-v6.css ＋ SoT_card-components.js
 **除外根拠:** app-shell-draft-v1は使用しない（/saved・Create=Header固定の旧設計）
 
@@ -15,29 +13,13 @@ Phase 1以降の全モバイルページが共有するShell・部品・tokenの
 
 - **対象:** mobile-shell（現行v0.4）の8系統（§3）＋共通ページ部品（§4）＋カード契約（§5）＋JS契約（§6）
 - **非対象:** Home専用表現 E12〜E26 → `.page-e3` adapterに残置。**Home視覚は凍結**、抽出でHomeの見た目を変えないことを回帰ゲート（§7）で担保
-- **参照優先順位:** r14凍結Home → Coverage Matrix v1.1 → Page Role Matrix v1.4 → auth-guard-spec等現行仕様 → PC版39ページ → v0.2 9ページ版・app-shell-draft-v1（参考のみ）
+- **参照優先順位:** r14凍結Home → Coverage Matrix v1.1 → Page Role Matrix v1.3 → auth-guard-spec等現行仕様 → PC版39ページ → v0.2 9ページ版・app-shell-draft-v1（参考のみ）
 
 ---
 
 ## 2. Token契約
 
-**3系統厳守:** `--color-*`（v6正典） / `--cat-*` / `--rig-status-*`
-
-**`--cat-*` の値は Token Note v8 が正典**（docs/design/color-token-v8.md）:
-
-```css
-:root { --cat-rig:#FBFF00; --cat-rig-on:#151515;
-        --cat-parts:#D92D20; --cat-parts-on:#ffffff;
-        --cat-log:#2F5F8F;  --cat-log-on:#ffffff; }
-[data-theme="dark"] { --cat-log:#3F709E; }
-```
-
-> ⚠️ **2026-08-21 監査で訂正（3AIクロスチェック一致・最重要）**
-> 本項は長らく「Token Note **v7**」と、緑 `#66b900` / 紫 `#4e00de` / 橙 `#f88202` を厳守対象として記載していた。
-> v7 は **2026-07-29 のイタヤ裁定で v8 へ置換**（RIG=黄 / PARTS=赤 / LOG=スチールブルー）。
-> モバイルへの v8 適用は **P22-B19（2026-08-17）で完了**。CURRENT.md への Active Override 記録が 2026-08-19。
-> **契約書だけが旧値の厳守を命じている状態**であり、実装時の事故源だった。
-> v8 の対文字色トークン `--cat-*-on` は必ずセットで使うこと（黄地に白文字はコントラスト1.08で読めない）。
+**3系統厳守（Token Note v7）:** `--color-*`（v6正典） / `--cat-*`（--cat-rig:#66b900 / --cat-parts:#4e00de / --cat-log:#f88202 =Light実測） / `--rig-status-*`
 
 **モバイル専用token:** mobile-tokens.cssで宣言済みの`--ms-*`は15種（下表）。別途、**mobile-shell.css内に未定義参照4種が実在**するため、Phase 0-5で新tokenを追加せず、canonical／既存tokenへ正規化する。
 
@@ -100,10 +82,7 @@ Phase 1以降の全モバイルページが共有するShell・部品・tokenの
 ### 3.5 SearchField【#18・v0.5再改訂 — 検索3導線の確定】
 - **3本整理（確定）:** ①Header検索＝**その場で検索開始**（3.1b Overlay・遷移しない） ②BottomNav「探す」＝`/search`へ移動（**自動focusなし** — カテゴリやメーカーから探す動線を妨げない） ③検索確定＝`/search?q=...`へ移動
 - **`focus=1`方式は廃止**【v0.4から変更】。関連コード・パラメータ処理を除去
-- **/searchのヘッダー＝SearchHeader variant** `.mobile-shell-header--search`: 通常の「ロゴ＋小型検索窓」ヘッダーを出さず、**横幅いっぱいの検索入力欄**＋クリア/検索ボタンで構成。leading領域は**検索トップ＝ロゴまたは空（戻る矢印なし — BottomNav主要タブを下層ページに見せない）／検索結果＝戻る矢印（fallback=`/search`。Homeではない）**。**ページ内に大型検索欄を別途置かない**（検索窓2つ問題の解消 — 大型欄をヘッダーへ統合する。近づけるだけでは不可）。/searchトップの下部構成（種別タブ・メーカー・車種カテゴリ・最近の検索・フィルター/結果）は
-**search-page-plan v2 が正**（docs/search/search-page-plan-v2.md。2026-07-23 に v1 を全面置換。
-v2 では「人・ガレージを探す」独立行が追加され、種別タブは無限スクロール＝#26 裁定。
-旧記載の「v1 §2のまま有効」は 2026-08-21 監査で訂正）
+- **/searchのヘッダー＝SearchHeader variant** `.mobile-shell-header--search`: 通常の「ロゴ＋小型検索窓」ヘッダーを出さず、**横幅いっぱいの検索入力欄**＋クリア/検索ボタンで構成。leading領域は**検索トップ＝ロゴまたは空（戻る矢印なし — BottomNav主要タブを下層ページに見せない）／検索結果＝戻る矢印（fallback=`/search`。Homeではない）**。**ページ内に大型検索欄を別途置かない**（検索窓2つ問題の解消 — 大型欄をヘッダーへ統合する。近づけるだけでは不可）。/searchトップの下部構成（種別タブ・メーカー・車種カテゴリ・最近の検索・フィルター/結果）はsearch-page-plan v1 §2のまま有効
 - searchSheet系の語は引き続き参照0件（静的ゲート）
 - **実機ゲート:** iPhone Safari実機でOverlayタップ→キーボード挙動確認（デプロイ後・イタヤ確認項目）
 
@@ -225,9 +204,6 @@ window.MyRIGMobileShell = {
 
 1. 本契約の変更（token追加 / Shell構造 / カードAPI / 認証挙動）= **GPTクロスチェック対象**。ページ内部の視覚調整は対象外
 2. Home（r14）は視覚凍結。抽出はコード移動と§2正規化・§3.7 JS挙動追加のみで、**Homeの算出スタイル（computed value）を変えない**
-   > ⚠️ **2026-08-21 監査**: この「視覚凍結 / pixel diff 0」は **v8カラー適用前の baseline を前提**にしている。
-   > v8 は P22-B19 でモバイル適用済みのため、v0.4/v0.5 baseline との pixel diff は必ず非0になる。
-   > 以後の回帰判定は **v8適用後の baseline を新規作成**して行うこと。旧baselineとの比較で不合格判定を出さない。
 3. **回帰ゲート（Phase 0-5直後・Phase 1-1着手前）— 二段階判定:**
    - 前提条件: 同一Chromium版 / 同一DPR / フォント読込完了 / 画像decode完了 / transition・animation停止後に撮影（viewport: 360×800 / 390×844 / 430×932、ライト・ダーク）
    - **第一基準: pixel diff 0**
@@ -243,18 +219,7 @@ window.MyRIGMobileShell = {
 
 ---
 
-## 8. 変更履歴
-
-### 2026-08-21 docs精査（3AIクロスチェック）での改訂
-
-1. **§2 — `--cat-*` を v7（緑/紫/橙）から v8（黄/赤/スチールブルー）へ訂正【最重要】。**
-   v8 は 2026-07-29 裁定・P22-B19（08-17）でモバイル適用済みなのに、本契約だけが v7 値の「厳守」を
-   命じており実装事故源だった。対文字色トークン `--cat-*-on` も併記
-2. **§3.5 — `search-page-plan v1 §2のまま有効` を v2 参照へ更新**（v1 は 2026-07-23 に全面置換済み）
-3. **§7-2 — Home視覚凍結 / pixel diff 0 に注記追加。**v8適用前 baseline との比較では必ず非0になるため、
-   v8適用後の baseline を新規作成して判定する
-
-### rev.1変更履歴（GPT監査7点への対応 — 全件r14実資産で裏取り済み）
+## 8. rev.1変更履歴（GPT監査7点への対応 — 全件r14実資産で裏取り済み）
 
 | # | 指摘 | 対応 | 裏取り |
 |---|---|---|---|

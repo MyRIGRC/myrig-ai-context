@@ -16,8 +16,9 @@ MyRIG RC（myrigrc.com）はRC車両の愛好家向けプラットフォーム�
 App領域とResearch領域を混同しない。
 
 - App: user / content系スキーマ、UI、モックアップ、実装
-- Research: master系スキーマ（manufacturers / rig_masters / parts_masters等）、
-  マスターデータ収集ルール、カテゴリ構造
+- Research: master系スキーマ（manufacturers / rig_masters / part_masters / rig_categories /
+  part_categories / master_aliases 等）、マスターデータ収集ルール、カテゴリ構造
+  ※Research側は part_masters（単数形）。App側の parts_masters（複数形）とは同名別義。混同しない
 
 App相談とDB Research作業を同一セッションで混ぜない。
 UI設計とDB設計を混同しない。

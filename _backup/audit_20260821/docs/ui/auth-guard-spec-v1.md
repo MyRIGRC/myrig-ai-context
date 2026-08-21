@@ -235,34 +235,26 @@ export const config = {
   matcher: [
     '/garage/:path*',
     '/settings/:path*',
+    '/notifications/:path*',
+    '/register/:path*',
   ],
 };
 ```
 
-> **⚠️ 2026-08-21 監査で訂正（3AIクロスチェック一致）**
-> 旧 skeleton は matcher に `/notifications/:path*` と `/register/:path*` を含めていた。
-> しかし skeleton 内の `// 4) Auth Guard P1` ブロックは matcher 内の全 route を**無条件で `/login` へ redirect** するため、
-> P2（元ページを維持したまま Modal を開く）と**正面から矛盾**していた。
-> §5.1 の但し書き自身も「本実装着手時に matcher から外す可能性あり」と揺れていた。
-> mobile-component-contract v0.5 §3.8 は「`/notifications` `/register/:path*` は **P1 matcher から除外**」を
-> 既に確定扱いにしているため、契約側に合わせて matcher から除外した。
-> **P2 のページは matcher に入れず、page.tsx 側で session 確認 → `<LoginRequiredModal />` を表示する。**
-
 ### 5.1 matcher と挙動パターンの対応
 
-| URL pattern | matcher に含める | パターン | UI |
-|---|---|---|---|
-| `/garage/:path*` | ✅ 含める | **P1** | middleware で直接 redirect |
-| `/settings/:path*` | ✅ 含める | **P1** | 同上 |
-| `/notifications/:path*` | ❌ 含めない | **P2（確定）** | page.tsx で session 取得 → 未ログインなら Login Required Modal を表示 |
-| `/register/:path*` | ❌ 含めない | **P2（確定）** | 同上。Create 導線からの起動は元ページを維持したいため P2 |
+| matcher | パターン | UI |
+|---|---|---|
+| `/garage/:path*` | **P1** | middleware で直接 redirect |
+| `/settings/:path*` | **P1** | 同上 |
+| `/notifications/:path*` | **P2 推奨** | matcher には含めるが、middleware は session check のみ。ページ側で「未ログイン時は Login Required Modal を表示」する実装も可。P1/P2 のどちらにするかは本実装着手時に最終決定（現状は P2 を第一候補）|
+| `/register/:path*` | **P2 推奨** | 同上。Create 導線からの起動は元ページを維持したいケースが多いため P2 |
 
 > **方針:**
-> - P1 は middleware で確実に redirect（`/garage/:path*` / `/settings/:path*`）
+> - P1 は middleware で確実に redirect
 > - P2 は middleware では redirect せず、ページ Server Component / Client Component 側で `<LoginRequiredModal />` を表示する
-> - **P2 のページは matcher に含めない。** matcher に入れると skeleton の `// 4) Auth Guard P1` ブロックが無条件 redirect するため P2 が成立しない
-> - （2026-08-21 監査: 旧記載は「matcher には含める」「外す可能性あり」と揺れており、上の skeleton と矛盾していた。
->   mobile-component-contract v0.5 §3.8 の確定扱いに合わせて P2＝matcher対象外で固定した）
+> - matcher に含めるかどうかは「未ログインで route 到達した場合の挙動」で決まる。P2 のページは matcher から外し、page.tsx で session を取得 → 未ログインなら Modal を出す
+> - 上記 matcher 例は **P1 想定**。本実装着手時に P2 候補（`/notifications` / `/register/:path*`）を matcher から外す可能性あり
 
 ---
 
@@ -293,4 +285,3 @@ export const config = {
 |---|---|---|
 | v1 | 2026-05-22 | 初版（MR-AUDIT-002 / A7）。P1 / P2 / P3 パターン / Login Required Modal 文言 / `next` 安全性 / `middleware.ts` skeleton + matcher を確定 |
 | v1（注記） | 2026-07-23 | Coworkナレッジ監査で冒頭に改訂注記を追加（#14文言置換・§3.1/§3.3旧定義マーク）。本文・版数は不変。本文反映は#19キュー⑤ |
-| v1（改訂） | **2026-08-21** | **docs精査（3AIクロスチェック）で §5 middleware skeleton と §5.1 を本文改訂。** matcher から `/notifications/:path*` `/register/:path*` を除外（skeleton の `// 4) Auth Guard P1` ブロックが matcher 内を無条件 redirect するため、P2「元ページ維持のまま Modal」と矛盾していた）。§5.1 の揺れを解消し **P2＝matcher対象外**で確定。**※§3.1/§3.3 の冒頭注記の本文統合は未実施。ステータス「確定 v1」は据え置き** |

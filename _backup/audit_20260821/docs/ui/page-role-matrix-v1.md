@@ -1,26 +1,15 @@
 # MyRIG RC — Page Role Matrix / Final Sitemap v1
 
-**作成日:** 2026-05-03
-**最終更新:** 2026-08-21（docs精査で改訂注記3件を本文統合・URLパラメータ名統一）
-**過去の主な改訂:** 2026-05-12 URL設計統一 / `/saved`廃止・`/garage/favorites`・`/garage/pins` 正式化 /
-GarageShell-List・GarageDetailShell 分離確定。以降 Library系ページを追加（v1.1〜v1.3 MVP再構築）
-**ステータス:** 確定ベース v1.4
-
-
-※旧記載のヘッダー Session 番号（作成=100 / 最終更新=86）は前後が逆転していたため、2026-08-21 監査で
-ヘッダーのみ日付表記に改めた。**本文中の Session 86 / 113 / 115 の記述は経緯として残している。**
-
+**作成日:** 2026-05-03 (Session 100)
+**最終更新:** 2026-05-12 (Session 86 — URL設計統一 / /saved廃止・/garage/favorites・/garage/pins 正式化 / GarageShell-List・GarageDetailShell 分離確定)
+**ステータス:** 確定ベース v1.3（保存系URL統一 + GarageShell分離）
 **目的:** MyRIG全体のページ構成・役割・優先度を固め、V3モック制作・Next.js実装・管理画面設計で迷わない状態にする
 
-> **✅ 改訂反映済み（2026-08-21 監査 — 本文統合完了）**
+> **⚠️ 改訂注記（2026-07-23 Coworkナレッジ監査 — 本文は未改訂・本注記が優先）**
 >
-> 2026-07-23 の改訂注記が指していた3件は、**すべて本文へ統合済み**。注記と本文が二重状態だった問題は解消。
->
-> 1. §3 Feed行・§6 Feed Definition → **#28裁定「おすすめ / フォロー中」の2タブ**に本文改訂（画像グリッド＋ImageLightbox、無限スクロール#25も§6へ記載）
-> 2. §7 `/ranking` → **ランキング機能全廃方針**を本文へ反映。`*-ranking` プリセットの記述を削除
-> 3. §9 i18n → **#24裁定「MVP時点から日英2言語」**を本文へ反映
->
-> 詳細な経緯は mobile-feedback-ledger #24 / #25 / #28。
+> 1. **§3 Feed行・§6 Feed Definitionのタブ構成「All / Following」は旧定義。** #28裁定（2026-07-23 イタヤ実機裁定・P13b r2実装済み）で置換: タブは**「おすすめ / フォロー中」の2本**（「すべて＝全投稿時系列」タブは置かない — X型。おすすめのMVPロジックは新着＋人気の擬似ミックスで可）。画像は**グリッド型＋ImageLightbox**（1枚=単体/2枚=2列/3枚=1大＋2小）。Feed追加ロードは**無限スクロール**（#25・Feed限定例外）。詳細は mobile-feedback-ledger #25/#28。
+> 2. **§7の`/ranking`吸収記述にある`*-ranking`プリセット定義はランキング機能全廃方針により改訂対象**（#19キューに登録済み）。
+> 3. 本文の書き換えは正典改訂手続き（#19キュー消化・Next.js実装前・PC正本改訂と同時）で実施する。
 
 ---
 
@@ -58,7 +47,7 @@ Public Browse
 ├─ /category/[rigType]/[categorySlug]   SubCategory Top（例: /category/rock-crawler/comp）
 ├─ /parts                               Parts Browse Top
 ├─ /parts/category/[partCategorySlug]   Parts SubCategory（例: /parts/category/tire）
-├─ /feed                                Feed（LOG中心 / おすすめ・フォロー中の2タブ）
+├─ /feed                                Feed（LOG中心 / Following タブあり）
 └─ /search                              Search Results
 
 Detail
@@ -116,7 +105,7 @@ Admin
 | Parts Browse Top | `/parts` | Browse | パーツ専用Browse Top。ブランド・カテゴリ・使用RIG数を軸に | パーツを探す / 使用人数を見る | Must | A | 収益導線・Library連携の中核 |
 | Parts SubCategory | `/parts/category/[partCategorySlug]` | Browse | パーツカテゴリ別Browse。タイヤ・ESC・ショック等 | 特定カテゴリのパーツを比較する | Should | B | Parts Browse Top V3 完成後 |
 | Search Results | `/search` | Browse | 目的検索の固定UI。browse_md grid + list。フィルター・ソート優先 | 特定のRIG・パーツ・ユーザーを探す | Must | A | section-driven ではない。固定UI |
-| Feed | `/feed` | Relationship | LOG中心のアクティビティフィード | 最新ログを眺める / フォロー中の動向を見る | Should | A | **「おすすめ / フォロー中」の2タブ**（#28裁定。§6参照） |
+| Feed | `/feed` | Relationship | LOG中心のアクティビティフィード。Following タブあり | 最新ログを眺める / フォロー中の動向を見る | Should | A | All Feed + Following Feed の2タブ（**旧定義 — #28裁定で「おすすめ/フォロー中」に置換。冒頭の改訂注記参照**） |
 | RIG Detail | `/rig/[rigId]` | Detail | ユーザーRIG個別ページ。スペック・パーツ・ログ・写真 | このRIGの構成を見る | Must | S | ✅ v6 完成済み |
 | PARTS Detail | `/parts/[partId]` | Detail | ユーザーパーツ個別ページ。スペック・使用RIG・レビュー | このパーツの詳細を見る | Must | S | ✅ v6 完成済み |
 | LOG Detail | `/log/[logId]` | Detail | 整備・走行・カスタムログ個別ページ | このログの内容を読む | Must | S | ✅ v6 完成済み |
@@ -132,7 +121,7 @@ Admin
 | Parts Masters 一覧 | `/library/parts` | Library | Parts Master公式DB一覧。VIEW + 購入先を見る 2-CTA | パーツ製品を探す | Must | A | ✅ v1.1 MVP再構築済み（Session 115） |
 | Makers 一覧 | `/library/makers` | Library | Maker公式DB一覧。Official site + VIEW MAKER 2-CTA | メーカーを調べる | Must | A | ✅ v1.1 MVP再構築済み（Session 115） |
 | RIG Master Detail | `/library/rigs/[masterSlug]` | Library | **Lite版**: 画像2枚・スペック8項目・Variants・User Examples 4件・購入先導線。詳細は公式サイト/提携ショップへ | このモデルの基本情報を確認 / 購入先へ進む | Must | A | ✅ v1.1 Lite 完成（Session 115）。Full Scope版は将来実装候補 |
-| Parts Master Detail | `/library/parts/[masterSlug]` | Library | パーツの公式スペック・購入先導線（Lite方針）| このパーツの基本情報を確認 / 購入先へ進む | Must | B | 未作成 |
+| Parts Master Detail | `/library/parts/[partSlug]` | Library | パーツの公式スペック・購入先導線（Lite方針）| このパーツの基本情報を確認 / 購入先へ進む | Must | B | 未作成 |
 | Maker Detail | `/library/makers/[makerSlug]` | Library | メーカー情報・製品ライン・公式サイト導線 | このメーカーの製品を見る | Later | Later | 未作成 |
 | Notifications | `/notifications` | Relationship | いいね・コメント・フォロー通知 | 通知を確認する | Should | Later | MVP後半で整備 |
 | RIG 登録 | `/register/rig` | Utility | RIG登録フォーム（ステップ式） | RIGを登録する | Must | B | フォーム系は別まとめ |
@@ -229,27 +218,22 @@ GarageShell は **GarageShell-List**（一覧・管理ハブページ群）と *
 
 ## 6. Feed Definition
 
-**本§は #28裁定（2026-07-23 イタヤ実機裁定・P13b r2実装済み）を反映した現行定義**
-（2026-08-21 監査で本文統合。旧定義「All / Following」は失効）。
+> **⚠️ 本§のタブ構成は旧定義。#28裁定（2026-07-23）で「おすすめ / フォロー中」の2タブに置換済み（冒頭の改訂注記参照）。本文改訂は#19キューで実施。**
 
 ### Feed の基本思想
 
 Feed は「SNS的な拡散の場」ではなく「フォローしているガレージの更新履歴」として設計する。
 
-### タブ構成 = 「おすすめ / フォロー中」の2本
-
-**「すべて（全投稿時系列）」タブは置かない**（X型）。
-
-### おすすめ（デフォルト）
+### All Feed（デフォルト）
 
 - 流れるコンテンツ: **LOG のみ**
+- 整備ログ・走行ログ・カスタムログが時系列で流れる
 - ユーザーフォロー関係に関係なく全公開LOGが対象
-- **MVPのおすすめロジックは「新着＋人気の擬似ミックス」で可**
 - card_variant: **`log-feed`**（`myrig-log-card variant="feed"`）
   - ⚠️ `browse`（browse_md）は Browse ページ用。Feed では使用しない
   - `feed` variant は `SoT_card-components.js` に実装済み（旧 `myrig-log-feed`）
 
-### フォロー中（タブ切替）
+### Following Feed（タブ切替）
 
 - 流れるコンテンツ: フォロー中ユーザーの **LOG + Activity**
 - Activity の種別:
@@ -257,15 +241,10 @@ Feed は「SNS的な拡散の場」ではなく「フォローしているガレ
   - `part_added` — パーツを RIG に追加した
   - `rig_updated` — RIG の構成を更新した
   - `log_posted` — 新しい LOG を投稿した
-- LOG card_variant: **`log-feed`**（おすすめタブと同じ）
+- LOG card_variant: **`log-feed`**（All Feed と同じ）
 - Activity card_variant: **`activity_item`**（軽量専用コンポーネント / 将来設計）— `myrig-activity-item` 想定
   - Activity は LOG より小さく・情報量少なめ
   - SoT_card-components.js への追加は Feed V3 モック制作時に設計する
-
-### 画像表示・追加ロード（#28 / #25）
-
-- 画像は**グリッド型 ＋ ImageLightbox**（1枚=単体 / 2枚=2列 / 3枚=1大＋2小）
-- 追加ロードは**無限スクロール**（#25・Feed限定例外。pc-mobile-spec-inheritance G7 参照）
 
 ### Feed に含めないもの
 
@@ -274,7 +253,7 @@ Feed は「SNS的な拡散の場」ではなく「フォローしているガレ
 | Repost / 引用 | SNS 的拡散は MyRIG の方向性ではない |
 | DM / メッセージ | コミュニケーション機能はスコープ外（MVP）|
 | RIG / PARTS ブラウズカード混在 | Feed は LOG 中心。RIG/PARTS は Browse / Search から |
-| ランキング表示 | **ランキング機能は全廃方針**（2026-08-21 監査で訂正。旧記載「INDEX / Category Top の Browse Section で扱う」は失効） |
+| ランキング表示 | Feed ではなく INDEX / Category Top の Browse Section で扱う |
 
 ---
 
@@ -284,9 +263,9 @@ Feed は「SNS的な拡散の場」ではなく「フォローしているガレ
 
 | ページ候補 | 理由 |
 |---|---|
-| `/ranking` | **作成しない。ランキング機能そのものが全廃方針**（2026-08-21 監査で本文統合）。旧記載の「Browse Section（`data-query-preset="*-ranking"`）として吸収する」という扱いも**失効**。`*-ranking` プリセットは定義しない。ランキング表現はモバイル契約§4でも全部品で禁止 |
+| `/ranking` | INDEX / Category Top / Parts Browse Top の Browse Section（`data-query-preset="*-ranking"`）として吸収する。ランキングは「棚の並び順」であり独立ページが必要な情報量ではない（**注記: `*-ranking`プリセット定義はランキング全廃方針により#19キューで改訂対象**） |
 | `/logs`（LOG Browse Top） | LOG 一覧・回遊は Feed で吸収する。LOG 専用 Browse Top は MVP では不要。必要なら Category Top の entity_type: log として対応可能 |
-| `/makers`（Maker 一覧） | Library 内（`/library/makers` / `/library/makers/[makerSlug]`）で扱う。Maker 一覧は Library の補助コンテンツ |
+| `/makers`（Maker 一覧） | Library 内（`/library/makers/[makerId]`）で扱う。Maker 一覧は Library の補助コンテンツ |
 | `/favorites` | 独立 URL としては不作成。`/garage/favorites`（Garage グループ）として実装。旧 `/saved` タブ統合案は Session 86 で廃止 |
 | `/pins` | 独立 URL としては不作成。`/garage/pins`（Garage グループ）として実装。旧 `/saved` タブ統合案は Session 86 で廃止 |
 | `/saved`（および `/saved/*`） | **廃止（Session 86 確定）**。`/garage/favorites` / `/garage/pins` への 301 リダイレクト。`/saved` を独立URLにすると Garage ナビとの動線が分裂するため廃止 |
@@ -304,7 +283,7 @@ Feed は「SNS的な拡散の場」ではなく「フォローしているガレ
 | 2 | `myrig-parts-browse-v3.html` | `/parts` | 収益導線・Library 連携の中核。Parts Master との接続設計を固める |
 | 3 | `myrig-search-v3.html` | `/search` | 固定 UI（section-driven 非使用）のテンプレートを確立。browse_md grid + browse_list |
 | 4 | Global Layout / App Shell | — | **前倒し（↑ 6位→4位）。** Header / Sidebar / Drawer / Bottom Nav の設計。Feed・Public Garage など関係系ページのナビ構造を先に固める。現 V3 モックは Main Content only |
-| 5 | `myrig-feed-v3.html` | `/feed` | 「おすすめ / フォロー中」2タブ構成。LOG カード `log-feed` variant を主役に。`activity_item` コンポーネント設計もここで行う |
+| 5 | `myrig-feed-v3.html` | `/feed` | All Feed / Following Feed 2タブ構成。LOG カード `log-feed` variant を主役に。`activity_item` コンポーネント設計もここで行う |
 | 6 | `myrig-public-garage-v3.html` | `/user/[username]` | Own Garage v6 との表示分岐整理。GarageShell の共通化方針確定 |
 | 7 | `myrig-library-v3.html` 系 | `/library/*` | RIG Master / Parts Master Detail。SEO・アフィリエイト収益の中核 |
 
@@ -323,9 +302,9 @@ Feed は「SNS的な拡散の場」ではなく「フォローしているガレ
 | RIG カテゴリ slug | `/category/rock-crawler`, `/category/drift`, `/category/buggy` 等。英語 kebab-case |
 | PARTS カテゴリ slug | `/parts/category/tire`, `/parts/category/esc` 等 |
 | ユーザー識別 | `/user/[username]`（@ なし）。`@` は表示のみ |
-| Master 識別 | `/library/rigs/[masterSlug]`, `/library/parts/[masterSlug]`, `/library/makers/[makerSlug]`。**slug を使う想定**（UUIDは露出させない）。※ただし schema 側は masters を UUID PK で定義しており、**master 用 slug 列の定義は未確認**。実装前に schema と突き合わせること。**全エンティティで複数形に統一**（旧: `/library/rig/`, `/library/maker/` → 廃止）。※2026-08-21 監査でパラメータ名を `[masterId]`/`[makerId]` から統一 |
+| Master 識別 | `/library/rigs/[masterId]`, `/library/parts/[masterId]`, `/library/makers/[makerId]`。UUID or slug。**全エンティティで複数形に統一**（旧: `/library/rig/`, `/library/maker/` → 廃止） |
 | Admin プレフィックス | `/admin/*`。認証 middleware で保護 |
-| i18n | **MVP時点から日英2言語公開**（#24裁定 2026-07-23。mobile-feedback-ledger #24）。`/en/*` プレフィックス方式（Next.js i18n routing）。旧記載「日本語優先MVP・将来追加」は失効（2026-08-21 監査で本文統合） |
+| i18n | 日本語優先 MVP。将来 `/en/*` プレフィックスを追加可能な設計にする（Next.js i18n routing）（**注記: #24裁定（2026-07-23）で日英2言語公開はMVP時点からに変更 — mobile-feedback-ledger #24参照**） |
 
 ---
 
@@ -333,4 +312,4 @@ Feed は「SNS的な拡散の場」ではなく「フォローしているガレ
 
 ※ Breakpoint正典: desktop=1025px↑ / tablet=721-1024px / mobile=720px↓（詳細: `docs/design-rules.md` Breakpoint正典セクション参照）
 
-*Page Role Matrix v1.4 — 作成: 2026-05-03 / 補正: 2026-05-12 (Session 86) `/saved`廃止・`/garage/favorites`・`/garage/pins` 正式化・GarageShell分離 / 改訂: 2026-08-21 改訂注記3件（Feedタブ・ranking全廃・日英MVP）の本文統合＋URLパラメータ名統一*
+*Page Role Matrix v1.3 — 作成: 2026-05-03 / 補正: 2026-05-12 (Session 86) — /saved廃止・/garage/favorites・/garage/pins 正式化 / GarageShell-List・GarageDetailShell 分離確定*

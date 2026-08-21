@@ -1,20 +1,5 @@
 # MyRIG — スキーマ確認依頼 v1 への回答（DB Research 主査裁定）
 
-> ⚠️ **本書を読む前に（2026-08-21 追記）**
->
-> 本書は 2026-07-30 時点の裁定であり、**マスター系スキーマの正本**として扱われる。
-> ただしその後の**実DB確認（`_decisions/2026-08-21_db-inquiry-002-realdata.md`）で、
-> 本書の記述と実装実態が食い違う項目が判明している。**以下は本書の記述をそのまま実装しないこと。
->
-> | 本書の記述 | 実装実態 | 状態 |
-> |---|---|---|
-> | §2 `size_class` 固定値集合**13値** | 実データは**18パターン**（`NULL` 639件が最多、`M-chassis` `mini` 等の自由記述が混在）。enum運用されていない。`MyRIG_Category_Structure_v1.4`（本書より前の6/16改訂）はTEXT自由記述として定義 | **HOLD** — 実データ主導での再確定を提案中・イタヤ裁定待ち |
-> | Q6 `event_tags` **確定値12種** | **`event_tags` という列名がDB全体のどのテーブルにも存在しない（0件）** | **HOLD** — owner確認が先 |
-> | §2 `categories` パーツ親14・**子90で凍結** | **`part_categories` テーブルは0行（空）**。`spec_schema` 列もDB全体に存在しない | 未構築 |
-> | Q12 `spec_data` 承認キー（rig側11個） | `part_masters.spec_data` の実在キーは**225種**。パーツ側のキー設計は本書でも「未定」 | パーツ側は未設計 |
->
-> 現在のHOLD状況の索引は `_AI/MyRIG_CURRENT.md`。**本書とCURRENTが食い違う場合はCURRENTの後発裁定を優先する。**
-
 回答日: 2026-07-30 (JST) / 回答元: MyRIG Database Research PJ / 主査
 正典: MyRIG_Category_Structure_v1.4 / RC_Master_Research_Rules_v4.4_final_rev3 / Research_DB_Schema_v1.2
 記録: App実装プロジェクト側の写し。原文は DB Research PJ が保持。
@@ -190,12 +175,6 @@ App側は `master_aliases` を JOIN して検索対象に含める。
 パーツ側 `spec_data` のキー設計は**未定**。置き場は `part_categories.spec_schema` JSONB（列は存在）。
 **App側は当面 `spec_data` を絞り込み軸に使わない。**
 
-> ⚠️ **2026-08-21 実DB確認で訂正**: 「列は存在」は**誤り**。`spec_schema` という列名は
-> **DB全体のどのテーブルにも存在せず**、`part_categories` テーブル自体も **0行（空）**。
-> `part_masters.spec_data` の実在キーは **225種**で、事実上の自由入力運用。
-> **ホワイトリスト方式の前提インフラが未構築。** 詳細は
-> `_decisions/2026-08-21_db-inquiry-002-realdata.md` E-1／E-3／E-5。
-
 表示側は `master_publication.spec_display_schema`（Rules §G-8・14値）に一本化済み。
 `rig_masters` / `part_masters` 側に `spec_display_schema` 列を追加しない。
 
@@ -216,10 +195,6 @@ App側は `master_aliases` を JOIN して検索対象に含める。
 `tags` TEXT[] はユーザー自由入力。**ただしフィルタに出すなら別軸が要る。**
 運営正規タグは **`event_tags`**（Category v1.4 で確定値12種: `recon-g6` / `hill-climb` /
 `endurance` / `demolition` 等）を使う。**自由 `tags` と `event_tags` を同じ入力欄に混ぜない。**
-
-> ⚠️ **HOLD（2026-08-21 実DB確認）**: `event_tags` という列名は **DB全体のどのテーブルにも存在しない（0件）**。
-> 上の「確定値12種」は未実装の机上記述。**owner（App未実装機能の先行記述か / Research管轄の未構築か）の
-> 確認が先。** 詳細は `_decisions/2026-08-21_db-inquiry-002-realdata.md` I-3。
 
 ### Q7 全文検索の対象範囲
 
