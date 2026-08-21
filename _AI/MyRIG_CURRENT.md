@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260821-005
-updated: 2026-08-21 15:30 JST
+revision: MYRIG-20260821-006
+updated: 2026-08-21 16:00 JST
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -13,18 +13,29 @@ PC mockup: 39ページ、SoT CSS/JS構成、概ね完成
 Mobile mockup: 約55ページ、確認ダッシュボードで管理中
 確認状況: 確定0 / PC版のみ6 / 要確認49 / 未着手0（2026-08-20時点）
 確認ダッシュボード: デプロイ済（新規スレッド開始時に必ずURL・所在を確認すること）
-Mockup shell: v0.5 / Home r14 / P22-C28
+Mockup shell: v0.5 / Home r14 / P22-C35
+
+ナレッジ運用: 2026-08-21 CORE+CURRENT方式へ移行。
+本repo（myrig-ai-context）が全AI共通の正本。
+旧Claude Knowledge 41本は本repoへ分類移送済み（下記Task Routing参照）。
 
 ## Active Overrides
 
 2026-08-19
 カテゴリ色はToken Note v7ではなくv8裁定を採用。
-v8: RIG=黄 / PARTS=赤 / LOG=スチールブルー。モバイル42ページ適用済み。
-Token Note v7文書（緑/紫/橙）は失効。正典への正式反映は未完。
+v8: RIG=黄 / PARTS=赤 / LOG=スチールブルー。モバイル適用済み。
+Token Note v7文書（緑/紫/橙）は失効し _archive へ退役。
+正典は docs/design/color-token-v8.md。
 
 2026-08-21
-検索の現行確定仕様は search-page-plan-v2。
-claude_search-system-design-v3.1 はPROPOSAL（未裁定）。正典扱いしない。
+検索の現行確定仕様は docs/search/search-page-plan-v2.md。
+_proposals/ の検索4文書（system-design-v3.1 / blueprint-v2 /
+results-ux-v1 / contract-v1）はPROPOSAL。正典扱いしない。
+ただし search-contract-v1 は主要7件イタヤ裁定済み・残3件照会中。
+
+2026-07-30
+FEED文法はモバイル基準（おすすめ/フォロー中タブ）。
+PC版を差し替える（_decisions/p22-c21 参照）。実装待ち。
 
 ## HOLD
 
@@ -45,50 +56,58 @@ event_tags
 
 ## Pending Canonical Updates
 
-正典側に未反映の確定事項。
-
-- Token Note v7 → v8正式版の作成
 - design-nogo-list NG-7 の既知誤記修正（一般化は誤りと判明済み、本文未修正）
-- Page Role Matrix: 冒頭注記（おすすめ/フォロー中）を本文へ統合し版上げ
-- Auth Guard: 冒頭注記（Mobile Contract v0.5優先）を本文へ統合し版上げ
+- Page Role Matrix: 冒頭注記を本文へ統合し版上げ
+- Auth Guard: 冒頭注記を本文へ統合し版上げ
 - Mobile Contract v0.5: search-page-plan v1参照が残存。v2へ更新
 - pc-mobile-spec-inheritance v1.1: 「無限スクロールはFeedのみ」が
   Search Plan v2（検索種別タブ無限スクロール）と矛盾
-- App Schema v1.6: App所有領域とResearch Master領域を1冊で定義している。
-  責務分離した改訂が必要
-- Operations Charter v1.4: 現状認識が旧世代（Research_DB_Schema未作成等）
+- App Schema v1.6: App所有領域とResearch Master領域の責務分離改訂
+- Operations Charter: v1.4/v1.5とも現状と乖離。CORE.mdが実質後継。
+  Charter正式廃止はGPTクロスチェック後に裁定（下記・未決定事項）
 
-## 棚卸しで判明した是正項目（2026-08-21）
+## ローカル正典の是正項目（棚卸し 2026-08-21）
 
-- Charter v1.5 が Research/_docs/ に配置されているが、本文の自己申告パスと不一致。
-  _CURRENT_RULES/ への移動またはパス記述の訂正が必要
-- Research/_docs/_INDEX.md: Knowledge v1.9記載/実体v1.10、Schema v1.1記載/実体v1.2。
-  いずれも1版遅れ
-- Claude Project Knowledge側: Charter v1.4 → ローカルv1.5へ差し替え要
-- Claude Project Knowledge側: cross-ref-category-names-v3 は superseded、v4が最新
-- 棚卸し時「37件受領/列挙39行」の差異が未特定
+- Charter v1.5 が Research/_docs/ に誤配置（自己申告パスと不一致）
+- Research/_docs/_INDEX.md: Knowledge v1.9記載/実体v1.10、Schema v1.1記載/実体v1.2
+- 棚卸し時「37件受領/列挙39行」の差異 → 実体は41本と判明（検索系2本が後日追加分）。解消
 
 ## 解決済み（記録）
 
 2026-08-21
-App/MOKUP/myrig_pc_Ver3/docs/ 消失問題を解決。
-原因: 2026-08-20 P22-C28再編時、PC root重複退避の際に docs/ を巻き込んだ。
-docs/ は複製ではなく唯一の実体だった。
-対応: 正典パスへ復帰（85ファイル）、git追跡復帰、.vercelignore に docs 追加。
+App/MOKUP/myrig_pc_Ver3/docs/ 消失問題を解決（P22-C28再編の誤退避。85ファイル復帰、
+.vercelignore に docs 追加）。
 
 2026-08-21
-Knowledge 37本中24件がローカル未保存だった原因判明。
-Coworkは project_write で claude.ai Knowledge にのみ書き込み、
-Macローカルには落ちない仕様。事故ではない。
+CURRENT同期方式確定: 本repo → push → Claude Project GitHub Integration Sync now。
+revision 003/004 で追従テスト済み。web_fetch方式は不採用（ツール側キャッシュ）。
+
+2026-08-21
+Knowledge 24件ローカル未保存の原因: Coworkは project_write で
+Knowledge にのみ書く仕様。今後の生成物は本repoへ書く。
 
 ## Task Routing
 
-CURRENT同期: myrig-ai-context repo → push → Claude Project で Sync now
-詳細仕様の参照先は正典棚卸し完了後に追記予定。
+このrepoの構成と参照ルール:
+
+_AI/            CORE / CURRENT（常時読む。Knowledge接続対象）
+docs/           ACTIVE正典（Knowledge接続対象）
+  schema/       DB: myrig_db_schema_v1_6 / cross-ref-v4 / db-schema-answers-v1
+  design/       デザイン: color-token-v8 / design-nogo-list
+  ui/           UI: page-role-matrix / auth-guard / mobile-contract-v0.5 /
+                pc-mobile-inheritance-v1.1
+  search/       検索: search-page-plan-v2（現行確定）
+  support/      補助: App_Ready_Design_Rules / implementation_checklist
+_state/         生きた台帳: mobile-feedback-ledger（Knowledge接続対象）
+_decisions/     裁定記録。経緯を辿る時だけ読む
+_proposals/     未裁定の検討資料。正典扱い禁止
+_archive/       退役文書。通常判断には使わない
+
+Cowork生成物の新規保存先: 種別に応じて docs/ _state/ _decisions/ _proposals/ へ。
+作業完了レポートは _archive/ 直行でよい。
 
 ## 未決定事項
 
-Cowork生成物（p22系・search系等）の置き場所。
-docs/ 直下に混ぜると正典と検討資料が区別できなくなる。
-候補: docs/claude/ に分けるか、docs/ の外（_work/ 等）に置くか。
-決定後、CoworkがKnowledgeとローカル両方へ書く運用へ変更可能。
+- Operations Charter（v1.4/v1.5）の正式廃止とCORE.mdへの一本化。
+  GPTクロスチェック待ち。
+- 検索 _proposals 4文書の裁定（実機比較A/B/C → 確定 → docs/search/へ昇格）。
