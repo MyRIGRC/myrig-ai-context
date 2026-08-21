@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260821-007
-updated: 2026-08-21 20:34 JST
+revision: MYRIG-20260821-008
+updated: 2026-08-21 21:40 JST
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -36,6 +36,23 @@ search-results-ux-v1 / search-contract-v1）はPROPOSAL。正典扱いしない�
 2026-07-30
 FEED文法はモバイル基準（おすすめ/フォロー中タブ）。
 PC版を差し替える（_decisions/p22-c21 参照）。実装待ち。
+
+## GPT外部監査の最優先4系統（2026-08-21・監査済み／未反映）
+
+詳細は _audit/gpt-review-20260821.md。すべてCoworkが現物で裏取り済み。
+**Next.js実装前に解消すること。モックアップ制作はブロックしない。**
+
+A. Auth middleware — Maintenance/Suspendedの全体ガードがmatcher(/garage,/settings)に
+   縛られ、公開ページで実行されない。matcher拡張＋内部分岐か、全体ガードとP1ガードの分離。要裁定。
+B. 物理DELETE禁止 ⇔ 解除手段の不在 — likes/favorites/pins/followsにdeleted_at/is_activeが無く、
+   いいね/フォロー/ピン解除は物理DELETEでしか実現できない。
+   soft-delete列の追加か、CORE側で「関係テーブルの解除は例外」と正式裁定するかの二択。要裁定（L1改訂）。
+C. RLSがprivateデータを保護していない —
+   pins定義「非公開」⇔RLS全公開 / favorites・pinsの個別行が全公開でPublic Garage非表示を迂回可能 /
+   imagesは親が非公開でも読める / commentsは親の公開可否を検査していない。
+   UI非表示はアクセス制御にならない。要裁定（セキュリティモデル）。
+D. master_aliases.entity_type が db-schema-answers-v1 で 'part' 表記。実DB実在値は 'part_master'。
+   単純な誤記。裁定不要で修正可能。
 
 ## HOLD
 
@@ -124,6 +141,11 @@ CURRENT旧記載の「NG-7一般化は誤り」の実体はここである可能
 
 ### 未解消
 
+- **GPT外部監査（2026-08-21）の指摘17件が未反映**（上記4系統を除く文書整理系）。
+  参照切れ（design-rules.md / cross-ref-v2 / Coverage Matrix版数）、`/rigs` の非正典URL持ち込み、
+  db-schema-answers本文に残る旧「確定」、App_Ready Rule1⇔Rule7の矛盾、
+  implementation_checklistの根拠なき強制値など。詳細は _audit/gpt-review-20260821.md
+- **GPTの総合所見: 「注記で旧本文を覆う方式がまだ多く、正典本文だけ読めば安全という状態には達していない」**
 - **Auth Guard: 冒頭注記（#14文言5グループ・§3.1/§3.3旧定義マーク）の本文統合が未実施。**
   matcher の是正のみ行い版上げは保留。page-role-matrix は同種作業を完遂して v1.4 へ昇版したため対応が非対称
 - **App Schema: size_class / power_source / platform_slug のApp側実列追加DDLが未設計**
