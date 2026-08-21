@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260821-001
+revision: MYRIG-20260821-003
 updated: 2026-08-21 00:00 JST
 
 ## 現在地
