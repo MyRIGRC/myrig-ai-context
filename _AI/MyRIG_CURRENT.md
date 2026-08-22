@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260822-015
+revision: MYRIG-20260822-016
 updated: 2026-08-22 16:24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下記「timestamp要確認」参照）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -33,6 +33,12 @@ GPT側確認時刻との間に約2時間のズレが報告された。原因未�
 Cowork/GPT双方がGitHub mainへ直接書き込める体制になったため、
 WRITE前の同期確認（fetch/diff/pull、SHA再取得）とforce push禁止をCORE.mdに明記した。
 詳細はMyRIG_CORE.md「GitHub複数WRITE経路の競合防止」節。
+
+**2026-08-22 GPT GitHub WRITE実地テスト完了。**
+GPTがGitHub API経由で `_audit/gpt-write-test-20260822.md` を直接commit（`8350e10`）。
+Cowork側はCOREルールどおり fetch → 差分確認（behind 1）→ pull（fast-forward）を実行し、
+local HEADとorigin/mainの一致、revision/CURRENTが変更されていないことを確認した。
+READ/WRITEともにClaude・GPT双方で確認済み、複数WRITE経路の競合防止ルールは実運用で機能した。
 
 ## Active Overrides
 
