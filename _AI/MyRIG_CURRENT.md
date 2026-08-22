@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260822-017
+revision: MYRIG-20260822-018
 updated: 2026-08-22 16:24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下記「timestamp要確認」参照）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -135,9 +135,11 @@ PC版を差し替える（_decisions/p22-c21 参照）。実装待ち。
 
 A. Auth middleware — Maintenance/Suspendedの全体ガードがmatcher(/garage,/settings)に
    縛られ、公開ページで実行されない。matcher拡張＋内部分岐か、全体ガードとP1ガードの分離。要裁定。
-B. 物理DELETE禁止 ⇔ 解除手段の不在 — likes/favorites/pins/followsにdeleted_at/is_activeが無く、
-   いいね/フォロー/ピン解除は物理DELETEでしか実現できない。
-   soft-delete列の追加か、CORE側で「関係テーブルの解除は例外」と正式裁定するかの二択。要裁定（L1改訂）。
+B. ✅ 解消済み（2026-08-22 イタヤ裁定）— 物理DELETE禁止 ⇔ 解除手段の不在。
+   likes/favorites/pins/followsの4テーブルにdeleted_atを追加し、解除操作をUPDATEで行う方式に統一。
+   CORE(L1)「物理DELETEは禁止」は無改訂のまま維持（例外化しない判断）。
+   理由: 将来の選択肢を狭めない方を優先（履歴を残せば後で物理削除も選べるが、逆はできない）。
+   UNIQUE制約は部分インデックス化（WHERE deleted_at IS NULL）。詳細はschema v1.6-r2「ソーシャル」節。
 C. ✅ 解消済み（2026-08-22 イタヤ裁定）— RLSがprivateデータを保護していない問題。
    pins定義「非公開」⇔RLS全公開 / favorites・pinsの個別行が全公開でPublic Garage非表示を迂回可能 /
    imagesは親が非公開でも読める / commentsは親の公開可否を検査していない、という4点を解消。

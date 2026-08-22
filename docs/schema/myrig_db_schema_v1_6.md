@@ -263,6 +263,12 @@ RIG・パーツ・ログの画像統合管理。**プロフィール画像は含
 
 ## Domain 5: ソーシャル
 
+✅ **2026-08-22 イタヤ裁定・HOLD解除。** likes/favorites/pins/followsの4テーブルに
+`deleted_at`を追加し、解除操作（アンいいね・お気に入り解除・ピン解除・フォロー解除）を
+`deleted_at`のUPDATEで行う（CORE「物理DELETEは禁止」を例外なく維持。L1改訂は不要）。
+UNIQUE制約は再操作（一度解除して再度いいね等）に対応するため部分ユニークインデックス
+（`WHERE deleted_at IS NULL`）へ変更する。
+
 ### `likes`
 ♥いいね。公開カウント・通知あり。
 
@@ -273,8 +279,9 @@ RIG・パーツ・ログの画像統合管理。**プロフィール画像は含
 | entity_type | TEXT | NOT NULL | CHECK (entity_type IN ('rig','part','log','comment')) |
 | entity_id | UUID | NOT NULL | |
 | created_at | TIMESTAMPTZ | DEFAULT now() | |
+| deleted_at | TIMESTAMPTZ | NULLABLE | 論理削除（アンいいね） |
 
-**UNIQUE:** `(user_id, entity_type, entity_id)`
+**UNIQUE（部分インデックス）:** `(user_id, entity_type, entity_id) WHERE deleted_at IS NULL`
 
 ---
 
@@ -288,8 +295,9 @@ RIG・パーツ・ログの画像統合管理。**プロフィール画像は含
 | entity_type | TEXT | NOT NULL | CHECK (entity_type IN ('rig','part','log')) |
 | entity_id | UUID | NOT NULL | |
 | created_at | TIMESTAMPTZ | DEFAULT now() | |
+| deleted_at | TIMESTAMPTZ | NULLABLE | 論理削除（お気に入り解除） |
 
-**UNIQUE:** `(user_id, entity_type, entity_id)`
+**UNIQUE（部分インデックス）:** `(user_id, entity_type, entity_id) WHERE deleted_at IS NULL`
 
 ---
 
@@ -303,8 +311,9 @@ RIG・パーツ・ログの画像統合管理。**プロフィール画像は含
 | entity_type | TEXT | NOT NULL | CHECK (entity_type IN ('rig','part','log')) |
 | entity_id | UUID | NOT NULL | |
 | created_at | TIMESTAMPTZ | DEFAULT now() | |
+| deleted_at | TIMESTAMPTZ | NULLABLE | 論理削除（ピン解除） |
 
-**UNIQUE:** `(user_id, entity_type, entity_id)`
+**UNIQUE（部分インデックス）:** `(user_id, entity_type, entity_id) WHERE deleted_at IS NULL`
 
 ---
 
@@ -317,12 +326,10 @@ RIG・パーツ・ログの画像統合管理。**プロフィール画像は含
 | follower_id | UUID | FK → profiles.id, NOT NULL | フォローする側 |
 | following_id | UUID | FK → profiles.id, NOT NULL | フォローされる側 |
 | created_at | TIMESTAMPTZ | DEFAULT now() | |
+| deleted_at | TIMESTAMPTZ | NULLABLE | 論理削除（フォロー解除） |
 
-**UNIQUE:** `(follower_id, following_id)`
+**UNIQUE（部分インデックス）:** `(follower_id, following_id) WHERE deleted_at IS NULL`
 **CHECK:** `follower_id != following_id`
-
-> ⚠️ **HOLD**: `likes` / `favorites` / `pins` / `follows` には `deleted_at` が無く、
-> 解除操作を物理DELETE禁止（L1）と両立させる手段が未確定。要裁定。
 
 ---
 
@@ -567,14 +574,16 @@ notifications
 **テーブル別に個別ポリシーを設計。**
 
 ### 共通原則
-- **`deleted_at` 列を持つテーブルの**全SELECTポリシーに `deleted_at IS NULL` を含める
-  （論理削除を持つのは `profiles` / `rigs` / `parts` / `maintenance_logs` / `images` / `comments` のみ。
-  `likes` / `favorites` / `pins` / `follows` に同列は無いので、そのまま書くと SQL エラーになる）
+- ✅ **2026-08-22 イタヤ裁定・HOLD解除**: `likes` / `favorites` / `pins` / `follows` にも
+  `deleted_at` を追加した（GPT監査B解消）。**論理削除を持たないテーブルはこれで無くなった**
+  （全テーブル共通で `deleted_at IS NULL` を使ってよい）
+- **`deleted_at` を持つ全テーブルの**全SELECTポリシーに `deleted_at IS NULL` を含める
 - 公開データ: `is_public = true AND deleted_at IS NULL`
 - 自分のデータ: `user_id = auth.uid() AND deleted_at IS NULL`
 - INSERT/UPDATE: `user_id = auth.uid()`
 - **DELETE**: ポリシー上は `user_id = auth.uid()` を許可するが、**アプリからは物理DELETEを発行しない**。
-  削除操作は `deleted_at` の UPDATE で行う（CORE.md「物理DELETEは禁止」）。
+  削除・解除操作（RIG/パーツ/ログの削除、いいね/お気に入り/ピン/フォローの解除）は
+  すべて `deleted_at` の UPDATE で行う（CORE.md「物理DELETEは禁止」、例外なし）。
   DELETE ポリシーは運用・移行時の最終手段としてのみ残す
 
 ### テーブル別の特記事項
@@ -587,14 +596,16 @@ notifications
 - **images**: SELECTは「自分の行」または「親（rig/part/log）が`is_public=true AND deleted_at IS NULL`」の場合のみ。
   entity_typeごとに参照先テーブル（rigs/parts/maintenance_logs）をCASE分岐でEXISTS判定する。
   INSERT/DELETEは`user_id = auth.uid()`
-- **favorites**: 個別行のSELECTは`user_id = auth.uid()`のみ（他人の個別行は不可）。
+- **favorites**: 個別行のSELECTは`user_id = auth.uid() AND deleted_at IS NULL`のみ（他人の個別行は不可）。
   **公開カウント（「◯件お気に入り」表示）は維持する**が、個別行そのものは公開しない。
-  件数はCOUNT用の関数またはビュー経由で提供する（RLSを迂回した個別行閲覧はさせない）
-- **pins**: **完全非公開。** SELECTは`user_id = auth.uid()`のみ。他人には件数含め一切公開しない
-- **likes**: 現行どおりSELECT全公開を維持（「いいね」は元々公開カウント前提の機能で、
+  件数は`WHERE deleted_at IS NULL`のCOUNT用の関数またはビュー経由で提供する（RLSを迂回した個別行閲覧はさせない）。
+  解除は`deleted_at`のUPDATEで行う（物理DELETEなし）
+- **pins**: **完全非公開。** SELECTは`user_id = auth.uid() AND deleted_at IS NULL`のみ。
+  他人には件数含め一切公開しない。解除は`deleted_at`のUPDATE
+- **likes**: SELECTは全公開だが`deleted_at IS NULL`を条件に含める（「いいね」は元々公開カウント前提の機能で、
   非公開エンティティへのlikes自体はUI層でアクション不可にする運用のまま。pins/favoritesのような
-  「非公開」定義との矛盾が無いため対象外）
-- **follows**: follower_id = auth.uid() でINSERT/DELETE。SELECTは全公開
+  「非公開」定義との矛盾が無いためRLS方針は対象外）。解除（アンいいね）は`deleted_at`のUPDATE
+- **follows**: follower_id = auth.uid()でINSERT、解除は`deleted_at`のUPDATE。SELECTは全公開（`deleted_at IS NULL`）
 - **マスターデータ**: SELECT全公開。変更は管理者ロールのみ
 - **rig_parts**: user_id = auth.uid() でINSERT/UPDATE/DELETE
 - **comments**: SELECTは`status='published'`かつ親（rig/part/log）が`is_public=true AND deleted_at IS NULL`の場合のみ。
@@ -773,7 +784,8 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 - **App↔Research 写像表（cross_ref）が未作成。**本文中の `parts_masters` が
   App側 / Research側どちらを指すか曖昧な箇所が残る（機械的な一括置換をしないこと）
 - `images.alt`（画像代替テキスト）の追加要否
-- 関係テーブル（likes / favorites / pins / follows）の解除手段と物理DELETE禁止の両立
+- ~~関係テーブル（likes / favorites / pins / follows）の解除手段と物理DELETE禁止の両立~~
+  ✅ 2026-08-22 イタヤ裁定・解消済み（4テーブルへdeleted_at追加。上記ソーシャル節参照）
 - ~~RLS のセキュリティモデル~~ ✅ 2026-08-22 イタヤ裁定・解消済み（上記 RLS 節参照）
 
 ---
