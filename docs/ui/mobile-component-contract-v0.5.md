@@ -24,7 +24,7 @@ Phase 1以降の全モバイルページが共有するShell・部品・tokenの
 
 - **対象:** mobile-shell（現行v0.4）の8系統（§3）＋共通ページ部品（§4）＋カード契約（§5）＋JS契約（§6）
 - **非対象:** Home専用表現 E12〜E26 → `.page-e3` adapterに残置。**Home視覚は凍結**、抽出でHomeの見た目を変えないことを回帰ゲート（§7）で担保
-- **参照優先順位:** r14凍結Home → Coverage Matrix v1.1 → Page Role Matrix v1.4 → auth-guard-spec等現行仕様 → PC版39ページ → v0.2 9ページ版・app-shell-draft-v1（参考のみ）
+- **参照優先順位:** r14凍結Home → Coverage Matrix v1.1 → Page Role Matrix v1.5 → auth-guard-spec等現行仕様 → PC版39ページ → v0.2 9ページ版・app-shell-draft-v1（参考のみ）
 
 ---
 

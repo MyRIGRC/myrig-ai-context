@@ -26,10 +26,16 @@
 
 ## 0. 総論（App側が最初に飲み込むこと）— L1
 
-**`myrig_db_schema_v1.6` は正典ではない。**
+✅ **2026-08-22 GPT総合監査で是正**: 旧記述「`myrig_db_schema_v1.6` は正典ではない」は、
+2026-08-21のApp/Research責務分離裁定（CURRENT Task Routing）以降は誤り。正しくは:
+
+**`myrig_db_schema_v1_6.md` は Research 所有領域（下記責務境界の左列）の正典ではない。
+App 所有領域（rigs / rig_parts / maintenance_logs / profiles / images / likes / favorites /
+pins / follows / comments 等）については同書が正典である。**
+
 Q1〜Q4・Q6・Q12 で「スキーマに無い」と報告した軸は、**すべて Research DB 側の正典に存在する**。
 無いのは App 側スキーマの取りこぼしであって、設計上「持たない方針」ではない。
-**App側は独自にカラムを新設せず、正本定義に合わせて追加する。**
+**App側はマスター系について独自にカラムを新設せず、正本定義に合わせて追加する。**
 
 ### 責務境界（混ぜない）
 

@@ -14,7 +14,7 @@
 **作成:** 2026-07-24 (JST) / Claude
 **状態:** v1.1（GPTクロスチェック反映）
 ⚠️ **本書の承認の有無は未確定。** 正典として運用を続けるか参考文書に落とすかはイタヤ裁定待ち。
-**入力:** アーカイフ_.zip（PC版V3 39ページ現物を機械抽出＋目視照合）/ mobile-coverage-matrix v1.2 / page-role-matrix v1.4 / mobile-component-contract v0.5 / mobile-feedback-ledger
+**入力:** アーカイフ_.zip（PC版V3 39ページ現物を機械抽出＋目視照合）/ mobile-coverage-matrix v1.2 / page-role-matrix v1.5 / mobile-component-contract v0.5 / mobile-feedback-ledger
 
 ---
 
@@ -28,7 +28,7 @@
 
 | 文書 | 粒度 |
 |---|---|
-| page-role-matrix v1.4 | ページの役割・URL |
+| page-role-matrix v1.5 | ページの役割・URL |
 | mobile-coverage-matrix v1.2 | ページ単位の処遇（full mock / skeleton / direct）<br>⚠️ 実体は `_archive/knowledge-20260821/mobile-coverage-matrix-v1.md` にあり、参照版数も contract v0.5 と不一致。**所在・版数とも要確認** |
 | mobile-component-contract v0.5 | 部品（Shell・カード）の契約 |
 | **本書** | **ページ内セクションの構成順と引き継ぎ処遇** |
@@ -102,7 +102,7 @@
 
 ## 5. 参照優先順位（coverage matrix §2に本書を挿入した形）
 
-1. r14凍結Home → 2. Coverage Matrix → 3. Page Role Matrix v1.4 → 4. auth-guard等の現行仕様 → **5. 本書§6設計図** → 6. PC版39ページHTML現物 → 7. v0.2 9ページ版等（参考のみ）
+1. r14凍結Home → 2. Coverage Matrix → 3. Page Role Matrix v1.5 → 4. auth-guard等の現行仕様 → **5. 本書§6設計図** → 6. PC版39ページHTML現物 → 7. v0.2 9ページ版等（参考のみ）
 
 - feedback ledgerの確定裁定は該当箇所で常に優先。
 - 5と6が食い違えば6が正（本書改訂を起票）。

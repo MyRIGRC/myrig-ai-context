@@ -11,7 +11,7 @@
 
 **作成日:** 2026-05-22 (MR-AUDIT-002 / A7)
 **最終更新:** 2026-08-22
-**ステータス:** 確定 v1.2
+**ステータス:** 確定 v1.2-r3
 **前提:** `auth-onboarding-minimum-spec-v1` / `nextjs-routing-table-v1` / `appheader-interaction-spec-v1` / `dialog-interaction-spec-v1`
 ⚠️ **上記4本＋`error-states-decomposition-MR-AUDIT-002` は本repo内に未収録。**
 参照が必要になった時点で所在を確認すること。
@@ -230,24 +230,52 @@ import type { NextRequest } from 'next/server';
 // server-only変数名を使う。切替方法（env再デプロイ / Feature Flag / DB検査）は実装時に確定。
 const MAINTENANCE_MODE = process.env.MAINTENANCE_MODE === 'on';
 
-// P1: middlewareで直接 /login へ redirectする保護ルート
+// ✅ 2026-08-22 GPT総合監査で追加: locale正規化
+// page-role-matrix #24裁定「MVP時点から日英2言語・/en/* プレフィックス方式」により、
+// /en/garage のようなパスが来る。locale接頭辞を外してから判定しないとP1認証を素通りする。
+const LOCALES = ['en'] as const; // ja はプレフィックス無し（デフォルト）
+
+function stripLocale(pathname: string): { locale: string | null; path: string } {
+  for (const l of LOCALES) {
+    if (pathname === `/${l}` || pathname.startsWith(`/${l}/`)) {
+      return { locale: l, path: pathname.slice(l.length + 1) || '/' };
+    }
+  }
+  return { locale: null, path: pathname };
+}
+
+// locale付きのredirect先を作る（/en/garage で弾かれたら /en/login へ戻す）
+function withLocale(locale: string | null, path: string): string {
+  return locale ? `/${locale}${path}` : path;
+}
+
+// P1: middlewareで直接 /login へ redirectする保護ルート（locale除去後のパスで判定）
 const P1_PROTECTED_PATTERNS = [
   /^\/garage(\/|$)/,
   /^\/settings(\/|$)/,
 ];
 
-function isP1Protected(pathname: string): boolean {
-  return P1_PROTECTED_PATTERNS.some((re) => re.test(pathname));
+function isP1Protected(path: string): boolean {
+  return P1_PROTECTED_PATTERNS.some((re) => re.test(path));
+}
+
+// ✅ 2026-08-22 GPT総合監査で追加: 管理者ルート
+// page-role-matrix「Admin プレフィックス /admin/*。認証 middleware で保護」および
+// implementation_checklist（L1）「/admin/* → is_admin チェック → 非管理者は403」に対応。
+function isAdminRoute(path: string): boolean {
+  return /^\/admin(\/|$)/.test(path);
 }
 
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
+  // locale接頭辞を外して判定用パスを作る（/en/garage → /garage）
+  const { locale, path } = stripLocale(pathname);
 
   // 1) Maintenance — 全ページ対象（最優先）
   if (MAINTENANCE_MODE) {
-    if (pathname !== '/maintenance') {
+    if (path !== '/maintenance') {
       const url = req.nextUrl.clone();
-      url.pathname = '/maintenance';
+      url.pathname = withLocale(locale, '/maintenance');
       return NextResponse.redirect(url);
     }
     return NextResponse.next();
@@ -258,20 +286,35 @@ export async function middleware(req: NextRequest) {
 
   // 3) Suspended — 全ページ対象
   if (session?.user?.accountStatus === 'suspended') {
-    if (pathname !== '/account-suspended') {
+    if (path !== '/account-suspended') {
       const url = req.nextUrl.clone();
-      url.pathname = '/account-suspended';
+      url.pathname = withLocale(locale, '/account-suspended');
       return NextResponse.redirect(url);
     }
     return NextResponse.next();
   }
 
   // 4) Auth Guard P1（未ログインで protected route）— P1ルートのみ判定
-  if (isP1Protected(pathname) && !session?.user) {
+  if (isP1Protected(path) && !session?.user) {
     const url = req.nextUrl.clone();
-    url.pathname = '/login';
-    url.searchParams.set('next', pathname + search);
+    url.pathname = withLocale(locale, '/login');
+    url.searchParams.set('next', pathname + search); // nextは元のlocale付きパスを保持
     return NextResponse.redirect(url);
+  }
+
+  // 5) Admin Guard（/admin/* は認証＋is_adminが必須）
+  //    未ログイン → /login へ（P1と同じ扱い）／ログイン済みだが非管理者 → 403
+  if (isAdminRoute(path)) {
+    if (!session?.user) {
+      const url = req.nextUrl.clone();
+      url.pathname = withLocale(locale, '/login');
+      url.searchParams.set('next', pathname + search);
+      return NextResponse.redirect(url);
+    }
+    if (!session.user.isAdmin) {
+      // 管理画面の存在を伏せたい場合は404を返す方針もある。実装時に確定（下記§5.2）
+      return new NextResponse(null, { status: 403 });
+    }
   }
 
   return NextResponse.next();
@@ -299,14 +342,34 @@ export const config = {
 |---|---|---|---|---|
 | `/garage/:path*` | ✅（広いmatcherに包含） | ✅ 効く | ✅ `isP1Protected()`が対象 | middlewareで直接redirect |
 | `/settings/:path*` | ✅ | ✅ 効く | ✅ | 同上 |
+| **`/en/garage/:path*` `/en/settings/:path*`** | ✅ | ✅ 効く | ✅ **`stripLocale()`後に判定** | 同上（redirect先は`/en/login`） |
+| **`/admin/:path*`（`/en/admin/*`含む）** | ✅ | ✅ 効く | — | **未ログイン→`/login` ／ 非管理者→403**（§5.2） |
 | `/notifications/:path*` | ✅ | ✅ 効く | ❌ 対象外 | page.tsxでLogin Required Modal（**P2は変更なし**） |
 | `/register/:path*` | ✅ | ✅ 効く | ❌ 対象外 | 同上（**P2は変更なし**） |
-| 公開ページ全般（トップ・検索・Public Garage等） | ✅ | ✅ 効く（今回の修正の主眼） | ❌ 対象外 | 通常表示 |
+| 公開ページ全般（トップ・検索・Public Garage等） | ✅ | ✅ 効く | ❌ 対象外 | 通常表示 |
 
 > **方針:**
-> - Maintenance/Suspendedはmatcherでほぼ全パスを対象にし、公開ページでも確実に効かせる（今回のバグの本体）
+> - Maintenance/Suspendedはmatcherでほぼ全パスを対象にし、公開ページでも確実に効かせる
 > - P1のredirectは`isP1Protected()`のパス判定のみで絞る。matcherの範囲とは独立させる
+> - **判定は必ず`stripLocale()`後のパスで行う。** `/en/garage`が素通りするのを防ぐ（GPT総合監査で検出）
 > - P2のページはP1判定の対象外のまま。挙動は無変更
+
+### 5.2 Admin Guard（`/admin/*`）
+
+✅ **2026-08-22 GPT総合監査で追加**（page-role-matrix「Admin プレフィックス `/admin/*`。認証 middleware で
+保護」／implementation_checklist L1「`/admin/*` → `is_admin` チェック → 非管理者は403」に対応。
+従来auth-guard側に`/admin`の記述が一切なく、設計漏れになっていた）
+
+| 状態 | 挙動 |
+|---|---|
+| 未ログイン | `/login?next=...` へredirect（P1と同じ） |
+| ログイン済み・非管理者 | **403** を返す |
+| ログイン済み・管理者 | 通過 |
+
+- 管理者判定のソースは `session.user.isAdmin`（実際のカラム/クレーム名は実装時に確定。
+  `profiles.is_admin` 相当を想定）
+- ⚠️ **実装時に確定**: 非管理者に403を返すか、管理画面の存在自体を伏せて404を返すか
+  （セキュリティ上は404が有利、運用上は403が分かりやすい）
 
 ---
 
@@ -348,4 +411,5 @@ Suspendedユーザーが `/account-suspended` を開いた場合の無限redirec
 | v1 | 2026-05-22 | 初版（MR-AUDIT-002 / A7）。P1 / P2 / P3 パターン / Login Required Modal 文言 / `next` 安全性 / `middleware.ts` skeleton + matcher を確定 |
 | v1.1 | 2026-08-21 | #14裁定（context 8種・文言5グループ）を §3.1 / §3.3 本文へ反映。matcher から `/notifications/:path*` `/register/:path*` を除外し **P2＝matcher対象外**で確定 |
 | v1.2 | 2026-08-22 | GPT監査A解消。Maintenance/Suspendedが公開ページで無効だった問題を、matcher拡張＋`isP1Protected()`によるパス内分岐へ変更して解消。P2の挙動（matcher非依存の判定）は無変更 |
+| v1.2-r3 | 2026-08-22 | GPT総合監査(revision023)のHIGH2件: (1) locale正規化を追加。`/en/garage`等がP1認証を素通りしていた（page-role-matrix #24裁定の`/en/*`プレフィックス方式と未接続だった）。`stripLocale()`/`withLocale()`を導入し全判定をlocale除去後のパスで行う (2) §5.2 Admin Guard新設。page-role-matrix「`/admin/*`は認証middlewareで保護」およびimplementation_checklist L1「is_adminチェック→非管理者403」が、auth-guard側に一切記述されていなかった設計漏れを解消 |
 | v1.2-r2 | 2026-08-22 | GPT監査(revision020→021)の追加是正6件: 冒頭ヘッダーをv1.2/2026-08-22へ更新／`NEXT_PUBLIC_MAINTENANCE`→server-only `MAINTENANCE_MODE`（envインライン化問題）／matcherに`sitemap.xml``robots.txt`除外を追加してNext.js公式例に合わせる／§6 P3の「matcherに含めない」旧記述を撤回／ガード優先順位（Maintenance>Suspended>P1 Auth）を明記／Next.js 16なら`middleware.ts`→`proxy.ts`改称の注記／APIルート用に別契約(503/403 JSON)の実装時確定を注記／§6.1に`/account-suspended`直接アクセスの未決定項目を明示 |

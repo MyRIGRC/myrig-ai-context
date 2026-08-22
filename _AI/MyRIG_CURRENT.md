@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260822-023
+revision: MYRIG-20260822-024
 updated: 2026-08-22 16:24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下記「timestamp要確認」参照）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -178,6 +178,29 @@ D. ✅ 解消済み（2026-08-22）— master_aliases.entity_type の 'part' →
 再監査。9件（HIGH3件・MEDIUM-HIGH1件・MEDIUM4件・LOW-MEDIUM1件）の残存矛盾を検出、
 すべて現物照合の上で同日中に修正・commit・push済み。**「Claudeの裁定をGPTが監査し、
 指摘をCoworkが裏取りして反映する」フローが実地で機能した最初の事例。**
+
+**2026-08-22 GPT総合監査（revision023・全docs横断）実施記録**: 本日の全裁定を横串で監査。
+HIGH4件・MEDIUM8件・LOW3件を検出。**HIGH4件＋LOW2件をrevision024で修正済み**:
+- HIGH1: schema RLS節に「運用・移行時はservice roleで物理DELETE」が残存 → 削除（CORE L1に例外を作らない）
+- HIGH2: `/en/garage`等がP1認証を素通り（i18n `/en/*`裁定とauth-guardが未接続）→ `stripLocale()`導入
+- HIGH3: `/admin/*` guardがauth-guardに存在しない設計漏れ（page-role-matrixとchecklist L1が要求済み）
+  → §5.2 Admin Guard新設
+- HIGH4: db-schema-answers §0(L1)「myrig_db_schema_v1.6は正典ではない」が責務分離裁定後の体系と逆
+  → 「Research所有領域の正典ではない／App所有領域では正典」へ訂正
+- LOW: auth-guardステータス表示をv1.2-r3へ／page-role-matrix参照をv1.4→v1.5へ統一
+
+**未対応（MEDIUM 8件・次バッチ候補。モック詰め作業をブロックしない）**:
+1. Favorites/PinsのUsers対応がUIとDBで不一致（page-role-matrixは`RIG/PARTS/LOG/Users`、
+   schemaのentity_typeは`rig/part/log`のみ）
+2. コメントowner「非表示」権限に対応するRLS UPDATEポリシーが無い（moderation不能）
+3. `profiles`はuser_id列を持たない（`id = auth.uid()`）ためRLS共通則が適用できず、特記も無い
+4. color-token-v8「PCは段階適用中」⇔ CURRENT「部分適用禁止」の記述衝突
+5. part_categories 14/90が同一文書内でHOLDかつ確定（「体系は確定・実DB投入が未完了」と分離すべき）
+6. HOLD延期理由の事実誤認2件（size_class「サイズ選択UI未着手」→実際はsearch正典に`scale`実装済み。
+   NG-7「通知UI未着手」→実際はnotifications PCページが存在。**HOLD継続自体は妥当、理由文のみ要訂正**）
+7. CURRENT外のactive docsに未分類のHOLD/裁定待ちが残る（cross-ref size_class、checklist Cookie同意、
+   schema images.alt 等）。2分類（裁定待ち/将来議論項目＋再開トリガー）への統一が未完
+8. pc-mobile-spec-inheritance自身が「本書の承認の有無は未確定」とありながらACTIVE正典扱い
 
 ## HOLD
 

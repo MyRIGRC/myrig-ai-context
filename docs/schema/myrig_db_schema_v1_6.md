@@ -589,8 +589,9 @@ notifications
   `user_id = auth.uid()`によるDELETEポリシーを設けない（CORE.md「物理DELETEは禁止」に例外なし）。
   削除・解除操作（RIG/パーツ/ログの削除、rig_partsの取り外し、いいね/お気に入り/ピン/フォローの解除）は
   すべて対応する論理削除列（`deleted_at`または`removed_at`）のUPDATEで行う。
-  運用・移行時にどうしても物理DELETEが要る場合は、RLSポリシーではなくservice role（RLSをバイパスする
-  管理者経路）で行う。ユーザー向けポリシーにDELETEを残さない
+  ユーザー向けポリシーにDELETEを残さない。
+  ✅ **2026-08-22 GPT総合監査で是正**: 旧記述にあった「運用・移行時はservice roleで物理DELETE」は
+  CORE(L1)「物理DELETEは禁止」の例外化にあたるため削除した。**例外経路は設けない。**
 
 ### テーブル別の特記事項
 
