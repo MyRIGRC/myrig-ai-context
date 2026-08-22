@@ -17,8 +17,12 @@
 >
 > - §2 `size_class` の固定値集合13値 — 実データは18パターンで enum 運用されていない
 > - Q6 `event_tags` 確定値12種 — `event_tags` 列が DB に存在しない
-> - §2 `categories` パーツ親14・子90 — `part_categories` テーブルは0行（未構築）
 > - Q12 `spec_data` パーツ側キー — 未設計。`spec_schema` 列は DB に存在しない
+>
+> ℹ️ **§2 `categories` パーツ親14・子90 は HOLD ではない。体系そのものは確定・凍結済み**
+> （Search正典 search-page-plan-v2 も `pcat = 親14` を現行仕様として使用している）。
+> 未完了なのは**実DBへの投入・物理構築のみ**（`part_categories` テーブルは0行）。
+> 「値が未確定」ではなく「まだ入れていない」状態。混同しないこと。
 >
 > HOLD の現在地索引は `_AI/MyRIG_CURRENT.md`。**本書と CURRENT が食い違う場合は CURRENT を優先する。**
 

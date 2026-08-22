@@ -13,7 +13,9 @@
 **ID:** pc-mobile-spec-inheritance-v1
 **作成:** 2026-07-24 (JST) / Claude
 **状態:** v1.1（GPTクロスチェック反映）
-⚠️ **本書の承認の有無は未確定。** 正典として運用を続けるか参考文書に落とすかはイタヤ裁定待ち。
+✅ **2026-08-22 ACTIVE正典として確定**（旧「承認の有無は未確定」注記を削除）。
+`docs/ui/` 配下に置かれ CURRENT の Task Routing に載っており、他の正典からも参照されている実態に合わせた。
+拘束力は上記のとおり **L2**（提案歓迎。ただし §1 R2 のみ L1）。
 **入力:** アーカイフ_.zip（PC版V3 39ページ現物を機械抽出＋目視照合）/ mobile-coverage-matrix v1.2 / page-role-matrix v1.5 / mobile-component-contract v0.5 / mobile-feedback-ledger
 
 ---

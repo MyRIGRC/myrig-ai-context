@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260822-024
+revision: MYRIG-20260822-025
 updated: 2026-08-22 16:24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下記「timestamp要確認」参照）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -189,18 +189,24 @@ HIGH4件・MEDIUM8件・LOW3件を検出。**HIGH4件＋LOW2件をrevision024で
   → 「Research所有領域の正典ではない／App所有領域では正典」へ訂正
 - LOW: auth-guardステータス表示をv1.2-r3へ／page-role-matrix参照をv1.4→v1.5へ統一
 
-**未対応（MEDIUM 8件・次バッチ候補。モック詰め作業をブロックしない）**:
-1. Favorites/PinsのUsers対応がUIとDBで不一致（page-role-matrixは`RIG/PARTS/LOG/Users`、
-   schemaのentity_typeは`rig/part/log`のみ）
-2. コメントowner「非表示」権限に対応するRLS UPDATEポリシーが無い（moderation不能）
-3. `profiles`はuser_id列を持たない（`id = auth.uid()`）ためRLS共通則が適用できず、特記も無い
-4. color-token-v8「PCは段階適用中」⇔ CURRENT「部分適用禁止」の記述衝突
-5. part_categories 14/90が同一文書内でHOLDかつ確定（「体系は確定・実DB投入が未完了」と分離すべき）
-6. HOLD延期理由の事実誤認2件（size_class「サイズ選択UI未着手」→実際はsearch正典に`scale`実装済み。
-   NG-7「通知UI未着手」→実際はnotifications PCページが存在。**HOLD継続自体は妥当、理由文のみ要訂正**）
-7. CURRENT外のactive docsに未分類のHOLD/裁定待ちが残る（cross-ref size_class、checklist Cookie同意、
-   schema images.alt 等）。2分類（裁定待ち/将来議論項目＋再開トリガー）への統一が未完
-8. pc-mobile-spec-inheritance自身が「本書の承認の有無は未確定」とありながらACTIVE正典扱い
+**MEDIUM 8件の処理（2026-08-22 revision024〜025）**
+
+✅ **文書の書き間違い・古い記述として修正済み（4件）** — モックの議論とは無関係なノイズのため削除・訂正:
+- color-token-v8「PCは段階適用中」→ **「PC未適用（v7のまま）・部分適用禁止」**へ訂正（事実と逆だった）
+- db-schema-answers §HOLD表の`categories`親14/子90 → HOLD対象から除外。
+  **「体系は確定・凍結済み。未完了は実DB投入のみ」**と明記
+- HOLD延期理由の事実誤認2件を訂正（size_class「サイズ選択UI未着手」→「値集合の最終確定が未着手」／
+  NG-7「通知UI未着手」→「通知色の詰め議論が未着手」）。**HOLD継続自体は妥当**
+- pc-mobile-spec-inheritance「承認の有無は未確定」注記を削除 → **ACTIVE正典として確定**
+
+🔵 **モック詰め作業の中で決まる項目として残置（4件）** — 今は裁定しない・催促しない:
+- Favorites/PinsのUsers対応（page-role-matrixは`RIG/PARTS/LOG/Users`、schemaのentity_typeは
+  `rig/part/log`のみ）→ **「ユーザーをお気に入り/ピンできるか」は仕様議論そのもの**
+- コメントowner「非表示」権限に対応するRLS UPDATEポリシーが無い → **moderation機能の設計と一緒に決まる**
+- `profiles`はuser_id列を持たない（`id = auth.uid()`）ためRLS共通則が適用できず特記も無い
+  → **onboarding/profile編集の設計と一緒に決まる**
+- CURRENT外のactive docsに未分類のHOLD/裁定待ちが残る（cross-ref size_class、checklist Cookie同意、
+  schema images.alt 等）→ **各docに触れるタイミングで2分類（裁定待ち/将来議論項目＋再開トリガー）へ寄せる**
 
 ## HOLD
 
@@ -215,7 +221,9 @@ A: spec_data / B: aliases / C: log_type / D: size_class に対応する。
 実行したのは E / F / H-1 / I-3 / J-2（＋Gは読みの追認）。**K（facetable）は未着手**（週次ゲート裁定待ち。
 E-3で前提インフラ＝part_categories が0行・spec_schema列不在と判明）。
 
-size_class（将来議論項目・サイズ選択UI未着手）
+size_class（将来議論項目・値集合の最終確定が未着手）
+※検索UI側では既に `data-size-class` として13値が動いている（search-page-plan-v2）。
+  未着手なのは「UI」ではなく「値集合を実データに合わせて確定する作業」。
 議論着手時の参考: 13値enumの出典は docs/schema/db-schema-answers-v1.md（7/30主査裁定・App側の写し）§2。
 2026-08-21 実DB確認（_decisions/2026-08-21_db-inquiry-002-realdata.md J-1/J-2）で判明した実態:
 - 実データは18パターン（NULL 639件が最多 / 1/10 341 / M-chassis 2 / mini 1 等の自由記述が混在）
@@ -266,8 +274,9 @@ B19但し書き「Bottom Nav中央の＋登録のみブランド色」は不採�
 ハードコードでlightが2値に分裂。PCのトークン化は未着手 → モック是正キュー#10。
 
 NG-7の通知色（2026-08-21 新規HOLD／2026-08-22 「将来議論項目」として据え置き確定）
-**通知UI自体がまだモックプロジェクトで着手されていない。** 通知の設計議論を始めるタイミングまで
-この項目は裁定しない。Claude/GPT/Geminiとも「早く決めるべき」と催促しないこと。
+**通知色の最終設計・詰め議論がまだ着手されていない**（notifications PCページ自体は存在する）。
+通知UIの詰め議論を始めるタイミングまでこの項目は裁定しない。
+Claude/GPT/Geminiとも「早く決めるべき」と催促しないこと。
 
 実装の現状（記録・議論着手時の参考）:
   モバイル css/mobile-shell.css:42-44 → #D92D20（PARTS色と同一）/ dark :56-58 → #E5534B
