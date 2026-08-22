@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260822-021
+revision: MYRIG-20260822-022
 updated: 2026-08-22 16:24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下記「timestamp要確認」参照）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -137,11 +137,17 @@ PC版を差し替える（_decisions/p22-c21 参照）。実装待ち。
 詳細は _audit/gpt-review-20260821.md。すべてCoworkが現物で裏取り済み。
 **A・B・C・Dすべて解消。実装（コード自体）はモック完成後・Next.js着手時に行う。**
 
-A. ✅ 解消済み（2026-08-22 イタヤ裁定）— Auth middleware。Maintenance/Suspendedの全体ガードが
-   matcher(/garage,/settings)に縛られ、公開ページで実行されない問題。
+A. ✅ 解消済み（2026-08-22 イタヤ裁定、同日GPT監査(revision020→021)で追加是正）— Auth middleware。
+   Maintenance/Suspendedの全体ガードがmatcher(/garage,/settings)に縛られ、公開ページで実行されない問題。
    matcherを静的アセット等を除く全パスへ拡張し、Maintenance/Suspendedは全ページに効かせ、
-   P1のredirectだけ`isP1Protected()`のパス判定で絞る方式へ変更（Next.js公式の標準パターン）。
-   P2（/notifications, /register）の挙動は無変更。詳細は`docs/ui/auth-guard-spec-v1.md` v1.2 §5。
+   P1のredirectだけ`isP1Protected()`のパス判定で絞る方式へ変更（Next.js公式と同じnegative-lookahead）。
+   P2（/notifications, /register）の挙動は無変更。詳細は`docs/ui/auth-guard-spec-v1.md` v1.2-r2 §5。
+   **GPT監査で発見・同日中に修正した残課題**: `NEXT_PUBLIC_MAINTENANCE`はビルド時インライン化されるため
+   保守モードスイッチに不適切→server-only `MAINTENANCE_MODE`へ変更／matcherに`sitemap.xml``robots.txt`除外を追加／
+   §6 P3の「matcherに含めない」旧記述と新matcherの矛盾を撤回／ガード優先順位（Maintenance>Suspended>P1）を明記／
+   Next.js 16なら`middleware.ts`→`proxy.ts`改称の注記／APIルート用の別契約(503/403 JSON)を実装時確定として明示。
+   実装時に確定する項目: 対象Next.jsバージョン、Maintenance切替方式（env/Flag/DB）、APIルートの応答契約、
+   `/account-suspended`の逆向きguard要否。
 B. ✅ 解消済み（2026-08-22 イタヤ裁定、同日GPT監査で残課題を追加修正）— 物理DELETE禁止 ⇔ 解除手段の不在。
    likes/favorites/pins/followsの4テーブルにdeleted_atを追加し、解除操作をUPDATEで行う方式に統一。
    CORE(L1)「物理DELETEは禁止」は無改訂のまま維持（例外化しない判断）。

@@ -10,15 +10,20 @@
 > ただし **§4「`next` パラメータ安全性」は L1**（open redirect 対策。セキュリティ）。
 
 **作成日:** 2026-05-22 (MR-AUDIT-002 / A7)
-**最終更新:** 2026-08-21
-**ステータス:** 確定 v1.1
+**最終更新:** 2026-08-22
+**ステータス:** 確定 v1.2
 **前提:** `auth-onboarding-minimum-spec-v1` / `nextjs-routing-table-v1` / `appheader-interaction-spec-v1` / `dialog-interaction-spec-v1`
 ⚠️ **上記4本＋`error-states-decomposition-MR-AUDIT-002` は本repo内に未収録。**
 参照が必要になった時点で所在を確認すること。
 
-> ✅ **2026-08-22 イタヤ裁定・解消済み（GPT監査A）**: §5 skeleton を「matcher拡張＋内部分岐」方式へ修正した。
-> Maintenance/Suspendedは全ページ対象、P1のredirectだけをパス判定で絞る（Next.js公式ドキュメントの
-> 標準パターンに準拠）。詳細は §5。
+> ✅ **2026-08-22 イタヤ裁定・解消済み（GPT監査A・revision020→021監査で追加是正）**:
+> §5 skeleton を「matcher拡張＋内部分岐」方式へ修正した（Next.js公式と同じnegative-lookahead方式）。
+> Maintenance/Suspendedは全ページ対象、P1のredirectだけをパス判定で絞る。詳細は §5。
+> ガード優先順位: **Maintenance > Suspended > P1 Auth**。
+> ⚠️ **未確定（実装時に確定）**: (1) 対象Next.jsバージョン（16なら`middleware.ts`はdeprecated、
+> `proxy.ts`へ改称する）／(2) Maintenance/Suspendedのredirectとは別のAPI用契約
+> （現在のskeletonは全リクエストを対象にするためAPIルートもHTTP redirectになる。
+> 必要ならmatcherから`api`を除外し、APIは503/403 JSON等の別レスポンスにする）。
 
 ---
 
@@ -205,18 +210,25 @@ export function safeNext(rawNext: string | null | undefined): string {
 
 実装着手時の参考骨格。Supabase session check は本実装で具体化する。
 
-✅ **2026-08-22 イタヤ裁定・解消済み（GPT監査A）**: matcherを静的アセット等を除く全パスへ拡張し、
-Maintenance/Suspendedは全ページで実行、P1のredirectだけをパス判定（正規表現配列）で絞る方式に変更した。
-（Next.js公式の「matcherは広く取り、内部でパスごとに分岐する」という標準パターンに準拠。
-全体ガードとP1ガードを別ファイルに分離する案は、Next.jsの`middleware.ts`が1ファイル1matcherである
-制約と相性が悪いため不採用）
+✅ **2026-08-22 イタヤ裁定・解消済み（GPT監査A・revision020→021監査で追加是正）**: matcherを静的アセット等を
+除く全パスへ拡張し、Maintenance/Suspendedは全ページで実行、P1のredirectだけをパス判定（正規表現配列）で絞る
+方式に変更した（Next.js公式と同じnegative-lookahead方式）。
+全体ガードとP1ガードを別ファイルに分離する案は、Next.js/Vercelのmiddleware/proxyが1ファイル1matcherである
+制約と相性が悪いため不採用。
+
+**ガード優先順位: Maintenance > Suspended > P1 Auth**（Maintenance ON時はSuspendedユーザーも
+`/maintenance`へ誘導される。session取得もスキップされる。障害・保守モードとして意図した挙動）。
 
 ```ts
-// middleware.ts
+// Next.js 15なら middleware.ts / Next.js 16以降なら proxy.ts へ改称する
+// （Next.js 16では middleware.ts はdeprecated、proxy.ts / export function proxy()）
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const MAINTENANCE_MODE = process.env.NEXT_PUBLIC_MAINTENANCE === 'on';
+// ⚠️ NEXT_PUBLIC_ プレフィックスは避ける（ビルド時にJSへインライン化され、
+// デプロイ後のenv切替では反映されないため保守モードの運用スイッチとして不適切）。
+// server-only変数名を使う。切替方法（env再デプロイ / Feature Flag / DB検査）は実装時に確定。
+const MAINTENANCE_MODE = process.env.MAINTENANCE_MODE === 'on';
 
 // P1: middlewareで直接 /login へ redirectする保護ルート
 const P1_PROTECTED_PATTERNS = [
@@ -231,7 +243,7 @@ function isP1Protected(pathname: string): boolean {
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
 
-  // 1) Maintenance（MR-AUDIT-002 / A3 と統合）— 全ページ対象
+  // 1) Maintenance — 全ページ対象（最優先）
   if (MAINTENANCE_MODE) {
     if (pathname !== '/maintenance') {
       const url = req.nextUrl.clone();
@@ -244,7 +256,7 @@ export async function middleware(req: NextRequest) {
   // 2) Session 取得（実装時に具体化）
   const session = await getSession(req); // Supabase session lookup
 
-  // 3) Suspended（MR-AUDIT-002 / A3 と統合）— 全ページ対象
+  // 3) Suspended — 全ページ対象
   if (session?.user?.accountStatus === 'suspended') {
     if (pathname !== '/account-suspended') {
       const url = req.nextUrl.clone();
@@ -266,10 +278,12 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // 静的アセット・画像最適化・favicon等を除く全パスにマッチさせる（Next.js公式推奨パターン）。
-  // Maintenance/Suspendedをこの全パスに効かせるのが目的。P1判定はmatcherではなく上のisP1Protected()で行う。
+  // Next.js公式と同じnegative-lookahead方式。静的アセット・画像最適化・favicon・sitemap・robotsを除外。
+  // ⚠️ 現状は `api` を含む（HTTP redirectがAPIルートにも掛かる）。
+  //    APIをJSON契約で応答させたい場合は、matcherに `api` を追加除外し、
+  //    Maintenance→503 JSON / Suspended→403 JSON をAPI側で別実装する（実装時に確定）。
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
 ```
@@ -298,14 +312,24 @@ export const config = {
 
 ## 6. P3 — Public Mode Login Modal の実装方針
 
-- ページ自体は middleware を通さない（matcher に含めない）
+✅ **2026-08-22 GPT監査(revision021)で是正**: §5のmatcher拡張により公開ページも
+middlewareを通るため、旧「ページ自体はmiddlewareを通さない（matcherに含めない）」の記述を撤回する。
+
+- ページ自体は §5 の広いmatcherに含まれ、middlewareを通る。
+  ただしP3ページに対しては Maintenance/Suspended のみ適用され、**P1認証redirectは掛からない**
+  （`isP1Protected()` の対象外のため）
 - mutate ボタン Component が Client Component として `useSession()` でログイン状態を確認
 - 未ログインなら `<LoginRequiredModal context="follow|like|..." />` を open
 - ログイン後の楽観的 mutate 実行は対象外（本 Spec はあくまで「未ログイン挙動」の確定）
 
----
+### 6.1 `/account-suspended` 直接アクセスの扱い（未決定）
 
-## 7. 関連 docs
+Suspendedユーザーが `/account-suspended` を開いた場合の無限redirect回避は§5で対応済み。
+一方、**Suspendedではないユーザーが `/account-suspended` を直接開いた場合**の扱いは未仕様。
+- 「本人専用エラー画面」にしたい → 逆向きguard（sessionが正常なら他ページへredirect）が必要
+- 単なる説明ページとしてよい → 現状通り誰でも閲覧可
+
+**実装時に確定する**。現時点でモックアップの動作を妨げるものではない。
 
 | 参照先 | 関係 |
 |---|---|
@@ -324,3 +348,4 @@ export const config = {
 | v1 | 2026-05-22 | 初版（MR-AUDIT-002 / A7）。P1 / P2 / P3 パターン / Login Required Modal 文言 / `next` 安全性 / `middleware.ts` skeleton + matcher を確定 |
 | v1.1 | 2026-08-21 | #14裁定（context 8種・文言5グループ）を §3.1 / §3.3 本文へ反映。matcher から `/notifications/:path*` `/register/:path*` を除外し **P2＝matcher対象外**で確定 |
 | v1.2 | 2026-08-22 | GPT監査A解消。Maintenance/Suspendedが公開ページで無効だった問題を、matcher拡張＋`isP1Protected()`によるパス内分岐へ変更して解消。P2の挙動（matcher非依存の判定）は無変更 |
+| v1.2-r2 | 2026-08-22 | GPT監査(revision020→021)の追加是正6件: 冒頭ヘッダーをv1.2/2026-08-22へ更新／`NEXT_PUBLIC_MAINTENANCE`→server-only `MAINTENANCE_MODE`（envインライン化問題）／matcherに`sitemap.xml``robots.txt`除外を追加してNext.js公式例に合わせる／§6 P3の「matcherに含めない」旧記述を撤回／ガード優先順位（Maintenance>Suspended>P1 Auth）を明記／Next.js 16なら`middleware.ts`→`proxy.ts`改称の注記／APIルート用に別契約(503/403 JSON)の実装時確定を注記／§6.1に`/account-suspended`直接アクセスの未決定項目を明示 |
