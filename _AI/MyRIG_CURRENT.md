@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260821-008
-updated: 2026-08-21 21:40 JST
+revision: MYRIG-20260821-009
+updated: 2026-08-21 22:55 JST
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -36,6 +36,40 @@ search-results-ux-v1 / search-contract-v1）はPROPOSAL。正典扱いしない�
 2026-07-30
 FEED文法はモバイル基準（おすすめ/フォロー中タブ）。
 PC版を差し替える（_decisions/p22-c21 参照）。実装待ち。
+
+## モック是正キュー（2026-08-21 正典⇄モック全面照合で検出）
+
+詳細は _audit/canon-vs-mockup-20260821.md。**正典ではなくモック側を直す項目。**
+
+### 最優先
+1. PC Feed が #28 未適用 — pc/myrig-feed-v3.html:700-702 が All/Following/Trending の3タブ。
+   ImageLightbox・無限スクロールも未実装。モバイル feed.html が完全な参照実装として存在する
+2. PC composer の廃止値 setup — myrig-log-composer-modal-v0.3.9.html:1043 と :1299、
+   モバイル register-log.html:381
+3. v8カラーがPC 40ファイル中6ファイルのみ適用 — v7ローカル定義14 / 共有CSS継承3 / 未定義17。
+   共有 pc/assets/css/SoT_tokens-v6.css:28,54 を直せば5ページ一括解決
+4. NG-7 アバター違反 — pc/myrig-notifications-pc-v0.1.1.html:476-482 に
+   紫#7c3aed・緑#15803d・橙を含む7色グラデーション。「緑紫橙 全廃」に正面衝突
+5. myrig-rc.com 残存4箇所 — pc/myrig-auth-onboarding-pc-v0.2.html:1132,1206,1312,1600。
+   ユーザー名入力のURLプレビューでユーザーの目に直接触れる
+
+### 高
+6. ランキング表現の残存 — home-v3:3209 の data-query-preset="weekly-like-ranking-rig" ほか、
+   browse-category-v3:810,814,882,953 / preview.html / モバイル browse-category.html:264,290,317
+7. --cat-*-on 未敷設と color:#fff 残存 — garage-favorites:246-248 / garage-pins:246-248 /
+   SoT_component-catalog-v6.css:68（黄地に白文字 CR1.08）
+8. NG-1 生存 — pc/myrig-library-v3.html:233-241（正典が名指しした当のコードが未撤去）ほか4箇所
+9. 登録フォームと検索が別タクソノミー — PARTS登録が独自10カテゴリ（正本は親14）、
+   RIG登録カスタムフォームが英語8カテゴリ（正本は24件）
+10. surface/weather の登録経路が無い — 検索側は10値/6値で確定しているのに、
+    PC composer は自由テキスト1本に天候まで混在。**データが永久に入らない構造**
+
+### 中〜低
+11. Library URL の単数形残存（index.html:954,960,966 ほか）
+12. PCプレースホルダ2種の不統一（pc/myrig-search-v3.html:1173）
+13. 48px未満のタップ要素4件（search.html の .rc__chip/.rc__x/.rc__clear/.ax-tools__b）
+14. Cookie同意バナー未実装 / PCフッター特商法リンクがhref="#"のまま
+15. NG-2（PC46箇所・モバイル14箇所）/ NG-6 / PC中立操作色の2値分裂 / 死んだv7宣言の掃除
 
 ## GPT外部監査の最優先4系統（2026-08-21・監査済み／未反映）
 
@@ -72,13 +106,18 @@ HOLDの理由は出典の不在ではなく、2026-08-21実DB確認で判明し�
 - MyRIG_Category_Structure_v1.4（6/16改訂・7/30より前）はTEXT自由記述として定義
 App側提案: 実データ主導（18パターンを土台に再確定）へ切替。イタヤ裁定待ち。
 
-log_type
-矛盾の所在を特定済み（2026-08-21監査）。
-DB定義（App Schema v1.6のCHECK制約）は4種（maintenance/run/custom/memo）。
-cross-ref v4は監査時に「4 or 5・HOLD」へ更新済み。
-5種目 setting の実体は docs/ui/pc-mobile-spec-inheritance-v1.1 #30（PC正本 log-composer の種別タブ）。
-つまり schema内部の矛盾ではなく schema↔UI の矛盾。旧 setup はv1.2→v1.3で意図的廃止済み。
-要裁定: setting を独立log_typeにするか下位属性にするか。App管轄のためApp側で決定可。
+log_type ★2026-08-21 モック照合で誤診と判明。実質決着
+文書監査では「schema(4値)⇔UI(5値)の矛盾・要裁定」としていたが、実装を見ると別の話だった。
+- 5値目の実装値は setting ではなく setup（pc/myrig-log-composer-modal-v0.3.9.html:1043）
+- setup は schema v1.2 で廃止済みの値。pc/myrig-feed-v3.html:725 が
+  「以前ここにあった『セットアップ』は廃止された値」と同じモック内で注記している
+- setting という値はモックにもDBにも存在しない。文書上にしかない語
+- 実装内部でも分裂: 登録は5値（PC composer / モバイル register-log.html:381）、
+  閲覧・検索・絞り込みは4値（search-v3 / feed-v3 / garage-logs / garage-logs-v6）
+
+結論: 正典（4値）が正しく、登録フォームに廃止済み setup が残っているだけ。
+裁定案件ではなくモックのバグ。Search Contract §5-4「7/28裁定で5値」はこの残骸の誤読の可能性が高い。
+残作業: composer :1043 と :1299、モバイル register-log.html:381 から setup を撤去。
 
 aliases
 master_aliases が正本であることは確定（db-schema-answers-v1 §0責務境界・Q7）。
@@ -104,14 +143,23 @@ _state/mobile-feedback-ledger-v1 の同日裁定2件が対立している。
 pc-mobile-spec-inheritance G7 は現状「ページングが基本・例外はFeedと検索種別タブ」としているが、
 #26 を広く読むとこの前提自体が成立しない。台帳が生きた正典であるため要調停。
 
-操作色 --color-action-primary の実値（2026-08-21 新規HOLD）
-方向（中立ソリッド＝B案）は2026-08-17イタヤ裁定で確定。純黒・純白は使わない。
-ただし実値の確定記録が見つからない。design-nogo-list NG-7は #1F2328 / #E6EDF3 とするが、
-P22-B19報告書は同日付で「操作の色だけ未裁定」「次にやること#1: A/B/C裁定→実値確定」と記載。
-B19推奨の但し書き「Bottom Nav中央の＋登録のみブランド色」の採否も不明。
-モバイル実装の --color-action-primary は緑のまま残っている可能性がある。実機確認 → イタヤ裁定。
+操作色 --color-action-primary ★2026-08-21 モック照合で決着（HOLD解除可）
+実装に存在し、design-nogo-list NG-7 の記載値と完全一致していた。
+  css/mobile-shell.css:32  --color-action-primary: #1F2328;  （light・「純黒より一段柔らかい黒」）
+  css/mobile-shell.css:47  --color-action-primary: #E6EDF3;  （dark）
+「緑のまま残っている可能性」は否定された。
+B19但し書き「Bottom Nav中央の＋登録のみブランド色」は不採用（mobile-shell.css:792-806 が中立黒）。
+残作業: color-token-v8 §3 の「要確認」注記を外して確定表記へ。
+別件: PC側には --color-action-primary が皆無で、中立色は #24292f(6箇所)/#1f2328(3箇所)の
+ハードコード＝lightが2値に分裂している。PCのトークン化は未着手。
 
-NG-7の通知色（2026-08-21 新規HOLD）
+NG-7の通知色（2026-08-21 新規HOLD）★モック照合で裁定材料が判明
+実装では PC が既に PARTS色と別値を採用していた。正典はモバイル片面だけを記述している。
+  モバイル css/mobile-shell.css:42-44 → #D92D20（PARTS色と同一）/ dark :56-58 → #E5534B
+  PC通知ページ myrig-notifications-pc-v0.1.1.html:64-65 → #cf222e、地は青系 rgba(9,105,218,.02)
+  PCヘッダー通知ドット SoT_app-shell.css:311-321 → #dc2626（ハードコード）
+実装に赤が3値存在し、PC側は意図的に分離している。「PARTS色と別にする」方向に実装は倒れている。
+
 design-nogo-list NG-7の職域表が、通知・未読・NEWに #D92D20＝PARTSカテゴリ色を割り当てており、
 同表1行目「カテゴリ色は種別識別のみ」と自己矛盾。
 （NG-4の「赤は警告・削除に見える」は現在地の行の塗りつぶしの話であり通知色とは別論点だが、
@@ -141,6 +189,19 @@ CURRENT旧記載の「NG-7一般化は誤り」の実体はここである可能
 
 ### 未解消
 
+- **正典⇄モック照合（2026-08-21）で判明した「正典が古い」項目が未反映**。詳細は
+  _audit/canon-vs-mockup-20260821.md。主なもの:
+  - **search-page-plan-v2 が実装から1世代遅れ** — 実装は 2026-08-21 P22-C29「D案」
+    （探し方4枚＋軸の開閉）へ移行済み。正典の「種別で探す→人・ガレージ独立行→…」構成は
+    もう存在しない。ソートの3ピルも裁定⑦⑧で廃止済み（「人気順」は意図的に不使用）
+  - **page-role-matrix §3 の「未作成」が誤り** — Parts Master Detail / Maker Detail は実装済み
+  - **page-role-matrix が compare.html / help.html / legal.html を捕捉していない**
+  - **color-token-v8 が v8の適用範囲を書いていない** — PC 40中6ファイルのみ適用の段階適用中
+  - **正典がPC側にトークン層が無い事実を記述していない**
+  - **NG-1「モバイル側は処理完了」/ NG-6「P22-C12で是正」の適用範囲がPC未処理を含んでいない**
+  - **検索スコープ正典表は「宿題」ではなく実装から昇格可能**
+    （search-results.html:524-576 の LABEL/UNIT/GRIDTYPE/DIGEST/SORT_OPTIONS が事実上の一元定義）
+    ※ただしタブ順(log→lib)とダイジェスト順(lib→log)が食い違うため裁定1点必要
 - **GPT外部監査（2026-08-21）の指摘17件が未反映**（上記4系統を除く文書整理系）。
   参照切れ（design-rules.md / cross-ref-v2 / Coverage Matrix版数）、`/rigs` の非正典URL持ち込み、
   db-schema-answers本文に残る旧「確定」、App_Ready Rule1⇔Rule7の矛盾、
