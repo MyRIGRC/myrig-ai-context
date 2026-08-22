@@ -1,8 +1,12 @@
-# RLSセキュリティモデル 裁定提案 v1
+# RLSセキュリティモデル 裁定記録 v1
 
-**status: PROPOSAL（未裁定）**
+**status: ADOPTED（2026-08-22 イタヤ裁定・revision017）**
+**2026-08-22 GPT外部監査（revision018監査）で以下の残課題を追加指摘・同日中に反映済み:**
+**likesが親公開判定から漏れていた／favoritesの公開カウントに親公開判定が無かった／
+部分UNIQUEインデックスの実DDLが無かった。詳細は`docs/schema/myrig_db_schema_v1_6.md`本文（確定版）を参照。
+本ファイルは裁定時点の検討記録として保存する。**
 **対象: GPT外部監査 最優先4系統C（`_audit/gpt-review-20260821.md`）**
-**関連: `docs/schema/myrig_db_schema_v1_6.md` RLS節（L1・592行のHOLD注記）**
+**関連: `docs/schema/myrig_db_schema_v1_6.md` RLS節**
 
 ---
 
@@ -71,11 +75,11 @@ RLSは変更せず、Next.js側のクエリで必ず親の`is_public`をチェ�
 - `images`/`comments`は「親が公開なら子も公開」という直感的な規則で説明でき、既存のUI仕様（Public Garageでの非表示ルール）と矛盾しない
 - 案Bの集計ビュー新設は、現時点でパフォーマンス要件が明確でない（`myrig_db_schema_v1_6.md`556行「like_count/favorite_countはCOUNTで取得、キャッシュは問題発生時に追加」）ため、先取りして複雑化する必要が薄い
 
-## 4. 裁定が必要な点（イタヤ裁定待ち）
+## 4. 裁定結果（2026-08-22 確定）
 
-1. 案A/B/Cのどれを採用するか（推奨: A）
-2. `favorites`の「公開カウント」要件は維持するか（維持する場合、COUNT用の関数/ビューが必要）
-3. `pins`は完全非公開（owner限定）で確定してよいか（現行定義通りなら確定でよいはず）
-4. 実装タイミング: Next.js実装開始前に確定必須（モックアップ段階では実害なし）
+1. **案A採用**
+2. `favorites`の「公開カウント」要件は**維持**（COUNT用の関数/ビュー経由。GPT監査で「親が公開の場合のみ」の条件を追加）
+3. `pins`は**完全非公開（owner限定）で確定**
+4. 実装タイミング: **モックアップ完成後、Next.js着手時**
 
-裁定後、`docs/schema/myrig_db_schema_v1_6.md` RLS節のHOLD注記を解除し、本文を確定仕様として書き換える。
+反映先: `docs/schema/myrig_db_schema_v1_6.md` RLS節（確定版）。本ファイルは検討経緯の記録として残す。

@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260822-018
+revision: MYRIG-20260822-019
 updated: 2026-08-22 16:24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下記「timestamp要確認」参照）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -135,19 +135,34 @@ PC版を差し替える（_decisions/p22-c21 参照）。実装待ち。
 
 A. Auth middleware — Maintenance/Suspendedの全体ガードがmatcher(/garage,/settings)に
    縛られ、公開ページで実行されない。matcher拡張＋内部分岐か、全体ガードとP1ガードの分離。要裁定。
-B. ✅ 解消済み（2026-08-22 イタヤ裁定）— 物理DELETE禁止 ⇔ 解除手段の不在。
+B. ✅ 解消済み（2026-08-22 イタヤ裁定、同日GPT監査で残課題を追加修正）— 物理DELETE禁止 ⇔ 解除手段の不在。
    likes/favorites/pins/followsの4テーブルにdeleted_atを追加し、解除操作をUPDATEで行う方式に統一。
    CORE(L1)「物理DELETEは禁止」は無改訂のまま維持（例外化しない判断）。
    理由: 将来の選択肢を狭めない方を優先（履歴を残せば後で物理削除も選べるが、逆はできない）。
-   UNIQUE制約は部分インデックス化（WHERE deleted_at IS NULL）。詳細はschema v1.6-r2「ソーシャル」節。
-C. ✅ 解消済み（2026-08-22 イタヤ裁定）— RLSがprivateデータを保護していない問題。
+   UNIQUE制約は部分インデックス化（WHERE deleted_at IS NULL）。
+   **GPT監査（revision018）で発見・同日中に修正した残課題**: RLS共通原則にDELETEポリシーの
+   一般許可が残存／images・rig_partsのRLS特記がDELETEを明記／部分UNIQUEの本文記載に対応する
+   実DDLが無かった／follows解除のUPDATE許可者が未明記／統計COUNTがdeleted_at IS NULLを
+   明記していなかった／「全テーブルdeleted_atあり」という誤記述（rig_partsはremoved_at）。
+   すべてschema v1.6-r2「ソーシャル」節・RLS節・インデックス設計節・統計カウント節に反映済み。
+C. ✅ 解消済み（2026-08-22 イタヤ裁定、同日GPT監査で穴を追加修正）— RLSがprivateデータを保護していない問題。
    pins定義「非公開」⇔RLS全公開 / favorites・pinsの個別行が全公開でPublic Garage非表示を迂回可能 /
    imagesは親が非公開でも読める / commentsは親の公開可否を検査していない、という4点を解消。
    裁定: 案A（親のis_publicをJOIN判定）採用。pinsは完全非公開（owner限定）、
-   favoritesは個別行非公開・公開カウントのみ維持。likesは現行どおり全公開のまま維持（対象外）。
-   詳細は `_proposals/rls-security-model-v1.md`、正典反映は `docs/schema/myrig_db_schema_v1_6.md` RLS節。
+   favoritesは個別行非公開・公開カウントのみ維持。
+   **GPT監査（revision018）で発見・同日中に修正**: 当初「likesは対象外」としたが、
+   likesが参照するrig/part/logが後から非公開化されても行が全公開のままという同種の漏洩経路が
+   残っていた。likesもimages/comments同様に親公開判定へ変更。favoritesの公開カウントにも
+   「対象entityが公開の場合のみ返す」条件を追加。
+   詳細は `_decisions/2026-08-22_rls-security-model-v1.md`（ADOPTED）、
+   正典反映は `docs/schema/myrig_db_schema_v1_6.md` RLS節（確定版）。
    **実装タイミング: モックアップ完成後・Next.js着手時。**
 D. ✅ 解消済み（2026-08-22）— master_aliases.entity_type の 'part' → 'part_master' 誤記を訂正。
+
+**2026-08-22 GPT外部監査（revision018監査）実施記録**: B・Cの裁定内容をGitHub main実物で
+再監査。9件（HIGH3件・MEDIUM-HIGH1件・MEDIUM4件・LOW-MEDIUM1件）の残存矛盾を検出、
+すべて現物照合の上で同日中に修正・commit・push済み。**「Claudeの裁定をGPTが監査し、
+指摘をCoworkが裏取りして反映する」フローが実地で機能した最初の事例。**
 
 ## HOLD
 

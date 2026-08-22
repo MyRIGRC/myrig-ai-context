@@ -363,7 +363,8 @@ UNIQUE制約は再操作（一度解除して再度いいね等）に対応す�
 **権限ルール：**
 - 投稿者本人：自分のコメントを削除可能（status→deleted）
 - コンテンツオーナー：他人のコメントを非表示可能（status→hidden）。削除不可
-- 運営者：非表示解除・完全削除・制裁対応
+- 運営者：非表示解除・論理削除（status→deleted）・制裁対応（✅ 2026-08-22 GPT監査で訂正。
+  「完全削除」は物理DELETEと読めるためCORE違反。運営者権限も論理削除に統一する）
 
 **制御（アプリ層）：**
 - ログイン必須（ゲスト投稿不可）
@@ -564,7 +565,9 @@ notifications
 ## 統計カウントの方針
 
 - **`view_count`**: `rigs`, `parts`, `maintenance_logs` に直接保持（インクリメント更新）
-- **`like_count` / `favorite_count`**: テーブルに持たず、COUNTで取得。パフォーマンス問題発生時にキャッシュカラム追加
+- **`like_count` / `favorite_count`**: テーブルに持たず、`COUNT(*) WHERE deleted_at IS NULL`で取得
+  （✅ 2026-08-22 GPT監査で明記。対象entityが非公開の場合はcount自体を返さない。RLS節参照）。
+  パフォーマンス問題発生時にキャッシュカラム追加
 - **画像総容量**: `SUM(images.file_size) WHERE user_id = X AND deleted_at IS NULL` で集計。キャッシュカラムは不要
 
 ---
@@ -575,39 +578,46 @@ notifications
 
 ### 共通原則
 - ✅ **2026-08-22 イタヤ裁定・HOLD解除**: `likes` / `favorites` / `pins` / `follows` にも
-  `deleted_at` を追加した（GPT監査B解消）。**論理削除を持たないテーブルはこれで無くなった**
-  （全テーブル共通で `deleted_at IS NULL` を使ってよい）
-- **`deleted_at` を持つ全テーブルの**全SELECTポリシーに `deleted_at IS NULL` を含める
+  `deleted_at` を追加した（GPT監査B解消）。**ただし `rig_parts` は例外で、この4テーブルとは別に
+  `removed_at` で同じ役割（現在有効かどうか）を表す。「全テーブルがdeleted_atを持つ」わけではない。**
+- **`deleted_at`（または`rig_parts`の`removed_at`）を持つ全テーブルの**全SELECTポリシーに
+  対応する列の `IS NULL` 条件を含める
 - 公開データ: `is_public = true AND deleted_at IS NULL`
 - 自分のデータ: `user_id = auth.uid() AND deleted_at IS NULL`
 - INSERT/UPDATE: `user_id = auth.uid()`
-- **DELETE**: ポリシー上は `user_id = auth.uid()` を許可するが、**アプリからは物理DELETEを発行しない**。
-  削除・解除操作（RIG/パーツ/ログの削除、いいね/お気に入り/ピン/フォローの解除）は
-  すべて `deleted_at` の UPDATE で行う（CORE.md「物理DELETEは禁止」、例外なし）。
-  DELETE ポリシーは運用・移行時の最終手段としてのみ残す
+- ✅ **2026-08-22 GPT監査で修正**: **DELETEポリシーは作らない。** どのテーブルにも
+  `user_id = auth.uid()`によるDELETEポリシーを設けない（CORE.md「物理DELETEは禁止」に例外なし）。
+  削除・解除操作（RIG/パーツ/ログの削除、rig_partsの取り外し、いいね/お気に入り/ピン/フォローの解除）は
+  すべて対応する論理削除列（`deleted_at`または`removed_at`）のUPDATEで行う。
+  運用・移行時にどうしても物理DELETEが要る場合は、RLSポリシーではなくservice role（RLSをバイパスする
+  管理者経路）で行う。ユーザー向けポリシーにDELETEを残さない
 
 ### テーブル別の特記事項
 
 ✅ **2026-08-22 イタヤ裁定・HOLD解除。** 旧「SELECT全公開」方針（pinsの「非公開」定義と矛盾、
 親が非公開でも images/comments が読めた問題）を、親の`is_public`をJOIN判定する方式へ変更する。
-詳細検討は `_proposals/rls-security-model-v1.md`（案A採用）。**実装はNext.js着手時に行う
+詳細検討は `_decisions/2026-08-22_rls-security-model-v1.md`（案A採用）。**実装はNext.js着手時に行う
 （モックアップ段階では対象データが存在しないため実害なし。着手前に必ずこの通りに実装すること）。**
 
 - **images**: SELECTは「自分の行」または「親（rig/part/log）が`is_public=true AND deleted_at IS NULL`」の場合のみ。
   entity_typeごとに参照先テーブル（rigs/parts/maintenance_logs）をCASE分岐でEXISTS判定する。
-  INSERT/DELETEは`user_id = auth.uid()`
+  INSERTは`user_id = auth.uid()`。削除は`deleted_at`のUPDATE（物理DELETEなし）
 - **favorites**: 個別行のSELECTは`user_id = auth.uid() AND deleted_at IS NULL`のみ（他人の個別行は不可）。
   **公開カウント（「◯件お気に入り」表示）は維持する**が、個別行そのものは公開しない。
-  件数は`WHERE deleted_at IS NULL`のCOUNT用の関数またはビュー経由で提供する（RLSを迂回した個別行閲覧はさせない）。
+  件数は`WHERE deleted_at IS NULL`かつ**対象entityが`is_public=true AND deleted_at IS NULL`の場合のみ**
+  返すCOUNT用の関数またはビュー経由で提供する（非公開entityのcountは返さない。RLSを迂回した個別行閲覧もさせない）。
   解除は`deleted_at`のUPDATEで行う（物理DELETEなし）
 - **pins**: **完全非公開。** SELECTは`user_id = auth.uid() AND deleted_at IS NULL`のみ。
   他人には件数含め一切公開しない。解除は`deleted_at`のUPDATE
-- **likes**: SELECTは全公開だが`deleted_at IS NULL`を条件に含める（「いいね」は元々公開カウント前提の機能で、
-  非公開エンティティへのlikes自体はUI層でアクション不可にする運用のまま。pins/favoritesのような
-  「非公開」定義との矛盾が無いためRLS方針は対象外）。解除（アンいいね）は`deleted_at`のUPDATE
-- **follows**: follower_id = auth.uid()でINSERT、解除は`deleted_at`のUPDATE。SELECTは全公開（`deleted_at IS NULL`）
+- ✅ **2026-08-22 GPT監査で修正**: **likes**: SELECTは「自分の行」または「参照先が公開」の場合のみ
+  （旧: 全公開。favorites/pins/images/commentsと同じ基準に揃える）。
+  entity_typeがrig/part/logなら親が`is_public=true AND deleted_at IS NULL`、
+  entity_typeがcommentなら対象コメントが`status='published'`かつ**そのコメントの親（rig/part/log）も公開**の場合。
+  いずれも`deleted_at IS NULL`を条件に含める。解除（アンいいね）は`deleted_at`のUPDATE
+- **follows**: SELECTは全公開（`deleted_at IS NULL`）。INSERTは`follower_id = auth.uid()`。
+  解除（UPDATE `deleted_at`）は`follower_id = auth.uid()`の行のみ許可（他人のフォロー関係は解除不可）
 - **マスターデータ**: SELECT全公開。変更は管理者ロールのみ
-- **rig_parts**: user_id = auth.uid() でINSERT/UPDATE/DELETE
+- **rig_parts**: `user_id = auth.uid()`でINSERT/UPDATE。取り外しは`removed_at`のUPDATEで行う（物理DELETEなし）
 - **comments**: SELECTは`status='published'`かつ親（rig/part/log）が`is_public=true AND deleted_at IS NULL`の場合のみ。
   INSERTはauth.uid()必須。自分のコメントのstatus更新のみ可能
 - **comment_reports**: INSERTはauth.uid()必須。SELECTは運営者ロールのみ
@@ -638,10 +648,16 @@ CREATE INDEX idx_parts_master ON parts(parts_master_id) WHERE parts_master_id IS
 -- 画像取得
 CREATE INDEX idx_images_entity ON images(entity_type, entity_id) WHERE deleted_at IS NULL;
 
--- いいね・お気に入り・ピン
-CREATE INDEX idx_likes_entity ON likes(entity_type, entity_id);
-CREATE INDEX idx_favorites_entity ON favorites(entity_type, entity_id);
-CREATE INDEX idx_pins_entity ON pins(entity_type, entity_id);
+-- いいね・お気に入り・ピン（一覧取得用。deleted_at除外）
+CREATE INDEX idx_likes_entity ON likes(entity_type, entity_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_favorites_entity ON favorites(entity_type, entity_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_pins_entity ON pins(entity_type, entity_id) WHERE deleted_at IS NULL;
+
+-- ✅ 2026-08-22 GPT監査で追加: 再操作（解除→再いいね等）を許すための部分UNIQUE INDEX
+-- （本文の「UNIQUE（部分インデックス）」表記に対応する実DDL。従来は本文記載のみでDDLが無かった）
+CREATE UNIQUE INDEX idx_likes_active_unique ON likes(user_id, entity_type, entity_id) WHERE deleted_at IS NULL;
+CREATE UNIQUE INDEX idx_favorites_active_unique ON favorites(user_id, entity_type, entity_id) WHERE deleted_at IS NULL;
+CREATE UNIQUE INDEX idx_pins_active_unique ON pins(user_id, entity_type, entity_id) WHERE deleted_at IS NULL;
 
 -- カテゴリ検索
 CREATE INDEX idx_rigs_category ON rigs(category_id) WHERE deleted_at IS NULL;
@@ -649,8 +665,10 @@ CREATE INDEX idx_rigs_rig_type ON rigs(rig_type) WHERE deleted_at IS NULL;
 CREATE INDEX idx_parts_category ON parts(category_id) WHERE deleted_at IS NULL;
 
 -- フォロー
-CREATE INDEX idx_follows_follower ON follows(follower_id);
-CREATE INDEX idx_follows_following ON follows(following_id);
+CREATE INDEX idx_follows_follower ON follows(follower_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_follows_following ON follows(following_id) WHERE deleted_at IS NULL;
+-- ✅ 2026-08-22 GPT監査で追加: 再フォローを許すための部分UNIQUE INDEX
+CREATE UNIQUE INDEX idx_follows_active_unique ON follows(follower_id, following_id) WHERE deleted_at IS NULL;
 
 -- 公開一覧（検索・フィード用）
 CREATE INDEX idx_rigs_public ON rigs(is_public, created_at DESC) WHERE deleted_at IS NULL AND is_public = true;
