@@ -105,6 +105,11 @@ GitHub WRITE前に必ず、
 
 をGitHub mainから再取得する。
 取得済みの古い内容・古いSHAを使ってWRITEしてはならない。
+
+**取得元は `api.github.com/repos/.../contents/...?ref=main` を使う。**
+`raw.githubusercontent.com` はCDNキャッシュ（最大5分）で古い内容が返ることがあり、
+「CURRENT_STALE」の誤検出につながる。revision照合・監査・WRITE前確認のいずれも
+API経由で取得すること（GitHub Appのconnectorは通常API経由なので既定でこれを満たす）。
 更新APIがSHA不一致・競合を返した場合は、
 再取得して勝手に上書きせず停止し、競合を報告する。
 

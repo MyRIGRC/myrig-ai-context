@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260822-020
+revision: MYRIG-20260822-021
 updated: 2026-08-22 16:24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下記「timestamp要確認」参照）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -33,6 +33,10 @@ GPT側確認時刻との間に約2時間のズレが報告された。原因未�
 Cowork/GPT双方がGitHub mainへ直接書き込める体制になったため、
 WRITE前の同期確認（fetch/diff/pull、SHA再取得）とforce push禁止をCORE.mdに明記した。
 詳細はMyRIG_CORE.md「GitHub複数WRITE経路の競合防止」節。
+
+**2026-08-22 GPT取得元をAPIへ明示化。**
+`raw.githubusercontent.com`にCDNキャッシュ（最大5分）があり、pushしてもrevisionが古く見える現象を
+実測。CORE.md「GPT」節に`api.github.com/repos/.../contents/...?ref=main`経由で取得することを明記。
 
 **2026-08-22 GPT GitHub WRITE実地テスト完了。**
 GPTがGitHub API経由で `_audit/gpt-write-test-20260822.md` を直接commit（`8350e10`）。
