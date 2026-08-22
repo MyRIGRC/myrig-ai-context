@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260822-019
+revision: MYRIG-20260822-020
 updated: 2026-08-22 16:24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下記「timestamp要確認」参照）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -128,13 +128,16 @@ PC版を差し替える（_decisions/p22-c21 参照）。実装待ち。
     整合していない。「注目」等へ変えるか、順位ではないラベルとして許容するか要裁定
     （2026-08-22 検出。文書監査では「該当語0件」と誤って宣言していた箇所）
 
-## GPT外部監査の最優先4系統（2026-08-21・監査済み／未反映）
+## GPT外部監査の最優先4系統（2026-08-21検出 → 2026-08-22 全件解消済み）
 
 詳細は _audit/gpt-review-20260821.md。すべてCoworkが現物で裏取り済み。
-**Next.js実装前に解消すること。モックアップ制作はブロックしない。**
+**A・B・C・Dすべて解消。実装（コード自体）はモック完成後・Next.js着手時に行う。**
 
-A. Auth middleware — Maintenance/Suspendedの全体ガードがmatcher(/garage,/settings)に
-   縛られ、公開ページで実行されない。matcher拡張＋内部分岐か、全体ガードとP1ガードの分離。要裁定。
+A. ✅ 解消済み（2026-08-22 イタヤ裁定）— Auth middleware。Maintenance/Suspendedの全体ガードが
+   matcher(/garage,/settings)に縛られ、公開ページで実行されない問題。
+   matcherを静的アセット等を除く全パスへ拡張し、Maintenance/Suspendedは全ページに効かせ、
+   P1のredirectだけ`isP1Protected()`のパス判定で絞る方式へ変更（Next.js公式の標準パターン）。
+   P2（/notifications, /register）の挙動は無変更。詳細は`docs/ui/auth-guard-spec-v1.md` v1.2 §5。
 B. ✅ 解消済み（2026-08-22 イタヤ裁定、同日GPT監査で残課題を追加修正）— 物理DELETE禁止 ⇔ 解除手段の不在。
    likes/favorites/pins/followsの4テーブルにdeleted_atを追加し、解除操作をUPDATEで行う方式に統一。
    CORE(L1)「物理DELETEは禁止」は無改訂のまま維持（例外化しない判断）。

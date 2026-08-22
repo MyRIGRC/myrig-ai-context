@@ -16,9 +16,9 @@
 ⚠️ **上記4本＋`error-states-decomposition-MR-AUDIT-002` は本repo内に未収録。**
 参照が必要になった時点で所在を確認すること。
 
-> ⚠️ **未確定:** §5 skeleton は Maintenance / Suspended の全体ガードを middleware 内に置いているが、
-> matcher が `/garage` `/settings` のみのため**公開ページで実行されない**。
-> matcher 拡張＋内部分岐か、全体ガードとP1ガードの分離かは**要裁定**。
+> ✅ **2026-08-22 イタヤ裁定・解消済み（GPT監査A）**: §5 skeleton を「matcher拡張＋内部分岐」方式へ修正した。
+> Maintenance/Suspendedは全ページ対象、P1のredirectだけをパス判定で絞る（Next.js公式ドキュメントの
+> 標準パターンに準拠）。詳細は §5。
 
 ---
 
@@ -205,6 +205,12 @@ export function safeNext(rawNext: string | null | undefined): string {
 
 実装着手時の参考骨格。Supabase session check は本実装で具体化する。
 
+✅ **2026-08-22 イタヤ裁定・解消済み（GPT監査A）**: matcherを静的アセット等を除く全パスへ拡張し、
+Maintenance/Suspendedは全ページで実行、P1のredirectだけをパス判定（正規表現配列）で絞る方式に変更した。
+（Next.js公式の「matcherは広く取り、内部でパスごとに分岐する」という標準パターンに準拠。
+全体ガードとP1ガードを別ファイルに分離する案は、Next.jsの`middleware.ts`が1ファイル1matcherである
+制約と相性が悪いため不採用）
+
 ```ts
 // middleware.ts
 import { NextResponse } from 'next/server';
@@ -212,33 +218,44 @@ import type { NextRequest } from 'next/server';
 
 const MAINTENANCE_MODE = process.env.NEXT_PUBLIC_MAINTENANCE === 'on';
 
+// P1: middlewareで直接 /login へ redirectする保護ルート
+const P1_PROTECTED_PATTERNS = [
+  /^\/garage(\/|$)/,
+  /^\/settings(\/|$)/,
+];
+
+function isP1Protected(pathname: string): boolean {
+  return P1_PROTECTED_PATTERNS.some((re) => re.test(pathname));
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
 
-  // 1) Maintenance（MR-AUDIT-002 / A3 と統合）
+  // 1) Maintenance（MR-AUDIT-002 / A3 と統合）— 全ページ対象
   if (MAINTENANCE_MODE) {
-    const isAsset = pathname.startsWith('/_next') || pathname.startsWith('/static');
-    if (pathname !== '/maintenance' && !isAsset) {
+    if (pathname !== '/maintenance') {
       const url = req.nextUrl.clone();
       url.pathname = '/maintenance';
       return NextResponse.redirect(url);
     }
+    return NextResponse.next();
   }
 
   // 2) Session 取得（実装時に具体化）
   const session = await getSession(req); // Supabase session lookup
 
-  // 3) Suspended（MR-AUDIT-002 / A3 と統合）
+  // 3) Suspended（MR-AUDIT-002 / A3 と統合）— 全ページ対象
   if (session?.user?.accountStatus === 'suspended') {
     if (pathname !== '/account-suspended') {
       const url = req.nextUrl.clone();
       url.pathname = '/account-suspended';
       return NextResponse.redirect(url);
     }
+    return NextResponse.next();
   }
 
-  // 4) Auth Guard P1（未ログインで protected route）
-  if (!session?.user) {
+  // 4) Auth Guard P1（未ログインで protected route）— P1ルートのみ判定
+  if (isP1Protected(pathname) && !session?.user) {
     const url = req.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('next', pathname + search);
@@ -249,31 +266,33 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
+  // 静的アセット・画像最適化・favicon等を除く全パスにマッチさせる（Next.js公式推奨パターン）。
+  // Maintenance/Suspendedをこの全パスに効かせるのが目的。P1判定はmatcherではなく上のisP1Protected()で行う。
   matcher: [
-    '/garage/:path*',
-    '/settings/:path*',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
 ```
 
-> **⚠️ matcher に P2 の route を入れないこと。**
-> skeleton の `// 4) Auth Guard P1` ブロックは matcher 内の全 route を無条件で `/login` へ redirect するため、
-> `/notifications` `/register/:path*` を matcher に入れると P2（元ページを維持したまま Modal を開く）が成立しない。
-> **P2 のページは matcher に入れず、page.tsx 側で session 確認 → `<LoginRequiredModal />` を表示する。**
+> **⚠️ matcherを広げても、P2のページ（`/notifications` `/register/:path*`）にP1のredirectはかからない。**
+> `isP1Protected()` が garage/settings のみを対象にしているため、matcherに含まれていても
+> 「4) Auth Guard P1」ブロックはスキップされる。**P2は引き続きpage.tsx側で session確認 →
+> `<LoginRequiredModal />` を表示する方式のまま。**
 
-### 5.1 matcher と挙動パターンの対応
+### 5.1 matcher拡張後の挙動パターン対応
 
-| URL pattern | matcher に含める | パターン | UI |
-|---|---|---|---|
-| `/garage/:path*` | ✅ 含める | **P1** | middleware で直接 redirect |
-| `/settings/:path*` | ✅ 含める | **P1** | 同上 |
-| `/notifications/:path*` | ❌ 含めない | **P2（確定）** | page.tsx で session 取得 → 未ログインなら Login Required Modal を表示 |
-| `/register/:path*` | ❌ 含めない | **P2（確定）** | 同上。Create 導線からの起動は元ページを維持したいため P2 |
+| URL pattern | matcherに含まれる | Maintenance/Suspended | P1 redirect判定 | UI |
+|---|---|---|---|---|
+| `/garage/:path*` | ✅（広いmatcherに包含） | ✅ 効く | ✅ `isP1Protected()`が対象 | middlewareで直接redirect |
+| `/settings/:path*` | ✅ | ✅ 効く | ✅ | 同上 |
+| `/notifications/:path*` | ✅ | ✅ 効く | ❌ 対象外 | page.tsxでLogin Required Modal（**P2は変更なし**） |
+| `/register/:path*` | ✅ | ✅ 効く | ❌ 対象外 | 同上（**P2は変更なし**） |
+| 公開ページ全般（トップ・検索・Public Garage等） | ✅ | ✅ 効く（今回の修正の主眼） | ❌ 対象外 | 通常表示 |
 
 > **方針:**
-> - P1 は middleware で確実に redirect（`/garage/:path*` / `/settings/:path*`）
-> - P2 は middleware では redirect せず、ページ Server Component / Client Component 側で `<LoginRequiredModal />` を表示する
-> - **P2 のページは matcher に含めない。** matcher に入れると skeleton の `// 4) Auth Guard P1` ブロックが無条件 redirect するため P2 が成立しない
+> - Maintenance/Suspendedはmatcherでほぼ全パスを対象にし、公開ページでも確実に効かせる（今回のバグの本体）
+> - P1のredirectは`isP1Protected()`のパス判定のみで絞る。matcherの範囲とは独立させる
+> - P2のページはP1判定の対象外のまま。挙動は無変更
 
 ---
 
@@ -304,3 +323,4 @@ export const config = {
 |---|---|---|
 | v1 | 2026-05-22 | 初版（MR-AUDIT-002 / A7）。P1 / P2 / P3 パターン / Login Required Modal 文言 / `next` 安全性 / `middleware.ts` skeleton + matcher を確定 |
 | v1.1 | 2026-08-21 | #14裁定（context 8種・文言5グループ）を §3.1 / §3.3 本文へ反映。matcher から `/notifications/:path*` `/register/:path*` を除外し **P2＝matcher対象外**で確定 |
+| v1.2 | 2026-08-22 | GPT監査A解消。Maintenance/Suspendedが公開ページで無効だった問題を、matcher拡張＋`isP1Protected()`によるパス内分岐へ変更して解消。P2の挙動（matcher非依存の判定）は無変更 |
