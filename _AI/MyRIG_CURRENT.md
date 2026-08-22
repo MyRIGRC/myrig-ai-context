@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260822-025
+revision: MYRIG-20260822-026
 updated: 2026-08-22 16:24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下記「timestamp要確認」参照）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -57,6 +57,13 @@ Token Note v7文書（緑/紫/橙）は失効し _archive へ退役。
 _proposals/ の検索4文書（search-system-design-v3.md ※本文タイトルはv3.1 / search-blueprint-v2 /
 search-results-ux-v1 / search-contract-v1）はPROPOSAL。正典扱いしない。
 ただし search-contract-v1 は主要7件イタヤ裁定済み・残3件照会中。
+
+⚠️ **2026-08-22 是正**: 2026-08-21のイタヤ裁定8件のうち **②④⑤⑥が正典から欠落**していた
+（`_proposals/search-results-ux-v1.md`にしか記載がなく、そこはPROPOSAL扱いのため
+「裁定した事実」ごと参照不能になっていた）。search-page-plan-v2 に**「裁定済み・未実装」節**を
+新設して移設済み。②PC非ブレンド化（PC版バッチ）/ ④答えカード（Phase 3）/
+⑤絞り込み候補チップ（Phase 3）/ ⑥保存検索（Phase 4）。
+**教訓: 裁定した内容を`_proposals/`に置いたままにしない。裁定と同時に正典側へ移す。**
 
 2026-07-30
 FEED文法はモバイル基準（おすすめ/フォロー中タブ）。
@@ -214,6 +221,12 @@ HIGH4件・MEDIUM8件・LOW3件を検出。**HIGH4件＋LOW2件をrevision024で
 下記のHOLDは大半が**「将来議論項目（そのUI/機能の議論を始めるまで触らない）」**である。
 Claude/GPT/Geminiとも、これらに対して裁定要求・催促を出さないこと。
 CORE.md「HOLD原則」を参照。
+
+### 裁定待ちHOLD（案を出して裁定を求めてよい）
+
+- **種別チップ順（log→lib）とダイジェスト順（lib→log）の食い違い**（search-page-plan-v2）
+  どちらに揃えるか。`_audit`側で「裁定1点必要」と記録されている。
+  検索の詰め作業を始めるときに扱う
 
 ※DB系HOLDの多くは _proposals/db-research-inquiry-spec-data-v1.md（**照会#1・DB Researchへ未回答**）の
 A: spec_data / B: aliases / C: log_type / D: size_class に対応する。
