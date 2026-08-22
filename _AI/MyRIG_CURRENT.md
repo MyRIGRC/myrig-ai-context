@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260822-022
+revision: MYRIG-20260822-023
 updated: 2026-08-22 16:24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下記「timestamp要確認」参照）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -65,6 +65,8 @@ PC版を差し替える（_decisions/p22-c21 参照）。実装待ち。
 ## モック是正キュー（2026-08-21 正典⇄モック全面照合で検出）
 
 詳細は _audit/canon-vs-mockup-20260821.md。**正典ではなくモック側を直す項目。**
+**性質**: HOLDとは別枠。モックで既に問題として顕在化していて、直せば直せるが「見た目が変わる」ため
+確認フローとの調整が要る。モック詰め作業の中で1件ずつ扱う（今は棚に上げる）。
 
 ### ✅ 完了（2026-08-22 モック是正A・見た目不変の範囲）
 
@@ -179,21 +181,24 @@ D. ✅ 解消済み（2026-08-22）— master_aliases.entity_type の 'part' →
 
 ## HOLD
 
+**現在のフェーズ認識（2026-08-22 確定）**: モックの詰め作業がまだ始まったばかりで、
+下記のHOLDは大半が**「将来議論項目（そのUI/機能の議論を始めるまで触らない）」**である。
+Claude/GPT/Geminiとも、これらに対して裁定要求・催促を出さないこと。
+CORE.md「HOLD原則」を参照。
+
 ※DB系HOLDの多くは _proposals/db-research-inquiry-spec-data-v1.md（**照会#1・DB Researchへ未回答**）の
 A: spec_data / B: aliases / C: log_type / D: size_class に対応する。
 照会#2はApp側Coworkが実DB確認を自前実行 → _decisions/2026-08-21_db-inquiry-002-realdata.md。
 実行したのは E / F / H-1 / I-3 / J-2（＋Gは読みの追認）。**K（facetable）は未着手**（週次ゲート裁定待ち。
 E-3で前提インフラ＝part_categories が0行・spec_schema列不在と判明）。
 
-size_class
-HOLD継続。13値の出典は docs/schema/db-schema-answers-v1.md（7/30主査裁定・App側の写し）§2に実在する。
-HOLDの理由は出典の不在ではなく、2026-08-21実DB確認で判明した実装実態との乖離
-（_decisions/2026-08-21_db-inquiry-002-realdata.md J-1/J-2）:
+size_class（将来議論項目・サイズ選択UI未着手）
+議論着手時の参考: 13値enumの出典は docs/schema/db-schema-answers-v1.md（7/30主査裁定・App側の写し）§2。
+2026-08-21 実DB確認（_decisions/2026-08-21_db-inquiry-002-realdata.md J-1/J-2）で判明した実態:
 - 実データは18パターン（NULL 639件が最多 / 1/10 341 / M-chassis 2 / mini 1 等の自由記述が混在）
-  で、13値enumとして運用されていない
 - DB Research PJが保持する7/30裁定書の原本は正典内で未確認（写しのみ）
-- MyRIG_Category_Structure_v1.4（6/16改訂・7/30より前）はTEXT自由記述として定義
-App側提案: 実データ主導（18パターンを土台に再確定）へ切替。イタヤ裁定待ち。
+- Category_Structure_v1.4（6/16改訂・7/30より前）はTEXT自由記述として定義
+議論再開時の論点: 実データ主導で再確定するか、13値enumを維持するか。**現段階では催促しない。**
 
 log_type ✅ 決着（2026-08-22 正典へ反映済み・HOLD解除）
 4値 maintenance/run/custom/memo が正。「5値論争」は誤診だった。
@@ -202,29 +207,33 @@ setting という値はモックにもDBにも存在せず、文書上にしか�
 正典側の反映は完了（schema v1.6 / cross-ref v4）。
 モック側の撤去も2026-08-22に完了（PC composer / モバイル register-log / public-garage-logs）。
 
-aliases
+aliases（将来議論項目・データ移行タイミング未確定）
 master_aliases が正本であることは確定（db-schema-answers-v1 §0責務境界・Q7）。
-未裁定なのは parts_masters.aliases TEXT[] ＋GIN索引の物理的処遇（削除 or 併存移行）。
+議論着手時の参考: 未裁定は parts_masters.aliases TEXT[] ＋GIN索引の物理的処遇（削除 or 併存移行）。
 Research側は rig_masters について名指しで言及するが parts_masters は明示していない。
+議論再開時期: 実データ移行の段取りを組む時。**現段階では催促しない。**
 
-event_tags
-HOLD。2026-08-21 実DB確認（同上 I-3）: event_tags という列名はDB全体のどのテーブルにも存在しない（0件）。
+event_tags（将来議論項目・イベント機能未着手）
+2026-08-21 実DB確認（同上 I-3）: event_tags という列名はDB全体のどのテーブルにも存在しない（0件）。
 Category v1.4「確定値12種」も従来CURRENT記載の「8値未確定」も、どちらも未実装の机上記述と判明。
-値の議論より先に owner（App未実装機能の先行記述か / Research管轄の未構築か）の確認が必要。
+議論着手時の参考: 値の議論より先に owner（App未実装機能の先行記述か / Research管轄の未構築か）の確認が必要。
+議論再開時期: イベント機能の設計を始める時。**現段階では催促しない。**
 
-認証方式（2026-08-21 新規HOLD）
+認証方式（将来議論項目・OAuthオンボーディング未着手）
 プロバイダとメール認証の有無が4文書で不一致。
 App_Ready_Design_Rules（Google/GitHub＋メール）/ implementation_checklist（Google＋メール確認）/
 auth-guard-spec §7（OAuth only）/ pc-mobile-spec-inheritance #33（Google・X・Facebook・メール認証なし）。
 さらに同 #34特記に「PC現物のOAuthは Google / Apple で #33 と不一致」という5系統目の記録もある。
-一次資料 auth-onboarding-minimum-spec-v1 は本repo未収録。実装フェーズで裁定する。
+一次資料 auth-onboarding-minimum-spec-v1 は本repo未収録。
+議論再開時期: 実装フェーズ（プロバイダ選定はビジネス判断）。**現段階では催促しない。**
 
-追加ロード方式 #25 vs #26（2026-08-21 新規HOLD）
+追加ロード方式 #25 vs #26（将来議論項目・モバイル一覧UIの詰め未着手）
 _state/mobile-feedback-ledger-v1 の同日裁定2件が対立している。
 #25「他ページ（検索結果・一覧系）はページネーション維持のまま」
 #26「モバイルの一覧系はページネーション原則廃止」（「次へ」が出た時点で離脱するため）
 pc-mobile-spec-inheritance G7 は現状「ページングが基本・例外はFeedと検索種別タブ」としているが、
-#26 を広く読むとこの前提自体が成立しない。台帳が生きた正典であるため要調停。
+#26 を広く読むとこの前提自体が成立しない。
+議論再開時期: モバイル一覧UIの詰め議論を始める時。**現段階では催促しない。**
 
 操作色 --color-action-primary ✅ 決着（2026-08-22 正典へ反映済み・HOLD解除）
 実装に確定値が存在した。color-token-v8 §3 に反映済み。
@@ -233,19 +242,21 @@ B19但し書き「Bottom Nav中央の＋登録のみブランド色」は不採�
 別件（未解決）: PC側に --color-action-primary が皆無で、中立色は #24292f/#1f2328 の
 ハードコードでlightが2値に分裂。PCのトークン化は未着手 → モック是正キュー#10。
 
-NG-7の通知色（2026-08-21 新規HOLD）★モック照合で裁定材料が判明
-実装では PC が既に PARTS色と別値を採用していた。正典はモバイル片面だけを記述している。
+NG-7の通知色（2026-08-21 新規HOLD／2026-08-22 「将来議論項目」として据え置き確定）
+**通知UI自体がまだモックプロジェクトで着手されていない。** 通知の設計議論を始めるタイミングまで
+この項目は裁定しない。Claude/GPT/Geminiとも「早く決めるべき」と催促しないこと。
+
+実装の現状（記録・議論着手時の参考）:
   モバイル css/mobile-shell.css:42-44 → #D92D20（PARTS色と同一）/ dark :56-58 → #E5534B
   PC通知ページ myrig-notifications-pc-v0.1.1.html:64-65 → #cf222e、地は青系 rgba(9,105,218,.02)
   PCヘッダー通知ドット SoT_app-shell.css:311-321 → #dc2626（ハードコード）
-実装に赤が3値存在し、PC側は意図的に分離している。「PARTS色と別にする」方向に実装は倒れている。
+実装に赤が3値存在し、PC側は意図的にPARTS色と分離している。
+design-nogo-list NG-7の職域表を「未定」に修正済み（2026-08-22 revision023）。
 
-design-nogo-list NG-7の職域表が、通知・未読・NEWに #D92D20＝PARTSカテゴリ色を割り当てており、
-同表1行目「カテゴリ色は種別識別のみ」と自己矛盾。
-（NG-4の「赤は警告・削除に見える」は現在地の行の塗りつぶしの話であり通知色とは別論点だが、
-「赤＝PARTS色が別の意味を帯びる」という論点は共通する）
-CURRENT旧記載の「NG-7一般化は誤り」の実体はここである可能性が高い（未確定）。
-要裁定: 通知色をPARTS色と別値にするか、NG-7の禁止範囲から通知を外すか。
+議論再開時に扱う論点（着手前に決めない）:
+- 通知色をPARTS色と別値にするか、NG-7の禁止範囲から通知を外すか
+- PC/モバイルの3値をどう1本化するか
+- 通知UI設計（バッジ・ドット・トースト等）の全体像との整合
 
 ## ローカル正典の是正項目（棚卸し 2026-08-21）
 
