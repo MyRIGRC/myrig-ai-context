@@ -1,14 +1,26 @@
 # MyRIG RC — 実装初期設定チェックリスト
 
-**最終更新:** 2026-08-21（docs精査: 認証方式をHOLD化 / signup後の遷移をonboarding経由に訂正 /
-sitemap の旧URL `/subcategory/[slug]` を是正 / 物理DELETE禁止との関係を注記）
+> **拘束力: L2（現在の確定仕様・より良い案の提案歓迎）**
+>
+> 手順・数値・構成は「今こう決めている」もの。
+> **「既存仕様と異なる」ことだけを理由に案を捨てない。**
+> 差分を明示すればイタヤ裁定で変更できる。
+>
+> ただし以下は **L1（恒久ルール・逸脱禁止）**。節に個別表示する。
+>
+> - **Phase 0（鍵・環境変数・本番/開発の分離）**
+> - **1-3 管理者アクセス制御 / 5-2 RLS 全テーブル有効化**
+> - **末尾「Claude Code 安全ルール」（物理DELETE禁止を含む）**
+> - **HOLD 項目を確定として扱わないこと**（1-1 認証方式 / 4-1 Cookie同意モデル）
+
+**最終更新:** 2026-08-22
 
 Next.js + Supabase + Vercel + Cloudflare Images の実装開始時に必ず対応する項目。
 Claude Codeに渡す前にこのリストを確認し、順番に実装する。
 
 ---
 
-## Phase 0: プロジェクト初期化（最優先）
+## Phase 0: プロジェクト初期化（最優先）— L1
 
 ### 0-1. .gitignore
 ```
@@ -60,9 +72,9 @@ RAKUTEN_AFFILIATE_ID=
 
 ### 1-1. Supabase Auth設定
 
-> ⚠️ **HOLD: 認証方式は未裁定**（2026-08-21 監査・3AIクロスチェックで検出）
-> プロバイダとメール認証の有無が**5系統に割れている**（App_Ready_Design_Rules.md Rule 6 の HOLD 表を参照）。
+> ⚠️ **HOLD: 認証方式（プロバイダ・メール認証の有無）は未裁定 — L1**
 > **実装フェーズで裁定する。**それまで下記の具体設定を確定事項として扱わない。
+> 割れている出所の一覧は `_AI/MyRIG_CURRENT.md`。
 
 - OAuth プロバイダ有効化（**どのプロバイダかは裁定待ち**）
 - メール/パスワード認証を採用するか（**裁定待ち**）
@@ -84,11 +96,9 @@ signup（OAuth成功）
 - `/auth/callback` — Supabase Auth callbackハンドラー
 - `/onboarding` — 初期設定ウィザード（ユーザー名・表示名・国/地域・興味カテゴリ）
 
-（2026-08-21 監査で訂正: 旧記載は `signup → /auth/verify-email → /auth/callback → /garage` で
-**onboarding を素通りしていた**ほか、未裁定のメール確認フローを前提にしていた。
-`/auth/verify-email` の要否はメール認証採用の裁定後に決める）
+`/auth/verify-email` の要否はメール認証採用の裁定後に決める（上記 HOLD に従属）。
 
-### 1-3. 管理者アクセス制御
+### 1-3. 管理者アクセス制御 — L1
 Supabase Auth のカスタムクレーム:
 ```sql
 -- profiles テーブルに role カラム追加（or app_metadata で管理）
@@ -101,8 +111,8 @@ middleware.ts → is_admin チェック → 非管理者は403
 
 ### 1-4. Rate Limiting
 
-> ⚠️ **以下の数値は暫定の初期値**（2026-08-21 監査）。裁定根拠が正典内に無いため、
-> 確定値としては扱わない。運用開始後に実測で調整すること。
+> **以下の数値は暫定の初期値。**裁定根拠が正典内に無いため確定値としては扱わない。
+> 運用開始後に実測で調整すること。
 
 Vercel Edge Middlewareで実装:
 ```
@@ -142,9 +152,8 @@ export async function generateMetadata({ params }) {
 
 ### 2-2. robots.txt
 
-> **モック配信環境は意図的に全面 noindex**（2026-08-21 確認）。
-> `robots.txt` は `User-agent: * / Disallow: /`、`vercel.json` も全パスに `X-Robots-Tag: noindex, nofollow`。
-> 下記は**本番実装時の仕様**であり、モック側の設定と食い違っていて正しい。
+> **モック配信環境は意図的に全面 noindex**（`robots.txt` は `Disallow: /`、`vercel.json` も
+> 全パスに `X-Robots-Tag: noindex, nofollow`）。下記は**本番実装時の仕様**。
 ```typescript
 // app/robots.ts
 export default function robots() {
@@ -164,7 +173,6 @@ export default function robots() {
 // /category/[rigType], /category/[rigType]/[categorySlug]
 // /parts, /parts/category/[partCategorySlug]
 // /library/rigs/[masterSlug], /library/parts/[masterSlug], /library/makers/[makerSlug]
-// ※2026-08-21 監査で訂正: 旧記載の /subcategory/[slug] は page-role-matrix に存在しないURL
 ```
 
 ### 2-4. canonical URL
@@ -187,7 +195,7 @@ rig-detailとgarage-rig-detailが同一RIGを参照する。
 
 ### 3-2. 画像バリデーション（アプリ層）
 
-> ⚠️ **以下の数値も暫定の初期値**（2026-08-21 監査）。裁定根拠が正典内に無い。
+> **以下の数値も暫定の初期値。**裁定根拠が正典内に無い。
 
 ```
 - 最大ファイルサイズ: 10MB
@@ -212,9 +220,7 @@ rig-detailとgarage-rig-detailが同一RIGを参照する。
 
 ### 4-1. Cookie同意バナー
 
-> ⚠️ **同意モデルが未裁定（2026-08-21 監査で検出）**
-> 旧記載は「**同意するボタン**でlocalStorageに保存」（明示同意型）と
-> 「**続行することで**同意したものとみなされます」（黙示同意型）を**同一節に併記**していた。
+> ⚠️ **HOLD: 同意モデル（明示同意型 / 黙示同意型）が未裁定 — L1**
 > AdSense/Analytics を同意後ロードにするなら**明示同意型でなければ成立しない**。
 > どちらを採るかイタヤ裁定。下記は明示同意型を前提とした実装案。
 
@@ -227,8 +233,6 @@ rig-detailとgarage-rig-detailが同一RIGを参照する。
 ```
 テキスト案: 「このサイトではCookieを使用しています。詳しくはプライバシーポリシーをご覧ください。」
 ＋「同意する」ボタン（「続行することで同意」の文言は明示同意型と矛盾するため使わない）
-
-**実装状況**: モックには**バナー未実装**（DOM・localStorage・同意ゲートいずれも無い。2026-08-21確認）。
 
 ### 4-2. 特定商取引法の表示
 アフィリエイト収益がある場合の対応:
@@ -248,7 +252,7 @@ rig-detailとgarage-rig-detailが同一RIGを参照する。
 - Edge Config or KV: Rate Limiting用
 ```
 
-### 5-2. Supabase本番設定
+### 5-2. Supabase本番設定 — L1（RLS）
 ```
 - RLS: 全テーブル有効化（必須）
 - Email Templates: カスタマイズ（確認メール・パスワードリセット）
@@ -263,7 +267,7 @@ rig-detailとgarage-rig-detailが同一RIGを参照する。
 
 ---
 
-## Claude Code 安全ルール（全セッション共通）
+## Claude Code 安全ルール（全セッション共通）— L1
 
 Claude Codeへの指示には以下を常に含める:
 

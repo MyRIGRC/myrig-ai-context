@@ -1,26 +1,24 @@
 # Auth Guard / Login Required UI Spec v1
 
+> **拘束力: L2（現在の確定仕様・より良い案の提案歓迎）**
+>
+> いまモックアップ制作フェーズ。デザインとサービス概念を**議論しながら作る**段階なので、
+> 本書は「今こうなっている」という出発点であって、議論の打ち切りではない。
+> **「既存仕様と異なる」ことだけを理由に案を捨てないこと。**
+> 差分を明示すればイタヤ裁定で変更できる。
+>
+> ただし **§4「`next` パラメータ安全性」は L1**（open redirect 対策。セキュリティ）。
+
 **作成日:** 2026-05-22 (MR-AUDIT-002 / A7)
-**最終更新:** 2026-08-21（#14裁定を本文統合・middleware matcher を是正）
+**最終更新:** 2026-08-21
 **ステータス:** 確定 v1.1
 **前提:** `auth-onboarding-minimum-spec-v1` / `nextjs-routing-table-v1` / `appheader-interaction-spec-v1` / `dialog-interaction-spec-v1`
-⚠️ **上記4本＋`error-states-decomposition-MR-AUDIT-002` は本repo内に未収録**（2026-08-21確認）。
+⚠️ **上記4本＋`error-states-decomposition-MR-AUDIT-002` は本repo内に未収録。**
 参照が必要になった時点で所在を確認すること。
 
-> **✅ 改訂反映済み（2026-08-21 — 本文統合完了）**
->
-> 2026-07-23 の改訂注記が指していた項目は、**すべて本文へ統合済み**。
-> 注記と本文が二重状態だった問題は解消した。
->
-> 1. §3.1 / §3.3 → **#14裁定（context 8種・文言5グループ）を本文へ反映。**
->    実装 `js/mobile-shell.js:498-507` と一致を確認済み
-> 2. §4.2 `safeNext` の二段フォールバック（不正値→`/` / login・signupループ→`/garage`）は**現行どおり有効**。
->    実装 `js/mobile-shell.js:488-495` が完全準拠
-> 3. §5 / §5.1 → **middleware matcher の自己矛盾を是正**（P2＝matcher対象外で固定）
->
-> **既知の未解消（GPT外部監査 2026-08-21）**: §5 skeleton は Maintenance / Suspended の全体ガードを
-> middleware 内に置いているが、matcher が `/garage` `/settings` のみのため**公開ページで実行されない**。
-> matcher 拡張＋内部分岐か、全体ガードとP1ガードの分離かは**要裁定**（`_audit/gpt-review-20260821.md` A）。
+> ⚠️ **未確定:** §5 skeleton は Maintenance / Suspended の全体ガードを middleware 内に置いているが、
+> matcher が `/garage` `/settings` のみのため**公開ページで実行されない**。
+> matcher 拡張＋内部分岐か、全体ガードとP1ガードの分離かは**要裁定**。
 
 ---
 
@@ -117,8 +115,7 @@ UI 挙動を 3 パターンに整理し、ページごとに使い分けるル�
 
 ### 3.1 文言（P2 / P3 共通）
 
-**#14裁定（2026-07-17 イタヤ承認・P11実装済み）を反映した現行定義**
-（2026-08-21 本文統合。実装 `js/mobile-shell.js:498-507` と一致を確認済み）。
+**#14裁定（2026-07-17 イタヤ承認）による現行定義。**
 
 | 要素 | 文言 |
 |---|---|
@@ -127,9 +124,6 @@ UI 挙動を 3 パターンに整理し、ページごとに使い分けるル�
 | Primary CTA | ログイン |
 | Secondary CTA | 新規登録 |
 | Close | 外側クリック / Escape / × ボタン |
-
-> 旧定義は Description を「この機能を使うにはログインしてください」の**共通1文**としていたが、
-> #14裁定で**ベネフィット説明の5文言グループ**へ置換された。
 
 ### 3.2 挙動ルール
 
@@ -158,14 +152,11 @@ type LoginRequiredModalContext =
 | `notifications` | ログインすると、いいね・コメント・フォローなどの通知を確認できます。 |
 | `default`（省略時） | ログインすると、ガレージ管理やお気に入りなど、MyRIGの主な機能が使えます。 |
 
-**実装**: `js/mobile-shell.js:498-507` `LOGIN_CONTEXT_TEXT` に8キーで定義済み。
+**実装**: `js/mobile-shell.js` の `LOGIN_CONTEXT_TEXT` に8キーで定義。
 うち like / favorite / pin / comment が同一文言＝実質5グループ。
 mobile-component-contract v0.5 §3.7 の表と一致。
 
-> 旧定義は「Reserved（将来差し替える余地を残す）」「MVPは共通文言で開始」としていたが、
-> **#14裁定で実装済みとなった。**（2026-08-21 本文統合）
-> 旧文言案（「フォローするにはログインしてください」等の機能説明型）は、
-> ベネフィット説明型へ置換されたため使わない。
+機能説明型の旧文言（「フォローするにはログインしてください」等）は使わない。
 
 ---
 
@@ -265,13 +256,9 @@ export const config = {
 };
 ```
 
-> **⚠️ 2026-08-21 監査で訂正（3AIクロスチェック一致）**
-> 旧 skeleton は matcher に `/notifications/:path*` と `/register/:path*` を含めていた。
-> しかし skeleton 内の `// 4) Auth Guard P1` ブロックは matcher 内の全 route を**無条件で `/login` へ redirect** するため、
-> P2（元ページを維持したまま Modal を開く）と**正面から矛盾**していた。
-> §5.1 の但し書き自身も「本実装着手時に matcher から外す可能性あり」と揺れていた。
-> mobile-component-contract v0.5 §3.8 は「`/notifications` `/register/:path*` は **P1 matcher から除外**」を
-> 既に確定扱いにしているため、契約側に合わせて matcher から除外した。
+> **⚠️ matcher に P2 の route を入れないこと。**
+> skeleton の `// 4) Auth Guard P1` ブロックは matcher 内の全 route を無条件で `/login` へ redirect するため、
+> `/notifications` `/register/:path*` を matcher に入れると P2（元ページを維持したまま Modal を開く）が成立しない。
 > **P2 のページは matcher に入れず、page.tsx 側で session 確認 → `<LoginRequiredModal />` を表示する。**
 
 ### 5.1 matcher と挙動パターンの対応
@@ -287,8 +274,6 @@ export const config = {
 > - P1 は middleware で確実に redirect（`/garage/:path*` / `/settings/:path*`）
 > - P2 は middleware では redirect せず、ページ Server Component / Client Component 側で `<LoginRequiredModal />` を表示する
 > - **P2 のページは matcher に含めない。** matcher に入れると skeleton の `// 4) Auth Guard P1` ブロックが無条件 redirect するため P2 が成立しない
-> - （2026-08-21 監査: 旧記載は「matcher には含める」「外す可能性あり」と揺れており、上の skeleton と矛盾していた。
->   mobile-component-contract v0.5 §3.8 の確定扱いに合わせて P2＝matcher対象外で固定した）
 
 ---
 
@@ -318,5 +303,4 @@ export const config = {
 | バージョン | 日付 | 内容 |
 |---|---|---|
 | v1 | 2026-05-22 | 初版（MR-AUDIT-002 / A7）。P1 / P2 / P3 パターン / Login Required Modal 文言 / `next` 安全性 / `middleware.ts` skeleton + matcher を確定 |
-| v1（注記） | 2026-07-23 | Coworkナレッジ監査で冒頭に改訂注記を追加（#14文言置換・§3.1/§3.3旧定義マーク）。本文・版数は不変。本文反映は#19キュー⑤ |
-| v1（改訂） | **2026-08-21** | **docs精査（3AIクロスチェック）で §5 middleware skeleton と §5.1 を本文改訂。** matcher から `/notifications/:path*` `/register/:path*` を除外（skeleton の `// 4) Auth Guard P1` ブロックが matcher 内を無条件 redirect するため、P2「元ページ維持のまま Modal」と矛盾していた）。§5.1 の揺れを解消し **P2＝matcher対象外**で確定。**※§3.1/§3.3 の冒頭注記の本文統合は未実施。ステータス「確定 v1」は据え置き** |
+| v1.1 | 2026-08-21 | #14裁定（context 8種・文言5グループ）を §3.1 / §3.3 本文へ反映。matcher から `/notifications/:path*` `/register/:path*` を除外し **P2＝matcher対象外**で確定 |

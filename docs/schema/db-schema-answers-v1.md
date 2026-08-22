@@ -1,27 +1,30 @@
 # MyRIG — スキーマ確認依頼 v1 への回答（DB Research 主査裁定）
 
-> ⚠️ **本書を読む前に（2026-08-21 追記）**
+> **拘束力: L1（恒久ルール・逸脱禁止）— §0 責務境界 / §2 確定事項**
 >
-> 本書は 2026-07-30 時点の裁定であり、**マスター系スキーマの正本**として扱われる。
-> ただしその後の**実DB確認（`_decisions/2026-08-21_db-inquiry-002-realdata.md`）で、
-> 本書の記述と実装実態が食い違う項目が判明している。**以下は本書の記述をそのまま実装しないこと。
+> §0 と §2 は **DB Research 所有領域の正本**であり、App 側の一存では変えられない。
+> 変更提案は「Research への照会」という形でしか出せない。
 >
-> | 本書の記述 | 実装実態 | 状態 |
-> |---|---|---|
-> | §2 `size_class` 固定値集合**13値** | 実データは**18パターン**（`NULL` 639件が最多、`M-chassis` `mini` 等の自由記述が混在）。enum運用されていない。`MyRIG_Category_Structure_v1.4`（本書より前の6/16改訂）はTEXT自由記述として定義 | **HOLD** — 実データ主導での再確定を提案中・イタヤ裁定待ち |
-> | Q6 `event_tags` **確定値12種** | **`event_tags` という列名がDB全体のどのテーブルにも存在しない（0件）** | **HOLD** — owner確認が先 |
-> | §2 `categories` パーツ親14・**子90で凍結** | **`part_categories` テーブルは0行（空）**。`spec_schema` 列もDB全体に存在しない | 未構築 |
-> | Q12 `spec_data` 承認キー（rig側11個） | `part_masters.spec_data` の実在キーは**225種**。パーツ側のキー設計は本書でも「未定」 | パーツ側は未設計 |
->
-> 現在のHOLD状況の索引は `_AI/MyRIG_CURRENT.md`。**本書とCURRENTが食い違う場合はCURRENTの後発裁定を優先する。**
+> **§3 推奨（App側責務）は L2（現在の確定仕様・より良い案の提案歓迎）。**
+> L2 の節では「既存仕様と異なる」ことだけを理由に案を捨てない。
+> 差分を明示すればイタヤ裁定で変更できる。
 
 回答日: 2026-07-30 (JST) / 回答元: MyRIG Database Research PJ / 主査
 正典: MyRIG_Category_Structure_v1.4 / RC_Master_Research_Rules_v4.4_final_rev3 / Research_DB_Schema_v1.2
 記録: App実装プロジェクト側の写し。原文は DB Research PJ が保持。
 
+> ⚠️ **本書のうち以下は HOLD。確定事項として実装しないこと。**
+>
+> - §2 `size_class` の固定値集合13値 — 実データは18パターンで enum 運用されていない
+> - Q6 `event_tags` 確定値12種 — `event_tags` 列が DB に存在しない
+> - §2 `categories` パーツ親14・子90 — `part_categories` テーブルは0行（未構築）
+> - Q12 `spec_data` パーツ側キー — 未設計。`spec_schema` 列は DB に存在しない
+>
+> HOLD の現在地索引は `_AI/MyRIG_CURRENT.md`。**本書と CURRENT が食い違う場合は CURRENT を優先する。**
+
 ---
 
-## 0. 総論（App側が最初に飲み込むこと）
+## 0. 総論（App側が最初に飲み込むこと）— L1
 
 **`myrig_db_schema_v1.6` は正典ではない。**
 Q1〜Q4・Q6・Q12 で「スキーマに無い」と報告した軸は、**すべて Research DB 側の正典に存在する**。
@@ -60,7 +63,7 @@ App `parts_masters` と Research `part_masters`、App `rigs.platform` と Resear
 
 ---
 
-## 2. 確定事項（App側が従うもの）
+## 2. 確定事項（App側が従うもの）— L1
 
 ### スケール = `size_class`（正規化カラム）
 
@@ -77,10 +80,8 @@ App `parts_masters` と Research `part_masters`、App `rigs.platform` と Resear
 - 正規化カラムで持つ。**JSONB には置かない**（抽出生値であり表記ゆれ防止の仕組みが無いため絞り込みに使わない）
 - 絞り込みに使うのは **`size_class` のみ**
 - 固定値集合: `1/5` `1/6` `1/7` `1/8` `1/10` `1/12` `1/14` `1/16` `1/18` `1/24` `1/27` `mini-z` `other`
-  > ⚠️ **この13値は HOLD**（2026-08-21）。実データは**18パターン**で enum 運用されていない
-  > （`NULL` 639件が最多 / `M-chassis` / `mini` 等の自由記述が混在）。
-  > `MyRIG_Category_Structure_v1.4`（本書より前の6/16改訂）は TEXT 自由記述として定義。
-  > 一方**検索UIは13値で実装済み**（`pc/myrig-search-v3.html:1127-1139` / `search.html:411-424`）。
+  > ⚠️ **この13値は HOLD。確定値として実装しない。**
+  > 実データは18パターンで enum 運用されておらず、検索UIは13値で実装済みという乖離がある。
   > 「実装13値を正として実データを移行」か「実データ主導で再定義」かの裁定待ち。
 - **分母整数は採らない**（`mini-z` のような非分数値が入るため）。範囲指定が必要になった時点で
   generated column `scale_denominator INT` を追加する
@@ -100,14 +101,14 @@ App `parts_masters` と Research `part_masters`、App `rigs.platform` と Resear
 | `rc-airplane` | RC飛行機 | Phase 4 |
 | `rc-boat` | RCボート | Phase 4 |
 
-App側 v1.6 の `('rc','mini4wd','miniz','drone','airplane','boat')` は**全面的に旧**。
+旧6値 `('rc','mini4wd','miniz','drone','airplane','boat')` は**全面的に旧。使わない。**
 `rc`→`rc-car` / `drone`→`drone-fpv` / `airplane`→`rc-airplane` / `boat`→`rc-boat` / **`miniz` は廃止**。
 ドローン/飛行機/ボートは値として残す（サイドバーの「計画中」表示は正しい）。
 
 **Mini-Z の受け皿は `size_class`。** `product_line` でも `categories` でもない。
 Category v1.4 は rc-car に「Mini-Z含む」と明記。
 正 = `size_class='mini-z'`（絞り込み軸）／併記可 = `rig_masters.product_line='Mini-Z'`（表示用）。
-**モックの「product_line のチェック項目」は絞り込み軸としては不可。`size_class` へ移す。**
+**`product_line` を絞り込み軸に使うのは不可。**
 
 同一値セットで揃える: `profiles.preferred_rig_type` / `parts.compatible_types` /
 `rig_categories.rig_type` / `part_categories.rig_type` / `rig_masters.rig_type` / `part_masters.rig_type`
@@ -151,7 +152,6 @@ Rules §E: 大分類ラベルは `rig_type` + `power_source` から UI 側で生
 ### `categories` = RIG 24 / パーツ親14・子90 / 2階層で凍結
 
 **RIGカテゴリ（`rig_categories`, `rig_type='rc-car'`）の正は 24件。**
-PC左サイドバーの24件が正しい。**モバイル `search.html` の21件・タイルの12件は誤り。24件へ統一する。**
 
 - オフロード11: `rock-crawler` `comp-crawler` `buggy` `truggy` `stadium-truck` `short-course`
   `desert-truck` `monster-truck` `basher` `rally` `pulling`
@@ -159,6 +159,7 @@ PC左サイドバーの24件が正しい。**モバイル `search.html` の21件
 - スケール&特殊6: `semi-truck` `tank` `construction` `motorcycle` `lowrider` `truck-trial`
 
 パーツ親カテゴリは**14で確定・凍結**。子カテゴリは**90で確定**（追加はレコード追加のみ）。
+⚠️ ただし `part_categories` テーブルは実DB上0行（未構築）。
 
 **2階層で足りる。3階層にしない。** `CHECK (level IN (1,2))` で確定済み。
 「タイヤ・ホイール → タイヤ → 1.9インチ」の3階層目は**分類ではなくスペック**。
@@ -167,17 +168,15 @@ Category v1.4 運用原則「spec_data で検索強化（親子分類より優�
 サイズを子カテゴリ化すると 1.9/2.2/2.6/1.55 で子が爆発し、親14凍結が崩れる。
 
 `rig_masters` ↔ カテゴリの突き合わせは `rig_masters.myrig_category` が正本列。
-ただし**実データの充足率は未測定**（次回週次ゲートで census）。「列は確定・値の網羅は未確定」と扱う。
+ただし**実データの充足率は未測定**。「列は確定・値の網羅は未確定」と扱う。
 
 ### `master_aliases` が aliases の正本
 
 `rig_masters` に `aliases` 列は追加しない。`master_aliases` が正本。
-`entity_type` = `'rig_master'` / `'rig_master_variant'` / **`'part_master'`** / `'manufacturer'` を1テーブルで扱う設計。
+`entity_type` の実在値は **`rig_master` / `rig_master_variant` / `part_master`（単数形） / `manufacturer`** の4種。
+1テーブルで扱う設計。
 
-> ⚠️ **2026-08-21 訂正**: 本項は長らく `'part'` と記載していたが**誤記**。
-> 実DB確認（`_decisions/2026-08-21_db-inquiry-002-realdata.md` F-1）の実在値は
-> `part_master`(190件) / `rig_master_variant`(53) / `manufacturer`(31) / `rig_master`(2) の4種。
-> 単数形 `part_master` が正しい（App側の `parts_masters` とは同名別義なので混同しないこと）。
+> App 側の `parts_masters`（複数形）とは同名別義。混同しない。
 
 ハイラックス / Hilux / TF2 はここに入る（`alias_kind` と `locale` で区別）。
 App側は `master_aliases` を JOIN して検索対象に含める。
@@ -198,21 +197,21 @@ App側は `master_aliases` を JOIN して検索対象に含める。
 | キット / RTR | `kit_type` enum（Rules §G-1・8値）。spec_data ではない |
 | 防水 | 承認キー外。**未定**（追加は週次ゲート判断） |
 
-パーツ側 `spec_data` のキー設計は**未定**。置き場は `part_categories.spec_schema` JSONB（列は存在）。
+パーツ側 `spec_data` のキー設計は**未定**。想定の置き場は `part_categories.spec_schema` JSONB。
 **App側は当面 `spec_data` を絞り込み軸に使わない。**
 
-> ⚠️ **2026-08-21 実DB確認で訂正**: 「列は存在」は**誤り**。`spec_schema` という列名は
-> **DB全体のどのテーブルにも存在せず**、`part_categories` テーブル自体も **0行（空）**。
-> `part_masters.spec_data` の実在キーは **225種**で、事実上の自由入力運用。
-> **ホワイトリスト方式の前提インフラが未構築。** 詳細は
-> `_decisions/2026-08-21_db-inquiry-002-realdata.md` E-1／E-3／E-5。
+> ⚠️ **HOLD**: `spec_schema` 列は DB 全体に存在せず、`part_categories` も0行。
+> `part_masters.spec_data` の実在キーは225種で事実上の自由入力運用。
+> **ホワイトリスト方式の前提インフラが未構築。**
 
 表示側は `master_publication.spec_display_schema`（Rules §G-8・14値）に一本化済み。
 `rig_masters` / `part_masters` 側に `spec_display_schema` 列を追加しない。
 
 ---
 
-## 3. 推奨（App側責務・DB Researchは裁定しない）
+## 3. 推奨（App側責務・DB Researchは裁定しない）— L2
+
+> この節は App 側の裁量領域。より良い案があれば差分を明示して提案してよい。
 
 ### Q5 surface / weather
 
@@ -228,9 +227,8 @@ App側は `master_aliases` を JOIN して検索対象に含める。
 運営正規タグは **`event_tags`**（Category v1.4 で確定値12種: `recon-g6` / `hill-climb` /
 `endurance` / `demolition` 等）を使う。**自由 `tags` と `event_tags` を同じ入力欄に混ぜない。**
 
-> ⚠️ **HOLD（2026-08-21 実DB確認）**: `event_tags` という列名は **DB全体のどのテーブルにも存在しない（0件）**。
-> 上の「確定値12種」は未実装の机上記述。**owner（App未実装機能の先行記述か / Research管轄の未構築か）の
-> 確認が先。** 詳細は `_decisions/2026-08-21_db-inquiry-002-realdata.md` I-3。
+> ⚠️ **HOLD**: `event_tags` 列は DB 全体に存在しない。上の12種は未実装の机上記述。
+> **owner（App未実装機能の先行記述か / Research管轄の未構築か）の確認が先。**
 
 ### Q7 全文検索の対象範囲
 
@@ -285,10 +283,10 @@ App側は `master_aliases` を JOIN して検索対象に含める。
 
 1. `rig_type` の値を `rc` → `rc-car` 等、5値の正本へ置換
 2. `miniz` を廃止し、Mini-Z を `size_class='mini-z'` の項目へ移動
-3. スケール絞り込みを「スキーマ未定義」警告付き残置 → **`size_class` として正式実装**
+3. スケール絞り込みを **`size_class` として正式実装**
 4. パワーソースをフィルタから外したままでよいが、**データ層には `power_source` を持つ前提に戻す**
 5. 「シャーシ / プラットフォーム」絞り込みを **`platform_slug` ベース**に変更（自由テキスト廃止）
-6. モバイル `search.html` のカテゴリを 21件 → **24件**へ、タイルを 12件 → **24件**へ統一
+6. RIGカテゴリを **24件**へ統一
 7. パーツカテゴリの3階層案を取り下げ、**2階層＋`spec_data`** に変更
 
 ## 5. 週次ゲートへ回す事項（DB Research 側）

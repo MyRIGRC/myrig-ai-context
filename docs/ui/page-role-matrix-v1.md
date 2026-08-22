@@ -1,47 +1,28 @@
 # MyRIG RC — Page Role Matrix / Final Sitemap v1
 
+> **拘束力: L2（現在の確定仕様・より良い案の提案歓迎）**
+>
+> いまモックアップ制作フェーズ。デザインとサービス概念を**議論しながら作る**段階なので、
+> 本書は「今こうなっている」という出発点であって、議論の打ち切りではない。
+> **「既存仕様と異なる」ことだけを理由に案を捨てないこと。**
+> 差分を明示すればイタヤ裁定で変更できる。
+
 **作成日:** 2026-05-03
-**最終更新:** 2026-08-22（モック照合: Parts/Maker Master Detail の「未作成」誤記を訂正 / Feed行にPC未適用の但し書き / 未捕捉ページ表を追加）
-**前回更新:** 2026-08-21（docs精査で改訂注記3件を本文統合・URLパラメータ名統一）
-**過去の主な改訂:** 2026-05-12 URL設計統一 / `/saved`廃止・`/garage/favorites`・`/garage/pins` 正式化 /
-GarageShell-List・GarageDetailShell 分離確定。以降 Library系ページを追加（v1.1〜v1.3 MVP再構築）
+**最終更新:** 2026-08-22
 **ステータス:** 確定ベース v1.5
-
-
-※旧記載のヘッダー Session 番号（作成=100 / 最終更新=86）は前後が逆転していたため、2026-08-21 監査で
-ヘッダーのみ日付表記に改めた。**本文中の Session 86 / 113 / 115 の記述は経緯として残している。**
 
 **目的:** MyRIG全体のページ構成・役割・優先度を固め、V3モック制作・Next.js実装・管理画面設計で迷わない状態にする
 
-> **✅ 改訂反映済み（2026-08-21 監査 — 本文統合完了）**
+> **⚠️ 本表に未捕捉のページ**
 >
-> 2026-07-23 の改訂注記が指していた3件は、**すべて本文へ統合済み**。注記と本文が二重状態だった問題は解消。
+> `/about` `/support` は pc-mobile-spec-inheritance #36 / #37 が PROPOSED として捕捉。
+> error-states / welcome-tour も同 #39 / #35 が捕捉。
+> **`compare.html` / `help.html` / `legal.html` はどの正典にも記載が無い**（要棚卸し）。
+> 実装側のファイル分割は本表と1対1ではない（`/search` は `search-results.html` と分割、
+> モバイルHomeの実体は `index-e-roomclip.html`）。
 >
-> 1. §3 Feed行・§6 Feed Definition → **#28裁定「おすすめ / フォロー中」の2タブ**に本文改訂（画像グリッド＋ImageLightbox、無限スクロール#25も§6へ記載）
-> 2. §7 `/ranking` → **ランキング機能全廃方針**を本文へ反映。`*-ranking` プリセットの記述を削除
-> 3. §9 i18n → **#24裁定「MVP時点から日英2言語」**を本文へ反映
->
-> 詳細な経緯は mobile-feedback-ledger #24 / #25 / #28。
-
-> **⚠️ 本表に未捕捉の実装ページ（2026-08-21 モック照合で検出）**
->
-> 以下は実装に存在するが、本表の §2 / §3 に記載が無い。
->
-> | 実装ファイル | 想定URL | 捕捉状況 |
-> |---|---|---|
-> | `about.html` / `myrig-about-v0.1.html` | `/about` | pc-mobile-spec-inheritance #36 が PROPOSED として捕捉 |
-> | `support-us.html` / `myrig-support-us-v0.1.html` | `/support` | 同 #37 が PROPOSED として捕捉 |
-> | `error-states.html` / `myrig-error-states-v0.1.html` | — | 同 #39 が捕捉 |
-> | `welcome-tour.html` / `myrig-welcome-tour-v0.1.html` | — | 同 #35 が捕捉 |
-> | **`compare.html`** | 不明 | **どちらの正典にも記載が無い** |
-> | **`help.html`** | `/help` 相当 | **同上**（`myrig-support-legal-report-pc-v0.1.html` のタブ内には Help あり） |
-> | **`legal.html`** | `/legal/*` 相当 | **同上** |
-> | `search-results.html` | `/search?q=` | 実装はファイル分割。本表は `/search` 1本で記述 |
-> | `index-e-roomclip.html` | `/`（モバイル） | 実質のモバイルHome |
->
-> **`/rigs` について**: contract §3.9 と pc-mobile-spec-inheritance 補助行A が参照しているが、
-> 本表の §2 URL一覧には存在しない。**URL改訂候補#8 が未発効のため、実装側の参照も0件**。
-> 発効時に本表へ追加すること。
+> **`/rigs`**: contract §3.9 と pc-mobile-spec-inheritance 補助行A が参照しているが、
+> **URL改訂候補#8 が未発効**のため本表の §2 URL一覧には置かない。発効時に追加すること。
 
 ---
 
@@ -137,7 +118,7 @@ Admin
 | Parts Browse Top | `/parts` | Browse | パーツ専用Browse Top。ブランド・カテゴリ・使用RIG数を軸に | パーツを探す / 使用人数を見る | Must | A | 収益導線・Library連携の中核 |
 | Parts SubCategory | `/parts/category/[partCategorySlug]` | Browse | パーツカテゴリ別Browse。タイヤ・ESC・ショック等 | 特定カテゴリのパーツを比較する | Should | B | Parts Browse Top V3 完成後 |
 | Search Results | `/search` | Browse | 目的検索の固定UI。browse_md grid + list。フィルター・ソート優先 | 特定のRIG・パーツ・ユーザーを探す | Must | A | section-driven ではない。固定UI |
-| Feed | `/feed` | Relationship | LOG中心のアクティビティフィード | 最新ログを眺める / フォロー中の動向を見る | Should | A | **「おすすめ / フォロー中」の2タブ**（#28裁定。§6参照）。⚠️**モバイルのみ適用済み。PC正本 `myrig-feed-v3.html:700-702` は All/Following/Trending の3タブのまま未適用**（2026-08-21 モック照合） |
+| Feed | `/feed` | Relationship | LOG中心のアクティビティフィード | 最新ログを眺める / フォロー中の動向を見る | Should | A | **「おすすめ / フォロー中」の2タブ**（#28裁定。§6参照）。⚠️ PC正本 `myrig-feed-v3.html` は未適用（3タブのまま）なので参照実装にしない |
 | RIG Detail | `/rig/[rigId]` | Detail | ユーザーRIG個別ページ。スペック・パーツ・ログ・写真 | このRIGの構成を見る | Must | S | ✅ v6 完成済み |
 | PARTS Detail | `/parts/[partId]` | Detail | ユーザーパーツ個別ページ。スペック・使用RIG・レビュー | このパーツの詳細を見る | Must | S | ✅ v6 完成済み |
 | LOG Detail | `/log/[logId]` | Detail | 整備・走行・カスタムログ個別ページ | このログの内容を読む | Must | S | ✅ v6 完成済み |
@@ -153,8 +134,8 @@ Admin
 | Parts Masters 一覧 | `/library/parts` | Library | Parts Master公式DB一覧。VIEW + 購入先を見る 2-CTA | パーツ製品を探す | Must | A | ✅ v1.1 MVP再構築済み（Session 115） |
 | Makers 一覧 | `/library/makers` | Library | Maker公式DB一覧。Official site + VIEW MAKER 2-CTA | メーカーを調べる | Must | A | ✅ v1.1 MVP再構築済み（Session 115） |
 | RIG Master Detail | `/library/rigs/[masterSlug]` | Library | **Lite版**: 画像2枚・スペック8項目・Variants・User Examples 4件・購入先導線。詳細は公式サイト/提携ショップへ | このモデルの基本情報を確認 / 購入先へ進む | Must | A | ✅ v1.1 Lite 完成（Session 115）。Full Scope版は将来実装候補 |
-| Parts Master Detail | `/library/parts/[masterSlug]` | Library | パーツの公式スペック・購入先導線（Lite方針）| このパーツの基本情報を確認 / 購入先へ進む | Must | B | ✅ **実装済み**（PC `myrig-library-parts-master-detail-v3.html` / モバイル `library-parts-master-detail.html`）。2026-08-21 モック照合で「未作成」の誤記を訂正 |
-| Maker Detail | `/library/makers/[makerSlug]` | Library | メーカー情報・製品ライン・公式サイト導線 | このメーカーの製品を見る | Later | Later | ✅ **実装済み**（PC `myrig-library-maker-detail-v3.html` / モバイル `library-maker-detail.html`）。同上 |
+| Parts Master Detail | `/library/parts/[masterSlug]` | Library | パーツの公式スペック・購入先導線（Lite方針）| このパーツの基本情報を確認 / 購入先へ進む | Must | B | ✅ 実装済み（PC `myrig-library-parts-master-detail-v3.html` / モバイル `library-parts-master-detail.html`） |
+| Maker Detail | `/library/makers/[makerSlug]` | Library | メーカー情報・製品ライン・公式サイト導線 | このメーカーの製品を見る | Later | Later | ✅ 実装済み（PC `myrig-library-maker-detail-v3.html` / モバイル `library-maker-detail.html`） |
 | Notifications | `/notifications` | Relationship | いいね・コメント・フォロー通知 | 通知を確認する | Should | Later | MVP後半で整備 |
 | RIG 登録 | `/register/rig` | Utility | RIG登録フォーム（ステップ式） | RIGを登録する | Must | B | フォーム系は別まとめ |
 | PARTS 登録 | `/register/part` | Utility | PARTS登録フォーム | パーツを登録する | Must | B | |
@@ -250,8 +231,7 @@ GarageShell は **GarageShell-List**（一覧・管理ハブページ群）と *
 
 ## 6. Feed Definition
 
-**本§は #28裁定（2026-07-23 イタヤ実機裁定・P13b r2実装済み）を反映した現行定義**
-（2026-08-21 監査で本文統合。旧定義「All / Following」は失効）。
+**本§は #28裁定（2026-07-23 イタヤ実機裁定）による現行定義。**
 
 ### Feed の基本思想
 
@@ -295,7 +275,7 @@ Feed は「SNS的な拡散の場」ではなく「フォローしているガレ
 | Repost / 引用 | SNS 的拡散は MyRIG の方向性ではない |
 | DM / メッセージ | コミュニケーション機能はスコープ外（MVP）|
 | RIG / PARTS ブラウズカード混在 | Feed は LOG 中心。RIG/PARTS は Browse / Search から |
-| ランキング表示 | **ランキング機能は全廃方針**（2026-08-21 監査で訂正。旧記載「INDEX / Category Top の Browse Section で扱う」は失効） |
+| ランキング表示 | **ランキング機能は全廃方針** |
 
 ---
 
@@ -305,7 +285,7 @@ Feed は「SNS的な拡散の場」ではなく「フォローしているガレ
 
 | ページ候補 | 理由 |
 |---|---|
-| `/ranking` | **作成しない。ランキング機能そのものが全廃方針**（2026-08-21 監査で本文統合）。旧記載の「Browse Section（`data-query-preset="*-ranking"`）として吸収する」という扱いも**失効**。`*-ranking` プリセットは定義しない。ランキング表現はモバイル契約§4でも全部品で禁止 |
+| `/ranking` | **作成しない。ランキング機能そのものが全廃方針。** `*-ranking` プリセットは定義しない。ランキング表現はモバイル契約§4でも全部品で禁止 |
 | `/logs`（LOG Browse Top） | LOG 一覧・回遊は Feed で吸収する。LOG 専用 Browse Top は MVP では不要。必要なら Category Top の entity_type: log として対応可能 |
 | `/makers`（Maker 一覧） | Library 内（`/library/makers` / `/library/makers/[makerSlug]`）で扱う。Maker 一覧は Library の補助コンテンツ |
 | `/favorites` | 独立 URL としては不作成。`/garage/favorites`（Garage グループ）として実装。旧 `/saved` タブ統合案は Session 86 で廃止 |
@@ -344,9 +324,9 @@ Feed は「SNS的な拡散の場」ではなく「フォローしているガレ
 | RIG カテゴリ slug | `/category/rock-crawler`, `/category/drift`, `/category/buggy` 等。英語 kebab-case |
 | PARTS カテゴリ slug | `/parts/category/tire`, `/parts/category/esc` 等 |
 | ユーザー識別 | `/user/[username]`（@ なし）。`@` は表示のみ |
-| Master 識別 | `/library/rigs/[masterSlug]`, `/library/parts/[masterSlug]`, `/library/makers/[makerSlug]`。**slug を使う想定**（UUIDは露出させない）。※ただし schema 側は masters を UUID PK で定義しており、**master 用 slug 列の定義は未確認**。実装前に schema と突き合わせること。**全エンティティで複数形に統一**（旧: `/library/rig/`, `/library/maker/` → 廃止）。※2026-08-21 監査でパラメータ名を `[masterId]`/`[makerId]` から統一 |
+| Master 識別 | `/library/rigs/[masterSlug]`, `/library/parts/[masterSlug]`, `/library/makers/[makerSlug]`。**slug を使う想定**（UUIDは露出させない）。※ただし schema 側は masters を UUID PK で定義しており、**master 用 slug 列の定義は未確認**。実装前に schema と突き合わせること。**全エンティティで複数形に統一**（旧: `/library/rig/`, `/library/maker/` → 廃止） |
 | Admin プレフィックス | `/admin/*`。認証 middleware で保護 |
-| i18n | **MVP時点から日英2言語公開**（#24裁定 2026-07-23。mobile-feedback-ledger #24）。`/en/*` プレフィックス方式（Next.js i18n routing）。旧記載「日本語優先MVP・将来追加」は失効（2026-08-21 監査で本文統合） |
+| i18n | **MVP時点から日英2言語公開**（#24裁定 2026-07-23）。`/en/*` プレフィックス方式（Next.js i18n routing） |
 
 ---
 
@@ -354,4 +334,4 @@ Feed は「SNS的な拡散の場」ではなく「フォローしているガレ
 
 ※ Breakpoint正典: desktop=1025px↑ / tablet=721-1024px / mobile=720px↓（詳細: `docs/design-rules.md` Breakpoint正典セクション参照）
 
-*Page Role Matrix v1.5 — 作成: 2026-05-03 / 補正: 2026-05-12 (Session 86) `/saved`廃止・`/garage/favorites`・`/garage/pins` 正式化・GarageShell分離 / 改訂: 2026-08-21 改訂注記3件（Feedタブ・ranking全廃・日英MVP）の本文統合＋URLパラメータ名統一 / 2026-08-22 モック照合を反映*
+*Page Role Matrix v1.5 — 作成: 2026-05-03 / 最終更新: 2026-08-22*

@@ -1,38 +1,36 @@
 # MyRIG RC — Database Schema Design v1.6-r2（App所有領域）
 
-**最終更新:** 2026-08-21（docs精査。改訂内容は末尾の変更履歴 v1.6 → v1.6-r2 を参照）
+> **拘束力: L2（現在の確定仕様・より良い案の提案歓迎）**
+>
+> 列・型・CHECK 値・インデックスは「今こうなっている」仕様。
+> **「既存仕様と異なる」ことだけを理由に案を捨てない。**
+> 差分を明示すればイタヤ裁定で変更できる。
+>
+> ただし以下は **L1（恒久ルール・逸脱禁止）**。節ごとに再掲する。
+>
+> - **物理DELETE禁止**（削除は `deleted_at` の UPDATE）
+> - **App / Research の責務分離**（下表。Research 所有領域を本書で定義しない）
+> - **RLS 方針**（セキュリティ）
+> - **HOLD 項目を確定として扱わないこと**
+
+**最終更新:** 2026-08-22
 ※ファイル名は `myrig_db_schema_v1_6.md` のまま（CURRENT.md の索引と一致させるため）
 
-> **⚠️ 適用範囲の限定（2026-08-21 監査・イタヤ裁定で改訂。3AIクロスチェック一致）**
->
-> 本書が**正典として拘束するのは App 所有領域のみ**。
-> DB Research 所有領域（マスター系）の定義は **`db-schema-answers-v1.md`（2026-07-30 主査裁定）が正本**であり、
-> 本書に残っていた独自定義は参照へ降格した。
->
-> | 区分 | テーブル | 正本 |
-> |---|---|---|
-> | **App 所有** | `profiles` / `rigs` / `parts` / `maintenance_logs` / `rig_parts` / `images` / `likes` / `favorites` / `pins` / `follows` / `comments` / `comment_reports` / `content_reports` / `page_blocks` / `affiliate_links` / `notifications` / `user_plans` | **本書** |
-> | **Research 所有** | `manufacturers` / `rig_masters` / **`part_masters`**（※単数形） / `rig_categories` / `part_categories` / `master_aliases` / `master_relations` / `master_images` / `master_external_links` / `master_publication` / `rig_master_variants` / `part_master_variants` / `bodies` | **`db-schema-answers-v1.md`** |
->
-> ⚠️ **`part_masters`（Research・単数形）と `parts_masters`（App・複数形）は同名別義。**
-> db-schema-answers-v1 §0 が「列名も値域も異なる。**写像表を作るまで同名別義のカラムを増やさない**」と警告している。
-> 実DB確認でも `master_aliases.entity_type` の実在値は `part_master`（単数形）だった
-> （`_decisions/2026-08-21_db-inquiry-002-realdata.md` F-1）。
->
-> **`parts_masters` の所有区分は未確定**のため、上のどちらの区分にも入れていない。
-> 本書は歴史的に `parts_masters`（複数形）と書き、v1.2〜v1.6 でこれに列（`aliases` 等）を足してきたが、
-> それが Research の `part_masters` と**同一テーブルの表記ゆれ**なのか、
-> **App が別に持つ独立テーブル**なのかが決まっていない。
-> **写像表（cross_ref）の作成が未了のため、本書内の `parts_masters` を機械的に一括置換しないこと**
-> （誤った同定を固定してしまうため）。ER図・FK定義・マイグレーション順序も現行表記のまま据え置いている。
->
-> **改訂の根拠**: `db-schema-answers-v1.md` §0 が「`myrig_db_schema_v1.6` は正典ではない」「App側は独自にカラムを
-> 新設せず、正本定義に合わせて追加する」と明言している一方、本書の v1.2〜v1.6 で Research 所有領域の列を
-> 独自に増やし続けており（`parts_masters.aliases` / `rig_masters.platform` / `rig_masters.product_line` 等）、
-> 列名も値域も Research 正本と食い違う状態になっていた。1冊で両領域を定義する構造そのものが矛盾の生産源だったため、
-> 領域を切り離した。
->
-> **App↔Research 写像表（cross_ref）が無い状態で App 側スキーマを進めないこと**（同 §0）。
+## 適用範囲 — L1
+
+本書が正典として拘束するのは **App 所有領域のみ**。
+
+| 区分 | テーブル | 正本 |
+|---|---|---|
+| **App 所有** | `profiles` / `rigs` / `parts` / `maintenance_logs` / `rig_parts` / `images` / `likes` / `favorites` / `pins` / `follows` / `comments` / `comment_reports` / `content_reports` / `page_blocks` / `affiliate_links` / `notifications` / `user_plans` | **本書** |
+| **Research 所有** | `manufacturers` / `rig_masters` / **`part_masters`**（※単数形） / `rig_categories` / `part_categories` / `master_aliases` / `master_relations` / `master_images` / `master_external_links` / `master_publication` / `rig_master_variants` / `part_master_variants` / `bodies` | **`db-schema-answers-v1.md`** |
+
+⚠️ **`part_masters`（Research・単数形）と `parts_masters`（App・複数形）は同名別義。**
+**`parts_masters` の所有区分は未確定**のため上のどちらにも入れていない。
+
+- **App↔Research 写像表（cross_ref）が無い状態で App 側スキーマを進めないこと。**
+- **本書内の `parts_masters` を機械的に一括置換しないこと**（誤った同定を固定するため）。
+  ER図・FK定義・マイグレーション順序も現行表記のまま据え置いている。
 
 ## 命名規則
 
@@ -43,7 +41,7 @@
 - 日時: `_at` サフィックス（`purchased_at`, `deleted_at`）
 - JSONB: 自由入力・可変構造のデータに使用
 - UUID: 全テーブルの主キー（Supabase標準）
-- 論理削除: `deleted_at` NULLABLE（物理削除しない）
+- **論理削除: `deleted_at` NULLABLE（物理削除しない）— L1**
 - 制約付きTEXT: 固定値セットは `TEXT + CHECK` で管理（enumより柔軟）
 
 ---
@@ -87,12 +85,12 @@ Supabase Auth (`auth.users`) と1:1。認証情報以外の全プロフィール
 | id | UUID | PK, DEFAULT gen_random_uuid() | |
 | user_id | UUID | FK → profiles.id, NOT NULL | オーナー |
 | rig_master_id | UUID | FK → rig_masters.id, NULLABLE | 公式マスターとの紐付け |
-| rig_type | TEXT | NOT NULL, DEFAULT 'rc-car' | CHECK (rig_type IN ('rc-car','mini4wd','drone-fpv','rc-airplane','rc-boat')) ※2026-08-21訂正 |
+| rig_type | TEXT | NOT NULL, DEFAULT 'rc-car' | CHECK (rig_type IN ('rc-car','mini4wd','drone-fpv','rc-airplane','rc-boat')) |
 | manufacturer_id | UUID | FK → manufacturers.id, NULLABLE | メーカー |
 | manufacturer_name_cache | TEXT | | 非正規化。表示高速化用 |
 | model_name | TEXT | NOT NULL | モデル名 |
 | base_model | TEXT | | ベース車種（載せ替え時） |
-| category_id | UUID | FK → **`rig_categories`.id**, NULLABLE | サブカテゴリ（※2026-08-21訂正。Research正本では単一`categories`表ではなく`rig_categories`/`part_categories`に分離） |
+| category_id | UUID | FK → **`rig_categories`.id**, NULLABLE | サブカテゴリ（単一 `categories` 表ではない） |
 | nickname | TEXT | | ユーザーがつけた愛称 |
 | description | TEXT | | 説明文 |
 | ownership_status | TEXT | NOT NULL, DEFAULT 'current' | CHECK (ownership_status IN ('current','past','wishlist')) |
@@ -103,8 +101,8 @@ Supabase Auth (`auth.users`) と1:1。認証情報以外の全プロフィール
 | purchase_store | TEXT | NULLABLE | 購入店名 |
 | build_details | JSONB | DEFAULT '{}' | register-rigの詳細データ全格納 |
 | external_links | JSONB | DEFAULT '[]' | [{label, url}] |
-| product_line | TEXT | NULLABLE | **マスターからの継承のみ**。ユーザー自由入力は不可（※2026-08-21訂正） |
-| platform | TEXT | NULLABLE | **自由テキスト廃止・マスターからの継承のみ。**未紐付けは NULL。照合は `rig_masters.platform_slug`（※2026-08-21訂正・db-schema-answers-v1 §2） |
+| product_line | TEXT | NULLABLE | **マスターからの継承のみ**。ユーザー自由入力は不可 |
+| platform | TEXT | NULLABLE | **自由テキスト廃止・マスターからの継承のみ。**未紐付けは NULL。照合は `rig_masters.platform_slug` |
 | sort_order | INTEGER | DEFAULT 0 | ガレージ内表示順 |
 | view_count | INTEGER | DEFAULT 0 | 閲覧数 |
 | created_at | TIMESTAMPTZ | DEFAULT now() | |
@@ -140,12 +138,12 @@ Supabase Auth (`auth.users`) と1:1。認証情報以外の全プロフィール
 | id | UUID | PK, DEFAULT gen_random_uuid() | |
 | user_id | UUID | FK → profiles.id, NOT NULL | オーナー |
 | parts_master_id | UUID | FK → parts_masters.id, NULLABLE | 公式マスターとの紐付け |
-| rig_type | TEXT | NOT NULL, DEFAULT 'rc-car' | CHECK (同上・5値) ※2026-08-21訂正 |
-| compatible_types | TEXT[] | DEFAULT '{rc-car}' | 対応する大大カテゴリ配列（rig_typeと同一値セット） ※2026-08-21訂正 |
+| rig_type | TEXT | NOT NULL, DEFAULT 'rc-car' | CHECK (同上・5値) |
+| compatible_types | TEXT[] | DEFAULT '{rc-car}' | 対応する大大カテゴリ配列（rig_typeと同一値セット） |
 | manufacturer_id | UUID | FK → manufacturers.id, NULLABLE | |
 | manufacturer_name_cache | TEXT | | |
 | product_name | TEXT | NOT NULL | 製品名 |
-| category_id | UUID | FK → **`part_categories`.id**, NULLABLE | パーツカテゴリ（※2026-08-21訂正。⚠️実DB確認で`part_categories`は**0行**＝未構築。`_decisions/2026-08-21_db-inquiry-002-realdata.md` E-3） |
+| category_id | UUID | FK → **`part_categories`.id**, NULLABLE | パーツカテゴリ（⚠️実DBでは `part_categories` は0行＝未構築） |
 | description | TEXT | | ユーザーメモ |
 | part_number | TEXT | | メーカー型番 |
 | purchased_at | DATE | NULLABLE | |
@@ -192,7 +190,7 @@ WHERE removed_at IS NULL;
 | id | UUID | PK, DEFAULT gen_random_uuid() | |
 | user_id | UUID | FK → profiles.id, NOT NULL | |
 | rig_id | UUID | FK → rigs.id, NULLABLE | 紐づくRIG（任意） |
-| log_type | TEXT | NOT NULL, DEFAULT 'maintenance' | CHECK (log_type IN ('maintenance','run','custom','memo')) ※4値が正・表の下参照 |
+| log_type | TEXT | NOT NULL, DEFAULT 'maintenance' | CHECK (log_type IN ('maintenance','run','custom','memo')) |
 | title | TEXT | NOT NULL | |
 | body | TEXT | | 本文（Markdown or plain） |
 | location | TEXT | | 場所 |
@@ -207,63 +205,34 @@ WHERE removed_at IS NULL;
 | updated_at | TIMESTAMPTZ | DEFAULT now() | |
 | deleted_at | TIMESTAMPTZ | NULLABLE | |
 
-> **✅ `log_type` は 4値が正**（2026-08-21 モック照合で決着）
->
-> 一時「schema(4値) ⇔ UI(5値) の矛盾・要裁定」とされていたが、**実装を見ると誤診だった。**
->
-> **5値目の実装値は `setting` ではなく `setup`。**
-> `setup` は本書 v1.2 で `setup/other → custom/memo` へ変更した際に**廃止した値**（変更履歴参照）。
-> 同じモック内の `pc/myrig-feed-v3.html:725` が
-> 「以前ここにあった『セットアップ』は廃止された値（スキーマ v1.2 で変更済み）」と注記している。
->
-> **`setting` という値はモックにもDBにも存在しない。文書上にしかない語。**
-> Search Contract §5-4 の「2026-07-28 裁定で5値」は、この残骸を新しい5値目と誤読した可能性が高い。
->
-> ### 実装の分裂状況（モック側の残作業）
->
-> | 面 | 値数 | 場所 |
-> |---|---|---|
-> | PC LOG登録 composer | **5値**（5つ目 `setup`） | `myrig-log-composer-modal-v0.3.9.html:1040-1044`、分岐は `:1299` |
-> | モバイル LOG登録 | **5値**（値属性なし・ラベルのみ「セッティング」） | `register-log.html:381` |
-> | モバイル LOG絞り込み | 4値 | `garage-logs.html:273,277` |
-> | PC 検索 | 4値 | `pc/myrig-search-v3.html:947-953` |
-> | PC フィード | 4値 | `pc/myrig-feed-v3.html:720-725` |
-> | PC ガレージLOG | 4値 | `pc/myrig-garage-logs-v6.html:517-520,568` |
->
-> **CHECK制約は変更しない。**登録フォーム2箇所から `setup` を撤去すれば解消する。
-> 仮に将来5値化する裁定が出る場合も、**`setup` は廃止済みなので別 slug を使うこと。**
+**`log_type` は4値が正。**
+`setup` は v1.2 で廃止した値。**将来5値化する裁定が出ても `setup` は再利用せず別 slug を使う。**
 
 ---
 
-## Domain 3: カテゴリ・マスターデータ（**本書では定義しない**）
+## Domain 3: カテゴリ・マスターデータ（**本書では定義しない**）— L1
 
-> **2026-08-21 監査・イタヤ裁定により、本 Domain の列定義は削除し参照に降格した。**
->
-> 対象: `manufacturers` / `categories`（→Research正本では `rig_categories` / `part_categories`）/ `rig_masters` / `parts_masters`（→Research側は `part_masters`）
-> **正本: `db-schema-answers-v1.md`（2026-07-30 DB Research 主査裁定）**
->
-> 本書 v1.2〜v1.6 に存在した独自定義は、Research 正本と列名・値域とも食い違っており、
-> そのまま実装すると事故になるため撤去した。撤去した定義の内容は
-> `_backup/audit_20260821/docs/schema/myrig_db_schema_v1_6.md` および git 履歴で参照できる。
+対象: `manufacturers` / `rig_categories` / `part_categories` / `rig_masters` / `parts_masters`
+**正本: `db-schema-answers-v1.md`（DB Research 主査裁定）**
 
-### 撤去した独自定義と、Research 正本での扱い
+本書は列定義を持たない。要点だけ再掲する（詳細は正本を見ること）。
 
-| 本書の旧定義 | Research 正本での扱い | 出典 |
-|---|---|---|
-| `rig_masters.rig_type` CHECK `('rc','mini4wd','miniz','drone','airplane','boat')` | **全面的に旧。**正は5値 `rc-car` / `mini4wd` / `drone-fpv` / `rc-airplane` / `rc-boat`。**`miniz` は廃止**（Mini-Z の受け皿は `size_class='mini-z'`） | answers §2「`rig_type` = 5値」 |
-| `size_class` 列なし | **Research 正本には存在する**（絞り込み軸の正本。`scale` は表示用、`spec_data.scale` は抽出生値で比較軸ではない）。⚠️**ただし値の集合はHOLD** — 13値の出典は answers §2 に実在するが、実DB確認で実データは**18パターン**（NULL最多639件、`M-chassis` `mini` 等の自由記述混在）でenum運用されておらず、Category v1.4（7/30より前）は**TEXT自由記述**として定義、7/30裁定書の**原本**（DB Research PJ保持）は正典内で未確認（`_decisions/2026-08-21_db-inquiry-002-realdata.md` J-1/J-2） | answers §2 / 実DB確認 |
-| `power_source` 列なし | **Research 正本には存在する。**「撤去は誤り。UIに出すかは App 判断でよいが、データ層は必ず持つ」 | answers §2「`power_source` を持つ」 |
-| `rig_masters.platform` TEXT（自由入力） | `platform_slug`（正規化キー・照合はこれ）/ `platform_name` / `platform_name_ja` に分離。`platforms` テーブルは作らない。**部分文字列照合は禁止**（過去に 318件の誤接続） | answers §2「`platform`」 |
-| `rigs.platform` 自由テキスト | **自由テキスト廃止・マスターからの継承のみ。**未紐付けは NULL。ユーザー自由入力は許さない（本書 Domain 2 側も同様に扱うこと） | answers §2 |
-| `categories` 単一表（`parent_id` + `target`） | **`rig_categories` / `part_categories` に分離。**RIG 24件 / パーツ親14・子90 の2階層で凍結 | answers §2「`categories`」 |
-| `rig_masters.specs` / `parts_masters.specs` JSONB | 列名は **`spec_data`**。**RIG側は承認11キー**。**パーツ側のキー設計は未定**（置き場は `part_categories.spec_schema` 予定）。⚠️実DB確認: `part_masters.spec_data` の実在キーは**225種**、`part_categories`は0行、`spec_schema`列は**DB全体に存在しない**（`_decisions/2026-08-21_db-inquiry-002-realdata.md` E-1/E-3） | answers Q12 / 実DB確認 |
-| `parts_masters.aliases` TEXT[] ＋ GIN索引 | **`master_aliases` が aliases の正本**（`alias_kind` / `locale` 付き）。App 側は JOIN して検索対象に含める。→ **HOLD**（下記） | answers Q7 / §2「`master_aliases`」 |
+| 項目 | Research 正本での扱い |
+|---|---|
+| `rig_type` | 5値 `rc-car` / `mini4wd` / `drone-fpv` / `rc-airplane` / `rc-boat`。**旧6値 `('rc',…,'miniz',…)` は使わない**（Mini-Z の受け皿は `size_class='mini-z'`） |
+| `size_class` | 絞り込み軸の正本として**存在する**（`scale` は表示用、`spec_data.scale` は抽出生値で比較軸ではない）。⚠️**値の集合はHOLD**（13値を確定として実装しない） |
+| `power_source` | **存在する。**UIに出すかは App 判断でよいが、**データ層は必ず持つ** |
+| `rig_masters.platform` | `platform_slug`（正規化キー・照合はこれ）/ `platform_name` / `platform_name_ja` に分離。`platforms` テーブルは作らない。**部分文字列照合は禁止**（過去に318件の誤接続） |
+| `rigs.platform` | **自由テキスト廃止・マスターからの継承のみ。**未紐付けは NULL。ユーザー自由入力は許さない |
+| `categories` | **`rig_categories` / `part_categories` に分離。**RIG 24件 / パーツ親14・子90 の2階層で凍結 |
+| `spec_data` | 列名は `specs` ではなく **`spec_data`**。**RIG側は承認11キー**。**パーツ側のキー設計は未定**（⚠️`spec_schema` 列はDBに存在せず `part_categories` は0行） |
+| aliases | **`master_aliases` が正本**（`alias_kind` / `locale` 付き）。App 側は JOIN して検索対象に含める。→ 下記 HOLD |
 
-### この降格に伴う HOLD
+### この領域の HOLD
 
-- **`aliases`**: `master_aliases` が正本であることは確定。ただし既存の `parts_masters.aliases`（＋GIN索引 `idx_parts_masters_aliases`）を
-  **削除するのか、当面併存させて移行するのか**は未裁定。Research 側は `rig_masters` について名指しで「列を追加しない」と述べているが、
-  `parts_masters.aliases` の物理列の処遇は明示していない。**移行方針が出るまで新規参照を増やさないこと。**
+- **`aliases`**: `master_aliases` が正本であることは確定。既存の `parts_masters.aliases`（＋GIN索引
+  `idx_parts_masters_aliases`）を削除するか併存移行するかは未裁定。
+  **移行方針が出るまで新規参照を増やさないこと。**
 
 ---
 
@@ -287,6 +256,8 @@ RIG・パーツ・ログの画像統合管理。**プロフィール画像は含
 | file_size | INTEGER | | バイト数 |
 | created_at | TIMESTAMPTZ | DEFAULT now() | |
 | deleted_at | TIMESTAMPTZ | NULLABLE | 論理削除 |
+
+⚠️ `images.alt`（画像代替テキスト）の追加要否は未裁定（App_Ready_Design_Rules からの申し送り）。
 
 ---
 
@@ -349,6 +320,9 @@ RIG・パーツ・ログの画像統合管理。**プロフィール画像は含
 
 **UNIQUE:** `(follower_id, following_id)`
 **CHECK:** `follower_id != following_id`
+
+> ⚠️ **HOLD**: `likes` / `favorites` / `pins` / `follows` には `deleted_at` が無く、
+> 解除操作を物理DELETE禁止（L1）と両立させる手段が未確定。要裁定。
 
 ---
 
@@ -436,10 +410,6 @@ RIG・パーツ・LOG自体の通報。comment_reportsとは別管理。
 - `wrong_info` = 表記ミス・情報の誤り
 - `harassment` = 嫌がらせ・ハラスメント
 - `other` = その他
-
----
-
-（`comments` は v1.4 で MVP実装に昇格済み。定義は Domain 5 を参照）
 
 ---
 
@@ -592,15 +562,14 @@ notifications
 
 ---
 
-## Row Level Security (RLS) 方針
+## Row Level Security (RLS) 方針 — L1
 
 **テーブル別に個別ポリシーを設計。**
 
 ### 共通原則
 - **`deleted_at` 列を持つテーブルの**全SELECTポリシーに `deleted_at IS NULL` を含める
-  （⚠️ 2026-08-21 監査で訂正: 旧記載は「全SELECTポリシーに」と一般化していたが、
-  `likes` / `favorites` / `pins` / `follows` には `deleted_at` 列が存在せず、そのまま書くと SQL エラーになる。
-  論理削除を持つのは `profiles` / `rigs` / `parts` / `maintenance_logs` / `images` / `comments` のみ）
+  （論理削除を持つのは `profiles` / `rigs` / `parts` / `maintenance_logs` / `images` / `comments` のみ。
+  `likes` / `favorites` / `pins` / `follows` に同列は無いので、そのまま書くと SQL エラーになる）
 - 公開データ: `is_public = true AND deleted_at IS NULL`
 - 自分のデータ: `user_id = auth.uid() AND deleted_at IS NULL`
 - INSERT/UPDATE: `user_id = auth.uid()`
@@ -618,6 +587,10 @@ notifications
 - **comment_reports**: INSERTはauth.uid()必須。SELECTは運営者ロールのみ
 - **content_reports**: INSERTはauth.uid()必須。SELECTは運営者ロールのみ。同一ユーザーから同一コンテンツへの重複通報はUNIQUE制約で防止
 - **page_blocks**: SELECT全公開（is_active=trueのみ）。変更は管理者ロールのみ
+
+> ⚠️ **HOLD（要裁定・セキュリティモデル）**: 上記の「SELECT全公開」は非公開データを保護しきれていない
+> （pins の定義「非公開」との矛盾、親が非公開でも images / comments が読める等）。
+> 詳細は `_AI/MyRIG_CURRENT.md`。**UI非表示をアクセス制御の代わりにしないこと。**
 
 ---
 
@@ -668,9 +641,8 @@ CREATE INDEX idx_rig_parts_rig ON rig_parts(rig_id);
 CREATE INDEX idx_rig_parts_part ON rig_parts(part_id);
 
 -- パーツマスター aliases 検索（GIN）
--- ⚠️ HOLD（2026-08-21 監査）: 対象の parts_masters は Research 所有。
---    aliases の正本は master_aliases（db-schema-answers-v1）。この索引の存続可否は未裁定。
---    移行方針が出るまで新規に本索引へ依存する実装を増やさないこと。
+-- ⚠️ HOLD: 対象の parts_masters は所有区分未確定。aliases の正本は master_aliases。
+--    この索引の存続可否は未裁定。新規に本索引へ依存する実装を増やさないこと。
 CREATE INDEX idx_parts_masters_aliases ON parts_masters USING GIN(aliases);
 
 -- アフィリエイト
@@ -750,22 +722,18 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 
 ## マイグレーション順序
 
-> ⚠️ **2026-08-21 監査**: 1・2・4 は **Research 所有テーブル**。FK 依存の都合で先に作る必要があるため
-> 順序表には残すが、**DDL の内容は `db-schema-answers-v1.md` が正本**（本書の旧列定義は使わない）。
-> （※1・2・4 が Research 所有。**5番 `parts_masters` は所有区分が未確定**のため、この分類に含めていない）
+> **1・2・4 は Research 所有テーブル。**FK 依存の都合で順序表には残すが、
+> **DDL の内容は `db-schema-answers-v1.md` が正本。**
 >
-> ⚠️ **5番 `parts_masters` の扱いは未確定。**本書は歴史的に `parts_masters`（複数形）と書いてきたが、
-> Research 正本のテーブルは `part_masters`（単数形）。**両者が同一テーブルの表記ゆれなのか、
-> App が別に持つべき独立テーブルなのかが決まっていない**（db-schema-answers-v1 §0 は
-> 「App `parts_masters` と Research `part_masters` は列名も値域も異なる」とする）。
+> ⚠️ **5番 `parts_masters` は所有区分が未確定**（Research の `part_masters` と同一かが決まっていない）。
 > **App↔Research 写像表（cross_ref）が無い状態でマイグレーションを流さないこと。**
 
-### MVP実行分（20テーブル ※2026-08-21: `categories` が `rig_categories`/`part_categories` の2表に分かれたため19→20）
+### MVP実行分（20テーブル）
 1. `manufacturers` ※Research所有
-2. `rig_categories` / `part_categories` ※Research所有（旧: 単一 `categories` 表）
+2. `rig_categories` / `part_categories` ※Research所有
 3. `profiles`（auth.users依存）
 4. `rig_masters` ※Research所有
-5. `parts_masters`（本書の表記。**実体が Research の `part_masters` と同一かは cross_ref 待ち** — 下記注意）
+5. `parts_masters`（本書の表記。**実体は cross_ref 待ち** — 上記注意）
 6. `rigs`（rig_masters依存）
 7. `parts`（parts_masters依存）
 8. `rig_parts`
@@ -787,82 +755,28 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 
 ---
 
-## 変更履歴
+## 未確定（要裁定）
 
-### v1.0 → v1.1
-1. `rig_parts`に`user_id`追加
-2. `rig_parts`に部分ユニーク制約追加
-3. `images`テーブルから`profile`を除外
-4. 全CHECK制約追加
-5. `currency_code`追加
-6. RLS方針をテーブル別設計に変更
-7. RLSに`deleted_at IS NULL`を共通含有
-8. 公開一覧インデックスを`parts`/`maintenance_logs`にも追加
+- `size_class` / `power_source` / `platform_slug` の **App側への実列追加DDL**が未設計
+  （`size_class` は値集合が HOLD 中）
+- **App↔Research 写像表（cross_ref）が未作成。**本文中の `parts_masters` が
+  App側 / Research側どちらを指すか曖昧な箇所が残る（機械的な一括置換をしないこと）
+- `images.alt`（画像代替テキスト）の追加要否
+- 関係テーブル（likes / favorites / pins / follows）の解除手段と物理DELETE禁止の両立
+- RLS のセキュリティモデル（上記 RLS 節の HOLD）
 
-### v1.1 → v1.2
-1. **`rigs.rig_master_id`追加** — UGCと公式マスターの紐付け。収益化の核
-2. **`parts.parts_master_id`追加** — 同上。パーツマスターへの集約でアフィ導線強化
-3. **`watchlists` → `pins`にリネーム** — UI用語（📌ピン留め）と統一
-4. **`maintenance_logs.log_type`値変更** — `setup/other` → `custom/memo`
-5. **`parts_masters.aliases`追加** — 製品名揺れ・通称・海外名の吸収用（TEXT[]）
-6. **`images.deleted_at`追加** — 他テーブルと論理削除設計を統一
-7. **`user_plans`テーブル構造確定** — 将来用。MVPでは作成しない
-8. **マスター紐付け用インデックス追加** — `idx_rigs_master`, `idx_parts_master`
-9. **`parts_masters.aliases`用GINインデックス追加**
-10. **マイグレーション順序変更** — `rig_masters`/`parts_masters`を`rigs`/`parts`より先に（FK依存）
+---
 
-### v1.2 → v1.3
-1. **`rigs.product_line`追加** — ブランドシリーズ名（例：Mini-Z, Clod Buster）。NULLABLE
-2. **`rigs.platform`追加** — シャーシ/プラットフォーム名（例：SCX10 III, BB-01）。NULLABLE
-3. **`rig_masters.product_line`追加** — 同上。マスターデータ側
-4. **`rig_masters.platform`追加** — 同上。マスターデータ側
+## 版の履歴（要点のみ）
 
-### v1.3 → v1.4
-1. **`comments`テーブルをMVP実装に昇格** — status追加、将来用から変更
-2. **`comment_reports`テーブル新規追加** — コメント専用通報
-3. **`profiles`に`comments_enabled_rig_part`/`comments_enabled_log`追加** — コメント受付2系統ON/OFF
-4. **`likes`のentity_type CHECKに`'comment'`追加** — コメントへの♥リアクション
-5. **コメント関連インデックス5本追加**
-6. **マイグレーション順序更新** — MVP 15→17テーブル（comments + comment_reports追加）
-7. **notifications.typeに`'comment_reply'`追加予定** — 将来用
+詳細な差分は git 履歴と `_backup/audit_20260821/` を参照。
 
-### v1.4 → v1.5
-1. **`page_blocks`テーブル新規追加** — ウィジェット型CMS。index/category_top/subcategory_topのセクション構成を管理
-2. **block_type 5種定義** — content_feed / banner_image / banner_html / adsense / featured
-3. **content_feedのsort_logic 6種定義** — newest / popular_week / popular_month / most_liked / most_commented / manual
-4. **page_blocks用インデックス追加** — `idx_page_blocks_page`
-5. **RLS方針追加** — page_blocksはSELECT全公開（is_active=true）、変更は管理者のみ
-6. **マイグレーション順序更新** — MVP 17→18テーブル（page_blocks追加）
-7. **Domain番号再編** — Domain 7: ページ管理（新規）、Domain 8: 課金、Domain 9: 通知
-
-### v1.5 → v1.6
-1. **`content_reports`テーブル新規追加** — RIG/パーツ/LOG自体の通報。report.htmlのUIに対応
-2. **reason_code 6種定義** — inappropriate / spam / copyright / wrong_info / harassment / other
-3. **content_reports用インデックス2本追加** — `idx_content_reports_entity`, `idx_content_reports_reporter`
-4. **RLS方針追加** — content_reportsはINSERTにauth.uid()必須、SELECTは運営者のみ
-5. **マイグレーション順序更新** — MVP 18→19テーブル（content_reports追加）
-
-### v1.6 → v1.6-r2（2026-08-21 docs精査・イタヤ裁定「Research領域を参照に降格」）
-
-1. **Domain 3（`manufacturers` / `categories` / `rig_masters` / `parts_masters`）の列定義を削除し参照へ降格。**
-   正本は `db-schema-answers-v1.md`。撤去した定義と Research 正本での扱いは Domain 3 の対照表に記載
-2. **App所有側の `rig_type` を5値へ更新** — `rigs` / `parts` の CHECK と DEFAULT、`parts.compatible_types` の
-   DEFAULT を `rc-car` 系へ（旧6値 `('rc',...,'miniz',...)` は全面的に旧）
-3. **`category_id` の FK 参照先を明記** — `rigs` → `rig_categories` / `parts` → `part_categories`
-   （Research正本では単一 `categories` 表ではない）。ER図・マイグレーション順序も同様に修正
-4. **`rigs.platform` / `rigs.product_line` を「マスターからの継承のみ」に変更** — ユーザー自由入力を廃止
-5. **RLS共通原則の訂正** — 「全SELECTに `deleted_at IS NULL`」→「**`deleted_at` 列を持つテーブルの**SELECTに」
-   （`likes` / `favorites` / `pins` / `follows` には同列が無くSQLエラーになるため）。
-   DELETEポリシーと物理DELETE禁止（CORE.md）の関係も明記
-6. **`page_blocks.page_type` に parts 系を追加** — `parts_browse_top` / `parts_subcategory`
-   （page-role-matrix が `/parts` `/parts/category/[slug]` を section-driven と規定しているため）
-7. **`log_type` は4値で決着**（2026-08-22 モック照合）— 5値目の実装値は廃止済み `setup` で、`setting` という値は存在しなかった
-8. 旧値・旧URLの是正 — config例の `"rig_type":"rc"` → `"rc-car"`、`/subcategory/...` → `/category/.../...`
-9. `comments` の空見出しを本文1行に整理
-
-> ⚠️ **未反映（要裁定）**: 本改訂は「App所有領域の記述をResearch正本と整合させる」ところまで。
-> **以下は未実施:**
-> - `size_class` / `power_source` / `platform_slug` の**App側への実列追加DDL**（`size_class` は値集合がHOLD中）
-> - App↔Research **写像表（cross_ref）の作成**。これが無いため本文中の `parts_masters` が
->   App側・Research側どちらを指すか曖昧な箇所が残る（機械的な一括置換をしないこと）
-> - `images.alt`（画像代替テキスト）の追加要否。App_Ready_Design_Rules から申し送りあり
+| 版 | 要点 |
+|---|---|
+| v1.1 | `rig_parts` に user_id と部分ユニーク制約 / CHECK 制約整備 / RLS をテーブル別設計へ |
+| v1.2 | `rigs.rig_master_id` `parts.parts_master_id` 追加 / `watchlists`→`pins` / **`log_type` の `setup`・`other` を廃止し `custom`・`memo` へ** / `parts_masters.aliases` と GIN 索引 |
+| v1.3 | `rigs` / `rig_masters` に `product_line` `platform` 追加 |
+| v1.4 | `comments` を MVP へ昇格 / `comment_reports` 追加 / コメント受付ON/OFF 2系統 |
+| v1.5 | `page_blocks`（ウィジェット型CMS）追加。block_type 5種・sort_logic 6種 |
+| v1.6 | `content_reports` 追加。reason_code 6種 |
+| v1.6-r2 | **Research 所有領域の列定義を削除し参照へ降格** / App側 `rig_type` を5値へ / `category_id` の FK 参照先を `rig_categories`・`part_categories` に明記 / `rigs.platform` `product_line` をマスター継承のみに / RLS の `deleted_at` 条件をテーブル限定へ / `page_blocks.page_type` に parts 系2種を追加 / `log_type` 4値で決着 |
