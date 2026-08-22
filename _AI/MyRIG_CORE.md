@@ -69,6 +69,52 @@ DB書込・ファイル操作・大量変更は実行レーンに渡す。
 commit / push は明示指示がある場合のみ。
 git add -A は使わない。常に明示的にファイルを列挙する。
 
+## GitHub複数WRITE経路の競合防止
+
+本repositoryには複数のWRITE経路が存在しうる。
+
+- Cowork / Claude Code:
+  ローカルcloneを編集し、git commit / push
+- GPT:
+  GitHub API / connector経由でrepositoryを直接更新
+
+そのため、WRITE開始前には必ずGitHub mainの最新版との同期を確認する。
+
+### Cowork / Claude Code
+
+ファイル編集前に必ず、
+
+1. working treeに未処理変更がないか確認
+2. git fetch
+3. local HEAD と origin/main の差分確認
+4. 必要ならgit pull
+
+を行う。
+origin/mainがローカルより進んでいる状態で、
+古いローカル内容を基準に編集・commitしてはならない。
+未commit変更等により安全にpullできない場合は、
+勝手にmerge/rebaseせず停止して報告する。
+
+### GPT
+
+GitHub WRITE前に必ず、
+
+1. revision.txt
+2. _AI/MyRIG_CURRENT.md
+3. 書き換える対象ファイル
+
+をGitHub mainから再取得する。
+取得済みの古い内容・古いSHAを使ってWRITEしてはならない。
+更新APIがSHA不一致・競合を返した場合は、
+再取得して勝手に上書きせず停止し、競合を報告する。
+
+### 共通
+
+- WRITE経路にかかわらず、最新mainを確認してから編集する
+- 他AIが直前に更新した可能性を常に考慮する
+- force push / 強制上書きは禁止
+- commit / push / GitHub WRITEはイタヤの明示指示がある場合のみ
+
 ## セキュリティ
 
 secret / DSN / API key をチャットに出さない。

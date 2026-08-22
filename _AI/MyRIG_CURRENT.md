@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260822-014
-updated: 2026-08-22 16:20 JST
+revision: MYRIG-20260822-015
+updated: 2026-08-22 16:24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下記「timestamp要確認」参照）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -18,6 +18,21 @@ Mockup shell: v0.5 / Home r14 / P22-C35
 ナレッジ運用: 2026-08-21 CORE+CURRENT方式へ移行。
 本repo（myrig-ai-context）が全AI共通の正本。
 旧Claude Knowledge 41本は本repoへ分類移送済み（下記Task Routing参照）。
+
+**2026-08-22 GPT側GitHub連携完了。** ChatGPT GitHub App を
+MyRIGRC/myrig-ai-context に限定接続。GPT Project Instructions を
+GitHub正本参照方式へ全面更新し、旧GPT Project Knowledgeは削除済み。
+Claude（GitHub Integration）とGPT（GitHub App）が同一repoを共通SoTとして参照する体制が成立。
+GPT側起動テスト済み: revision一致確認・CURRENT本文からのHOLD3件報告まで正常動作。
+
+**timestamp要確認（2026-08-22）**: 本ファイルの `updated` 表記について、
+GPT側確認時刻との間に約2時間のズレが報告された。原因未特定
+（Cowork/イタヤ実機いずれの時計かは未確認）。次回更新時にJST取得元を検証すること。
+
+**2026-08-22 GitHub複数WRITE経路の競合防止ルールをCOREへ追加。**
+Cowork/GPT双方がGitHub mainへ直接書き込める体制になったため、
+WRITE前の同期確認（fetch/diff/pull、SHA再取得）とforce push禁止をCORE.mdに明記した。
+詳細はMyRIG_CORE.md「GitHub複数WRITE経路の競合防止」節。
 
 ## Active Overrides
 
