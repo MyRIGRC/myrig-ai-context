@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260822-012
-updated: 2026-08-22 13:40 JST
+revision: MYRIG-20260822-013
+updated: 2026-08-22 15:00 JST
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -57,34 +57,44 @@ PC版を差し替える（_decisions/p22-c21 参照）。実装待ち。
 打ち消し規則を持たず v7色も自前定義しているため、NG-1の色帯が実際に描画されている。**
 → 下記キューBへ（当初「死んだ宣言」と判定したのは誤りだった）
 
-### B: 最優先（見た目が変わる。着手前に確認が要る）
+### ✅ 完了（2026-08-22 是正B・局所的な範囲）
+
+- NG-7 アバター違反（notifications）→ 無彩色3階調へ。
+  ※白文字が乗るためモバイルの #8B949E/#B1BAC4 は基準割れ（3.08/1.96）。
+    PCは AA 4.5:1 を満たす #6E7781/#57606A/#4B535B で構成し、ダーク分岐も追加。
+    **モバイル側のアバター色も同じ問題を抱えている（未着手）**
+- Library URL の単数形 → 複数形（index.html / library-maker-detail.html）
+- フッター法的リンクに data-href（SoTテンプレ＋33ファイル）
+
+**48px対応は撤回。** .rc__chip は `<a>` で .rc__x はその子のため、chip に ::after を足すと
+×を覆って削除が壊れる。さらに親 .rc__scroll が overflow-x:auto で高さ30pxにクリップするため
+48pxに達しない。見た目を変えずには対応不可。理由は search.html にコメントで残した。
+
+### B: 最優先（見た目が変わる。確認フローとの兼ね合いで要判断）
 1. PC Feed が #28 未適用 — pc/myrig-feed-v3.html:700-702 が All/Following/Trending の3タブ。
    ImageLightbox・無限スクロールも未実装。モバイル feed.html が完全な参照実装として存在する
 2. v8カラーがPC 40ファイル中6ファイルのみ適用 — v7ローカル定義14 / 共有CSS継承3 / 未定義17。
    共有 pc/assets/css/SoT_tokens-v6.css:28,54 を直せば5ページ一括解決
-3. NG-7 アバター違反 — pc/myrig-notifications-pc-v0.1.1.html:476-482 に
-   紫#7c3aed・緑#15803d・橙を含む7色グラデーション。「緑紫橙 全廃」に正面衝突
 
 ### B: 高
-4. ランキング表現の残存 — home-v3:3209 の data-query-preset="weekly-like-ranking-rig" ほか、
+3. ランキング表現の残存 — home-v3:3209 の data-query-preset="weekly-like-ranking-rig" ほか、
    browse-category-v3:810,814,882,953 / preview.html / モバイル browse-category.html:264,290,317
-5. --cat-*-on 未敷設と color:#fff 残存 — garage-favorites:246-248 / garage-pins:246-248 /
+4. --cat-*-on 未敷設と color:#fff 残存 — garage-favorites:246-248 / garage-pins:246-248 /
    SoT_component-catalog-v6.css:68（黄地に白文字 CR1.08）
-6. NG-1 生存 — pc/myrig-library-v3.html:233-241（正典が名指しした当のコードが未撤去）ほか4箇所。
+5. NG-1 生存 — pc/myrig-library-v3.html:233-241（正典が名指しした当のコードが未撤去）ほか4箇所。
    **＋ SoTテンプレ SoT_browse-sidebar.html の .dir-subheader 色帯（2026-08-22 追加検出）**
-7. 登録フォームと検索が別タクソノミー — PARTS登録が独自10カテゴリ（正本は親14）、
+6. 登録フォームと検索が別タクソノミー — PARTS登録が独自10カテゴリ（正本は親14）、
    RIG登録カスタムフォームが英語8カテゴリ（正本は24件）
-8. surface/weather の登録経路が無い — 検索側は10値/6値で確定しているのに、
+7. surface/weather の登録経路が無い — 検索側は10値/6値で確定しているのに、
     PC composer は自由テキスト1本に天候まで混在。**データが永久に入らない構造**
 
 ### B: 中〜低
-9. Library URL の単数形残存（index.html:954,960,966 ほか）
-10. 48px未満のタップ要素4件（search.html の .rc__chip/.rc__x/.rc__clear/.ax-tools__b）
-11. Cookie同意バナー未実装 / PCフッター特商法リンクがhref="#"のまま
-12. NG-2（PC46箇所・モバイル14箇所）/ NG-6 / PC中立操作色の2値分裂 / 死んだv7宣言の掃除
+8. **48px未満のタップ要素**（search.html の最近の検索チップ行）— 見た目変更が不可避。要裁定
+9. Cookie同意バナー未実装
+10. NG-2（PC46箇所・モバイル14箇所）/ NG-6 / PC中立操作色の2値分裂 / 死んだv7宣言の掃除
 
 ### B: 要裁定
-13. **「人気」バッジがUIに描画されている** — search-results.html:621
+11. **「人気」バッジがUIに描画されている** — search-results.html:621
     `<span class="sr-full__badge">人気</span>`。ranking全廃方針および裁定⑦「人気順は使わない」と
     整合していない。「注目」等へ変えるか、順位ではないラベルとして許容するか要裁定
     （2026-08-22 検出。文書監査では「該当語0件」と誤って宣言していた箇所）
@@ -159,7 +169,7 @@ pc-mobile-spec-inheritance G7 は現状「ページングが基本・例外はFe
   light #1F2328 / dark #E6EDF3（css/mobile-shell.css:32,47）
 B19但し書き「Bottom Nav中央の＋登録のみブランド色」は不採用（実装は中立黒）。
 別件（未解決）: PC側に --color-action-primary が皆無で、中立色は #24292f/#1f2328 の
-ハードコードでlightが2値に分裂。PCのトークン化は未着手 → モック是正キュー#12。
+ハードコードでlightが2値に分裂。PCのトークン化は未着手 → モック是正キュー#10。
 
 NG-7の通知色（2026-08-21 新規HOLD）★モック照合で裁定材料が判明
 実装では PC が既に PARTS色と別値を採用していた。正典はモバイル片面だけを記述している。
