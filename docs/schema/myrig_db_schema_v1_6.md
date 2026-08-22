@@ -578,19 +578,30 @@ notifications
   DELETE ポリシーは運用・移行時の最終手段としてのみ残す
 
 ### テーブル別の特記事項
-- **images**: SELECTは全公開（Cloudflare URLの推測不可能性で担保）。INSERT/DELETEは`user_id = auth.uid()`
-- **likes/favorites/pins**: SELECTは全公開。非公開エンティティへのアクションはUI層で制御
+
+✅ **2026-08-22 イタヤ裁定・HOLD解除。** 旧「SELECT全公開」方針（pinsの「非公開」定義と矛盾、
+親が非公開でも images/comments が読めた問題）を、親の`is_public`をJOIN判定する方式へ変更する。
+詳細検討は `_proposals/rls-security-model-v1.md`（案A採用）。**実装はNext.js着手時に行う
+（モックアップ段階では対象データが存在しないため実害なし。着手前に必ずこの通りに実装すること）。**
+
+- **images**: SELECTは「自分の行」または「親（rig/part/log）が`is_public=true AND deleted_at IS NULL`」の場合のみ。
+  entity_typeごとに参照先テーブル（rigs/parts/maintenance_logs）をCASE分岐でEXISTS判定する。
+  INSERT/DELETEは`user_id = auth.uid()`
+- **favorites**: 個別行のSELECTは`user_id = auth.uid()`のみ（他人の個別行は不可）。
+  **公開カウント（「◯件お気に入り」表示）は維持する**が、個別行そのものは公開しない。
+  件数はCOUNT用の関数またはビュー経由で提供する（RLSを迂回した個別行閲覧はさせない）
+- **pins**: **完全非公開。** SELECTは`user_id = auth.uid()`のみ。他人には件数含め一切公開しない
+- **likes**: 現行どおりSELECT全公開を維持（「いいね」は元々公開カウント前提の機能で、
+  非公開エンティティへのlikes自体はUI層でアクション不可にする運用のまま。pins/favoritesのような
+  「非公開」定義との矛盾が無いため対象外）
 - **follows**: follower_id = auth.uid() でINSERT/DELETE。SELECTは全公開
 - **マスターデータ**: SELECT全公開。変更は管理者ロールのみ
 - **rig_parts**: user_id = auth.uid() でINSERT/UPDATE/DELETE
-- **comments**: SELECTはstatus='published'のみ全公開。INSERTはauth.uid()必須。自分のコメントのstatus更新のみ可能
+- **comments**: SELECTは`status='published'`かつ親（rig/part/log）が`is_public=true AND deleted_at IS NULL`の場合のみ。
+  INSERTはauth.uid()必須。自分のコメントのstatus更新のみ可能
 - **comment_reports**: INSERTはauth.uid()必須。SELECTは運営者ロールのみ
 - **content_reports**: INSERTはauth.uid()必須。SELECTは運営者ロールのみ。同一ユーザーから同一コンテンツへの重複通報はUNIQUE制約で防止
 - **page_blocks**: SELECT全公開（is_active=trueのみ）。変更は管理者ロールのみ
-
-> ⚠️ **HOLD（要裁定・セキュリティモデル）**: 上記の「SELECT全公開」は非公開データを保護しきれていない
-> （pins の定義「非公開」との矛盾、親が非公開でも images / comments が読める等）。
-> 詳細は `_AI/MyRIG_CURRENT.md`。**UI非表示をアクセス制御の代わりにしないこと。**
 
 ---
 
@@ -763,7 +774,7 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
   App側 / Research側どちらを指すか曖昧な箇所が残る（機械的な一括置換をしないこと）
 - `images.alt`（画像代替テキスト）の追加要否
 - 関係テーブル（likes / favorites / pins / follows）の解除手段と物理DELETE禁止の両立
-- RLS のセキュリティモデル（上記 RLS 節の HOLD）
+- ~~RLS のセキュリティモデル~~ ✅ 2026-08-22 イタヤ裁定・解消済み（上記 RLS 節参照）
 
 ---
 

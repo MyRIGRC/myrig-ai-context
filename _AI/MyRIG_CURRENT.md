@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260822-016
+revision: MYRIG-20260822-017
 updated: 2026-08-22 16:24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下記「timestamp要確認」参照）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -138,10 +138,13 @@ A. Auth middleware — Maintenance/Suspendedの全体ガードがmatcher(/garage
 B. 物理DELETE禁止 ⇔ 解除手段の不在 — likes/favorites/pins/followsにdeleted_at/is_activeが無く、
    いいね/フォロー/ピン解除は物理DELETEでしか実現できない。
    soft-delete列の追加か、CORE側で「関係テーブルの解除は例外」と正式裁定するかの二択。要裁定（L1改訂）。
-C. RLSがprivateデータを保護していない —
+C. ✅ 解消済み（2026-08-22 イタヤ裁定）— RLSがprivateデータを保護していない問題。
    pins定義「非公開」⇔RLS全公開 / favorites・pinsの個別行が全公開でPublic Garage非表示を迂回可能 /
-   imagesは親が非公開でも読める / commentsは親の公開可否を検査していない。
-   UI非表示はアクセス制御にならない。要裁定（セキュリティモデル）。
+   imagesは親が非公開でも読める / commentsは親の公開可否を検査していない、という4点を解消。
+   裁定: 案A（親のis_publicをJOIN判定）採用。pinsは完全非公開（owner限定）、
+   favoritesは個別行非公開・公開カウントのみ維持。likesは現行どおり全公開のまま維持（対象外）。
+   詳細は `_proposals/rls-security-model-v1.md`、正典反映は `docs/schema/myrig_db_schema_v1_6.md` RLS節。
+   **実装タイミング: モックアップ完成後・Next.js着手時。**
 D. ✅ 解消済み（2026-08-22）— master_aliases.entity_type の 'part' → 'part_master' 誤記を訂正。
 
 ## HOLD
