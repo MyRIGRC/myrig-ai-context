@@ -192,7 +192,7 @@ WHERE removed_at IS NULL;
 | id | UUID | PK, DEFAULT gen_random_uuid() | |
 | user_id | UUID | FK → profiles.id, NOT NULL | |
 | rig_id | UUID | FK → rigs.id, NULLABLE | 紐づくRIG（任意） |
-| log_type | TEXT | NOT NULL, DEFAULT 'maintenance' | CHECK (log_type IN ('maintenance','run','custom','memo')) ※**HOLD・表の下参照** |
+| log_type | TEXT | NOT NULL, DEFAULT 'maintenance' | CHECK (log_type IN ('maintenance','run','custom','memo')) ※4値が正・表の下参照 |
 | title | TEXT | NOT NULL | |
 | body | TEXT | | 本文（Markdown or plain） |
 | location | TEXT | | 場所 |
@@ -207,19 +207,31 @@ WHERE removed_at IS NULL;
 | updated_at | TIMESTAMPTZ | DEFAULT now() | |
 | deleted_at | TIMESTAMPTZ | NULLABLE | |
 
-> ⚠️ **HOLD: `log_type` は 4値か5値か（2026-08-21 監査で矛盾の所在を特定）**
+> **✅ `log_type` は 4値が正**（2026-08-21 モック照合で決着）
 >
-> | 出所 | 値 |
-> |---|---|
-> | 本書（App Schema v1.6） | **4値** `maintenance` / `run` / `custom` / `memo` |
-> | cross-ref-category-names-v4 | 2026-08-20時点は**4値**（「確定・App管轄」）→ 2026-08-21監査で「4 or 5・HOLD」へ更新 |
-> | **pc-mobile-spec-inheritance-v1.1 #30（PC正本 log-composer の種別タブ）** | **5値**（整備 / カスタム / 走行 / **セッティング** / メモ） |
+> 一時「schema(4値) ⇔ UI(5値) の矛盾・要裁定」とされていたが、**実装を見ると誤診だった。**
 >
-> 差分は **`setting`（セッティング）** の1件。**UI 側の PC 正本モックには既に存在し、DB 側には無い。**
-> なお旧 `setup` は v1.2→v1.3 で意図的に廃止済みであり、これを復活させる話ではない。
+> **5値目の実装値は `setting` ではなく `setup`。**
+> `setup` は本書 v1.2 で `setup/other → custom/memo` へ変更した際に**廃止した値**（変更履歴参照）。
+> 同じモック内の `pc/myrig-feed-v3.html:725` が
+> 「以前ここにあった『セットアップ』は廃止された値（スキーマ v1.2 で変更済み）」と注記している。
 >
-> **要裁定**: `setting` を独立した `log_type` として持つか、走行/整備の下位属性として扱うか。
-> App 管轄の値であるため App 側で決められるが、決定まで CHECK 制約を変更しない。
+> **`setting` という値はモックにもDBにも存在しない。文書上にしかない語。**
+> Search Contract §5-4 の「2026-07-28 裁定で5値」は、この残骸を新しい5値目と誤読した可能性が高い。
+>
+> ### 実装の分裂状況（モック側の残作業）
+>
+> | 面 | 値数 | 場所 |
+> |---|---|---|
+> | PC LOG登録 composer | **5値**（5つ目 `setup`） | `myrig-log-composer-modal-v0.3.9.html:1040-1044`、分岐は `:1299` |
+> | モバイル LOG登録 | **5値**（値属性なし・ラベルのみ「セッティング」） | `register-log.html:381` |
+> | モバイル LOG絞り込み | 4値 | `garage-logs.html:273,277` |
+> | PC 検索 | 4値 | `pc/myrig-search-v3.html:947-953` |
+> | PC フィード | 4値 | `pc/myrig-feed-v3.html:720-725` |
+> | PC ガレージLOG | 4値 | `pc/myrig-garage-logs-v6.html:517-520,568` |
+>
+> **CHECK制約は変更しない。**登録フォーム2箇所から `setup` を撤去すれば解消する。
+> 仮に将来5値化する裁定が出る場合も、**`setup` は廃止済みなので別 slug を使うこと。**
 
 ---
 
@@ -844,7 +856,7 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
    DELETEポリシーと物理DELETE禁止（CORE.md）の関係も明記
 6. **`page_blocks.page_type` に parts 系を追加** — `parts_browse_top` / `parts_subcategory`
    （page-role-matrix が `/parts` `/parts/category/[slug]` を section-driven と規定しているため）
-7. **`log_type` にHOLD注記を追加** — DB4値 ⇔ PC正本 log-composer の5種（`setting` の要否が未裁定）
+7. **`log_type` は4値で決着**（2026-08-22 モック照合）— 5値目の実装値は廃止済み `setup` で、`setting` という値は存在しなかった
 8. 旧値・旧URLの是正 — config例の `"rig_type":"rc"` → `"rc-car"`、`/subcategory/...` → `/category/.../...`
 9. `comments` の空見出しを本文1行に整理
 

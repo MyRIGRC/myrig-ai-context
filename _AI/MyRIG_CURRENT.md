@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260821-009
-updated: 2026-08-21 22:55 JST
+revision: MYRIG-20260822-010
+updated: 2026-08-22 10:15 JST
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -64,6 +64,11 @@ PC版を差し替える（_decisions/p22-c21 参照）。実装待ち。
 10. surface/weather の登録経路が無い — 検索側は10値/6値で確定しているのに、
     PC composer は自由テキスト1本に天候まで混在。**データが永久に入らない構造**
 
+16. **「人気」バッジがUIに描画されている** — search-results.html:621
+    `<span class="sr-full__badge">人気</span>`。ranking全廃方針および裁定⑦「人気順は使わない」と
+    整合していない。「注目」等へ変えるか、順位ではないラベルとして許容するか要裁定
+    （2026-08-22 検出。文書監査では「該当語0件」と誤って宣言していた箇所）
+
 ### 中〜低
 11. Library URL の単数形残存（index.html:954,960,966 ほか）
 12. PCプレースホルダ2種の不統一（pc/myrig-search-v3.html:1173）
@@ -85,8 +90,7 @@ C. RLSがprivateデータを保護していない —
    pins定義「非公開」⇔RLS全公開 / favorites・pinsの個別行が全公開でPublic Garage非表示を迂回可能 /
    imagesは親が非公開でも読める / commentsは親の公開可否を検査していない。
    UI非表示はアクセス制御にならない。要裁定（セキュリティモデル）。
-D. master_aliases.entity_type が db-schema-answers-v1 で 'part' 表記。実DB実在値は 'part_master'。
-   単純な誤記。裁定不要で修正可能。
+D. ✅ 解消済み（2026-08-22）— master_aliases.entity_type の 'part' → 'part_master' 誤記を訂正。
 
 ## HOLD
 
@@ -106,18 +110,12 @@ HOLDの理由は出典の不在ではなく、2026-08-21実DB確認で判明し�
 - MyRIG_Category_Structure_v1.4（6/16改訂・7/30より前）はTEXT自由記述として定義
 App側提案: 実データ主導（18パターンを土台に再確定）へ切替。イタヤ裁定待ち。
 
-log_type ★2026-08-21 モック照合で誤診と判明。実質決着
-文書監査では「schema(4値)⇔UI(5値)の矛盾・要裁定」としていたが、実装を見ると別の話だった。
-- 5値目の実装値は setting ではなく setup（pc/myrig-log-composer-modal-v0.3.9.html:1043）
-- setup は schema v1.2 で廃止済みの値。pc/myrig-feed-v3.html:725 が
-  「以前ここにあった『セットアップ』は廃止された値」と同じモック内で注記している
-- setting という値はモックにもDBにも存在しない。文書上にしかない語
-- 実装内部でも分裂: 登録は5値（PC composer / モバイル register-log.html:381）、
-  閲覧・検索・絞り込みは4値（search-v3 / feed-v3 / garage-logs / garage-logs-v6）
-
-結論: 正典（4値）が正しく、登録フォームに廃止済み setup が残っているだけ。
-裁定案件ではなくモックのバグ。Search Contract §5-4「7/28裁定で5値」はこの残骸の誤読の可能性が高い。
-残作業: composer :1043 と :1299、モバイル register-log.html:381 から setup を撤去。
+log_type ✅ 決着（2026-08-22 正典へ反映済み・HOLD解除）
+4値 maintenance/run/custom/memo が正。「5値論争」は誤診だった。
+5値目の実装値は setting ではなく setup（v1.2で廃止済みの値）。
+setting という値はモックにもDBにも存在せず、文書上にしかない語だった。
+正典側の反映は完了（schema v1.6 / cross-ref v4）。
+残るのはモック側の撤去のみ → モック是正キュー#2。
 
 aliases
 master_aliases が正本であることは確定（db-schema-answers-v1 §0責務境界・Q7）。
@@ -143,15 +141,12 @@ _state/mobile-feedback-ledger-v1 の同日裁定2件が対立している。
 pc-mobile-spec-inheritance G7 は現状「ページングが基本・例外はFeedと検索種別タブ」としているが、
 #26 を広く読むとこの前提自体が成立しない。台帳が生きた正典であるため要調停。
 
-操作色 --color-action-primary ★2026-08-21 モック照合で決着（HOLD解除可）
-実装に存在し、design-nogo-list NG-7 の記載値と完全一致していた。
-  css/mobile-shell.css:32  --color-action-primary: #1F2328;  （light・「純黒より一段柔らかい黒」）
-  css/mobile-shell.css:47  --color-action-primary: #E6EDF3;  （dark）
-「緑のまま残っている可能性」は否定された。
-B19但し書き「Bottom Nav中央の＋登録のみブランド色」は不採用（mobile-shell.css:792-806 が中立黒）。
-残作業: color-token-v8 §3 の「要確認」注記を外して確定表記へ。
-別件: PC側には --color-action-primary が皆無で、中立色は #24292f(6箇所)/#1f2328(3箇所)の
-ハードコード＝lightが2値に分裂している。PCのトークン化は未着手。
+操作色 --color-action-primary ✅ 決着（2026-08-22 正典へ反映済み・HOLD解除）
+実装に確定値が存在した。color-token-v8 §3 に反映済み。
+  light #1F2328 / dark #E6EDF3（css/mobile-shell.css:32,47）
+B19但し書き「Bottom Nav中央の＋登録のみブランド色」は不採用（実装は中立黒）。
+別件（未解決）: PC側に --color-action-primary が皆無で、中立色は #24292f/#1f2328 の
+ハードコードでlightが2値に分裂。PCのトークン化は未着手 → モック是正キュー#15。
 
 NG-7の通知色（2026-08-21 新規HOLD）★モック照合で裁定材料が判明
 実装では PC が既に PARTS色と別値を採用していた。正典はモバイル片面だけを記述している。
@@ -168,6 +163,26 @@ CURRENT旧記載の「NG-7一般化は誤り」の実体はここである可能
 要裁定: 通知色をPARTS色と別値にするか、NG-7の禁止範囲から通知を外すか。
 
 ## Pending Canonical Updates
+
+### 2026-08-22 モック照合の結果を正典へ反映（完了）
+
+- ✅ **search-page-plan-v2 を全面改稿** — 実装（P22-C29「D案」）へ追随。探し方4枚＋開閉軸5本、
+  ソートの裁定⑦⑧（3ピル廃止・「人気順」不使用）、FEATURED のユーザータブ除外、検索面の広告ゼロ、
+  検索スコープ定義を実装から昇格、プレースホルダ基準文言を確定
+- ✅ page-role-matrix: **Parts Master Detail / Maker Detail の「未作成」誤記を訂正**（実装済み）。
+  Feed行にPC未適用の但し書き。未捕捉ページ表（compare/help/legal ほか）と `/rigs` の扱いを追記、v1.5へ
+- ✅ color-token-v8: **操作色の実値を実装から確定**（`#1F2328`/`#E6EDF3`・要確認注記を撤去）。
+  **v8の適用範囲を明記**（PC 40中6ファイル・未定義17ファイルの二重化を含む）。PC未トークン化も記録
+- ✅ design-nogo-list: NG-1「PC側は未処理」・NG-6「是正はhomeのみ」を明記。
+  NG-7通知色にPC実装（PARTS色と分離済み）を裁定材料として追記
+- ✅ **log_type を4値で決着**（schema v1.6 / cross-ref v4 の両方）。5値論争は廃止値 `setup` の残骸
+- ✅ db-schema-answers: `master_aliases.entity_type` の `'part'` → `'part_master'` 誤記訂正（GPT指摘D）。
+  本文の size_class 13値にHOLD注記
+- ✅ auth-guard: **#14裁定（context8種・文言5グループ）を本文統合**し v1.1 へ。冒頭注記を解消。
+  前提5文書がrepo未収録である旨も明記
+- ✅ App_Ready: Rule1⇔Rule7の矛盾を解消。「認証はmiddleware一元管理」をP1＋全体ガード限定へ訂正
+- ✅ implementation_checklist: Cookie同意の自己矛盾（明示同意型 vs 黙示同意型）を明示化。
+  rate limit・画像制限を「暫定の初期値」へ降格。モックが全面noindexである旨を注記
 
 ### 2026-08-21 docs精査で解消済み（3AIクロスチェック → 本文修正完了）
 
@@ -202,19 +217,15 @@ CURRENT旧記載の「NG-7一般化は誤り」の実体はここである可能
   - **検索スコープ正典表は「宿題」ではなく実装から昇格可能**
     （search-results.html:524-576 の LABEL/UNIT/GRIDTYPE/DIGEST/SORT_OPTIONS が事実上の一元定義）
     ※ただしタブ順(log→lib)とダイジェスト順(lib→log)が食い違うため裁定1点必要
-- **GPT外部監査（2026-08-21）の指摘17件が未反映**（上記4系統を除く文書整理系）。
-  参照切れ（design-rules.md / cross-ref-v2 / Coverage Matrix版数）、`/rigs` の非正典URL持ち込み、
-  db-schema-answers本文に残る旧「確定」、App_Ready Rule1⇔Rule7の矛盾、
-  implementation_checklistの根拠なき強制値など。詳細は _audit/gpt-review-20260821.md
 - **GPTの総合所見: 「注記で旧本文を覆う方式がまだ多く、正典本文だけ読めば安全という状態には達していない」**
-- **Auth Guard: 冒頭注記（#14文言5グループ・§3.1/§3.3旧定義マーク）の本文統合が未実施。**
-  matcher の是正のみ行い版上げは保留。page-role-matrix は同種作業を完遂して v1.4 へ昇版したため対応が非対称
 - **App Schema: size_class / power_source / platform_slug のApp側実列追加DDLが未設計**
 - **App↔Research 写像表（cross_ref）が未作成。**これが無いため本文中の `parts_masters` が
   App側（複数形）/ Research側 `part_masters`（単数形）のどちらを指すか曖昧な箇所が残る。
   db-schema-answers-v1 §0 は「写像表を作るまで同名別義のカラムを増やすな」と警告
 - `images.alt`（画像代替テキスト）の追加要否 — App_Ready_Design_Rules から schema への申し送り
 - **エラー色・成功色がどの正典にも未定義**（NG-7「黄赤青と白黒以外を足さない」との整合を含め未裁定）
+- **`docs/design-rules.md` が repo 内に存在しない**（page-role-matrix `:246` `:354` が
+  「Garage Detail 固有ルール」「Breakpoint正典」の参照先として指している）
 - **cross-ref-category-names-v2.md が repo 内に存在しない**（v4 が「part_categories親14・
   rig_categories24 の詳細一覧はこちらが正」と参照している）
 - **auth-guard-spec-v1 が前提とする5文書が repo 内に不在**

@@ -77,6 +77,11 @@ App `parts_masters` と Research `part_masters`、App `rigs.platform` と Resear
 - 正規化カラムで持つ。**JSONB には置かない**（抽出生値であり表記ゆれ防止の仕組みが無いため絞り込みに使わない）
 - 絞り込みに使うのは **`size_class` のみ**
 - 固定値集合: `1/5` `1/6` `1/7` `1/8` `1/10` `1/12` `1/14` `1/16` `1/18` `1/24` `1/27` `mini-z` `other`
+  > ⚠️ **この13値は HOLD**（2026-08-21）。実データは**18パターン**で enum 運用されていない
+  > （`NULL` 639件が最多 / `M-chassis` / `mini` 等の自由記述が混在）。
+  > `MyRIG_Category_Structure_v1.4`（本書より前の6/16改訂）は TEXT 自由記述として定義。
+  > 一方**検索UIは13値で実装済み**（`pc/myrig-search-v3.html:1127-1139` / `search.html:411-424`）。
+  > 「実装13値を正として実データを移行」か「実データ主導で再定義」かの裁定待ち。
 - **分母整数は採らない**（`mini-z` のような非分数値が入るため）。範囲指定が必要になった時点で
   generated column `scale_denominator INT` を追加する
 - **マスター由来。`rigs` は継承のみ**。ユーザーは編集しない（`build_tags` と同じ扱い）。
@@ -167,7 +172,13 @@ Category v1.4 運用原則「spec_data で検索強化（親子分類より優�
 ### `master_aliases` が aliases の正本
 
 `rig_masters` に `aliases` 列は追加しない。`master_aliases` が正本。
-`entity_type='rig_master' / 'rig_master_variant' / 'part' / 'manufacturer'` を1テーブルで扱う設計。
+`entity_type` = `'rig_master'` / `'rig_master_variant'` / **`'part_master'`** / `'manufacturer'` を1テーブルで扱う設計。
+
+> ⚠️ **2026-08-21 訂正**: 本項は長らく `'part'` と記載していたが**誤記**。
+> 実DB確認（`_decisions/2026-08-21_db-inquiry-002-realdata.md` F-1）の実在値は
+> `part_master`(190件) / `rig_master_variant`(53) / `manufacturer`(31) / `rig_master`(2) の4種。
+> 単数形 `part_master` が正しい（App側の `parts_masters` とは同名別義なので混同しないこと）。
+
 ハイラックス / Hilux / TF2 はここに入る（`alias_kind` と `locale` で区別）。
 App側は `master_aliases` を JOIN して検索対象に含める。
 

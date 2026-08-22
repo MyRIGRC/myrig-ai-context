@@ -15,7 +15,7 @@
 |---|---|---|---|
 | `size_class` | Research正典未定義 | 確定済み（7/30主査裁定・13値） | ⚠️ **HOLD。**13値の出典は db-schema-answers-v1 §2 に実在するが、実データは18パターンでenum運用されていない |
 | `mini-micro`（build_tags, deprecated） | 置換先未定で宙に浮いていた | 置換先=`size_class`に確定 | `size_class` 自体がHOLDのため継続HOLD |
-| Research未定義軸の分類 | 5軸を一括りに「未定義」 | `event_tags`のみResearch管轄・未確定／`log_type` `surface` `weather`はApp管轄 | ⚠️ `event_tags` は**列が物理的に存在せず**owner未確定。`log_type` は4/5値でHOLD |
+| Research未定義軸の分類 | 5軸を一括りに「未定義」 | `event_tags`のみResearch管轄・未確定／`log_type` `surface` `weather`はApp管轄 | ⚠️ `event_tags` は**列が物理的に存在せず**owner未確定。✅ `log_type` は**4値で決着**（2026-08-22・下表参照） |
 | `rig_type=drone-fpv` 表示 | 表記ゆれ | 正は「ドローン / FPV」に統一。slugは`drone-fpv` | 変更なし（有効） |
 
 ---
@@ -26,7 +26,7 @@
 |---|---|---|---|
 | `rig_type` | 5 | 確定 | RCカー / ミニ四駆（予定） / **ドローン / FPV** / RC飛行機 / RCボート |
 | `size_class` | **不明（実データ18パターン）** | ⚠️ **HOLD（2026-08-21 実DB確認で「13値確定」の裏付けが崩れた）** | 旧記載の13値: `1/5` `1/6` `1/7` `1/8` `1/10` `1/12` `1/14` `1/16` `1/18` `1/24` `1/27` `mini-z` `other`<br>⚠️ **13値そのものの出典は存在する** — `db-schema-answers-v1.md`（2026-07-30 主査裁定・App側の写し）§2 に固定値集合として明記。**HOLDの主因は実装実態との乖離**:<br>`_decisions/2026-08-21_db-inquiry-002-realdata.md` J-2: **実データは18パターン**（`NULL` 639件が最多 / `1/10` 341 / `1/8` 62 / `1/12` 50 … `M-chassis` 2 / `mini` 1 等の自由記述が混在）で、**13値enumとして運用されていない**。<br>副次的な不確かさ: J-1 の記録どおり **DB Research PJ が保持する7/30裁定書の原本は未確認**（App側の写しのみ）で、**`MyRIG_Category_Structure_v1.4`（6/16改訂・7/30より前）は TEXT 自由記述として定義**している。<br>App側提案は「実データ主導（18パターンを土台に再確定）へ切替」。イタヤ裁定待ち |
-| `log_type` | 4 or 5 | ⚠️ **HOLD**（App管轄） | 整備 / 走行 / カスタム / メモ ＋ **セッティング（要裁定）**。PC正本 log-composer の種別タブは5種。詳細は `myrig_db_schema_v1_6.md` の `log_type` 項 |
+| `log_type` | **4** | ✅ **4値が正**（2026-08-21 モック照合で決着） | 整備 `maintenance` / 走行 `run` / カスタム `custom` / メモ `memo`<br>**「5値論争」は誤診だった。**5値目の実装値は `setting` ではなく **`setup`** で、これは schema v1.2 で廃止済みの値（`pc/myrig-log-composer-modal-v0.3.9.html:1043`）。同じモック内の `pc/myrig-feed-v3.html:725` が「以前ここにあった『セットアップ』は廃止された値」と注記している。**`setting` という値はモックにもDBにも存在しない**（文書上にしかない語）。<br>実装は登録が5値・閲覧/検索/絞り込みが4値で内部分裂しており、**登録フォームから `setup` を撤去すれば解消**（裁定不要のバグ）。詳細は `_audit/canon-vs-mockup-20260821.md` |
 | `surface` | 10 | 確定（App管轄） | 岩 / 土 / 芝 / アスファルト / カーペット / 砂 / 雪 / 屋内コース / 屋外コース / その他 |
 | `weather` | 6 | 確定（App管轄） | 晴れ / 曇り / 雨 / 雪 / 屋内 / その他 |
 | `event_tags` | **不明（列が物理的に存在しない）** | ⚠️ **HOLD・owner未確定** | 2026-08-21 実DB確認（`_decisions/2026-08-21_db-inquiry-002-realdata.md` I-3）: **`event_tags` という列名はDB全体のどのテーブルにも存在しない（0件）。** Category v1.4「確定値12種」も本表の旧記載「4件判明・残8件復元中」も、**どちらも未実装の机上記述**と判明。値の議論より先に owner（App実装かResearch管轄か）の確認が必要 |
@@ -59,7 +59,8 @@ App側UIには現状未表示。将来表示する際の命名基準として、
    実データ18パターンを土台に再確定する案をイタヤ裁定待ち
 2. **`event_tags` の owner 確認** — 列が物理的に存在しない（実DB確認I-3）。
    App未実装機能の先行記述なのか、Research管轄の未構築なのかを先に決める
-3. **`log_type` 4値/5値の裁定** — `setting`（セッティング）の要否。App管轄
+3. ~~`log_type` 4値/5値の裁定~~ → **クローズ（2026-08-21）。4値が正**。5値目は廃止済み `setup` の
+   残骸だった。残るのはモック側の撤去作業のみ（composer `:1043`・`:1299`、`register-log.html:381`）
 4. `mini-micro`件数READ後の移行判断（`size_class` 確定が前提のため上記1に従属）
 5. パーツ子カテゴリ90件の個別点検（Research側作業、待ちのみ）。
    ⚠️ ただし実DB確認E-3で `part_categories` は**0行（空）**と判明。点検以前にデータ投入が未了

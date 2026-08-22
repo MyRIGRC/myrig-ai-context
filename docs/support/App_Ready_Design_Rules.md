@@ -58,7 +58,9 @@ features/{domain}/
 
 - 1ドメイン1ファイル（`services/rigs.ts`, `services/parts.ts`, `services/images.ts`）
 - Supabase clientの注入はパラメータまたはファクトリパターン（Web用/App用で差し替え可能に）
-- サーバー専用処理はServer Actionsに書いてOKだが、同等のクライアント版をservices層にも持つ
+- サーバー専用処理はServer Actionsに書いてOK。**将来Expoで共有する見込みのあるものだけ**、
+  同等のクライアント版をservices層にも持つ（Rule 7と同じ基準。2026-08-21 監査で統一。
+  旧記載は「同等のクライアント版を持つ」と無条件だったため Rule 7 と矛盾していた）
 
 ---
 
@@ -283,7 +285,10 @@ Server Actions / Route Handlers / SSR を自由に使ってOKだが、以下を�
 - **読み取り系:** 将来Expoで共有する見込みのあるものは、クライアントからも呼べるservices層を持つ（SSRと併用OK）。
   Web専用と割り切れる読み取りまで二重化する必要はない（2026-08-21 監査で限定）
 - **書き込み系:** Server Actionsに書いてOK（将来Expo側はSupabase直接 or Edge Functions経由）
-- **認証チェック:** middleware.tsで一元管理
+- **認証チェック:** **P1（全ページ認証必須）と全体ガード（Maintenance / Suspended）のみ middleware.ts。**
+  P2（元ページ維持のままModal）と P3（mutate操作時のみ）は page / component 側で判定する
+  （auth-guard-spec-v1 §2・§5.1。2026-08-21 監査で訂正。旧記載「middleware.tsで一元管理」は
+  P2/P3 の責務分離と矛盾していた）
 
 ### 判断フロー
 

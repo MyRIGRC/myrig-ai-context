@@ -1,14 +1,26 @@
 # Auth Guard / Login Required UI Spec v1
 
 **作成日:** 2026-05-22 (MR-AUDIT-002 / A7)
-**ステータス:** 確定 v1
-**前提:** `docs/auth-onboarding-minimum-spec-v1.md` / `docs/nextjs-routing-table-v1.md` / `docs/appheader-interaction-spec-v1.md` / `docs/dialog-interaction-spec-v1.md`
+**最終更新:** 2026-08-21（#14裁定を本文統合・middleware matcher を是正）
+**ステータス:** 確定 v1.1
+**前提:** `auth-onboarding-minimum-spec-v1` / `nextjs-routing-table-v1` / `appheader-interaction-spec-v1` / `dialog-interaction-spec-v1`
+⚠️ **上記4本＋`error-states-decomposition-MR-AUDIT-002` は本repo内に未収録**（2026-08-21確認）。
+参照が必要になった時点で所在を確認すること。
 
-> **⚠️ 改訂注記（2026-07-23 Coworkナレッジ監査 — 本文は未改訂・本注記が優先）**
+> **✅ 改訂反映済み（2026-08-21 — 本文統合完了）**
 >
-> 1. **§3.1の共通文言・§3.3の「Reserved」扱いは旧定義。** #14裁定（2026-07-17 イタヤ承認・P11実装済み・契約v0.4条文化）で置換: context は既存**8種を維持**しつつ、Description は**ベネフィット説明の5文言グループ**に解決する（例: `register`=「ログインすると、RIG・パーツ・LOGを登録して、自分のガレージを管理できます。」）。現行の正は **mobile-component-contract v0.5 §3.7の文言表**。
-> 2. §4.2 `safeNext` の二段フォールバック（不正値→`/` / login・signupループ→`/garage`）は現行どおり有効（契約v0.5もこの正典に準拠 — P05 erratum #1で契約側を本書に合わせて訂正済み）。
-> 3. 本文への反映は#19キュー⑤（Next.js実装前・PC正本改訂と同時）で実施する。
+> 2026-07-23 の改訂注記が指していた項目は、**すべて本文へ統合済み**。
+> 注記と本文が二重状態だった問題は解消した。
+>
+> 1. §3.1 / §3.3 → **#14裁定（context 8種・文言5グループ）を本文へ反映。**
+>    実装 `js/mobile-shell.js:498-507` と一致を確認済み
+> 2. §4.2 `safeNext` の二段フォールバック（不正値→`/` / login・signupループ→`/garage`）は**現行どおり有効**。
+>    実装 `js/mobile-shell.js:488-495` が完全準拠
+> 3. §5 / §5.1 → **middleware matcher の自己矛盾を是正**（P2＝matcher対象外で固定）
+>
+> **既知の未解消（GPT外部監査 2026-08-21）**: §5 skeleton は Maintenance / Suspended の全体ガードを
+> middleware 内に置いているが、matcher が `/garage` `/settings` のみのため**公開ページで実行されない**。
+> matcher 拡張＋内部分岐か、全体ガードとP1ガードの分離かは**要裁定**（`_audit/gpt-review-20260821.md` A）。
 
 ---
 
@@ -105,15 +117,19 @@ UI 挙動を 3 パターンに整理し、ページごとに使い分けるル�
 
 ### 3.1 文言（P2 / P3 共通）
 
-> **（旧定義 — #14裁定で置換済み。冒頭の改訂注記参照。現行の正は契約v0.5 §3.7の5文言グループ表）**
+**#14裁定（2026-07-17 イタヤ承認・P11実装済み）を反映した現行定義**
+（2026-08-21 本文統合。実装 `js/mobile-shell.js:498-507` と一致を確認済み）。
 
 | 要素 | 文言 |
 |---|---|
-| Title | ログインが必要です |
-| Description | この機能を使うにはログインしてください |
+| Title | ログインが必要です（全context共通） |
+| **Description** | **contextに応じて5グループに解決**（下記 §3.3） |
 | Primary CTA | ログイン |
 | Secondary CTA | 新規登録 |
 | Close | 外側クリック / Escape / × ボタン |
+
+> 旧定義は Description を「この機能を使うにはログインしてください」の**共通1文**としていたが、
+> #14裁定で**ベネフィット説明の5文言グループ**へ置換された。
 
 ### 3.2 挙動ルール
 
@@ -123,23 +139,33 @@ UI 挙動を 3 パターンに整理し、ページごとに使い分けるル�
 - focus trap 必須（`docs/dialog-interaction-spec-v1.md` §3 準拠）
 - Modal open 時は元ページの scroll lock
 
-### 3.3 文脈別の文言バリエーション（Reserved）
+### 3.3 文脈別の文言（#14裁定・実装済み）
 
-> **（旧定義 — #14裁定により「Reserved」ではなく実装済み。context 8種は維持・表示文言は5グループに解決。冒頭の改訂注記参照）**
-
-将来「フォロー」「いいね」など mutate 文脈で Description を差し替える余地を残す。MVP は共通文言で開始する。
+**context は8種を維持し、表示文言は5グループに解決する。**
+呼び出し側を変えずに将来文言を細分化できる設計。
 
 ```ts
 type LoginRequiredModalContext =
-  | 'default'      // 'この機能を使うにはログインしてください'
-  | 'follow'       // 'フォローするにはログインしてください'
-  | 'like'         // 'いいねするにはログインしてください'
-  | 'favorite'     // 'お気に入りに追加するにはログインしてください'
-  | 'pin'          // 'ピン留めするにはログインしてください'
-  | 'comment'      // 'コメントするにはログインしてください'
-  | 'register'     // '登録するにはログインしてください'
-  | 'notifications';  // '通知を見るにはログインしてください'
+  | 'default' | 'register' | 'follow' | 'like'
+  | 'favorite' | 'pin' | 'comment' | 'notifications';
 ```
+
+| context | Description |
+|---|---|
+| `register` | ログインすると、RIG・パーツ・LOGを登録して、自分のガレージを管理できます。 |
+| `like` / `favorite` / `pin` / `comment` | ログインすると、気になる投稿を保存したり、いいねやコメントを残したりできます。 |
+| `follow` | ログインすると、気になるガレージをフォローして更新を追えます。 |
+| `notifications` | ログインすると、いいね・コメント・フォローなどの通知を確認できます。 |
+| `default`（省略時） | ログインすると、ガレージ管理やお気に入りなど、MyRIGの主な機能が使えます。 |
+
+**実装**: `js/mobile-shell.js:498-507` `LOGIN_CONTEXT_TEXT` に8キーで定義済み。
+うち like / favorite / pin / comment が同一文言＝実質5グループ。
+mobile-component-contract v0.5 §3.7 の表と一致。
+
+> 旧定義は「Reserved（将来差し替える余地を残す）」「MVPは共通文言で開始」としていたが、
+> **#14裁定で実装済みとなった。**（2026-08-21 本文統合）
+> 旧文言案（「フォローするにはログインしてください」等の機能説明型）は、
+> ベネフィット説明型へ置換されたため使わない。
 
 ---
 
