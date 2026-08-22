@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260822-013
-updated: 2026-08-22 15:00 JST
+revision: MYRIG-20260822-014
+updated: 2026-08-22 16:20 JST
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -73,8 +73,16 @@ PC版を差し替える（_decisions/p22-c21 参照）。実装待ち。
 ### B: 最優先（見た目が変わる。確認フローとの兼ね合いで要判断）
 1. PC Feed が #28 未適用 — pc/myrig-feed-v3.html:700-702 が All/Following/Trending の3タブ。
    ImageLightbox・無限スクロールも未実装。モバイル feed.html が完全な参照実装として存在する
-2. v8カラーがPC 40ファイル中6ファイルのみ適用 — v7ローカル定義14 / 共有CSS継承3 / 未定義17。
-   共有 pc/assets/css/SoT_tokens-v6.css:28,54 を直せば5ページ一括解決
+2. **v8カラーのPC展開 — 2026-08-22 に試行して撤回**（_audit/v8-rollout-attempt-20260822.md）。
+   **部分適用は不可。途中で止めると v7 より悪化する。**
+   v7緑+白文字=CR2.47（読める）→ v8黄+白文字=CR1.08（読めない）。
+   --cat-*-on を1箇所でも取りこぼすとそこが壊れる。
+   実際の波及は「共有CSS 2行で5ページ」ではなく **live PC 24ページ＋モバイル2ページ**。
+   取りこぼした3形: ①子要素が自前で color:#fff を持つ（create-soft__plus/__label）
+   ②dark側の上書きが特異度で勝つ ③背景が --cat-* を間接参照（--master-cta-accent）。
+   着手するなら全体を1バッチ＋ライト/ダーク両方でコントラスト実測。
+   ※関連: 共有トークンの実体が pc/assets/css/ と css/sot/ に**二重化**しており先に統合が要る。
+   ※逆向きの同型障害（黄"文字"が白地に乗る・CR1.07）が別途17箇所ある
 
 ### B: 高
 3. ランキング表現の残存 — home-v3:3209 の data-query-preset="weekly-like-ranking-rig" ほか、
