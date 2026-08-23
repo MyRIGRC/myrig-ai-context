@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260822-027
-updated: 2026-08-22 16:24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下記「timestamp要確認」参照）
+revision: MYRIG-20260823-028
+updated: 2026-08-23 11:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下記「timestamp要確認」参照）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,16 +14,24 @@ updated: 2026-08-22 16:24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただ�
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-08-22 / revision 027**
+**最終更新: 2026-08-23 / revision 028**
 
 ### 進行中のレーン
 
 | レーン | 状態 | 次のアクション |
 |---|---|---|
-| **PC検索バッチ** | 🟡 着手待ち（推奨・最優先） | 現物確認（`pc/myrig-search-v3.html`）→ 裁定②の種別セクション制へ改修。ゼロクエリ状態なし・キーワード入力の二重・ソート位置も同時に片付く |
+| **PC検索バッチ** | 🟢 実装・デプロイ済み | **実機確認待ち。** P22-R2（裁定②種別セクション制・ソート移設・キーワード二重解消）＋ P22-R3（件数矛盾・密度・適用中フィルター）。URL は下記 |
 | モバイル検索 Phase 1 | ✅ 完了 | search-page-plan-v2 へ反映済み |
 | モバイル検索 Phase 2 | ⚪ 未着手 | 絞り込みの複数選択・件数・全画面オーバーレイ・URL/履歴。`size_class`(HOLD)に触れない範囲なら進行可 |
 | 正典整理 | ✅ 完了 | GPT監査A/B/C/D全解消、HOLD整理済み。当面やることなし |
+
+**PC検索の確認URL**: `https://myrig-mobile-mock.vercel.app/pc/myrig-search-v3.html`
+
+### 直近で片付いたこと（2026-08-23）
+
+- PC検索バッチを実装・デプロイ（mockup `06e52dd` / `5c84467` / `ca9dfe4`）
+- **デプロイが8/22以降ずっと落ちていた事故を解消**（下記「デプロイ運用」参照）
+- 「PCはローカル確認のみ」というCURRENTの誤記を訂正
 
 ### 直近で片付いたこと（2026-08-22）
 
@@ -40,13 +48,66 @@ updated: 2026-08-22 16:24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただ�
 
 ---
 
+## デプロイ運用（2026-08-23 実測で確定・過去の記述を訂正）
+
+### 手順
+
+1. Cowork が対象ファイルのみ編集（`git add -A` は使わない）
+2. `_backup/<バッチ名>_<YYYYMMDD>_JST/` へ改修前をバックアップ
+3. commit（**author は指定しない。下記を厳守**）
+4. イタヤがターミナルで `mockup` → push ＋ Vercel deploy
+5. 実機／ブラウザで確認 → 裁定 → 次バッチ
+
+`mockup` はリポジトリ直下で `git push` → `npx vercel` を実行する。
+未commitの変更があれば `mock: update <YYYY-MM-DD HH:MM JST>` という
+コミットが自動生成される（`~/.zshrc` は未確認のため、この自動commit部分は推測）。
+
+### 🔴 commit author を上書きしないこと（L1）
+
+`myrig-mockup` には `user.name = MyRIGRC` / `user.email = admin@myrigrc.com` が
+リポジトリ設定として入っており、**これが Vercel チームのメンバー**である。
+`git -c user.email=...` で上書きすると Vercel が
+「not a member of the team」でデプロイを拒否する。
+
+**実際に起きた事故（2026-08-23 検出）**: 8/22 の Cowork コミット2本
+（`b1f2640` / `5c8fa55`、author `Cowork (Claude) <info@rccrawlers.net>`）と
+8/23 の2本（`06e52dd` / `5c84467`、author `Itaya Hirotomo <info@rccrawlers.net>`）が
+チーム外 author だったため、**8/21 の `0042b56` を最後にデプロイが全て失敗していた**。
+本番は約2日間 8/21 時点の内容を配信し続けていた。CLI 側の認証
+（`admin-71487649` / team `myrig-rcs-projects`）は正常で、原因は commit author 側。
+復旧は正しい author の空コミット `ca9dfe4` を積んで押し出す方法を取った
+（force push は CORE 禁止のため履歴は書き換えていない）。
+
+**症状の見分け方**: `git push` は成功するのにデプロイだけ届かない。
+デプロイURLが `Deployment is building` のまま数分以上変わらない。
+Vercel から「attempted to deploy a commit … but they're not a member of the team」通知。
+
+### 配信範囲（従来の記述は誤り）
+
+- `mockup` はリポジトリ直下から deploy するため、**PC版も配信される**。
+  `/pc/*` は実際に到達可能（`/pc/myrig-search-v3.html` が HTTP 200）
+- 旧記述「PC mockup はローカル確認のみ / `mockup` はモバイル側のみ deploy」は**誤り**
+- `mobile/0709 mobile/mockup-deploy/` は配信元では**ない**。
+  中身は `.env.local` `.gitignore` `.vercel` のみで、`.vercel` は直下と同一プロジェクトを指す。
+  `README_3plans.md:176` の「このフォルダごと mockup-deploy 内に置いて `mockup`」は
+  3プラン比較モック時代の運用で、現在の実態と異なる
+- `.vercelignore` は `_archive` `*.zip` `.DS_Store` `_backup` `docs` のみ除外（`pc/` は除外していない）
+
+### 恒久対策の候補（未着手）
+
+Vercel プロジェクトを `MyRIGRC/myrig-mockup` に Git連携させれば `git push` だけで
+自動デプロイになり、CLI認証と author 判定に依存する経路を減らせる。要検討。
+
+---
+
 ## 現在地（プロジェクト全体）
 
 フェーズ: モックアップ確認中（Next.js実装前）
 PC mockup: 39ページ、SoT CSS/JS構成、概ね完成
 Mobile mockup: 約55ページ、確認ダッシュボードで管理中
 確認状況: 確定0 / PC版のみ6 / 要確認49 / 未着手0（2026-08-20時点）
-確認ダッシュボード: デプロイ済（新規スレッド開始時に必ずURL・所在を確認すること）
+確認ダッシュボード: 所在不明。2026-08-23 に `myrig_pc_Ver3` 配下を探索したが該当ファイルなし
+（`Research/` 配下のダッシュボード群は別物）。**デプロイURL・ソース所在ともに未特定。**
 Mockup shell: v0.5 / Home r14 / P22-C35
 
 ナレッジ運用: 2026-08-21 CORE+CURRENT方式へ移行。
@@ -168,6 +229,20 @@ PC版を差し替える（_decisions/p22-c21 参照）。実装待ち。
 8. **48px未満のタップ要素**（search.html の最近の検索チップ行）— 見た目変更が不可避。要裁定
 9. Cookie同意バナー未実装
 10. NG-2（PC46箇所・モバイル14箇所）/ NG-6 / PC中立操作色の2値分裂 / 死んだv7宣言の掃除
+
+### B: 要裁定（2026-08-23 追加 — PC検索）
+
+12. **種別タブの追加ロード方式が正典と矛盾している** — 正典 search-page-plan-v2 は
+    「種別タブ＝無限スクロール。6件ずつ追加。ページ送りUIは無い」だが、
+    実装（`pc/myrig-search-v3.html`）は種別選択時にページャ＋表示件数セレクトを出す。
+    P22-R3 で件数から実ページ数を算出するようにしたので数字の矛盾は消えたが、
+    ページャを持つこと自体は正典と食い違ったまま。
+    **HOLD「追加ロード方式 #25 vs #26」と束ねて裁定する。**
+    ※ 同節の「6件に1枚のフルワイド注目枠（FEATURED）」もPC版は未実装
+13. **ゼロクエリ状態をPCに作るか** — 正典 search-page-plan-v2 に規定が無く、
+    記載は `_proposals/search-blueprint-v2`・`search-contract-v1`（PROPOSAL）のみ。
+    実装しない判断で通しているが、CURRENT旧記述は「PC検索バッチで片付く」としていた。
+    正典に規定を起こすか、作らない方針を明記するか要裁定
 
 ### B: 要裁定
 11. **「人気」バッジがUIに描画されている** — search-results.html:621
