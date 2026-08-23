@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260822-026
-updated: 2026-08-22 16:24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下記「timestamp要確認」参照）
+revision: MYRIG-20260823-027
+updated: 2026-08-23 22:14 JST（生成: GPT ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -28,6 +28,7 @@ GPT側起動テスト済み: revision一致確認・CURRENT本文からのHOLD3�
 **timestamp要確認（2026-08-22）**: 本ファイルの `updated` 表記について、
 GPT側確認時刻との間に約2時間のズレが報告された。原因未特定
 （Cowork/イタヤ実機いずれの時計かは未確認）。次回更新時にJST取得元を検証すること。
+**2026-08-23更新では `ZoneInfo("Asia/Tokyo")` でJSTを取得して記録済み。前回ずれの原因自体は未特定。**
 
 **2026-08-22 GitHub複数WRITE経路の競合防止ルールをCOREへ追加。**
 Cowork/GPT双方がGitHub mainへ直接書き込める体制になったため、
@@ -43,6 +44,13 @@ GPTがGitHub API経由で `_audit/gpt-write-test-20260822.md` を直接commit（
 Cowork側はCOREルールどおり fetch → 差分確認（behind 1）→ pull（fast-forward）を実行し、
 local HEADとorigin/mainの一致、revision/CURRENTが変更されていないことを確認した。
 READ/WRITEともにClaude・GPT双方で確認済み、複数WRITE経路の競合防止ルールは実運用で機能した。
+
+**2026-08-23 検索基盤の実装原則を裁定。** Next.js実装時はページごとに独立した検索エンジンを作らず、
+共通のSearch Serviceを1つ持つ。Community / Catalog / User の論理indexと、Global / Library / User /
+Registration / Feed内検索等のranking/filter profileを切り替えて利用する。query正規化・alias/synonym・
+typo tolerance・公開可否/権限フィルター等の共通処理はSearch Serviceへ集約する。
+Feedの通常表示（おすすめ/フォロー中等）は検索ではなく推薦・ランキング責務として分離する。
+具体エンジン製品・index物理構成・同期方式・関連度数式は未確定。詳細は `docs/search/search-page-plan-v2.md`。
 
 ## Active Overrides
 
