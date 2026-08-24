@@ -1,10 +1,17 @@
-# MyRIG BOOT — 各AIのProject Instructionsへ貼る原文
+# MyRIG BOOT — Project Instructionsに最低限含まれているべき項目
 
 > **拘束力: L1（恒久ルール・逸脱禁止）**
 >
-> このファイルは**貼り付け用の原文**であって、Project Knowledgeへ同期させるものではない。
-> 下の「貼り付け本文」をそのままコピーして、各AI（Claude / ChatGPT / Gemini）の
-> **Project Instructions（カスタム指示）** へ入れる。
+> このファイルは**Project Instructions（カスタム指示）用の参照原文**であって、
+> Project Knowledgeへ同期させるものではない。
+>
+> ⚠️ **全文貼り替え用のテンプレートではない。** これは「最低限これだけは書かれていること」
+> を定めたもの。各AIの指示が既にこれを上回っている場合、上書きすると劣化する。
+> 2026-08-24、ChatGPT側の指示は既にこれより詳細だった
+> （`CURRENT_STALE`と`CURRENT_UNAVAILABLE`の区別、正典優先順位7段、Task Routing、
+> L1/L2/HOLD、App/Research分離）。**差分だけ直すこと。**
+>
+> 新規に指示を書き起こす場合や、該当節が存在しない場合のみ、下の本文をそのまま使う。
 >
 > **なぜKnowledgeではなくInstructionsなのか**: Knowledgeに置いたファイルはそれ自体が
 > 同期対象になり、また古くなる余地が生まれる。入口を守るために入口を同期対象にするのは
@@ -81,6 +88,20 @@ _AI _audit _state docs に加えて _archive _decisions _proposals も必ず含�
 ---
 
 ## 補足（貼り付け不要・運用メモ）
+
+### 指示を入れただけでは読めない
+
+Project Instructions は「GitHub mainを読め」と**命じるだけ**で、**アクセス手段は与えない**。
+実際に読めるかどうかは、その環境で **GitHubコネクタが接続されているか**で決まる。
+
+- 接続済み → GitHub main を直読みできる。Sync now 不要
+- 未接続 → 指示に何と書いてあっても読めない。`CURRENT_UNAVAILABLE` になるのが正しい挙動
+
+**確認方法**: そのAIに「今のCURRENTのrevisionは？」と聞く。
+
+- `CURRENT: MYRIG-20260824-030` のように**実取得した値**を答える → 接続OK
+- 「取得できない」「Knowledgeにある版では」と答える → 未接続。設定 → コネクタ で接続する
+- revisionを答えずに仕様を語りだす → **指示が効いていない**。指示側を見直す
 
 ### 環境ごとの実測（2026-08-24）
 
