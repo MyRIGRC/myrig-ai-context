@@ -7,7 +7,7 @@
 > **「既存仕様と異なる」ことだけを理由に案を捨てないこと。**
 > 差分を明示すればイタヤ裁定で変更できる。
 
-**更新:** 2026-08-24（SEARCH-UPDATE-001 を反映）
+**更新:** 2026-08-24（SEARCH-UPDATE-001 を反映 ＋ 2026-08-23 の検索基盤実装原則を統合）
 **実装:** `search.html` / `search-results.html` / `js/mobile-shell.js` / `pc/myrig-search-v3.html`
 モックでは `/search`→`search.html`、`/search?q=`→`search-results.html?q=` に読み替え。
 
@@ -213,6 +213,21 @@ RIG / パーツ / LOG = 共通カードのグリッド（PC 4列 / Mobile 2列�
 | ④ | 「すべて」の先頭に製品マスタの「答えカード」 | 🔴 **失効**（2026-08-24）。製品情報を標準検索から外したため前提が消滅。Libraryの責務へ |
 | ⑤ | 絞り込み候補チップ（押すとクエリが書き換わる） | 🟡 **改訂**（2026-08-23）。Amazon型の検索語拡張サジェストとしてヘッダー検索に実装済み。「結果内キーワード欄を作らない」は維持だが、理由が「第二検索欄の禁止」→「自由語はヘッダー1本に統一しサジェストで伸ばす」に変わった |
 | ⑥ | 「この検索を保存」→ 新着通知 | ⚪ **有効・未実装**（Phase 4）。認証ガードと束ねる必要あり |
+
+### 検索基盤の実装原則（2026-08-23 裁定・未実装）
+
+Next.js実装時の検索基盤は、**ページごとに独立した検索エンジンを作らず、共通の Search Service を1つ持つ**。
+検索面ごとの差は、検索対象indexとranking/filter profileの切替で表現する。
+
+- **Community index**: RIG / ユーザー登録PARTS / LOG を対象。標準検索の主対象。
+- **Catalog index**: Research所有のmasterデータを検索用ドキュメントへ同期・索引化したもの。Library検索の主対象。
+- **User index**: profile / handle 等のユーザー検索用。
+- **Search profile**: Global / Library / User / Registration / Feed内検索等で、対象index・重み・フィルター・ソートを切り替える。
+- query正規化、alias/synonym解決、typo tolerance、公開可否/権限フィルター等の共通処理はSearch Service側へ集約し、各ページへ重複実装しない。
+- Feedの通常表示（おすすめ/フォロー中等）は検索ではなく推薦・ランキング責務として分離する。将来Feed内自由語検索を設ける場合は共通Search Serviceを利用する。
+
+**未確定のまま残すもの:** Meilisearch / Typesense / Algolia / PostgreSQL FTS 等の具体製品選定、index物理構成、同期方式、関連度の数式・重み。実装時に比較・実測して決める。
+この原則は「同じ語なら全画面で同じ順位になる」という意味ではない。検索面ごとにranking profileは変えてよいが、検索基盤と正規化ロジックは共通化する。
 
 ---
 

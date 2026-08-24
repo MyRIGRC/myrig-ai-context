@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260824-029
-updated: 2026-08-24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下記「timestamp要確認」参照）
+revision: MYRIG-20260824-030
+updated: 2026-08-24 15:43 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-08-24 JST（生成: Cowork ZoneInfo("Asia/Tokyo")。ただし下�
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-08-24 / revision 029**
+**最終更新: 2026-08-24 / revision 030**
 
 ### 進行中のレーン
 
@@ -47,6 +47,13 @@ Mobile `https://myrig-mobile-mock.vercel.app/search.html` / `search-results.html
 
 ### 直近で片付いたこと（2026-08-24）
 
+- **⚠️ revision番号が枝分かれしていたのをマージで解消。**
+  Cowork側とGPT側が独立に **027** を採番していた（Cowork=NOW節新設 `7276e2f` /
+  GPT=共通Search Service原則 `9ea1669`）。両者は共通祖先026から分岐しており、
+  マージして統合。**内容は両方とも失われていない**（Search Service節は
+  search-page-plan-v2 §裁定済み・未実装 の直後と、本ファイル「現在地」節に残存）。
+  以後の採番衝突を防ぐため、上記「正典のWRITEはCoworkに一本化」を裁定。
+  マージ後の通し番号は **030**（027の重複を残したまま先へ進める。過去の番号は書き換えない）
 - **CORE に「正典化判断基準」を新設。** すべての設計判断を正典化しない。
   判定は重要度ではなく「黙ってズレたときのコスト」で行う。
   UI詳細（件数・位置・カードサイズ・文言）は正典に固定せず、実装＋DECISIONSへ。
@@ -74,6 +81,19 @@ Mobile `https://myrig-mobile-mock.vercel.app/search.html` / `search-results.html
 - **デスクトップCowork**: ローカル直読み。ファイル編集・commit可。pushはイタヤ手動
 - **ブラウザ通常チャット**: Knowledge経由。**push後は Sync now が必要**（自動同期ではない）
 - どの環境でも、CURRENT本文の revision を正とする（`revision.txt`は索引に乗らないことがある）
+
+### 🔴 正典のWRITEはCoworkに一本化（2026-08-24 裁定）
+
+**`myrig-ai-context` への書き込みはCowork（Claude）だけが行う。GPTはREAD専用。**
+GPTが読むのは自由だが、修正してpushしない。
+
+### 🔴 `mockup` は正典をpushしない（2026-08-24 実測）
+
+`mockup` が push するのは **`myrig-mockup`（モック）だけ**。
+`myrig-ai-context`（正典）は**別リポジトリ**なので手動pushが要る。
+2026-08-24、モック側が同期済みの状態で `mockup` を実行して
+`Everything up-to-date` と出たが、正典側は未push4本のまま残っていた。
+**正典を更新したら、モックとは別に push すること。**
 
 ---
 
@@ -152,6 +172,7 @@ GPT側起動テスト済み: revision一致確認・CURRENT本文からのHOLD3�
 **timestamp要確認（2026-08-22）**: 本ファイルの `updated` 表記について、
 GPT側確認時刻との間に約2時間のズレが報告された。原因未特定
 （Cowork/イタヤ実機いずれの時計かは未確認）。次回更新時にJST取得元を検証すること。
+**2026-08-23更新では `ZoneInfo("Asia/Tokyo")` でJSTを取得して記録済み。前回ずれの原因自体は未特定。**
 
 **2026-08-22 GitHub複数WRITE経路の競合防止ルールをCOREへ追加。**
 Cowork/GPT双方がGitHub mainへ直接書き込める体制になったため、
@@ -167,6 +188,13 @@ GPTがGitHub API経由で `_audit/gpt-write-test-20260822.md` を直接commit（
 Cowork側はCOREルールどおり fetch → 差分確認（behind 1）→ pull（fast-forward）を実行し、
 local HEADとorigin/mainの一致、revision/CURRENTが変更されていないことを確認した。
 READ/WRITEともにClaude・GPT双方で確認済み、複数WRITE経路の競合防止ルールは実運用で機能した。
+
+**2026-08-23 検索基盤の実装原則を裁定。** Next.js実装時はページごとに独立した検索エンジンを作らず、
+共通のSearch Serviceを1つ持つ。Community / Catalog / User の論理indexと、Global / Library / User /
+Registration / Feed内検索等のranking/filter profileを切り替えて利用する。query正規化・alias/synonym・
+typo tolerance・公開可否/権限フィルター等の共通処理はSearch Serviceへ集約する。
+Feedの通常表示（おすすめ/フォロー中等）は検索ではなく推薦・ランキング責務として分離する。
+具体エンジン製品・index物理構成・同期方式・関連度数式は未確定。詳細は `docs/search/search-page-plan-v2.md`。
 
 ## Active Overrides
 

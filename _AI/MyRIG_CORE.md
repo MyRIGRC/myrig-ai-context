@@ -158,12 +158,23 @@ git add -A は使わない。常に明示的にファイルを列挙する。
 
 ## GitHub複数WRITE経路の競合防止
 
-本repositoryには複数のWRITE経路が存在しうる。
+### 🔴 2026-08-24 裁定: 正典のWRITEはCoworkに一本化
+
+**`myrig-ai-context` へ書き込むのは Cowork / Claude Code のみ。GPTはREAD専用。**
+GPTが読むのは自由だが、修正してpushしない。
+
+**この裁定の理由（実際に起きた事故）**: 2026-08-24、Cowork側とGPT側が独立に
+revision **027** を採番していたことが判明した（Cowork=NOW節新設 / GPT=共通Search Service原則）。
+共通祖先026から両者が分岐し、同じ番号の異なる正典が2つ存在する状態になっていた。
+マージで統合したが、**気づかずにforce pushしていれば片方が消えていた。**
+番号の一意性は単一WRITE経路でしか担保できない。
+
+以下は、それでも複数経路が生じた場合に備えた手順として残す。
 
 - Cowork / Claude Code:
   ローカルcloneを編集し、git commit / push
 - GPT:
-  GitHub API / connector経由でrepositoryを直接更新
+  GitHub API / connector経由でrepositoryを直接更新（**現在は行わない**）
 
 そのため、WRITE開始前には必ずGitHub mainの最新版との同期を確認する。
 
