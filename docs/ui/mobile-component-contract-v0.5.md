@@ -72,7 +72,10 @@ Phase 1以降の全モバイルページが共有するShell・部品・tokenの
 
 ### 3.1 Header
 - **DOM:** `header.mobile-shell-header#mobileHeader[role=banner]` > `.mobile-shell-header__inner` > ①`.mobile-logo.mobile-logo--sm`（`__img--light/--dark` 2枚出し分け＋`__sub`「RC GARAGE」）②`.hdr-search`（`__t--full` / `__t--short`＝379px以下短縮文言）
-- **確定事項（裁定済み・再提案禁止）:** 通知アイコン・アバターは**置かない**。検索窓文言は「RIG・パーツ・LOG・製品情報を検索」
+- **確定事項（裁定済み・再提案禁止）:** 通知アイコン・アバターは**置かない**。検索窓文言は「**RIG・パーツ・LOGを検索**」
+  - 🔴 **2026-08-24 改訂**: 旧文言は「RIG・パーツ・LOG・製品情報を検索」。標準検索の対象から製品情報を外したため
+    （SEARCH-UPDATE-001 / `_decisions/2026-08-24_search-community-scope-v1.md`）。
+    「再提案禁止」の対象は**通知アイコン・アバターを置かないこと**であって、検索窓文言は対象範囲の変更に追随する
 - **状態:** 通常 / 未ログイン＝**「新規登録」ピル**を`__inner`末尾に表示（タップ48px・注入はmobile-shell.js）。遷移先: `/signup?next=<encoded・safeNext通し>`【#13・v0.4改訂】
 - **#13成立条件（契約化）:** ①`/signup`のファーストビュー内に「登録済みの方はログイン」を表示し`/login?next=<同一next>`へ遷移 ②signup→login間で`next`を落とさない ③新規登録後はauth仕様どおりonboarding経由（`next`はsessionに退避）で完了後に`next`へ復帰（auth-guard-spec L173準拠）
 
@@ -106,7 +109,11 @@ Phase 1以降の全モバイルページが共有するShell・部品・tokenの
 - **3本整理（確定）:** ①Header検索＝**その場で検索開始**（3.1b Overlay・遷移しない） ②BottomNav「探す」＝`/search`へ移動（**自動focusなし** — カテゴリやメーカーから探す動線を妨げない） ③検索確定＝`/search?q=...`へ移動
 - **`focus=1`方式は廃止**【v0.4から変更】。関連コード・パラメータ処理を除去
 - **/searchのヘッダー＝SearchHeader variant** `.mobile-shell-header--search`: 通常の「ロゴ＋小型検索窓」ヘッダーを出さず、**横幅いっぱいの検索入力欄**＋クリア/検索ボタンで構成。leading領域は**検索トップ＝ロゴまたは空（戻る矢印なし — BottomNav主要タブを下層ページに見せない）／検索結果＝戻る矢印（fallback=`/search`。Homeではない）**。**ページ内に大型検索欄を別途置かない**（検索窓2つ問題の解消 — 大型欄をヘッダーへ統合する。近づけるだけでは不可）。/searchトップの下部構成（種別タブ・メーカー・車種カテゴリ・最近の検索・フィルター/結果）は
-**search-page-plan v2 が正**（docs/search/search-page-plan-v2.md）。種別タブの無限スクロールは #26 裁定。
+**search-page-plan v2 が正**（docs/search/search-page-plan-v2.md）。
+  - 🔴 **2026-08-24 改訂**: 「種別タブの無限スクロールは #26 裁定」は失効。
+    **種別タブという独立状態を廃止**し、種別は検索結果ページ内のフィルター状態になった。
+    Mobileの検索結果は「すべて（RIG/パーツ/LOG混在）」の1状態＋無限スクロール。
+    詳細は `_decisions/2026-08-24_search-community-scope-v1.md`
 - searchSheet系の語は引き続き参照0件（静的ゲート）
 - **実機ゲート:** iPhone Safari実機でOverlayタップ→キーボード挙動確認（デプロイ後・イタヤ確認項目）
 
