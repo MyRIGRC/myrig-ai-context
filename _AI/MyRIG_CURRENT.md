@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260825-032
+revision: MYRIG-20260825-033
 updated: 2026-08-25 (JST)（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -14,16 +14,41 @@ updated: 2026-08-25 (JST)（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-08-25 / revision 032**
+**最終更新: 2026-08-25 / revision 033**
+
+> 📌 **スレッドをまたぐときは `_state/HANDOFF_20260825.md` も読む。**
+> 本節が「いまどこにいるか」の正本。HANDOFFはそれを補う会話レベルの文脈
+> （なぜそうなったか・進め方の約束・踏んだ罠・やらないこと）。HANDOFFは正典ではない。
 
 ### 進行中のレーン
 
 | レーン | 状態 | 次のアクション |
 |---|---|---|
 | **検索 SEARCH-UPDATE-001** | ✅ **CLOSE（2026-08-25）** | 追加監査・cleanup・改善探索を行わない。軽微/横断は Web文法キューへ |
-| MyRIG Web文法（横断設計） | ⚪ 未着手 | 骨格をDRAFTで作る。正典昇格は項目ごとに判断 |
-| Home 配線再検証 | ⚪ 未着手 | デザイン再制作ではなく配線検査（遷移先・state受け渡し・Feedとの役割・owner文脈） |
+| **Home 実画面レビュー** | 🔵 **進行中（GPT＋イタヤ主導）** | **いまここ。** イタヤが実画面を見て指摘 → 実装。Coworkは指示待ち |
+| MyRIG Web文法（横断設計） | 🟡 DRAFT v0 作成済み・**一旦停止** | 追加調査・文書拡張はしない。Homeレビューで判断材料が出たら再開 |
+| Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
 | モック全体の第2周 | ⚪ 未着手 | ページ単体ではなくフロー単位で確認する体制へ移行 |
+
+**ライブ**: `myrig-mockup` = `054e6e0`（production READY）
+スクリーンショット撮影は不要（2026-08-25 以降、イタヤが直接ライブを見る運用）。
+
+### 🔵 MyRIG Web文法（2026-08-25 / DRAFT）
+
+**`myrig-mockup/docs/WEB_GRAMMAR_DRAFT_v0.md`（NOT CANON）**
+
+Searchで確立した規約のうち「横断で意味があるもの」だけを他面へ広げるための分類作業。
+Route / Navigation / Context・Permission / State・URL / Interaction / Shared UI の6本柱。
+Route・Navigation の観測値は **GPT独立実測を確定入力**とし、Cowork実測と主要結論が一致。
+
+**正典ではない。ここに書いてあることを根拠に設計を固定しない。**
+正典昇格は項目ごとに、実装バッチと対で判断する（CORE「正典化判断基準」）。
+
+現状: CONFIRMED 4 / GAP 17 / HOLD 1 / **未裁定（USER_DECISION）は 0**。
+
+**モック全体の性質（棚卸しで判明）**: ページ単体は作り込まれているが、横につなぐ規約が無い。
+同じ部品が面ごとに別実装、同じ概念が面ごとに別語彙。
+Mobileは単一shellで歩けるが、**PCは40画面中28が行き止まり**だった（バッチ1で解消）。
 
 **確認URL**: PC `https://myrig-mobile-mock.vercel.app/pc/myrig-search-v3.html`
 Mobile `https://myrig-mobile-mock.vercel.app/search.html` / `search-results.html?q=TRX-4`
@@ -100,6 +125,15 @@ Mobile `https://myrig-mobile-mock.vercel.app/search.html` / `search-results.html
 
 ### 直近で片付いたこと（2026-08-25）
 
+- **Web文法 DRAFT v0 を作成**（`myrig-mockup/docs/WEB_GRAMMAR_DRAFT_v0.md`・NOT CANON）
+- **Web文法 実装バッチ1 完了・deploy済み**（`054e6e0`）
+  - PC app-nav を実PCサービス画面へ結線（30ファイル / 90本）。
+    **PCは40画面中28が行き止まりだった**のが解消
+  - `pc/assets/js/SoT_app-shell.js` に未実装routeの共通handlerを追加。
+    Mobileと同条件（href が無いか `#` のときだけ preventDefault + toast）。
+    これが無く、PC 33ファイルの法務リンクはMobileと同じmarkupなのに何も起きなかった
+  - Home「今週の人気」の RIG/パーツ切替を修正（`hidden` がCSSの `display:flex` に負けていた）
+  - 実測15項目 全PASS / pageerror 0 / 見た目の変更なし
 - **検索を CLOSE**（上記）。相互監査（Cowork実装＋実操作測定 / GPT独立ライブ監査）で
   P0級を計12件是正。最終回帰101項目 全PASS
 - モック全体の棚卸し（A/B/C/D）を実施し、
@@ -477,13 +511,48 @@ CORE.md「HOLD原則」を参照。
 
 ### PENDING（2026-08-25 時点）
 
+#### 🔴 Next.js実装前に「決める」必要がある配管4件
+
+DRAFT v0 の GAP 17件のうち、**実装前に決めないと止まるもの**だけを抜いたもの。
+本体は判断であって、コード変更は付随物。残り13件はモック段階では放置してよい
+（React化で書き方ごと変わる／実装で本物を作る）。
+
+| # | 内容 | なぜ必要か |
+|---|---|---|
+| 1 | **Routeの正本** — `/terms` か `/legal/terms` か。PC HTMLとMobile JSで綴りが違い、routing-table は `/terms` 側。`/legal/tokushoho` は routing-table に定義が無い | 実装のURL設計そのもの。後から直すと全ページ |
+| 2 | **public / owner 境界の実装** — 裁定済み・未実装（下記DECISION参照） | 権限モデル。ガードの置き場所が決まらない |
+| 3 | **デザイントークンの正本** — `--cat-rig` が `#66b900`(16ファイル) と `#FBFF00`(5ファイル) の**新旧2系統同時存在**。`:root` を持つファイルが46本、107トークンが多重定義 | Design System化で必ず踏む。見る画面で色が変わる |
+| 4 | **routing-table / page-mapping に Mobile 41画面が1つも無い**（grep実測0件） | Mobileが実装計画から構造的に抜け落ちている |
+
+> **進め方の方針（2026-08-25）**: この4件を机上で全部決めてから実装するより、
+> **Home → Feed → Garage と実画面を歩きながら1つずつ潰す**方が早くて確実。
+> 「このカードを押したらどこへ行くか」を決める作業が、そのまま 1 と 2 の答えになる。
+
+#### その他
+
 - **将来のユーザー検索方式** — MVPでは専用入口を置かない。
   方式（通常検索に混ぜる / `@username` 解釈 / 専用画面 / おすすめ 等）は
   実利用を見て決める。**いま方式を固定しない**
 - **`scale` HOLD解除後のSearch復帰判断** — `size_class` の値集合が確定したら、
   検索トップ・PC FACETS・Mobile AXES へ**同時に**戻す。片面だけ戻さない
 - **`docs/WEB_GRAMMAR_QUEUE.md` の横断課題**（`myrig-mockup` 側）—
-  hidden×display、検索ページ外の旧語彙、種別チップ件数の意味、空`?q=`の扱い
+  hidden×display の残り9件、検索ページ外の旧語彙、種別チップ件数の意味、空`?q=`の扱い
+
+### 🔴 owner / public のRIG遷移境界（2026-08-25 イタヤ裁定・DECISION）
+
+- 他人の公開GarageにあるRIGを押す → **公開RIG詳細**へ遷移
+- 自分のGarageにあるRIGを押す → **オーナー用RIG詳細・管理画面**へ遷移
+- **public文脈から owner/edit 画面へ直接入れない**
+- **owner / public の違いを、偶然の href やモックのファイル名に依存させない**
+
+**現行実装はこれに反している（GAP・未修正）**。
+`user-garage.html:713` の `var to = href || 'garage-rig-detail.html';` がオーナー版を既定にしており、
+既定の描画パスは引数を渡さないため public から owner画面へ入れてしまう。
+公開サブページ3本（`user-garage-rigs/-parts/-logs`）は正しく結線されており、破れているのはTOPだけ。
+
+実装時は **href の付け替えだけで終わらせない**。context を明示的に持たせて遷移先をそこから決める
+（既定値でowner側を指す構造を残すと同型が再発する）。
+根本原因は「Mobileにカードの共通コンポーネントが無く、同じ関数が2ファイルへコピーされ既定値だけ取り残された」こと。
 
 ### 裁定待ちHOLD（案を出して裁定を求めてよい）
 
