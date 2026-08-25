@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260825-031
+revision: MYRIG-20260825-032
 updated: 2026-08-25 (JST)（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -14,7 +14,7 @@ updated: 2026-08-25 (JST)（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-08-25 / revision 031**
+**最終更新: 2026-08-25 / revision 032**
 
 ### 進行中のレーン
 
@@ -102,7 +102,12 @@ Mobile `https://myrig-mobile-mock.vercel.app/search.html` / `search-results.html
 
 - **検索を CLOSE**（上記）。相互監査（Cowork実装＋実操作測定 / GPT独立ライブ監査）で
   P0級を計12件是正。最終回帰101項目 全PASS
-- モック全体の棚卸し（A/B/C/D）を実施し、`myrig-mockup` 側へスナップショットを残した
+- モック全体の棚卸し（A/B/C/D）を実施し、
+  **`_state/MyRIG_MOCK_SNAPSHOT_20260824.md` を観測資料として格納した**
+  （Status: OBSERVATION / NOT CANON。確定仕様ではない。
+  Searchに関する観測値は 2026-08-25 の CLOSE 以前のものなので一部陳腐化している。
+  Web文法・全体配線監査の入力資料として使い、現在状態を断定するときは実装を再確認すること。
+  **正本参照位置はここ1箇所。`myrig-mockup/docs/` へ複製しない**）
 - 旧・検索サイドバー（361行）を active HTML から撤去し `_archive` へ退避。
   `<div hidden>` の閉じ位置ミスで**実画面に出たままだった**（撤去済み軸やメーカー重複が見えていた）
 - `docs/WEB_GRAMMAR_QUEUE.md` を新設（Search外の横断課題の置き場）
