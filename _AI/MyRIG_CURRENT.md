@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260824-030
-updated: 2026-08-24 15:43 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260825-031
+updated: 2026-08-25 (JST)（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,18 +14,33 @@ updated: 2026-08-24 15:43 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-08-24 / revision 030**
+**最終更新: 2026-08-25 / revision 031**
 
 ### 進行中のレーン
 
 | レーン | 状態 | 次のアクション |
 |---|---|---|
-| **検索設計 SEARCH-UPDATE-001** | ✅ 実装・デプロイ・実機確認・正典反映すべて完了 | 当面なし。PENDINGは下記 |
-| モバイル検索 Phase 2 | ⚪ 未着手 | 絞り込みの複数選択・件数・全画面オーバーレイ・URL/履歴。`size_class`(HOLD)に触れない範囲なら進行可 |
-| 正典整理 | ✅ 完了 | GPT監査A/B/C/D全解消、HOLD整理済み |
+| **検索 SEARCH-UPDATE-001** | ✅ **CLOSE（2026-08-25）** | 追加監査・cleanup・改善探索を行わない。軽微/横断は Web文法キューへ |
+| MyRIG Web文法（横断設計） | ⚪ 未着手 | 骨格をDRAFTで作る。正典昇格は項目ごとに判断 |
+| Home 配線再検証 | ⚪ 未着手 | デザイン再制作ではなく配線検査（遷移先・state受け渡し・Feedとの役割・owner文脈） |
+| モック全体の第2周 | ⚪ 未着手 | ページ単体ではなくフロー単位で確認する体制へ移行 |
 
 **確認URL**: PC `https://myrig-mobile-mock.vercel.app/pc/myrig-search-v3.html`
 Mobile `https://myrig-mobile-mock.vercel.app/search.html` / `search-results.html?q=TRX-4`
+
+### ✅ 検索 CLOSE（2026-08-25）
+
+- 最終回帰 **101項目 全PASS** / JS・pageerror **0**
+- production deploy 済み
+- **GPTによるライブ独立監査 PASS**
+- 以後、Searchモックの追加監査・cleanup・改善探索は行わない。
+  軽微事項・横断課題は `myrig-mockup` の `docs/WEB_GRAMMAR_QUEUE.md` へ送る
+- 回帰スクリプト: `myrig-mockup` の `_state/search_regression.py`
+
+**モック全体の棚卸し（2026-08-24 A/B/C/D）で分かった重要な前提**:
+モックは長らくページ単体で作り込まれており、横につなぐと
+「URL語彙が違う」「同じボタンなのに意味が違う」「PCだけ歩けない」「SoTが二重化」
+といった亀裂が出る。今後は**ページ単位ではなくフロー単位**で詰める。
 
 ### 🔴 検索の骨格が変わった（2026-08-24 / SEARCH-UPDATE-001）
 
@@ -39,11 +54,58 @@ Mobile `https://myrig-mobile-mock.vercel.app/search.html` / `search-results.html
 | 種別 | 独立ページ | **同一ページ内のフィルター状態** |
 | PC | 非ブレンド | **Mobileと同一のブレンド** |
 | 製品情報 | 結果に混在 | **Libraryへの補助導線のみ**（件数非合算） |
-| ユーザー | 結果に混在 | **検索トップの「ビルダー」入口へ** |
+| ユーザー | 結果に混在 | **MVPでは検索入口を置かない**（2026-08-25 更新。旧「ビルダー入口へ」は失効） |
 
 失効した旧裁定: ②PC非ブレンド / ④答えカード / ⑦⑧すべてはソート不可 / 29件ダイジェスト /
-種別タブ無限スクロール / 種別6本 / 関連ユーザー枠 / FEATURED差し込み。
+種別タブ無限スクロール / 種別6本 / 関連ユーザー枠 / FEATURED差し込み /
+**ビルダー入口（2026-08-25 失効）** / **自分のRIGから探す（2026-08-25 失効）**。
 **削除ではなく失効として記録**（なぜ以前そうだったかを追えるようにするため）。
+
+### 🔴 検索の確定仕様（2026-08-25 / DECISION）
+
+裁定原本と「なぜそうなったか」は
+`_decisions/2026-08-25_search-closure-v1.md` / `_decisions/2026-08-24_search-community-scope-v1.md`。
+詳細な画面仕様は `docs/search/search-page-plan-v2.md`。ここは索引。
+
+**対象と入口**
+- 標準Searchの対象は Community 3種（**RIG / パーツ / LOG**）
+- 検索トップ「MyRIGで探す」は **3入口のみ**（RIG / パーツ / LOG）
+- 「もっと詳しく探す」は **2入口**（条件で探す / 製品名・型番で探す）
+- **ビルダー／ユーザー専用の検索入口はMVPから撤去**。
+  ユーザー検索という概念の永久廃止ではなく、方式は将来検討（PENDING）
+- **「自分のRIGから探す」は撤去**。`rig_scope` はSearch仕様に含めない
+- `scale`（`size_class`）はHOLD中のため **UI非表示・URLへ送らない**
+
+**URL / 状態**
+- URLの外部語彙 `type` は **`rig` / `parts` / `log`**。
+  PC内部の `logs` はmappingの内側だけに閉じる
+- `q` なし / `q=` 空 は **自由語条件なし**
+- `q` は **実結果・件数・Facet件数・Mobileシート内previewの基底predicate**
+- `q` の検索対象に **ユーザー名 / @handle を含めない**
+- 検索トップの Enter と固定CTAは **同一の Search State serializer** を通す
+
+**Facet**
+- **canonical-valid vocabulary と fixture存在値を分離する**
+- 正典上有効だが fixture 0件の値は **保持して0件表示**
+- 本当に無効な値のみ **解除＋通知**
+- 同一Facet内は **OR**、異Facet間は **AND**
+- 種別固有Facetを選んだら **対応する type へ state を正規化**
+- scope変更で無効になる条件は解除し、**silent clear 禁止**（必ず通知）
+- `maker` は RIG/PARTS では正本属性。LOG は **linked RIG から確実に導出できる場合のみ派生**
+
+**Library / その他**
+- Library は Community検索結果とは **別母集団**。Community件数へ合算しない
+- 「関連する」と表示するのは **明示的な関連根拠がある場合のみ**
+- **Search面は広告ゼロ**
+
+### 直近で片付いたこと（2026-08-25）
+
+- **検索を CLOSE**（上記）。相互監査（Cowork実装＋実操作測定 / GPT独立ライブ監査）で
+  P0級を計12件是正。最終回帰101項目 全PASS
+- モック全体の棚卸し（A/B/C/D）を実施し、`myrig-mockup` 側へスナップショットを残した
+- 旧・検索サイドバー（361行）を active HTML から撤去し `_archive` へ退避。
+  `<div hidden>` の閉じ位置ミスで**実画面に出たままだった**（撤去済み軸やメーカー重複が見えていた）
+- `docs/WEB_GRAMMAR_QUEUE.md` を新設（Search外の横断課題の置き場）
 
 ### 直近で片付いたこと（2026-08-24）
 
@@ -393,6 +455,30 @@ HIGH4件・MEDIUM8件・LOW3件を検出。**HIGH4件＋LOW2件をrevision024で
 下記のHOLDは大半が**「将来議論項目（そのUI/機能の議論を始めるまで触らない）」**である。
 Claude/GPT/Geminiとも、これらに対して裁定要求・催促を出さないこと。
 CORE.md「HOLD原則」を参照。
+
+### 🔴 manufacturer transport値（2026-08-25 / Research照会待ち）
+
+検索トップが出すメーカー値（`TAMIYA` / `Vanquish` / `京商`）と、
+モック結果側の値（`Tamiya` / `Vanquish Products`）が食い違う。
+`maker=` は完全一致で評価するため、**検索トップ自身が提示した値から偽0件を作れる**。
+
+**禁止**: 大文字小文字無視・部分一致・独自aliasで救うこと。
+`manufacturers` は Research 所有（`docs/schema/myrig_db_schema_v1_6.md`）で、
+別名は `master_aliases` 側に持つ設計（2026-08-21 F-5: `TRX` は Traxxas の別名）。
+モック側で正規化を発明すると本番の alias 解決と二重になって壊れる。
+
+**必要なもの**: Research 正本の manufacturer master / alias の実値。
+それまで**表示ラベルと transport 値を分離できない**ので、不一致は残したままにしてある。
+
+### PENDING（2026-08-25 時点）
+
+- **将来のユーザー検索方式** — MVPでは専用入口を置かない。
+  方式（通常検索に混ぜる / `@username` 解釈 / 専用画面 / おすすめ 等）は
+  実利用を見て決める。**いま方式を固定しない**
+- **`scale` HOLD解除後のSearch復帰判断** — `size_class` の値集合が確定したら、
+  検索トップ・PC FACETS・Mobile AXES へ**同時に**戻す。片面だけ戻さない
+- **`docs/WEB_GRAMMAR_QUEUE.md` の横断課題**（`myrig-mockup` 側）—
+  hidden×display、検索ページ外の旧語彙、種別チップ件数の意味、空`?q=`の扱い
 
 ### 裁定待ちHOLD（案を出して裁定を求めてよい）
 
