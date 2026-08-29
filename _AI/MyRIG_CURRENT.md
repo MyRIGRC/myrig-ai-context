@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260825-034
-updated: 2026-08-25 (JST)（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260829-035
+updated: 2026-08-29 (JST)（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-08-25 (JST)（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-08-25 / revision 034**
+**最終更新: 2026-08-29 / revision 035**
 
 > 📌 **スレッドをまたぐときは `_state/HANDOFF_20260825.md` も読む。**
 > 本節が「いまどこにいるか」の正本。HANDOFFはそれを補う会話レベルの文脈
@@ -25,7 +25,8 @@ updated: 2026-08-25 (JST)（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | レーン | 状態 | 次のアクション |
 |---|---|---|
 | **検索 SEARCH-UPDATE-001** | ✅ **CLOSE（2026-08-25）** | 追加監査・cleanup・改善探索を行わない。軽微/横断は Web文法キューへ |
-| **Home 実画面レビュー** | 🔵 **進行中（GPT＋イタヤ主導）** | **いまここ。** イタヤが実画面を見て指摘 → 実装。Coworkは指示待ち |
+| **Browse整合（BROWSE-CONTRACT-001）** | 🔴 **進行中（Cowork主査 / 2026-08-29〜）** | **いまここ。** 実測完了・表示契約 v1 策定済み。次は検証スクリプト → 修正。**このレーンの間、GPTはBrowse系ファイルを触らない**（§下記） |
+| **Home 実画面レビュー** | 🔵 進行中（GPT＋イタヤ主導） | イタヤが実画面を見て指摘 → 実装 |
 | MyRIG Web文法（横断設計） | 🟡 DRAFT v0 作成済み・**一旦停止** | 追加調査・文書拡張はしない。Homeレビューで判断材料が出たら再開 |
 | Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
 | モック全体の第2周 | ⚪ 未着手 | ページ単体ではなくフロー単位で確認する体制へ移行 |
@@ -122,6 +123,43 @@ Mobile `https://myrig-mobile-mock.vercel.app/search.html` / `search-results.html
 - Library は Community検索結果とは **別母集団**。Community件数へ合算しない
 - 「関連する」と表示するのは **明示的な関連根拠がある場合のみ**
 - **Search面は広告ゼロ**
+
+### 🔴 Browse整合 BROWSE-CONTRACT-001（2026-08-29 / Cowork主査）
+
+**正典: `docs/ui/browse-display-contract-v1.md`（L2。§3.2 禁止事項と §4.3 定義場所は L1）**
+
+Browse系の見た目が面ごとにズレる問題を全面実測した結果、原因は指示や担当者ではなく
+**同一部品が5系統に分裂し、揃える先が特定できない**という構造的欠陥だった。
+
+| カード部品 | 定義場所 | 判定 |
+|---|---|---|
+| `myrig-*-card variant="browse"` | `SoT_card-components.js`（正典） | **正しい**。PC Category Top / PC Home が使用 |
+| `.gcard` / `.m-card-*` | `css/mobile-shell.css`（共有） | 正典 §5 準拠 |
+| `.bp-card` | **HTML 2ファイルにインライン重複** | 共有CSSへ移送が必要 |
+| `.mec-card` | `js/parts-category-demo.js` 内 | **正典逸脱**。手書き |
+| `.edit-card` | **PC 4ファイルに重複・既に乖離** | 別トラック（§8-3） |
+
+**核心:** `pc/myrig-browse-parts-v3.html` は L19 に「カード内部は SoT_card-components.js に
+委譲。上書きしない。」と明記され、静的マークアップも `<myrig-part-card variant="browse">` で
+**正しく書かれていた**。それを後付けの `js/parts-category-demo.js` が `innerHTML` 全置換で
+破棄し `.mec-card` へ差し替えていた。これを L1 禁止化した（契約 §3.2-4）。
+
+`SoT_card-components.js` L96 に `browse card shared CSS (INDEX / Category Top / Search)` と
+あるとおり、**Category Top用のカードvariantは正典が最初から用意していた**。
+
+- **基準画面 = Rock Crawler Category Top（PC / モバイル）。変更しない**
+- 契約は数値を固定せず、**チェッカーが実行時に基準画面を実測して比較**する
+  （数値を文書に書き写すと基準画面変更時に文書が嘘になるため）
+- **修正の前にチェッカーを緑にしてから着手**する。作業者自身の作業も検証対象になる
+- モバイルのカード本体は3面で**完全一致していた**。不一致はバッジ・ナビ・ヒーローのみ
+- 棚の左ガター（`padding-left` / `scroll-padding-left`）は**修正済み**を実測確認
+- 見出しとサブタイトルの重なりは**実測0件**。`compare.html` のPNG書き出し起因の見え方であり、
+  **書き出し画像でレイアウトを判断しない**
+
+**レーン分離:** このレーンの間、GPT WorkはBrowse系5ファイルを触らない。
+対象 = `js/parts-category-demo.js` / `browse-parts.html` / `browse-category.html` /
+`pc/myrig-browse-parts-v3.html` / `pc/myrig-browse-category-v3.html`。
+並行編集すると、どちらの変更か判別できなくなる。
 
 ### 直近で片付いたこと（2026-08-25）
 
@@ -578,6 +616,38 @@ DRAFT v0 の GAP 17件のうち、**実装前に決めないと止まるもの**
   種別が3本（RIG/パーツ/LOG）になり、ダイジェスト自体を廃止したため、揃える対象が無くなった
 
 **※ 現在この分類に残っている検索系HOLDは無い。**
+
+#### 🔴 モバイル Rock Crawler カードの種別バッジ欠落（2026-08-29 / BROWSE-CONTRACT-001）
+
+実測で、モバイルの Rock Crawler Category Top のカードにだけ種別バッジが無いことが判明した。
+
+| 面 | バッジ |
+|---|---|
+| Rock Crawler Category Top（モバイル） | **なし** |
+| Parts Root / Motor・ESC（モバイル） | あり |
+| Rock Crawler Category Top（PC） | あり（`variant="browse"` が自動付与） |
+
+- **A: モバイルRock Crawlerにバッジを追加**（Cowork推奨）
+  PC版と揃う。Category Top は RIG/LOG/PARTS 混在面なので種別表示は必要。
+  ただし**基準画面に手を入れる**ため裁定を要する
+- **B: 現状維持**（Parts側からバッジを外して揃える）
+
+詳細は `docs/ui/browse-display-contract-v1.md` §8-1。
+
+#### SoTファイルの二重管理（2026-08-29 検出 / Browse整合とは別トラック）
+
+`pc/assets/css/` と `css/sot/` に同名SoTファイルが並存し、**双方向に乖離**している。
+単純にどちらかを正にできない。
+
+| ファイル | 差 | 新しい側 |
+|---|---|---|
+| `SoT_app-shell.css` | 103行 | **PC側**（P22-C10/C12/C23 がモバイル側コピーに未反映） |
+| `SoT_component-catalog-v6.css` | 4行 | **モバイル側**（P22-B5 の `@media (hover:hover)` がPC側に未反映。ソース内に「#19 PC改訂キューへ起票」と記載あり） |
+| `SoT_footer.css` | 0 | 一致 |
+
+あわせて `.edit-card` が PC 4ファイル（`preview.html` L194 / `myrig-home-v3.html` L194 /
+`myrig-browse-category-v3.html` L189 / `myrig-browse-parts-v3.html` L437）に重複し、
+既に書式が乖離している。HOMEを含むため Browse整合バッチでは扱わない。
 
 ※DB系HOLDの多くは _proposals/db-research-inquiry-spec-data-v1.md（**照会#1・DB Researchへ未回答**）の
 A: spec_data / B: aliases / C: log_type / D: size_class に対応する。
