@@ -8,6 +8,13 @@
 > **上位正典:** `mobile-component-contract-v0.5.md` §5 カード契約 / `SoT_card-components.js`
 > **対象:** Browse系4面 — Vehicle Category Top / Parts Category Top / RIG Root / Parts Root（PC・モバイル）
 > **非対象:** Search Results（CLOSE済み・触らない）、Feed、Garage、Library
+>
+> 🔴 **2026-08-29 V5裁定 / 2026-08-30 確定により一部が失効している。**
+> **末尾「§11 V5差分」と「§12 4軸の表示グループ」を先に読むこと。**
+> Sidebar / Breadcrumb / RIG ROOT / WORLD階層 / WORLD selector / Root current は
+> `docs/ui/browse-sidebar-v5.md` が正典。
+>
+> **2026-08-30: PC Browse V5 は CLOSE。** 新しい根拠がない限り再オープンしない。
 
 ---
 
@@ -128,6 +135,8 @@ Category Top はこのvariantの想定利用先である。
 
 > ⚠️ 適用範囲は §8-1 の裁定待ち。
 
+---
+
 ### 4.3 定義場所【L1】
 
 `.bp-card` 系CSSは **共有CSS（`css/mobile-shell.css`）に1箇所だけ**置く。
@@ -169,7 +178,7 @@ HTMLの `<style>` ブロックに書かない。
 |---|---|
 | Vehicle Category Top | `トップ / RIG / パーツ / LOG` |
 | Parts Category Top | `トップ / パーツ / RIG / LOG` |
-| RIG Root / Parts Root | **ローカルタブを置かない** |
+| RIG Root / Parts Root | **4軸を置く**（🔴 2026-08-29 V5裁定で改訂。旧「ローカルタブを置かない」は失効） |
 
 規則は「トップ → 主役entity → 相互参照entity → LOG」。
 第1タブの語は **「トップ」**（「ホーム」はMyRIG全体HOMEと衝突、「概要」は説明ページに見える）。
@@ -180,6 +189,7 @@ HTMLの `<style>` ブロックに書かない。
 
 - **Search Results へ遷移させない**
 - **ページ内アンカースクロールにも戻さない**
+- **どの棚が残るかは「表示グループ」で決める。§12 を参照**（🔴 2026-08-30 追加）
 
 > 根拠: `search-results.html` L893-903 の `AXES` で `scat` は scope:rig、`pcat` は scope:parts。
 > `visibleAxes()`（L919-923）と `dropHiddenFilters()`（L928-934）により、
@@ -328,3 +338,97 @@ HTMLの `<style>` ブロックに書かない。
 
 `.mec-*` を正典逸脱と認定し、`js/parts-category-demo.js` による
 正典コンポーネントの `innerHTML` 破棄を §3.2-4 として L1 禁止化した。
+
+---
+
+## 🔴 §11. V5 差分（2026-08-29 起案 / 2026-08-30 確定 / BROWSE-CONTRACT-003）
+
+**Sidebar / Breadcrumb / RIG ROOT / WORLD階層 / WORLD selector / Root current は
+`docs/ui/browse-sidebar-v5.md` が正典。**
+本書はカード・棚・カードvariant・棚レイアウト・ローカルナビを担当し、
+Sidebar側の意匠はそちらへ委譲する（V5 §17）。
+
+**2026-08-30 をもって PC Browse V5 は CLOSE。** 新しい根拠がない限り
+PC 5面のデザイン・Sidebar文法・WORLD selector・Root current・4軸を再調整しない。
+
+### 11.1 本書で失効した項目
+
+| 旧記述 | 失効理由 |
+|---|---|
+| §6.1「RIG Root / Parts Root はローカルタブを置かない」 | V5 §6: **Rootにも4軸を置く** |
+| §7「HOMEにパンくずを出さない」（v4時点の案） | V5 §10: HOMEは RCカー WORLD ROOT なのでパンくずを出す |
+| HOMEをBrowse全体Rootとして扱う前提 | V5 §0: **HOMEは「RCカー」WORLDのトップ**（WORLD階層） |
+| Directory 直前のキャプション「他のカテゴリを探す」 | V5 §14: 全Browse面から撤去 |
+| 4軸の表示判定を `data-entity-type` の完全一致で行う | **§12: 表示グループで行う**（2026-08-30） |
+
+### 11.2 WORLD階層（本書側で押さえること）
+
+```
+Browse › RCカー(WORLD ROOT) › RIG(RIG ROOT) › Rock Crawler(RIG CATEGORY)
+                            › PARTS(PARTS ROOT) › モーター・ESC(PARTS CATEGORY)
+```
+
+RIG ROOT（`pc/myrig-browse-rigs-v3.html`）は **Rock Crawler Category Top の別バージョンではない。**
+本文は特定カテゴリに寄せず、OFF-ROAD / ON-ROAD / SCALE & SPECIAL が
+最初の1〜2スクロールで混在して見えること。
+
+- **棚の意味と中身の entity を一致させる。** RIG棚にPARTSカードを混ぜない / LOG棚にはLOGのみ
+- PARTS ROOT / PARTS Category 固有のセクション（`Used in Real RIGs`・`Parts Guide` 等）を
+  RIG ROOT へ複製しない
+- 新規の架空データを作らない。既存 fixture を組み替える
+
+### 11.3 Root current（Sidebar側の詳細は V5 §9-2）
+
+| 面 | Directory current |
+|---|---|
+| RCカー HOME | **なし** |
+| RIG ROOT | すべてのRCカー |
+| Rock Crawler | ロッククローラー |
+| PARTS ROOT | すべてのパーツ |
+| Motor・ESC | モーター・ESC |
+
+反証も同格に重要: **HOME / Category 面で Root entry を current にしない。**
+
+---
+
+## 🔴 §12. 4軸の表示グループ（2026-08-30 イタヤ裁定）
+
+**拘束力: L2。ただし「§12.3 判定を1か所に持てないなら検査で塞ぐ」は L1。**
+裁定原本: `_decisions/2026-08-30_browse-axis-display-groups-v1.md`
+
+### 12.1 グループ定義
+
+4軸（§6）を押したときにどの棚が残るかは、`data-entity-type` の**完全一致ではなくグループ**で決める。
+
+| view | 表示する `data-entity-type` |
+|---|---|
+| RIG | `rig` / `rig_master` |
+| PARTS | `part` / `parts` / `part_master` |
+| LOG | `log` |
+| トップ | その面の通常構成へ復帰する |
+
+**理由:** master系（`rig_master` / `part_master`）は「その軸の実体そのもの」ではなく
+**その軸の集約ビュー**である。RIG を見にきた人にとって「みんなのRIGに多い車種」は
+RIG の話であり、RIG で絞ったときに消えるのは意味的に誤り。
+
+### 12.2 やらないこと【L1】
+
+- **`data-entity-type` を `rig` / `parts` へ書き換えて解決しない。**
+  棚が「実体」か「集約」かの区別は Next.js 実装でも必要な情報で、
+  表示の都合で潰すと後から復元できない。**visible 判定側で吸収する**
+- **`part` / `parts` の語彙2系統をここで統一しない**（PENDING。表示判定側で吸収中）
+- **Search の `type` 語彙（`rig` / `parts` / `log`）と混ぜない。**
+  Search は URL の外部語彙、本項は面内の表示グループ。別物
+
+### 12.3 🔴【L1】判定を1か所に持てないなら、検査で塞ぐ
+
+2026-08-30 時点、この判定は **PC 4か所 ＋ Mobile 1か所**に分散している
+（統合は PENDING・Mobile Browse 着手時）。分散している間は、
+`_audit/browse_sidebar_v5_check.py` が**実際に4軸を押して**本文を実測することで再発を塞ぐ。
+
+- **「クラスが付いているか」ではなく「見た目に差が出ているか」を検査する**
+- **「押せるか」ではなく「押した結果どうなるか」を検査する**
+- **検査が空振りしていないことを検査する**（対象の棚が0本なら判定は素通りする）
+- **チェッカーを足したら、故障を注入して FAIL することを確認してから採用する**
+
+**この原則が無かったために、master系が全部消えた状態でチェッカーが 140項目 FAIL 0 を出していた。**

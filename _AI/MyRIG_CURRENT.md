@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260829-035
-updated: 2026-08-29 (JST)（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260830-036
+updated: 2026-08-30 10:30 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,25 +14,38 @@ updated: 2026-08-29 (JST)（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-08-29 / revision 035**
+**最終更新: 2026-08-30 / revision 036**
 
 > 📌 **スレッドをまたぐときは `_state/HANDOFF_20260825.md` も読む。**
 > 本節が「いまどこにいるか」の正本。HANDOFFはそれを補う会話レベルの文脈
 > （なぜそうなったか・進め方の約束・踏んだ罠・やらないこと）。HANDOFFは正典ではない。
+>
+> ⚠️ **HANDOFF の「未コミット一覧」は書いた瞬間から古くなる。git status を正とする。**
+> 実例: 2026-08-30 の引き継ぎは `pc/myrig-browse-rigs-v3.html` ほかを未追跡としていたが、
+> 同日 09:23 JST の `mock: update`（`64f0099`）で全て commit 済みだった。
+> **HANDOFF にファイルの追跡状態を書かない。** 書くのは判断・約束・踏んだ罠だけにする。
 
 ### 進行中のレーン
 
 | レーン | 状態 | 次のアクション |
 |---|---|---|
 | **検索 SEARCH-UPDATE-001** | ✅ **CLOSE（2026-08-25）** | 追加監査・cleanup・改善探索を行わない。軽微/横断は Web文法キューへ |
-| **Browse整合（BROWSE-CONTRACT-001）** | 🔴 **進行中（Cowork主査 / 2026-08-29〜）** | **いまここ。** 実測完了・表示契約 v1 策定済み。次は検証スクリプト → 修正。**このレーンの間、GPTはBrowse系ファイルを触らない**（§下記） |
+| **PC Browse V5（BROWSE-CONTRACT-001/002/003）** | ✅ **CLOSE（2026-08-30）** | **PC 5面のデザイン・Sidebar文法・WORLD selector・Root current・4軸は再オープンしない**（新しい根拠がある場合を除く）。追加監査・cleanup・改善探索を行わない |
+| Mobile Browse | ⚪ 未着手 | PC が固まったので次はここ。着手時に4軸判定の PC/Mobile 共通化も併せて検討（下記 PENDING） |
 | **Home 実画面レビュー** | 🔵 進行中（GPT＋イタヤ主導） | イタヤが実画面を見て指摘 → 実装 |
 | MyRIG Web文法（横断設計） | 🟡 DRAFT v0 作成済み・**一旦停止** | 追加調査・文書拡張はしない。Homeレビューで判断材料が出たら再開 |
 | Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
 | モック全体の第2周 | ⚪ 未着手 | ページ単体ではなくフロー単位で確認する体制へ移行 |
 
-**ライブ**: `myrig-mockup` = `054e6e0`（production READY）
+**ライブ**: `myrig-mockup` = `64f0099`（`mock: update 2026-08-30 09:23 JST`）
 スクリーンショット撮影は不要（2026-08-25 以降、イタヤが直接ライブを見る運用）。
+
+> ⚠️ `myrig-mockup` は **private repo**。Cowork のサンドボックスからは
+> credential helper が無く `git fetch` / `ls-remote` が通らない（`could not read Username`）。
+> ローカルの `origin/main` ref は最後に手元から push された値であって、
+> **リモート最新であることの証明にはならない。**
+> モック側へ WRITE する前は、イタヤの手元（Mac）で fetch → HEAD 比較を行うこと。
+> `myrig-ai-context` は public なので Cowork からも fetch / ls-remote が通る。
 
 ### 🔵 MyRIG Web文法（2026-08-25 / DRAFT）
 
@@ -124,7 +137,50 @@ Mobile `https://myrig-mobile-mock.vercel.app/search.html` / `search-results.html
 - 「関連する」と表示するのは **明示的な関連根拠がある場合のみ**
 - **Search面は広告ゼロ**
 
-### 🔴 Browse整合 BROWSE-CONTRACT-001（2026-08-29 / Cowork主査）
+### ✅ PC Browse V5 CLOSE（2026-08-30 / Cowork主査・イタヤ裁定）
+
+**正典2本**
+- `docs/ui/browse-sidebar-v5.md` — Sidebar / Breadcrumb / WORLD階層 / **WORLD selector** / **Root current**
+- `docs/ui/browse-display-contract-v1.md` — カード / 棚 / ローカルナビ / **§12 4軸の表示グループ**
+
+**裁定原本**: `_decisions/2026-08-30_browse-axis-display-groups-v1.md`
+
+対象5面（PC）: HOME `myrig-home-v3.html` / RIG ROOT `myrig-browse-rigs-v3.html` /
+Rock Crawler `myrig-browse-category-v3.html` / PARTS ROOT `myrig-browse-parts-v3.html` /
+Motor・ESC `…?category=motor-esc`
+
+**🔴 PC 5面のデザイン・Sidebar文法・WORLD selector・Root current・4軸は再オープンしない。**
+新しい根拠がない限り再調整しない。Claude / GPT / Gemini とも改善提案を出さないこと。
+
+**確定した内容（8/30 分）**
+
+| # | 確定 |
+|---|---|
+| 1 | HOME の CURRENT WORLD は「大きなcurrentカード」ではなく **WORLD selector**（`RCカー / RC CARS` ＋ chevron、「現在表示中」文言なし、connector・縦棒なし、dropdown は overlay、将来WORLD は disabled） |
+| 2 | **Root current** — HOME=なし / RIG ROOT=すべてのRCカー / Rock Crawler=ロッククローラー / PARTS ROOT=すべてのパーツ / Motor・ESC=モーター・ESC。Root entry の寸法は変えず、薄い無彩色の面＋下罫線の色のみ |
+| 3 | **4軸の表示グループ** — RIG=`rig`+`rig_master` / PARTS=`part`+`parts`+`part_master` / LOG=`log`。`data-entity-type` は書き換えない |
+| 4 | RIG ROOT は Rock Crawler の別バージョンにしない。全カテゴリ混在／RIG棚にPARTSカードを混ぜない |
+| 5 | current の強さ: 4軸 ≧ WORLD selector ＞ Directory 子current ＞ Root current。**地色との相対差で判定** |
+
+**検証**: `_audit/browse_sidebar_v5_check.py` **174項目 FAIL 0**（140→174 へ強化）/
+`_audit/browse_contract_check.py` **76項目 FAIL 0 / WARN 9**（既知: 自己リンク7・インライン`<style>`2）/
+PC 5面 light・dark とも pageerror 0。
+
+**🔴 チェッカーの原則【L1】** — 2026-08-30、master系の棚が4軸で全部消えていたのに
+チェッカーは 140項目 FAIL 0 で通っていた。Root current も、`is-current` は付いているのに
+CSS が打ち消していて見えない状態で通っていた。同じ穴を開けないため:
+
+- **「クラスが付いているか」ではなく「見た目に差が出ているか」を検査する**
+- **「押せるか」ではなく「押した結果どうなるか」を検査する**
+- **検査が空振りしていないことを検査する**（対象棚が0本なら判定は素通りする）
+- **チェッカーを足したら、故障を注入して FAIL することを確認してから採用する**
+
+**レーン分離は解除。** PC Browse 系ファイルの GPT 触り禁止は CLOSE をもって終了する。
+ただし再オープンしない範囲（上表）への変更提案は受け付けない。
+
+---
+
+### 🔴 Browse整合 BROWSE-CONTRACT-001（2026-08-29 / 記録）
 
 **正典: `docs/ui/browse-display-contract-v1.md`（L2。§3.2 禁止事項と §4.3 定義場所は L1）**
 
@@ -583,6 +639,21 @@ DRAFT v0 の GAP 17件のうち、**実装前に決めないと止まるもの**
 > **Home → Feed → Garage と実画面を歩きながら1つずつ潰す**方が早くて確実。
 > 「このカードを押したらどこへ行くか」を決める作業が、そのまま 1 と 2 の答えになる。
 
+#### 🔵 PC Browse V5 CLOSE 後に残した別タスク（2026-08-30）
+
+**いずれも PC Browse V5 の CLOSE には含まれない。デザイン自体は再オープンしない。**
+
+| # | 項目 | 再開トリガー |
+|---|---|---|
+| 1 | **1024px以下の共通 Drawer** — 現状 `@media(max-width:1024px)` で `position:fixed`、ハンバーガーで `.home-dir.is-open` | PC Browse 完了後の約束。着手可 |
+| 2 | **4軸 visible 判定の実装分散** — 同じ規則が **PC 4か所 ＋ Mobile 1か所**にある。2026-08-30 の `rig_master` / `part_master` 欠落はこれが原因。内容は揃えたが構造は分散したまま | **Mobile Browse 着手時**に PC/Mobile を通した共通化を1バッチで検討 |
+| 3 | **`part` / `parts` の語彙2系統** — `data-entity-type` に両方が実在する。現在は表示判定側（§12 グループ）で吸収している | 同上（#2 と同じバッチで扱う） |
+| 4 | WORLD selector と OTHER WORLDS が同じ4件を別役割で出している重複 | 将来WORLDが実際に公開されるとき |
+
+> #2 は**分散を許している間、`_audit/browse_sidebar_v5_check.py` が実際に4軸を押して
+> 本文を実測することで再発を塞いでいる**。共通化するまでこの検査を弱めないこと。
+> 詳細は `_decisions/2026-08-30_browse-axis-display-groups-v1.md`。
+
 #### その他
 
 - **将来のユーザー検索方式** — MVPでは専用入口を置かない。
@@ -633,6 +704,17 @@ DRAFT v0 の GAP 17件のうち、**実装前に決めないと止まるもの**
 - **B: 現状維持**（Parts側からバッジを外して揃える）
 
 詳細は `docs/ui/browse-display-contract-v1.md` §8-1。
+
+> 🔵 **2026-08-30: HOLD 維持を再確認。** PC Browse V5 CLOSE の対象外。
+> Mobile Browse 自体が未着手のため、この裁定は Mobile Browse に着手するまで求めない。
+> **PC 側の修正を Mobile へ自動的に横展開しないこと**（4軸判定も同様。上記 PENDING #2）。
+
+#### Mobile Browse（将来議論項目・未着手）
+
+PC Browse V5 が CLOSE したので、次の着手候補ではある。ただし**まだ着手していない**。
+着手時に扱うもの: Mobile Browse 全体 / 上記 badge HOLD /
+`js/parts-category-demo.js` `initViewSwitch()` の完全一致判定（PC と同型。今回は触っていない）/
+4軸判定の PC・Mobile 共通化（PENDING #2・#3）。
 
 #### SoTファイルの二重管理（2026-08-29 検出 / Browse整合とは別トラック）
 
