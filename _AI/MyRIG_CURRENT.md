@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260830-036
-updated: 2026-08-30 10:30 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260830-037
+updated: 2026-08-30 12:19 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-08-30 10:30 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-08-30 / revision 036**
+**最終更新: 2026-08-30 / revision 037**
 
 > 📌 **スレッドをまたぐときは `_state/HANDOFF_20260825.md` も読む。**
 > 本節が「いまどこにいるか」の正本。HANDOFFはそれを補う会話レベルの文脈
@@ -30,8 +30,8 @@ updated: 2026-08-30 10:30 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | レーン | 状態 | 次のアクション |
 |---|---|---|
 | **検索 SEARCH-UPDATE-001** | ✅ **CLOSE（2026-08-25）** | 追加監査・cleanup・改善探索を行わない。軽微/横断は Web文法キューへ |
-| **PC Browse V5（BROWSE-CONTRACT-001/002/003）** | ✅ **CLOSE（2026-08-30）** | **PC 5面のデザイン・Sidebar文法・WORLD selector・Root current・4軸は再オープンしない**（新しい根拠がある場合を除く）。追加監査・cleanup・改善探索を行わない |
-| Mobile Browse | ⚪ 未着手 | PC が固まったので次はここ。着手時に4軸判定の PC/Mobile 共通化も併せて検討（下記 PENDING） |
+| **PC Browse V5（BROWSE-CONTRACT-001/002/003）** | ✅ **再CLOSE（2026-08-30 / revision 037）** | **今回の実画面状態を最終形とする。ここから先は文言を磨くために構造を開け直さない。** 追加監査・cleanup・改善探索を行わない |
+| Mobile Browse | ⚪ 未着手 | 上記の完了後。着手時に4軸判定の PC/Mobile 共通化も併せて検討（下記 PENDING） |
 | **Home 実画面レビュー** | 🔵 進行中（GPT＋イタヤ主導） | イタヤが実画面を見て指摘 → 実装 |
 | MyRIG Web文法（横断設計） | 🟡 DRAFT v0 作成済み・**一旦停止** | 追加調査・文書拡張はしない。Homeレビューで判断材料が出たら再開 |
 | Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
@@ -137,7 +137,58 @@ Mobile `https://myrig-mobile-mock.vercel.app/search.html` / `search-results.html
 - 「関連する」と表示するのは **明示的な関連根拠がある場合のみ**
 - **Search面は広告ゼロ**
 
-### ✅ PC Browse V5 CLOSE（2026-08-30 / Cowork主査・イタヤ裁定）
+### ✅ PC Browse V5 再CLOSE（2026-08-30 / revision 037）
+
+**裁定原本: `_decisions/2026-08-30_browse-axis-relation-view-v1.md`**
+036 の CLOSE を「ローカルナビ」と「Root current」に限って再オープンし、**この状態で再CLOSE。**
+
+**OVERRIDE — 「全Browse面で共通4軸」を失効。面ごとにナビの本数を変える。**
+
+| 面 | ローカルナビ |
+|---|---|
+| RCカー HOME | **なし** |
+| すべてのRCカー（RIG ROOT） | **トップ / RIG / LOG** |
+| Rock Crawler（RIG Category） | **トップ / RIG / パーツ / LOG** |
+| すべてのパーツ（PARTS ROOT） | **トップ / パーツ / LOG** |
+| モーター・ESC（PARTS Category） | **トップ / パーツ / LOG** |
+
+**DECISION — 相互参照は「大量閲覧の主要目的があるとき」だけナビ化。それ以外は棚。**
+構造的対称性で軸を決めない。全部の関連情報をナビへ昇格させない。
+
+| 情報 | 置き場所 |
+|---|---|
+| RIG ROOT で使われているパーツ | 棚 |
+| PARTS ROOT を使っているRIG | 棚 |
+| モーター・ESC を使っているRIG | 棚 |
+| Rock Crawler のパーツ（大量横断して見る意味が強い） | **ナビ** |
+| LOG（各スコープの「活動・経験を見るモード」） | **全面のナビに常設** |
+
+**DECISION — 関係条件は `rig_parts.removed_at IS NULL`（現在装着中のみ）。**
+関係件数は1か所（`js/browse-scope-relations.js`）へ集約し、MOCK であることを明記する【L1】。
+
+**OVERRIDE — Root current は子カテゴリ current と同一の表示文法。**
+036 の Root専用デザイン（全面帯＋濃い下罫線）は失効。非current の Root entry 文法は維持。
+
+**🔵 正典化しない: 具体的なラベル文言・余白・表示件数などのUI調整。**
+正典化するのは「どの面にどの閲覧モードがあるか」「相互参照はナビか棚か」
+「どういう関係を根拠に表示してよいか」まで。日本語ラベルは実装側で調整可能にしておく。
+**文言を磨くために構造を開け直さない。**
+
+**🔴 PENDING — PARTS系 LOG の直接関連モデル／実データ抽出方式。**
+UIとして LOG を置くことは確定。UX概念は「そのパーツに関するLOGを見られる」。
+ただし `maintenance_logs` は `rig_id`（NULLABLE）を持つが **`part_id` を持たない**ため、
+現行DBでは正確に抽出できない。**`装着RIG → そのRIGの全LOG` を代替して「関連LOG」と偽装しない。**
+モックは棚を `装着RIGのLOG` と正確に名乗り、画面上にも暫定表示と明記してある。
+候補: `maintenance_logs ↔ maintenance_log_parts ↔ parts` の多対多。**UIとは分離して扱う。**
+
+**検証: `browse_sidebar_v5_check.py` 211項目 FAIL 0 /
+`browse_contract_check.py` 76項目 FAIL 0 WARN 9 / PC 4面 pageerror 0。**
+
+**036 の表示グループ裁定（`rig+rig_master` / `part+parts+part_master` / `log`）は無改訂で有効。**
+
+---
+
+### PC Browse V5 CLOSE（2026-08-30 / revision 036 — 上記 037 で更新済み・記録）
 
 **正典2本**
 - `docs/ui/browse-sidebar-v5.md` — Sidebar / Breadcrumb / WORLD階層 / **WORLD selector** / **Root current**
@@ -649,6 +700,8 @@ DRAFT v0 の GAP 17件のうち、**実装前に決めないと止まるもの**
 | 2 | **4軸 visible 判定の実装分散** — 同じ規則が **PC 4か所 ＋ Mobile 1か所**にある。2026-08-30 の `rig_master` / `part_master` 欠落はこれが原因。内容は揃えたが構造は分散したまま | **Mobile Browse 着手時**に PC/Mobile を通した共通化を1バッチで検討 |
 | 3 | **`part` / `parts` の語彙2系統** — `data-entity-type` に両方が実在する。現在は表示判定側（§12 グループ）で吸収している | 同上（#2 と同じバッチで扱う） |
 | 4 | WORLD selector と OTHER WORLDS が同じ4件を別役割で出している重複 | 将来WORLDが実際に公開されるとき |
+| 5 | **PARTS系 LOG の直接関連モデル／実データ抽出方式** — UIとして LOG を置くことは確定だが、`maintenance_logs` に `part_id` が無く正確に抽出できない。`装着RIG → 全LOG` を代替として本実装しない。候補は `maintenance_log_parts` の多対多 | App スキーマを詰めるとき（UIとは分離） |
+| 6 | **RIG非紐付けLOGのBrowse上の発見経路** — `maintenance_logs.rig_id` は NULLABLE。`rig_id IS NULL` のLOGは RIG起点Browseのどの関係軸からも到達しない（4軸はすべて `rig_id` 経由のため）。2026-08-30 の4軸修正とは**分離**し、今回の実装範囲に入れない | LOG 面 / Feed / Search で LOG の入口を扱うとき |
 
 > #2 は**分散を許している間、`_audit/browse_sidebar_v5_check.py` が実際に4軸を押して
 > 本文を実測することで再発を塞いでいる**。共通化するまでこの検査を弱めないこと。
