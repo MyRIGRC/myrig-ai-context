@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260830-037
-updated: 2026-08-30 12:19 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260830-038
+updated: 2026-08-30 17:53 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-08-30 12:19 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-08-30 / revision 037**
+**最終更新: 2026-08-30 / revision 038**
 
 > 📌 **スレッドをまたぐときは `_state/HANDOFF_20260825.md` も読む。**
 > 本節が「いまどこにいるか」の正本。HANDOFFはそれを補う会話レベルの文脈
@@ -31,13 +31,16 @@ updated: 2026-08-30 12:19 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 |---|---|---|
 | **検索 SEARCH-UPDATE-001** | ✅ **CLOSE（2026-08-25）** | 追加監査・cleanup・改善探索を行わない。軽微/横断は Web文法キューへ |
 | **PC Browse V5（BROWSE-CONTRACT-001/002/003）** | ✅ **再CLOSE（2026-08-30 / revision 037）** | **今回の実画面状態を最終形とする。ここから先は文言を磨くために構造を開け直さない。** 追加監査・cleanup・改善探索を行わない |
-| Mobile Browse | ⚪ 未着手 | 上記の完了後。着手時に4軸判定の PC/Mobile 共通化も併せて検討（下記 PENDING） |
+| **Mobile Browse** | 🔴 **次はここ（2026-08-30〜）** | PC側はもう振り返らない。着手時に4軸判定の PC/Mobile 共通化も併せて検討（下記 PENDING）。PC Browse 4面をPC/Mobile両面確定へ昇格させるのもこのレーン |
 | **Home 実画面レビュー** | 🔵 進行中（GPT＋イタヤ主導） | イタヤが実画面を見て指摘 → 実装 |
 | MyRIG Web文法（横断設計） | 🟡 DRAFT v0 作成済み・**一旦停止** | 追加調査・文書拡張はしない。Homeレビューで判断材料が出たら再開 |
 | Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
 | モック全体の第2周 | ⚪ 未着手 | ページ単体ではなくフロー単位で確認する体制へ移行 |
 
-**ライブ**: `myrig-mockup` = `64f0099`（`mock: update 2026-08-30 09:23 JST`）
+**ライブ**: `myrig-mockup` = `1eb7bac`（`mock: update 2026-08-30 17:47 JST`）
+> この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
+> 2026-08-30、`64f0099` のまま放置していて「後続セッションが古いモックを現在地と誤認する」
+> 状態になっていた（イタヤ指摘）。
 スクリーンショット撮影は不要（2026-08-25 以降、イタヤが直接ライブを見る運用）。
 
 > ⚠️ `myrig-mockup` は **private repo**。Cowork のサンドボックスからは
@@ -185,6 +188,12 @@ UIとして LOG を置くことは確定。UX概念は「そのパーツに関�
 `browse_contract_check.py` 76項目 FAIL 0 WARN 9 / PC 4面 pageerror 0。**
 
 **036 の表示グループ裁定（`rig+rig_master` / `part+parts+part_master` / `log`）は無改訂で有効。**
+
+**STATE — モック進行状況ダッシュボード（`index.html`）を追従済み（2026-08-30 / `1eb7bac`）。**
+ブラウズ4面は **🔵 PC版のみ（青）**。Mobile Browse が未着手なので緑（＝PC・モバイル両面確定）にはしない。
+ここを緑にすると「モバイルも裁定済み」という誤った記録になる（P22-C30 で検索が起こした事故と同型）。
+見比べビュー `compare.html` も確定ラベルへ追従済み（`a2e043e`）。
+**PENDING: Mobile Browse 着手により、この4面を順次 PC/Mobile 両面確定へ昇格させる。**
 
 ---
 
