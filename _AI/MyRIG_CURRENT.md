@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260830-038
-updated: 2026-08-30 17:53 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260831-039
+updated: 2026-08-31 10:26 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -30,14 +30,13 @@ updated: 2026-08-30 17:53 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | レーン | 状態 | 次のアクション |
 |---|---|---|
 | **検索 SEARCH-UPDATE-001** | ✅ **CLOSE（2026-08-25）** | 追加監査・cleanup・改善探索を行わない。軽微/横断は Web文法キューへ |
-| **PC Browse V5（BROWSE-CONTRACT-001/002/003）** | ✅ **再CLOSE（2026-08-30 / revision 037）** | **今回の実画面状態を最終形とする。ここから先は文言を磨くために構造を開け直さない。** 追加監査・cleanup・改善探索を行わない |
-| **Mobile Browse** | 🔴 **次はここ（2026-08-30〜）** | PC側はもう振り返らない。着手時に4軸判定の PC/Mobile 共通化も併せて検討（下記 PENDING）。PC Browse 4面をPC/Mobile両面確定へ昇格させるのもこのレーン |
-| **Home 実画面レビュー** | 🔵 進行中（GPT＋イタヤ主導） | イタヤが実画面を見て指摘 → 実装 |
+| **Browse（PC＋Mobile / BROWSE-CONTRACT-001〜003）** | ✅ **CLOSE（2026-08-31 / revision 039）** | **PC・Mobile 両面とも確定。** 4面 × 2レーン = 8面。**ここから先は文言を磨くために構造を開け直さない。** 追加監査・cleanup・改善探索を行わない。次に開けてよいのは §9 のパターン設計トリガー（3つ目のCategory着手時）だけ |
+| **Home 実画面レビュー** | 🔵 **次はここ**（GPT＋イタヤ主導） | イタヤが実画面を見て指摘 → 実装 |
 | MyRIG Web文法（横断設計） | 🟡 DRAFT v0 作成済み・**一旦停止** | 追加調査・文書拡張はしない。Homeレビューで判断材料が出たら再開 |
 | Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
 | モック全体の第2周 | ⚪ 未着手 | ページ単体ではなくフロー単位で確認する体制へ移行 |
 
-**ライブ**: `myrig-mockup` = `1eb7bac`（`mock: update 2026-08-30 17:47 JST`）
+**ライブ**: `myrig-mockup` = `fe91492`（`chore: verify Vercel deploy author`）
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
 > 2026-08-30、`64f0099` のまま放置していて「後続セッションが古いモックを現在地と誤認する」
 > 状態になっていた（イタヤ指摘）。
@@ -140,31 +139,110 @@ Mobile `https://myrig-mobile-mock.vercel.app/search.html` / `search-results.html
 - 「関連する」と表示するのは **明示的な関連根拠がある場合のみ**
 - **Search面は広告ゼロ**
 
-### ✅ PC Browse V5 再CLOSE（2026-08-30 / revision 037）
+### ✅ Browse CLOSE — PC ＋ Mobile 両面確定（2026-08-31 / revision 039）
+
+**裁定原本: `_decisions/2026-08-31_browse-domain-scope-inheritance-v1.md`**
+
+**OVERRIDE / L1改訂 — ローカルナビの本数は「Domain内のscope継承」で決める。**
+037 の RIG ROOT `トップ / RIG / LOG` を**失効**。
+
+| Domain | 面 | ローカルナビ |
+|---|---|---|
+| — | RCカー HOME（WORLD ROOT） | **なし**（Domainの外側） |
+| **RIG** | すべてのRCカー（RIG ROOT） | **トップ / RIG / パーツ / LOG** |
+| **RIG** | Rock Crawler（RIG Category） | **トップ / RIG / パーツ / LOG** |
+| **PARTS** | すべてのパーツ（PARTS ROOT） | **トップ / パーツ / LOG** |
+| **PARTS** | モーター・ESC（PARTS Category） | **トップ / パーツ / LOG** |
+
+**DECISION — 判断基準は2階建て【L1】**
+
+| 方向 | 基準 |
+|---|---|
+| **Domain内（Root → Category）** | **継承する。** 需要判定を持ち込まない |
+| **Domain間（RIG系 ↔ PARTS系）** | **閲覧需要の非対称性で決める。** 揃えない |
+
+Root → Category で変わるのは scope だけ。**子が親より閲覧できるものが多い構造を作らない。**
+
+**🔴 書き方の注意【L1】: 「深さで軸を変えない」とは書かない。**
+HOME にナビが無いことと矛盾する。正しくは「**同一Domain内では継承する**」。
+
+**DECISION — RIG ROOT の `パーツ` は PARTS ROOT の `パーツ` と別物。**
+
+| | 定義 | MOCK |
+|---|---|---|
+| `すべてのRCカー → パーツ` | 全RIGに現在装着中のパーツ（`removed_at IS NULL`） | 12,480 |
+| `すべてのパーツ → パーツ` | 登録されている全パーツそのもの | 18,492 |
+
+**STATE — ROOT構造は維持。HOME統合・ROOT削除は行わない。**
+検討過程で出た「ROOT不要説」は採らない。違和感の正体は ROOT の存在ではなく
+**RIG ROOT だけ閲覧能力が欠けていたこと**だった。
+
+**改訂根拠:** 2026-08-31 の PC/Mobile 4面同時比較。
+037 は基準そのものではなく**適用範囲**を誤り、Domain間の基準を Domain内の縦方向にも適用していた。
+**L1 は失効理由の明示を伴わなければ改訂しない。**（失効範囲の全一覧は裁定原本 §2）
+
+**🔴 副作用として顕在化した 036違反 2件（修正済み）**
+
+| 場所 | 欠けていた型 | 状態 |
+|---|---|---|
+| `css/mobile-shell.css` | `part` | **顕在化。** RIG ROOTのパーツviewが白画面だった |
+| `pc/myrig-browse-category-v3.html` | `parts` | 潜在。該当棚を足した瞬間に消える |
+
+判定側だけ修正。`data-entity-type` は書き換えない（036のまま）。
+**「今は影響が無い」不整合は、影響が出る変更が来るまで待っているだけである。**
+
+**検証: `browse_sidebar_v5_check.py` 214項目 FAIL 0 /
+`browse_contract_check.py` 201項目 FAIL 0 WARN 4 / 8面 pageerror 0。**
+
+チェッカーに**軸を実際に押す**恒久回帰を追加（037までラベルしか見ていなかった）。
+故障注入5種すべてで FAIL を確認済み。
+
+**🔵 PENDING — セクション並びパターン（A/B/C）は今作らない。**
+実装済みCategory面が2つしかなく、2例から3パターンは導出できない。
+**再開トリガー: 3つ目のRIG Category（ドリフト等）を作るとき。**
+設計注意: A/B/C を「レイアウト」として設計しない。差は並び方ではなく
+**どの関係棚が成立するか**。軸は `Domain × セクションレジストリ（並び順つき）`。
+
+**🔵 PENDING（継続）:** 表示グループ判定が5か所に分散している件の集約は別トラック。
+
+**🔴 事故 — Cowork が commit author を変えて Vercel 本番デプロイを止めた（2026-08-31）**
+
+規則は `MyRIG_CORE.md` 実行レーン分離 §「commit author」へ恒久記載。要点のみ:
+
+- `myrig-mockup` の author は **`MyRIGRC <admin@myrigrc.com>`** を維持。AI名義へ変えない
+- Vercel Hobby は見知らぬ author の production deploy を **BLOCKED** にする
+- 039 のモックコミット `31b610b` が該当。以降3件が `UNKNOWN` で停止
+- author を戻した空コミット `fe91492` の直後、同一内容が `Ready in 8s` で通り原因確定
+- `31b610b` は push 済みのため author を直さない（履歴書き換え・force push はしない）
+- Cowork は `git add -A` も使っていた。**CORE 157行目の明記ルール違反**
+
+**切り分けで露呈した問題のほうが重い。** Cowork は自分が author を書き換えた事実を
+報告せず、障害の容疑者からも外していた。対照実験の前に3回原因を断定している。
+**自分の直近の操作を最初の容疑者にすること。**
+
+---
+
+### PC Browse V5 再CLOSE（2026-08-30 / revision 037 — 上記 039 で一部改訂・記録）
 
 **裁定原本: `_decisions/2026-08-30_browse-axis-relation-view-v1.md`**
 036 の CLOSE を「ローカルナビ」と「Root current」に限って再オープンし、**この状態で再CLOSE。**
 
-**OVERRIDE — 「全Browse面で共通4軸」を失効。面ごとにナビの本数を変える。**
+**OVERRIDE — 「全Browse面で共通4軸」を失効。**（039 でも維持。共通4軸は復活させない）
 
-| 面 | ローカルナビ |
-|---|---|
-| RCカー HOME | **なし** |
-| すべてのRCカー（RIG ROOT） | **トップ / RIG / LOG** |
-| Rock Crawler（RIG Category） | **トップ / RIG / パーツ / LOG** |
-| すべてのパーツ（PARTS ROOT） | **トップ / パーツ / LOG** |
-| モーター・ESC（PARTS Category） | **トップ / パーツ / LOG** |
+> 🔴 **本節のナビ表は 039 で改訂された。最新は下の「Browse CLOSE（039）」を見ること。**
+> 037 は RIG ROOT を `トップ / RIG / LOG` とし、面ごとに本数を決めていた。
+> 039 で Domain内継承へ改訂。**この行は「なぜ以前そうだったか」を残すための記録。**
 
-**DECISION — 相互参照は「大量閲覧の主要目的があるとき」だけナビ化。それ以外は棚。**
-構造的対称性で軸を決めない。全部の関連情報をナビへ昇格させない。
+**DECISION — Domain間の相互参照は「大量閲覧の主要目的があるとき」だけナビ化。**（039 でも維持）
 
 | 情報 | 置き場所 |
 |---|---|
-| RIG ROOT で使われているパーツ | 棚 |
 | PARTS ROOT を使っているRIG | 棚 |
 | モーター・ESC を使っているRIG | 棚 |
-| Rock Crawler のパーツ（大量横断して見る意味が強い） | **ナビ** |
+| RIG系のパーツ（大量横断して見る意味が強い） | **ナビ** |
 | LOG（各スコープの「活動・経験を見るモード」） | **全面のナビに常設** |
+
+> **039 で失効:** 「RIG ROOT で使われているパーツ → 棚」。ナビへ昇格した。
 
 **DECISION — 関係条件は `rig_parts.removed_at IS NULL`（現在装着中のみ）。**
 関係件数は1か所（`js/browse-scope-relations.js`）へ集約し、MOCK であることを明記する【L1】。
@@ -189,11 +267,10 @@ UIとして LOG を置くことは確定。UX概念は「そのパーツに関�
 
 **036 の表示グループ裁定（`rig+rig_master` / `part+parts+part_master` / `log`）は無改訂で有効。**
 
-**STATE — モック進行状況ダッシュボード（`index.html`）を追従済み（2026-08-30 / `1eb7bac`）。**
-ブラウズ4面は **🔵 PC版のみ（青）**。Mobile Browse が未着手なので緑（＝PC・モバイル両面確定）にはしない。
-ここを緑にすると「モバイルも裁定済み」という誤った記録になる（P22-C30 で検索が起こした事故と同型）。
-見比べビュー `compare.html` も確定ラベルへ追従済み（`a2e043e`）。
-**PENDING: Mobile Browse 着手により、この4面を順次 PC/Mobile 両面確定へ昇格させる。**
+**STATE — モック進行状況ダッシュボード（`index.html`）。**
+2026-08-30 時点でブラウズ4面は 🔵 PC版のみ（青）だった。
+**2026-08-31 / 039 で Mobile 4面が揃ったため、4面とも PC/Mobile 両面確定（緑）へ昇格。**
+見比べビュー `compare.html` も追従。
 
 ---
 

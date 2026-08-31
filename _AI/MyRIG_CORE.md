@@ -156,6 +156,39 @@ DB書込・ファイル操作・大量変更は実行レーンに渡す。
 commit / push は明示指示がある場合のみ。
 git add -A は使わない。常に明示的にファイルを列挙する。
 
+### 🔴 2026-08-31 事故: commit author を変えて Vercel の本番デプロイを止めた
+
+**commit author をAI名義へ書き換えない。リポジトリに設定済みの author をそのまま使う。**
+
+| リポジトリ | 正しい author |
+|---|---|
+| `myrig-mockup` | `MyRIGRC <admin@myrigrc.com>` |
+| `myrig-ai-context` | `Itaya Hirotomo (Cowork) <info@rccrawlers.net>` |
+
+`git -c user.name=... -c user.email=... commit` で上書きしない。
+`git config user.name` / `user.email` を読んで、**設定済みの値に従う**。
+
+**何が起きたか:** Cowork が revision 039 を `Cowork <info@rccrawlers.net>` 名義でコミットした。
+`myrig-mockup` は Vercel Hobby で、**見知らぬ author の production deploy が BLOCKED になる。**
+以降のデプロイが3件とも `status UNKNOWN` / `Duration ?` で止まり、本番へ反映できなくなった。
+author を元に戻した空コミットを載せた直後、同じ内容が `Ready in 8s` で通り、原因が確定した。
+
+**切り分けで露呈したより重い問題:**
+
+- Cowork は「内容は無害か」ばかり調べ、**自分が author を書き換えた事実を候補から外していた**
+- 報告していないので、イタヤも GPT も候補に挙げられなかった
+- 対照実験の前に3回も原因を断定した
+  （①チェッカーが遅い ②Vercel側 ③自分のHTML）。いずれも根拠不足
+- **push できない環境と分かっていながら commit だけ実行し、author 変更を報告しなかった**
+
+**規則:**
+
+1. **自分が加えた変更は、内容だけでなく「どう加えたか」も報告する。**
+   author / add の仕方 / 実行したコマンドを含む
+2. **障害の切り分けでは、自分の直近の操作を最初の容疑者にする。**
+   「内容が無害だから無関係」は成り立たない
+3. **対照実験の前に原因を断定しない。** 同じ入力で結果が変わるかを先に測る
+
 ## GitHub複数WRITE経路の競合防止
 
 ### 🔴 2026-08-24 裁定: 正典のWRITEはCoworkに一本化

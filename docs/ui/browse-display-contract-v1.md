@@ -179,30 +179,48 @@ HTMLの `<style>` ブロックに書かない。
 「現在のスコープを起点にした関係ビュー」である。**
 裁定原本: `_decisions/2026-08-30_browse-axis-relation-view-v1.md`
 
-| 面 | スコープ | 項目 |
+🔴 **2026-08-31 / revision 039 改訂: 本数は「Domain内のscope継承」で決める。**
+裁定原本: `_decisions/2026-08-31_browse-domain-scope-inheritance-v1.md`
+
+| Domain | 面 | スコープ | 項目 |
+|---|---|---|---|
+| **RIG** | RIG ROOT（すべてのRCカー） | RCカーWORLDの全RIG | **トップ / RIG / パーツ / LOG** |
+| **RIG** | RIG CATEGORY（Rock Crawler） | Rock CrawlerのRIG | **トップ / RIG / パーツ / LOG** |
+| **PARTS** | PARTS ROOT（すべてのパーツ） | RCカーWORLDの全パーツ | **トップ / パーツ / LOG** |
+| **PARTS** | PARTS CATEGORY（モーター・ESC） | モーター・ESCのパーツ | **トップ / パーツ / LOG** |
+
+🔴 **判断基準は2階建て【L1】**
+
+| 方向 | 基準 |
+|---|---|
+| **Domain内（Root → Category）** | **継承する。** 需要判定を持ち込まない |
+| **Domain間（RIG系 ↔ PARTS系）** | **閲覧需要の非対称性で決める。** 揃えない |
+
+Root → Category で変わるのは scope だけ。**子が親より閲覧できるものが多い構造を作らない。**
+
+🔴 **「深さで軸を変えない」とは書かない【L1】** — HOME にナビが無いことと矛盾する。
+HOME は Domain の外側。正しくは「**同一Domain内では継承する**」。
+
+🔴 **全面共通の「4軸」は復活させない【L1】** — RIG系4本 / PARTS系3本の非対称は意図的。
+
+**RIG ROOT の `パーツ` は PARTS ROOT の `パーツ` と同じ母集団ではない。**
+
+| | 定義 | MOCK |
 |---|---|---|
-| RIG ROOT（すべてのRCカー） | RCカーWORLDの全RIG | **トップ / RIG / LOG** |
-| RIG CATEGORY（Rock Crawler） | Rock CrawlerのRIG | **トップ / RIG / パーツ / LOG** |
-| PARTS ROOT（すべてのパーツ） | RCカーWORLDの全パーツ | **トップ / パーツ / LOG** |
-| PARTS CATEGORY（モーター・ESC） | モーター・ESCのパーツ | **トップ / パーツ / LOG** |
+| `すべてのRCカー → パーツ` | 全RIGに現在装着中のパーツ（`removed_at IS NULL`） | 12,480 |
+| `すべてのパーツ → パーツ` | 登録されている全パーツそのもの | 18,492 |
 
-🔴 **全面共通の「4軸」は失効。面ごとに本数が変わる【L1】**
-判断基準は entity の対称性ではなく **その軸を主ナビとして押したくなるか**。
+軸を足しても両者は同じ面にならない。**ROOT削除・HOME統合はしない。**
 
-| | 性質 | 置き場所 |
-|---|---|---|
-| **LOG** | **閲覧モード**（その場所に関する活動を見る） | **全面のナビに常設** |
-| RIG↔PARTS 相互参照 | **発見コンテンツ**（眺めて気づく） | **必要な面だけ。原則は棚** |
-
-**軸化の基準は階層差ではなく「閲覧需要の非対称性」。** 構造的な対称性で軸を決めない。
+Domain間の需要差（039でも維持）:
 
 | 方向 | 需要 | 置き場所 |
 |---|---|---|
-| RIG Category → PARTS | 大量閲覧したい（どんなタイヤ・ESC・サーボが使われているか） | **軸** |
-| PARTS Category → RIG | 参考・発見が中心 | **棚** |
-| ROOT 同士の相互参照 | 大量閲覧軸としては弱い | **棚** |
+| RIG系 → PARTS | 大量閲覧したい（どんなタイヤ・ESC・サーボが使われているか） | **軸** |
+| PARTS系 → RIG | 参考・発見が中心 | **棚** |
 
-**Root は構造上の Hub。** あれもこれも機能を持たせない。
+> **039 で失効:** 「ROOT同士の相互参照は棚」「Root は構造上のHubなので軽くする」。
+> RIG ROOT だけ子より閲覧能力が低くなる原因だった。Root も Category と同じ本数を持つ。
 
 🔴 **PARTS系の LOG軸は UI として採用するが、データ取得方式は PENDING。**
 意味は「当該パーツ／パーツカテゴリについて記録されたLOG」。現行DBに part↔log の
@@ -444,7 +462,7 @@ WORLD selector / Root entry 文法 / Breadcrumb / Directory / 表札 / 色 / 基
 
 | 旧記述 | 失効理由 |
 |---|---|
-| §6.1「RIG Root / Parts Root はローカルタブを置かない」 | V5 §6: **Rootにも4軸を置く** |
+| §6.1「RIG Root / Parts Root はローカルタブを置かない」 | V5 §6: **Rootにもローカル主ナビを置く** |
 | §7「HOMEにパンくずを出さない」（v4時点の案） | V5 §10: HOMEは RCカー WORLD ROOT なのでパンくずを出す |
 | HOMEをBrowse全体Rootとして扱う前提 | V5 §0: **HOMEは「RCカー」WORLDのトップ**（WORLD階層） |
 | Directory 直前のキャプション「他のカテゴリを探す」 | V5 §14: 全Browse面から撤去 |
