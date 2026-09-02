@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260902-042
-updated: 2026-09-02 17:38 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260902-043
+updated: 2026-09-02 21:03 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-02 17:38 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-02 / revision 042**
+**最終更新: 2026-09-02 / revision 043**
 
 > 📌 **スレッドをまたぐときは `_state/HANDOFF_20260825.md` も読む。**
 > 本節が「いまどこにいるか」の正本。HANDOFFはそれを補う会話レベルの文脈
@@ -33,7 +33,7 @@ updated: 2026-09-02 17:38 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | **Browse（PC＋Mobile / BROWSE-CONTRACT-001〜003）** | ✅ **CLOSE（2026-08-31 / revision 039）** | **PC・Mobile 両面とも確定。** 4面 × 2レーン = 8面。**ここから先は文言を磨くために構造を開け直さない。** 追加監査・cleanup・改善探索を行わない。次に開けてよいのは §9 のパターン設計トリガー（3つ目のCategory着手時）だけ |
 | ~~**Home 実画面レビュー**~~ | ⚫ **失効（2026-08-31 / 040 イタヤ裁定）** | **開かない。** 下記「失効の理由」参照 |
 | **RIG詳細 / パーツ詳細 / ログ詳細** | 🔵 **進行中**（2026-08-31 / 040 イタヤ裁定） | RIG詳細は `pc/myrig-rig-detail-v14r6-complete.html` が最新候補（7:3・全幅Identity・右レーン部品化前）。下記「詳細3面と共有化の実行順序」に従う。**パーツ詳細・ログ詳細は Header 共有化（B）と部品箱（C）の完了後に着手** |
-| **共有UI Single Source 化** | 🔵 **着手可**（2026-09-02 / 041 裁定） | 裁定原本 `_decisions/2026-09-02_shared-ui-single-source-v1.md`。バッチ B（Header）は RIG詳細と並行して進めてよい |
+| **共有UI Single Source 化** | 🔵 **B 完了（2026-09-02 / 043）→ 次は A の最終確認 → C** | 裁定原本 `_decisions/2026-09-02_shared-ui-single-source-v1.md`。B の結果は下記 |
 | MyRIG Web文法（横断設計） | 🟡 DRAFT v0 作成済み・**一旦停止** | 追加調査・文書拡張はしない。Homeレビューで判断材料が出たら再開 |
 | Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
 | モック全体の第2周 | ⚪ 未着手 | ページ単体ではなくフロー単位で確認する体制へ移行 |
@@ -73,13 +73,26 @@ CORE「物理DELETE禁止」は DB恒久ルール節のもので、Git管理コ�
 | | バッチ | 入口 | 出口 |
 |---|---|---|---|
 | A | RIG Detail 右レーン仮確定（`v14r6`） | — | イタヤ「これで行く」 |
-| B | Header Single Source 化（cx / app-nav 6ルール / ダーク地 → `SoT_app-shell`。旧23面の create-soft を置換） | 着手可 | チェッカー2本 FAIL 0・全面 pageerror 0・**Browse CLOSE 面 pixel parity** |
+| B | Header Single Source 化 | ✅ **完了（`9aacdc8`）** | チェッカー 214/201 FAIL 0・56面 pageerror 0・**CLOSE/現在形6面 pixel parity 0px**（feed light の2pxは同一ツリー再撮影でも出るキャレットノイズ）・cx 7挙動同一 |
 | C | Detail 部品箱新設 ＋ RIG Detail 載せ替え | A 完了 | インライン版と表示・状態遷移とも差分ゼロ |
 | D | PARTS / LOG Detail 新規 | **B・C 完了** | page-local の Header / 部品コピー 0 |
 | E | Footer / Garage `pit-*` / 未使用資産の掃除 | 実体再確認 | — |
 | F | PC v8 横断 | 独立 | 両テーマ実測・`--cat-*-on` 取りこぼし0 |
 
 A ∥ B → C → D。E・F は独立。
+
+**✅ Batch B 結果（2026-09-02 / 043 / mock `9aacdc8`）**
+- 共有化: `SoT_app-shell.css` に cx 25ルール＋app-nav 5ルール＋ダーク地、`SoT_app-shell.js` に `initCreateMenu()`、テンプレも cx へ
+- 除去: cx採用20面から inline の cx CSS / cx JS / app-nav override / ダーク地（−72〜−77行/面）
+- 移行: 旧 create-soft 23面 → cx（garage 9 / library 7 / public-garage 4 / parts-detail / log-detail / error-states / support-us）
+- 残存: create-soft markup は `myrig-rig-detail-v6.html` の1面のみ（母体保護・Legacy 許容。共有CSS側に DEPRECATED / successor / remove after を明記）。
+  `.app-header .cx__btn` の page-local 上書き9件（rig-detail v12〜v14r6）は A のデザイン探索差分として残置
+- 判断: `--cat-*-on` に fallback（`#151515` / `#fff`）を付与（v8未宣言23面で文字色が継承落ちするため。宣言済み6面は不変）/
+  home の死んだ create-soft override 14ルールを除去 / error-states の停止状態ルールを `.cx` へ追従
+- 🔴 事故: 除去スクリプトが `@media` 内を二重出力しインラインCSSを破壊（search で+123行）＋バックアップ除外パターンが
+  `garage-rig-detail-v6` にも部分一致し1面が未バックアップ。**pixel parity を出口条件にしていたため検出**。
+  42面はバックアップ、1面は Git HEAD から復旧し、中括弧収支の不変を assert して再実行。
+  教訓: 一括書換えは「同一ツリー2回撮影のノイズ」と「before→after」を分けて測る。バックアップの除外は完全一致で書く
 
 **棚卸し実測（2026-09-02 / PC 56面）:** インラインCSS 33,291行 vs 共有CSS 4,064行（1:8）。
 cx は共有側に無く page-local 20面複製。`sot-templates/` は include機構なし。
@@ -95,7 +108,7 @@ v6 のRIG詳細サイドバーは `catalog-v6` の共有部品だったが、v9�
 icon line/fill＋weight）。購入CTAは黒塗り。青 `#0969da` は操作色として不採用（ティール案も撤回済み）。
 **未裁定:** ピン留め件数の公開表示可否 / ベースモデル枠の暖色＋PR明示（#35確定形）との関係。
 
-**ライブ**: `myrig-mockup` = `dfaff3a`（`mock: update 2026-09-02 17:37 JST` — RIG詳細 v9a/v9c/v11〜v14r6・concept 2本を追加。v7 は削除（履歴 `1e94875` に残る））
+**ライブ**: `myrig-mockup` = `9aacdc8`（`mock: update 2026-09-02 21:02 JST` — Batch B: Header Single Source 化、46ファイル）
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
 > 2026-08-30、`64f0099` のまま放置していて「後続セッションが古いモックを現在地と誤認する」
 > 状態になっていた（イタヤ指摘）。
