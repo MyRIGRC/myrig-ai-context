@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260902-041
-updated: 2026-09-02 17:08 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260902-042
+updated: 2026-09-02 17:38 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-02 17:08 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-02 / revision 041**
+**最終更新: 2026-09-02 / revision 042**
 
 > 📌 **スレッドをまたぐときは `_state/HANDOFF_20260825.md` も読む。**
 > 本節が「いまどこにいるか」の正本。HANDOFFはそれを補う会話レベルの文脈
@@ -95,9 +95,7 @@ v6 のRIG詳細サイドバーは `catalog-v6` の共有部品だったが、v9�
 icon line/fill＋weight）。購入CTAは黒塗り。青 `#0969da` は操作色として不採用（ティール案も撤回済み）。
 **未裁定:** ピン留め件数の公開表示可否 / ベースモデル枠の暖色＋PR明示（#35確定形）との関係。
 
-**ライブ**: `myrig-mockup` = `fe91492`（`chore: verify Vercel deploy author`）
-> ⚠️ 2026-09-02 時点でモック側は `1e94875`（v7追加）まで commit 済み、その後の
-> v8〜v14r6・concept 各ファイルは**未commit（17件）**。`git status` を正とする。
+**ライブ**: `myrig-mockup` = `dfaff3a`（`mock: update 2026-09-02 17:37 JST` — RIG詳細 v9a/v9c/v11〜v14r6・concept 2本を追加。v7 は削除（履歴 `1e94875` に残る））
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
 > 2026-08-30、`64f0099` のまま放置していて「後続セッションが古いモックを現在地と誤認する」
 > 状態になっていた（イタヤ指摘）。
