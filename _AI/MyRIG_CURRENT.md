@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260831-040
-updated: 2026-08-31 11:17 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260902-041
+updated: 2026-09-02 17:08 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-08-31 11:17 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-08-31 / revision 040**
+**最終更新: 2026-09-02 / revision 041**
 
 > 📌 **スレッドをまたぐときは `_state/HANDOFF_20260825.md` も読む。**
 > 本節が「いまどこにいるか」の正本。HANDOFFはそれを補う会話レベルの文脈
@@ -32,7 +32,8 @@ updated: 2026-08-31 11:17 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | **検索 SEARCH-UPDATE-001** | ✅ **CLOSE（2026-08-25）** | 追加監査・cleanup・改善探索を行わない。軽微/横断は Web文法キューへ |
 | **Browse（PC＋Mobile / BROWSE-CONTRACT-001〜003）** | ✅ **CLOSE（2026-08-31 / revision 039）** | **PC・Mobile 両面とも確定。** 4面 × 2レーン = 8面。**ここから先は文言を磨くために構造を開け直さない。** 追加監査・cleanup・改善探索を行わない。次に開けてよいのは §9 のパターン設計トリガー（3つ目のCategory着手時）だけ |
 | ~~**Home 実画面レビュー**~~ | ⚫ **失効（2026-08-31 / 040 イタヤ裁定）** | **開かない。** 下記「失効の理由」参照 |
-| **RIG詳細 / パーツ詳細 / ログ詳細** | 🔵 **次はここ**（2026-08-31 / 040 イタヤ裁定） | 入口4グループ（ホーム/検索/Feed/ブラウズ）は確定済み。**そこから押した先が全部未確定**なので、フローとして詳細3面へ進む |
+| **RIG詳細 / パーツ詳細 / ログ詳細** | 🔵 **進行中**（2026-08-31 / 040 イタヤ裁定） | RIG詳細は `pc/myrig-rig-detail-v14r6-complete.html` が最新候補（7:3・全幅Identity・右レーン部品化前）。下記「詳細3面と共有化の実行順序」に従う。**パーツ詳細・ログ詳細は Header 共有化（B）と部品箱（C）の完了後に着手** |
+| **共有UI Single Source 化** | 🔵 **着手可**（2026-09-02 / 041 裁定） | 裁定原本 `_decisions/2026-09-02_shared-ui-single-source-v1.md`。バッチ B（Header）は RIG詳細と並行して進めてよい |
 | MyRIG Web文法（横断設計） | 🟡 DRAFT v0 作成済み・**一旦停止** | 追加調査・文書拡張はしない。Homeレビューで判断材料が出たら再開 |
 | Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
 | モック全体の第2周 | ⚪ 未着手 | ページ単体ではなくフロー単位で確認する体制へ移行 |
@@ -51,7 +52,52 @@ updated: 2026-08-31 11:17 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 🔴 **教訓: レーンを閉じたとき、次の行へ機械的に繰り上げない。** 中身が生きているかを確認する。
 
+### 🔵 詳細3面と共有化の実行順序（2026-09-02 / revision 041 / DECISION）
+
+**裁定原本: `_decisions/2026-09-02_shared-ui-single-source-v1.md`**（理由・棚卸し実測はすべてそこ）
+
+**DECISION — 共有UI Single Source 原則を CORE に L1 で追加した。**
+横断UIは2面目へ展開する段階で共有部品へ昇格し、以後 page-local に markup / style / behavior /
+accessibility state を複製しない。探索中の page-local 試作は許容。実装方式は固定しない。
+
+**DECISION — Header の Single Source 化を PARTS / LOG Detail 着手前に行う。**
+現在形は cx（P22-C7）。先にやらないと新規Detail 2面で cx の21・22面目のコピーが生まれる。
+
+**DECISION — Detail 右レーンは部品箱にする。** 候補6部品:
+`Rail Section Shell / Builder / Entity Actions / Share / Library Bridge / Feed・Shelf List`。
+Entity Actions は `aria-pressed`・件数・icon line/fill・focus・状態遷移まで含む。
+
+**DECISION — 旧コードは Git 履歴を退避先とし `_archive` へ複製しない。**
+CORE「物理DELETE禁止」は DB恒久ルール節のもので、Git管理コードには適用しない。
+
+| | バッチ | 入口 | 出口 |
+|---|---|---|---|
+| A | RIG Detail 右レーン仮確定（`v14r6`） | — | イタヤ「これで行く」 |
+| B | Header Single Source 化（cx / app-nav 6ルール / ダーク地 → `SoT_app-shell`。旧23面の create-soft を置換） | 着手可 | チェッカー2本 FAIL 0・全面 pageerror 0・**Browse CLOSE 面 pixel parity** |
+| C | Detail 部品箱新設 ＋ RIG Detail 載せ替え | A 完了 | インライン版と表示・状態遷移とも差分ゼロ |
+| D | PARTS / LOG Detail 新規 | **B・C 完了** | page-local の Header / 部品コピー 0 |
+| E | Footer / Garage `pit-*` / 未使用資産の掃除 | 実体再確認 | — |
+| F | PC v8 横断 | 独立 | 両テーマ実測・`--cat-*-on` 取りこぼし0 |
+
+A ∥ B → C → D。E・F は独立。
+
+**棚卸し実測（2026-09-02 / PC 56面）:** インラインCSS 33,291行 vs 共有CSS 4,064行（1:8）。
+cx は共有側に無く page-local 20面複製。`sot-templates/` は include機構なし。
+v6 のRIG詳細サイドバーは `catalog-v6` の共有部品だったが、v9〜v14 でインライン化された。
+
+**🔵 PENDING**
+- Detail 部品箱6つの境界 → A 完了後
+- 個別旧資産の失効（`sot-templates/` 7本 / 未使用 Web Component 5個 / `SoT_skeleton.css` / `browse-sidebar.css` 新旧）→ **リポジトリ全体で実体再確認後**。棚卸し値だけで確定しない
+- **PC v8 の実装状態と `color-token-v8.md` の不一致** → 正典は「PC未適用・部分適用禁止」だが、実モックは Home / Feed / Search / Browse 3面が page-local `:root` で v8 済み、残り23面は v7。推測で解消せず F で裁定
+- `--color-accent-hover: #A86F1F`（茶）が青の hover として不整合 → F
+
+**RIG詳細の右レーン（v14r6）で決まっていること:** アクション3ボタンは意味色なし（ニュートラル階調＋
+icon line/fill＋weight）。購入CTAは黒塗り。青 `#0969da` は操作色として不採用（ティール案も撤回済み）。
+**未裁定:** ピン留め件数の公開表示可否 / ベースモデル枠の暖色＋PR明示（#35確定形）との関係。
+
 **ライブ**: `myrig-mockup` = `fe91492`（`chore: verify Vercel deploy author`）
+> ⚠️ 2026-09-02 時点でモック側は `1e94875`（v7追加）まで commit 済み、その後の
+> v8〜v14r6・concept 各ファイルは**未commit（17件）**。`git status` を正とする。
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
 > 2026-08-30、`64f0099` のまま放置していて「後続セッションが古いモックを現在地と誤認する」
 > 状態になっていた（イタヤ指摘）。
