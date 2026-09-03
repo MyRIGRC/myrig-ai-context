@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260902-043
-updated: 2026-09-02 21:03 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260903-044
+updated: 2026-09-03 13:53 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-02 21:03 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-02 / revision 043**
+**最終更新: 2026-09-03 / revision 044**
 
 > 📌 **スレッドをまたぐときは `_state/HANDOFF_20260825.md` も読む。**
 > 本節が「いまどこにいるか」の正本。HANDOFFはそれを補う会話レベルの文脈
@@ -32,8 +32,8 @@ updated: 2026-09-02 21:03 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | **検索 SEARCH-UPDATE-001** | ✅ **CLOSE（2026-08-25）** | 追加監査・cleanup・改善探索を行わない。軽微/横断は Web文法キューへ |
 | **Browse（PC＋Mobile / BROWSE-CONTRACT-001〜003）** | ✅ **CLOSE（2026-08-31 / revision 039）** | **PC・Mobile 両面とも確定。** 4面 × 2レーン = 8面。**ここから先は文言を磨くために構造を開け直さない。** 追加監査・cleanup・改善探索を行わない。次に開けてよいのは §9 のパターン設計トリガー（3つ目のCategory着手時）だけ |
 | ~~**Home 実画面レビュー**~~ | ⚫ **失効（2026-08-31 / 040 イタヤ裁定）** | **開かない。** 下記「失効の理由」参照 |
-| **RIG詳細 / パーツ詳細 / ログ詳細** | 🔵 **進行中**（2026-08-31 / 040 イタヤ裁定） | RIG詳細は `pc/myrig-rig-detail-v14r6-complete.html` が最新候補（7:3・全幅Identity・右レーン部品化前）。下記「詳細3面と共有化の実行順序」に従う。**パーツ詳細・ログ詳細は Header 共有化（B）と部品箱（C）の完了後に着手** |
-| **共有UI Single Source 化** | 🔵 **B 完了（2026-09-02 / 043）→ 次は A の最終確認 → C** | 裁定原本 `_decisions/2026-09-02_shared-ui-single-source-v1.md`。B の結果は下記 |
+| **RIG詳細 / パーツ詳細 / ログ詳細** | 🔵 **RIG詳細 PC = `pc/myrig-rig-detail-v14r5-complete-r8.html` をイタヤ確定（2026-09-03 / 044）** | 次は Batch C（部品箱＋載せ替え）。パーツ詳細・ログ詳細は C 完了後に共有部品で新規作成 |
+| **共有UI Single Source 化** | 🔵 **A・B CLOSE → C 着手（2026-09-03 / 044）** | 裁定原本 `_decisions/2026-09-02_shared-ui-single-source-v1.md`。C の計画・出口条件は下記 |
 | MyRIG Web文法（横断設計） | 🟡 DRAFT v0 作成済み・**一旦停止** | 追加調査・文書拡張はしない。Homeレビューで判断材料が出たら再開 |
 | Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
 | モック全体の第2周 | ⚪ 未着手 | ページ単体ではなくフロー単位で確認する体制へ移行 |
@@ -72,9 +72,9 @@ CORE「物理DELETE禁止」は DB恒久ルール節のもので、Git管理コ�
 
 | | バッチ | 入口 | 出口 |
 |---|---|---|---|
-| A | RIG Detail 右レーン仮確定（`v14r6`） | — | イタヤ「これで行く」 |
+| A | RIG Detail 確定 | ✅ **完了（2026-09-03 / r8 をイタヤ確定）** | 右レーンだけでなく PC 版 RIG Detail 全体を確定 |
 | B | Header Single Source 化 | ✅ **完了（`9aacdc8`）** | チェッカー 214/201 FAIL 0・56面 pageerror 0・**CLOSE/現在形6面 pixel parity 0px**（feed light の2pxは同一ツリー再撮影でも出るキャレットノイズ）・cx 7挙動同一 |
-| C | Detail 部品箱新設 ＋ RIG Detail 載せ替え | A 完了 | インライン版と表示・状態遷移とも差分ゼロ |
+| C | Detail 部品箱新設 ＋ RIG Detail 載せ替え（r8 → `v15`） | 🔵 **着手** | r8 と v15 の visual parity 0px / Action・Gallery・Comment・Shelf・Follow の behavior parity / pageerror 0 / page-local 部品定義残存 0 の反証 |
 | D | PARTS / LOG Detail 新規 | **B・C 完了** | page-local の Header / 部品コピー 0 |
 | E | Footer / Garage `pit-*` / 未使用資産の掃除 | 実体再確認 | — |
 | F | PC v8 横断 | 独立 | 両テーマ実測・`--cat-*-on` 取りこぼし0 |
@@ -86,7 +86,7 @@ A ∥ B → C → D。E・F は独立。
 - 除去: cx採用20面から inline の cx CSS / cx JS / app-nav override / ダーク地（−72〜−77行/面）
 - 移行: 旧 create-soft 23面 → cx（garage 9 / library 7 / public-garage 4 / parts-detail / log-detail / error-states / support-us）
 - 残存: create-soft markup は `myrig-rig-detail-v6.html` の1面のみ（母体保護・Legacy 許容。共有CSS側に DEPRECATED / successor / remove after を明記）。
-  `.app-header .cx__btn` の page-local 上書き9件（rig-detail v12〜v14r6）は A のデザイン探索差分として残置
+  `.app-header .cx__btn` の page-local 上書き9件（rig-detail v12〜v14r6）は A のデザイン探索差分として残置（→ 044: 当該14面は除去済み。確定版 r8 にも同種の上書きがあり、C で共有側へ吸収するか判断）
 - 判断: `--cat-*-on` に fallback（`#151515` / `#fff`）を付与（v8未宣言23面で文字色が継承落ちするため。宣言済み6面は不変）/
   home の死んだ create-soft override 14ルールを除去 / error-states の停止状態ルールを `.cx` へ追従
 - 🔴 事故: 除去スクリプトが `@media` 内を二重出力しインラインCSSを破壊（search で+123行）＋バックアップ除外パターンが
@@ -104,11 +104,40 @@ v6 のRIG詳細サイドバーは `catalog-v6` の共有部品だったが、v9�
 - **PC v8 の実装状態と `color-token-v8.md` の不一致** → 正典は「PC未適用・部分適用禁止」だが、実モックは Home / Feed / Search / Browse 3面が page-local `:root` で v8 済み、残り23面は v7。推測で解消せず F で裁定
 - `--color-accent-hover: #A86F1F`（茶）が青の hover として不整合 → F
 
-**RIG詳細の右レーン（v14r6）で決まっていること:** アクション3ボタンは意味色なし（ニュートラル階調＋
-icon line/fill＋weight）。購入CTAは黒塗り。青 `#0969da` は操作色として不採用（ティール案も撤回済み）。
-**未裁定:** ピン留め件数の公開表示可否 / ベースモデル枠の暖色＋PR明示（#35確定形）との関係。
+### ✅ RIG Detail PC 確定（2026-09-03 / 044 / `pc/myrig-rig-detail-v14r5-complete-r8.html`）
 
-**ライブ**: `myrig-mockup` = `9aacdc8`（`mock: update 2026-09-02 21:02 JST` — Batch B: Header Single Source 化、46ファイル）
+GPT との実機確認・修正を経てイタヤ裁定。**ここからデザインを再検討しない。** 実装・共有化上の問題だけ報告する。
+r8 の中身すべてが永久固定ではない。固定したのは **役割・階層・レイアウト文法・組み替え可能にする境界**。
+
+**構造:** 全幅 Identity → Gallery → 7:3（左＝RIG本体 / 右＝補助・アクション・回遊・収益）→ RELATED → 共通 Footer。
+左本文8節: このRIGについて / フォトノート / RIG情報 / ベースモデル / ビルド詳細 / LOG / 使用パーツ / コメント（本文の終点）。
+
+**DECISION — Gallery は Cover 1 ＋ Sub 最大8（合計最大9）。Photo Notes は Sub が対象で最大8。** この対応関係を崩さない。
+
+**DECISION — 右レーンは現在構成を「標準プリセット」とし、将来 Widget Stack（追加・非表示・並び替え）にできる境界を維持する。**
+標準プリセット: ビルダー / このRIGへのアクション / ベースモデル / このRIGのフィード / AD / このRIGの外部リンク / このビルダーの他のRIG / このRIGで使われているパーツ / SPONSORED。
+識別子は `data-widget`。**順序は DOM 順が唯一の正本。`data-order` は持たない**（二重管理を作らない）。管理画面・保存 schema は着手時に設計。
+「このRIGのフィード」は LOG に限らない RIG 中心の Activity。外部リンクは登録が無ければ非表示にできる前提。
+
+**DECISION — コメントは Detail 共通の Conversation として扱う。** ページ内は件数明示＋数件プレビュー＋「書く／すべて見る」。全会話・返信・投稿は Modal。各コメントに「⋯」→「通報する」。投稿はログインユーザーのみ。**moderation / report の backend はこの作業で確定しない。**
+
+**DECISION — RELATED は「近い関連＝Detail 幅」→「広い発見＝フルワイド・高密度」の二段階文法。** 具体的な棚の内容・順番・件数は固定しない（データ量・運用・収益化で後から変える領域）。識別子は `data-section`、order 番号は持たない。
+
+**DECISION — 画鋲の正典は `_ic_pin_push`（Home のカードと同じ塗りアウトライン）。** I-1 で採用、異議なし。C03 カタログ・詳細 v6 系の C03 stroke 版は移行対象。
+
+**失効（記録）:** 「同じパーツを使っているRIG」棚は RIG Detail から撤去（PARTS Detail 側が意味的に適切）。コメント後にあったビルダーの RIG/パーツ/LOG タブ棚も撤去（右レーンのビルダー導線と重複）。ピン留め件数の公開表示は pins 完全非公開（L1）に従い非表示、本人の状態のみ。ベースモデル枠は中立面のまま、購入先＋ショップ群だけを Commerce 領域として囲み PR 明示。
+
+**Batch C 計画（承認済み）:**
+- 共有4ファイル新設: `SoT_detail.css`（Grid / Identity / Gallery拡張 / Section Shell / Comment Conversation / Related Zone）/ `SoT_detail-rail.css`（Rail Section Shell / Builder / Entity Actions / Share / Library Bridge / Feed・Shelf List / AD slot）/ `SoT_detail-components.js` / `SoT_shelf.js`
+- **既存を拡張し新部品を作らない:** Gallery は既存 `.gallery`、Comment は既存 `.cmt-modal` `.comment`、横スクロール棚は既存 `.shelf` ＋ **Home の inline 棚JS を `SoT_shelf.js` へ昇格**（2面目の昇格トリガー。Home も切替、pixel parity 条件）
+- r8 → `myrig-rig-detail-v15.html`。**r8 は移行用の比較元**（`DEPRECATED / successor: v15 / remove after: parity・behavior PASS`）。PASS 後は active tree から除去、履歴は Git
+- **Footer は C のスコープ外（Batch E）。** r8 の `<footer class="site-footer">` は page-local markup として存在するが、C では表示維持のみで共有化しない。**Header（B）も再オープンしない**
+- 手順: C-1 共有4ファイル → C-2 v15 → C-3 parity/behavior → C-4 Home 棚JS切替 → C-5 反証（v15 inline に部品定義 0） → C-6 r8 除去・報告
+
+**I-1 完了（2026-09-03）:** ガレージ8面＋テンプレ＋カタログG02 の お気に入り（ハート→星）/ ピン留め（星→画鋲）を修正。garage-top SAVED 見出しの文字グリフを SVG へ。Library パーツマスターの「ピン数 203件」を削除（pins 非公開。3項目へ）。
+**旧 RIG Detail 候補14件（v9a〜v14r6・concept 2本）を active tree から除去。** 履歴は `9aacdc8`。`_archive` へは複製しない（041 裁定）。
+
+**ライブ**: `myrig-mockup` = `45aec3f`（`mock: C-0 checkpoint` — r8 確定 / I-1 / 旧候補14件除去。26ファイル）
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
 > 2026-08-30、`64f0099` のまま放置していて「後続セッションが古いモックを現在地と誤認する」
 > 状態になっていた（イタヤ指摘）。
