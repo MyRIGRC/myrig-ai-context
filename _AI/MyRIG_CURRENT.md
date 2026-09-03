@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260903-044
-updated: 2026-09-03 13:53 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260903-045
+updated: 2026-09-03 16:25 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,12 @@ updated: 2026-09-03 13:53 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-03 / revision 044**
+**最終更新: 2026-09-03 / revision 045（交通整理 ＋ Batch C 完了・Gate 2 待ち）**
+
+> **いま止まっている場所:** Batch C の実装と検証は終わっている（54 PASS / 0 FAIL）。
+> 次は **GPT の Gate 2 独立監査**。PASS で v15 を SYSTEM VERIFIED へ昇格し、
+> Launcher・サイト内リンク 33本を **一度だけ** v15 へ切り替え、r8 を active tree から外す。
+> そのあと PARTS Detail（D）。**Gate 2 の前に新しい面へ進まない。**
 
 > 📌 **スレッドをまたぐときは `_state/HANDOFF_20260825.md` も読む。**
 > 本節が「いまどこにいるか」の正本。HANDOFFはそれを補う会話レベルの文脈
@@ -32,11 +37,54 @@ updated: 2026-09-03 13:53 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | **検索 SEARCH-UPDATE-001** | ✅ **CLOSE（2026-08-25）** | 追加監査・cleanup・改善探索を行わない。軽微/横断は Web文法キューへ |
 | **Browse（PC＋Mobile / BROWSE-CONTRACT-001〜003）** | ✅ **CLOSE（2026-08-31 / revision 039）** | **PC・Mobile 両面とも確定。** 4面 × 2レーン = 8面。**ここから先は文言を磨くために構造を開け直さない。** 追加監査・cleanup・改善探索を行わない。次に開けてよいのは §9 のパターン設計トリガー（3つ目のCategory着手時）だけ |
 | ~~**Home 実画面レビュー**~~ | ⚫ **失効（2026-08-31 / 040 イタヤ裁定）** | **開かない。** 下記「失効の理由」参照 |
-| **RIG詳細 / パーツ詳細 / ログ詳細** | 🔵 **RIG詳細 PC = `pc/myrig-rig-detail-v14r5-complete-r8.html` をイタヤ確定（2026-09-03 / 044）** | 次は Batch C（部品箱＋載せ替え）。パーツ詳細・ログ詳細は C 完了後に共有部品で新規作成 |
-| **共有UI Single Source 化** | 🔵 **A・B CLOSE → C 着手（2026-09-03 / 044）** | 裁定原本 `_decisions/2026-09-02_shared-ui-single-source-v1.md`。C の計画・出口条件は下記 |
+| **RIG詳細 / パーツ詳細 / ログ詳細** | 🔵 **RIG詳細 PC = r8 を VISUAL LOCK（2026-09-03 / 044）／ 共有部品版 `v15` は parity PASS（045）** | **Gate 2（GPT 独立監査）待ち。** PASS で v15 を SYSTEM VERIFIED へ昇格し、Launcher・内部リンクを一度だけ v15 へ。パーツ詳細・ログ詳細はその後 |
+| **共有UI Single Source 化** | 🔵 **A・B CLOSE / C 実装完了・監査待ち（2026-09-03 / 045）** | 裁定原本 `_decisions/2026-09-02_shared-ui-single-source-v1.md`。C の結果は下記 |
+| **PROPAGATION-SHELF** | ⚪ **未着手（045 で起票）** | Home ＋ Browse PC 3面の page-local 棚を `SoT_shelf.js` へ。**Gate 2 の後。** 4面それぞれ pixel parity |
+| **PROPAGATION-HEADER** | ⚪ **未着手（045 で起票）** | PC Home に残る `.app-logo` 系 page-local 17ルール。Batch B の除去対象から漏れ、ロゴ／タグラインが他6面と約2px不一致 |
 | MyRIG Web文法（横断設計） | 🟡 DRAFT v0 作成済み・**一旦停止** | 追加調査・文書拡張はしない。Homeレビューで判断材料が出たら再開 |
 | Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
 | モック全体の第2周 | ⚪ 未着手 | ページ単体ではなくフロー単位で確認する体制へ移行 |
+
+#### 🔵 レーン運用（2026-09-03 / 045 / イタヤ裁定）
+
+| | 担当 |
+|---|---|
+| **Cowork（Claude）** | mockup 実体管理・実装・component化・Launcher整合・regression・commit/push・CURRENT / DECISION 更新。**主査** |
+| **GPT** | 節目の独立監査（下記 Gate）・設計矛盾チェック・regression の反証確認・共有変更の Impact 監査。**正典は READ 専用** |
+| **イタヤ** | 最終裁定 |
+
+**GPT と Cowork が同じ HTML を並行して直す運用へは戻さない。**
+
+**作業レーンを3種に分け、同一バッチで混ぜない。**
+
+| レーン | 中身 | 例 |
+|---|---|---|
+| **DESIGN** | ページの見た目を作る | RIG Detail r1 → r8 |
+| **SYSTEM** | VISUAL LOCK 済みの面を共有部品へ移す | r8 → v15（Batch C） |
+| **PROPAGATION** | 共有部品の変更を既存 consumer へ展開する | 棚JS を Home / Browse へ |
+
+**GPT へ監査を戻す Gate**
+
+| | タイミング | 見るもの |
+|---|---|---|
+| Gate 1 | 045 反映後 | CURRENT / matrix の整合 |
+| **Gate 2** | **Batch C 完了後（＝いま）** | r8 vs v15 の visual / behavior parity |
+| Gate 3 | PROPAGATION-SHELF 完了後 | Home ＋ Browse CLOSE 面の非回帰 |
+| Gate 4 | PARTS Detail を VISUAL LOCK する前 | RIG Detail 共通文法との整合 |
+| Gate 5 | LOG Detail を VISUAL LOCK する前 | Detail 3面の横断整合 |
+
+これ以外でも、**共有部品の変更で複数の LOCK / CLOSE 面の見た目が変わるときは都度 Gate へ戻す。**
+
+#### 🔵 状態語彙（2026-09-03 / 045）
+
+| 語 | 意味 |
+|---|---|
+| **VISUAL LOCK** | イタヤが実画面を見て「この見た目で行く」と決めた状態。デザインの正本 |
+| **MIGRATING** | 共有部品へ載せ替え中 |
+| **SYSTEM VERIFIED** | 載せ替え後、visual / behavior parity と pageerror まで通した状態。実装の正本 |
+
+Launcher の本流は原則 VISUAL LOCK 以上を指す。**MIGRATING の版を確定版と混同しない。**
+現在: r8 = VISUAL LOCK / v15 = MIGRATING（parity は PASS、Gate 2 待ち）。
 
 #### ⚫ 「Home 実画面レビュー」失効の理由（2026-08-31 / 040）
 
@@ -74,12 +122,51 @@ CORE「物理DELETE禁止」は DB恒久ルール節のもので、Git管理コ�
 |---|---|---|---|
 | A | RIG Detail 確定 | ✅ **完了（2026-09-03 / r8 をイタヤ確定）** | 右レーンだけでなく PC 版 RIG Detail 全体を確定 |
 | B | Header Single Source 化 | ✅ **完了（`9aacdc8`）** | チェッカー 214/201 FAIL 0・56面 pageerror 0・**CLOSE/現在形6面 pixel parity 0px**（feed light の2pxは同一ツリー再撮影でも出るキャレットノイズ）・cx 7挙動同一 |
-| C | Detail 部品箱新設 ＋ RIG Detail 載せ替え（r8 → `v15`） | 🔵 **着手** | r8 と v15 の visual parity 0px / Action・Gallery・Comment・Shelf・Follow の behavior parity / pageerror 0 / page-local 部品定義残存 0 の反証 |
-| D | PARTS / LOG Detail 新規 | **B・C 完了** | page-local の Header / 部品コピー 0 |
+| C | Detail 部品箱新設 ＋ RIG Detail 載せ替え（r8 → `v15`） | ✅ **実装完了（2026-09-03 / 045 / `2e4e10d`）→ Gate 2 待ち** | 下記「Batch C 結果」 |
+| D | PARTS / LOG Detail 新規 | **Gate 2 PASS 後** | page-local の Header / 部品コピー 0 |
 | E | Footer / Garage `pit-*` / 未使用資産の掃除 | 実体再確認 | — |
 | F | PC v8 横断 | 独立 | 両テーマ実測・`--cat-*-on` 取りこぼし0 |
 
-A ∥ B → C → D。E・F は独立。
+A ∥ B → C → D。E・F は独立。PROPAGATION-SHELF / -HEADER は C とは別レーン（上表）。
+
+**✅ Batch C 結果（2026-09-03 / 045 / mock `2e4e10d`）**
+
+新設した共有4本（すべて `_state/build_detail_system.py` が r8 から生成する。手で編集しない）
+
+| ファイル | 中身 |
+|---|---|
+| `pc/assets/css/SoT_detail.css` | Grid / Identity / Gallery / Section Shell / Comment Conversation / Related Zone / 棚（169ルール） |
+| `pc/assets/css/SoT_detail-rail.css` | 右レーン標準プリセット（210ルール） |
+| `pc/assets/js/SoT_detail-components.js` | Gallery / Entity Actions / Comment Modal・⋯ / Follow / Share / Base Model thumb |
+| `pc/assets/js/SoT_shelf.js` | 横スクロール棚。`[data-shelf]` で拾う。スクロール量は `cards`（Home 由来）と `viewport`（詳細由来）の2種 |
+
+`pc/myrig-rig-detail-v15.html` — page-local の `<style>` 0 / インライン `<script>` 0。
+版番号入りクラス（`v14r3` / `v14r4` / `v14r5` / `r7` / `r8` / `dg`）を Detail 恒久語彙へ改名し、
+**死んだ規則 102セレクタ**（`discover-*` / `r7-*` / `*-v10` の旧世代）を除去した。
+
+**出口条件 54 PASS / 0 FAIL**（`_state/detail_parity.py` / 記録は `_state/parity_out/`）
+- visual: 1440 / 1200 / 1000 / 900 / 700px × light・dark すべて **pixel diff 0**（同一ツリー2回撮影のノイズ床と併記して判定）
+- behavior: Gallery 9枚・Entity Actions 3種の状態遷移と件数・Comment Modal / reply / ⋯ メニュー・Follow・棚のスクロール量・a11y state
+- pageerror: r8 / v15 とも 0
+- 反証: v15 に部品定義の残存 0。**故障注入で 6 FAIL することを確認済み**（検査の検出力）
+
+**DECISION — 044 の「既存の `.shelf` / `.cmt-modal` を拡張する」は C では見送る。**
+`SoT_component-catalog-v6.css` の同名部品は Detail 用ではなく（`.shelf__rail` は `gap:16px` と
+`--page-side-padding` を持つ）、その名前を付けると **確定済みの見た目が動く**。
+衝突しない `dt-*` を名乗り、**catalog 側との統合は Gate 4（PARTS Detail 着手前）で裁定する。**
+挙動だけは先に共有した（`SoT_shelf.js` はクラス名ではなく `[data-shelf]` 属性で拾う）。
+
+**DECISION — Header の白枠「＋投稿する」は C では触らない。**
+調査の結果、これは v12 で「★暫定。実画面で裁定する」と書かれたまま残った探索差分で、
+Detail だけ変える理由は文書に無い（＝ accidental drift）。ただし **その状態を含む r8 を
+イタヤが実画面で見て VISUAL LOCK している**ので、SYSTEM 移行で勝手に戻さない。
+`SoT_detail.css` は詳細面だけが読むため、r8 と同一のセレクタのままで Detail 限定 variant になる。
+**永久仕様として正典化したわけではない。** Header 横断の見直しは別の DESIGN / PROPAGATION 裁定で行う。
+
+**移行期の並存（CORE L1 の様式で明記済み）**
+- `r8` = `DEPRECATED 2026-09-03 / successor: v15 / remove after: Gate 2 PASS`
+- Home ＋ Browse PC 3面の page-local 棚 = `successor: SoT_shelf.js / remove after: PROPAGATION-SHELF parity PASS`
+- 確定済み4面へ入れたのは**コメントのみ**。HEAD 版との pixel diff 0 を実測（差分はいずれも同一ツリー再撮影のノイズ床と一致）
 
 **✅ Batch B 結果（2026-09-02 / 043 / mock `9aacdc8`）**
 - 共有化: `SoT_app-shell.css` に cx 25ルール＋app-nav 5ルール＋ダーク地、`SoT_app-shell.js` に `initCreateMenu()`、テンプレも cx へ
@@ -99,10 +186,39 @@ cx は共有側に無く page-local 20面複製。`sot-templates/` は include�
 v6 のRIG詳細サイドバーは `catalog-v6` の共有部品だったが、v9〜v14 でインライン化された。
 
 **🔵 PENDING**
-- Detail 部品箱6つの境界 → A 完了後
+- ~~Detail 部品箱6つの境界~~ → ✅ C で確定（`SoT_detail-rail.css` の Rail Section Shell / Builder / Entity Actions / Share / Library Bridge / Feed・Shelf List ＋ AD slot）
+- **Detail の 棚 / Comment / Modal が catalog-v6 の同名部品と2系統ある** → Gate 4（PARTS Detail 着手前）で統合を裁定。いまは `dt-*` と `catalog` が別物として並ぶ
 - 個別旧資産の失効（`sot-templates/` 7本 / 未使用 Web Component 5個 / `SoT_skeleton.css` / `browse-sidebar.css` 新旧）→ **リポジトリ全体で実体再確認後**。棚卸し値だけで確定しない
 - **PC v8 の実装状態と `color-token-v8.md` の不一致** → 正典は「PC未適用・部分適用禁止」だが、実モックは Home / Feed / Search / Browse 3面が page-local `:root` で v8 済み、残り23面は v7。推測で解消せず F で裁定
 - `--color-accent-hover: #A86F1F`（茶）が青の hover として不整合 → F
+
+### 🔵 Mockup State Audit（2026-09-03 / 045 / OBSERVATION）
+
+**実測表: `_state/mockup-state-matrix.md`**（Page Visual Canon / Shared Component State /
+Launcher の3層を1枚にした資料。**正典ではない。現在の実装状態を上書き更新する用途**で、
+履歴を積み上げない。表示件数・余白・棚の順番のような UI 調整は CURRENT にも matrix にも固定しない）
+
+C の着手前に、実装が正典より先行していないかを READ のみで棚卸しした。結果の要点だけ:
+
+| 分類 | 件 | 扱い |
+|---|---|---|
+| **BLOCKER**（C 開始前に処理） | 4 | 044 未push / Header の扱い / Launcher が v6 を指す / Shelf の影響範囲 → **すべて 045 で処理済み** |
+| **REGRESSION**（確定面の整合確認が要る） | 4 | Home ロゴ 2px → PROPAGATION-HEADER ／ Search の CLOSE 後 taxonomy 変更 → 回帰再実行 ／ Home 8/26 と Mobile Home 8/30 の記録欠落 → **記録として残す。Home は再設計しない** |
+| **CANON-STALE**（実装が正しく CURRENT が古い） | 2 | PC Feed の3タブ（下記）／ Batch B parity の証跡 |
+| **SEPARATE-BATCH** | 5 | Footer r8 独自 markup → E ／ `SoT_app-shell.css` の PC⇄Mobile 乖離 179行 → E ／ 孤児2件 → E ／ 404 3件 → E ／ PC v8 → F |
+
+**CANON correction — PC Feed は3タブが実装済み。** モック是正キュー B-1 の
+「PC Feed が #28 未適用（All/Following/Trending の3タブ）」と 2026-07-30 Active Override
+「FEED文法はモバイル基準。PC版を差し替える・実装待ち」は**失効**。実装は
+`pc/myrig-feed-v3.html` で おすすめ / 新着 / フォロー中 の3タブ＋`?tab=` 同期まで入っている。
+**未実装として残るのは ImageLightbox と無限スクロールのみ**（実測 0件）。実装を戻さない。
+
+**Search の CLOSE 後変更（記録）:** 8/30 に `js/category-taxonomy.js` を入れて
+`scat` の語彙を日本語ラベルから slug へ移した（PC / Mobile 両面）。内部語彙の変更であって
+仕様変更ではない。ただし `_state/search_regression.py` は旧語彙 3箇所を前提にしており
+**現状そのままでは 13項目目で停止する**（2026-09-03 実走で確認。それまでは 12 PASS / 0 FAIL）。
+**回帰スクリプト側を slug へ追随させて再実行し、101項目 PASS を確認するまで CLOSE の証跡は不完全。**
+FAIL が出た場合のみ裁定へ上げる。→ PROPAGATION / Regression レーン
 
 ### ✅ RIG Detail PC 確定（2026-09-03 / 044 / `pc/myrig-rig-detail-v14r5-complete-r8.html`）
 
@@ -127,17 +243,20 @@ r8 の中身すべてが永久固定ではない。固定したのは **役割�
 
 **失効（記録）:** 「同じパーツを使っているRIG」棚は RIG Detail から撤去（PARTS Detail 側が意味的に適切）。コメント後にあったビルダーの RIG/パーツ/LOG タブ棚も撤去（右レーンのビルダー導線と重複）。ピン留め件数の公開表示は pins 完全非公開（L1）に従い非表示、本人の状態のみ。ベースモデル枠は中立面のまま、購入先＋ショップ群だけを Commerce 領域として囲み PR 明示。
 
-**Batch C 計画（承認済み）:**
-- 共有4ファイル新設: `SoT_detail.css`（Grid / Identity / Gallery拡張 / Section Shell / Comment Conversation / Related Zone）/ `SoT_detail-rail.css`（Rail Section Shell / Builder / Entity Actions / Share / Library Bridge / Feed・Shelf List / AD slot）/ `SoT_detail-components.js` / `SoT_shelf.js`
-- **既存を拡張し新部品を作らない:** Gallery は既存 `.gallery`、Comment は既存 `.cmt-modal` `.comment`、横スクロール棚は既存 `.shelf` ＋ **Home の inline 棚JS を `SoT_shelf.js` へ昇格**（2面目の昇格トリガー。Home も切替、pixel parity 条件）
-- r8 → `myrig-rig-detail-v15.html`。**r8 は移行用の比較元**（`DEPRECATED / successor: v15 / remove after: parity・behavior PASS`）。PASS 後は active tree から除去、履歴は Git
-- **Footer は C のスコープ外（Batch E）。** r8 の `<footer class="site-footer">` は page-local markup として存在するが、C では表示維持のみで共有化しない。**Header（B）も再オープンしない**
-- 手順: C-1 共有4ファイル → C-2 v15 → C-3 parity/behavior → C-4 Home 棚JS切替 → C-5 反証（v15 inline に部品定義 0） → C-6 r8 除去・報告
+**Batch C（2026-09-03 / 045 で実装完了。計画からの変更点）:**
+- 共有4ファイルは計画どおり新設。**C-4「Home の棚JS 切替」は C から外して PROPAGATION-SHELF へ**（045 イタヤ裁定）。
+  Home / Browse は確定済みなので、SYSTEM 作業と同じバッチで触らない
+- **既存部品への統合は見送り**（上記 DECISION）。Gallery は既存 `.gallery` のまま、
+  棚・Comment・Modal は `dt-*` で新設し、統合は Gate 4 で裁定する
+- **C-6「r8 除去」は Gate 2 PASS 後**。いまは比較元として残す
+- **Footer は C のスコープ外（Batch E）。Header（B）も再オープンしない。** どちらも守った
+- 実施: C-1 共有4ファイル → C-2 v15 → C-3 parity/behavior → C-5 反証 → 報告・停止（Gate 2）
 
 **I-1 完了（2026-09-03）:** ガレージ8面＋テンプレ＋カタログG02 の お気に入り（ハート→星）/ ピン留め（星→画鋲）を修正。garage-top SAVED 見出しの文字グリフを SVG へ。Library パーツマスターの「ピン数 203件」を削除（pins 非公開。3項目へ）。
 **旧 RIG Detail 候補14件（v9a〜v14r6・concept 2本）を active tree から除去。** 履歴は `9aacdc8`。`_archive` へは複製しない（041 裁定）。
 
-**ライブ**: `myrig-mockup` = `45aec3f`（`mock: C-0 checkpoint` — r8 確定 / I-1 / 旧候補14件除去。26ファイル）
+**ライブ**: `myrig-mockup` = `2e4e10d`（`mock: Batch C` — 共有 Detail システム新設 / v15 / Launcher を r8 へ。17ファイル）
+> ⚠️ **2026-09-03 時点で push 待ち。** イタヤの手元で `mockup` を回すまでライブは `45aec3f` のまま。
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
 > 2026-08-30、`64f0099` のまま放置していて「後続セッションが古いモックを現在地と誤認する」
 > 状態になっていた（イタヤ指摘）。
@@ -1093,7 +1212,9 @@ docs/           ACTIVE正典（Knowledge接続対象）
                 pc-mobile-inheritance-v1.1
   search/       検索: search-page-plan-v2（現行確定）
   support/      補助: App_Ready_Design_Rules / implementation_checklist
-_state/         生きた台帳: mobile-feedback-ledger（Knowledge接続対象）
+_state/         生きた台帳: mobile-feedback-ledger（Knowledge接続対象）/
+                mockup-state-matrix（モック実装状態の実測表。OBSERVATION・上書き更新）/
+                HANDOFF_*（スレッド間の文脈。正典ではない）
 _decisions/     裁定記録。経緯を辿る時だけ読む
 _proposals/     未裁定の検討資料。正典扱い禁止
 _archive/       退役文書。通常判断には使わない
