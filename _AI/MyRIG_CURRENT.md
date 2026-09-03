@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
 revision: MYRIG-20260903-046
-updated: 2026-09-03 17:15 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+updated: 2026-09-03 17:34 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,13 +14,15 @@ updated: 2026-09-03 17:15 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-03 / revision 046（Gate 2 第1回の指摘4件を修正 → 再監査待ち）**
+**最終更新: 2026-09-03 / revision 046（Batch C 完了・Gate 2 PASS / CLOSE）**
 
-> **いま止まっている場所:** Batch C は実装・検証とも完了し、**Gate 2 第1回（HOLD）の指摘4件も
-> 修正済み**。次は **GPT の Gate 2 再監査**（監査対象 mock SHA = `5b3edde`）。
-> PASS で v15 を SYSTEM VERIFIED へ昇格し、Launcher・サイト内リンク 33本を **一度だけ**
-> v15 へ切り替え、**r8 と移行専用ツール2本を同じ撤去条件で外す**。
-> そのあと PARTS Detail（D）。**Gate 2 の前に新しい面へ進まない。**
+> **いま止まっている場所:** **Gate 2 は PASS / CLOSE。RIG 詳細 PC の SYSTEM 整理は完了した。**
+> `pc/myrig-rig-detail-v15.html` が **SYSTEM VERIFIED**（実装の正本）。
+> Launcher・見比べ・サイト内リンク 33本は v15 へ切り替え済み。r8 と移行専用ツールは撤去済み。
+>
+> **次は PARTS Detail（Batch D）だが、ここから先は再び DESIGN / モック制作。**
+> イタヤと実画面を見ながら始める。**Cowork が単独でデザインを進めない。**
+> Gate 4（Detail 横断裁定・`dt-*` と catalog-v6 の統合）もそのタイミングで扱う。
 
 > 📌 **スレッドをまたぐときは `_state/HANDOFF_20260825.md` も読む。**
 > 本節が「いまどこにいるか」の正本。HANDOFFはそれを補う会話レベルの文脈
@@ -38,9 +40,9 @@ updated: 2026-09-03 17:15 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | **検索 SEARCH-UPDATE-001** | ✅ **CLOSE（2026-08-25）** | 追加監査・cleanup・改善探索を行わない。軽微/横断は Web文法キューへ |
 | **Browse（PC＋Mobile / BROWSE-CONTRACT-001〜003）** | ✅ **CLOSE（2026-08-31 / revision 039）** | **PC・Mobile 両面とも確定。** 4面 × 2レーン = 8面。**ここから先は文言を磨くために構造を開け直さない。** 追加監査・cleanup・改善探索を行わない。次に開けてよいのは §9 のパターン設計トリガー（3つ目のCategory着手時）だけ |
 | ~~**Home 実画面レビュー**~~ | ⚫ **失効（2026-08-31 / 040 イタヤ裁定）** | **開かない。** 下記「失効の理由」参照 |
-| **RIG詳細 / パーツ詳細 / ログ詳細** | 🔵 **RIG詳細 PC = r8 を VISUAL LOCK（2026-09-03 / 044）／ 共有部品版 `v15` は parity PASS（045）** | **Gate 2（GPT 独立監査）待ち。** PASS で v15 を SYSTEM VERIFIED へ昇格し、Launcher・内部リンクを一度だけ v15 へ。パーツ詳細・ログ詳細はその後 |
-| **共有UI Single Source 化** | 🔵 **A・B CLOSE / C 実装完了・監査待ち（2026-09-03 / 045）** | 裁定原本 `_decisions/2026-09-02_shared-ui-single-source-v1.md`。C の結果は下記 |
-| **PROPAGATION-SHELF** | ⚪ **未着手（045 で起票）** | Home ＋ Browse PC 3面の page-local 棚を `SoT_shelf.js` へ。**Gate 2 の後。** 4面それぞれ pixel parity |
+| **RIG詳細 / パーツ詳細 / ログ詳細** | ✅ **RIG詳細 PC = `pc/myrig-rig-detail-v15.html` が SYSTEM VERIFIED（2026-09-03 / 046 / Gate 2 CLOSE）** | 次は **パーツ詳細（D）**。ただし**ここから先は DESIGN レーン**なので、イタヤと実画面を見ながら始める。共有部品から作りコピーしない |
+| **共有UI Single Source 化** | ✅ **A・B・C CLOSE（2026-09-03 / 046）** | 裁定原本 `_decisions/2026-09-02_shared-ui-single-source-v1.md`。C の結果は下記。残るは D / E / F と PROPAGATION 2本 |
+| **PROPAGATION-SHELF** | ⚪ **未着手（045 で起票）** | Home ＋ Browse PC 3面の page-local 棚を `SoT_shelf.js` へ。4面それぞれ pixel parity → Gate 3 |
 | **PROPAGATION-HEADER** | ⚪ **未着手（045 で起票）** | PC Home に残る `.app-logo` 系 page-local 17ルール。Batch B の除去対象から漏れ、ロゴ／タグラインが他6面と約2px不一致 |
 | MyRIG Web文法（横断設計） | 🟡 DRAFT v0 作成済み・**一旦停止** | 追加調査・文書拡張はしない。Homeレビューで判断材料が出たら再開 |
 | Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
@@ -123,16 +125,16 @@ CORE「物理DELETE禁止」は DB恒久ルール節のもので、Git管理コ�
 |---|---|---|---|
 | A | RIG Detail 確定 | ✅ **完了（2026-09-03 / r8 をイタヤ確定）** | 右レーンだけでなく PC 版 RIG Detail 全体を確定 |
 | B | Header Single Source 化 | ✅ **完了（`9aacdc8`）** | チェッカー 214/201 FAIL 0・56面 pageerror 0・**CLOSE/現在形6面 pixel parity 0px**（feed light の2pxは同一ツリー再撮影でも出るキャレットノイズ）・cx 7挙動同一 |
-| C | Detail 部品箱新設 ＋ RIG Detail 載せ替え（r8 → `v15`） | ✅ **実装完了 ＋ Gate 2 第1回の指摘4件を修正（2026-09-03 / 046 / `5b3edde`）→ 再監査待ち** | 下記「Batch C 結果」 |
-| D | PARTS / LOG Detail 新規 | **Gate 2 PASS 後** | page-local の Header / 部品コピー 0 |
+| C | Detail 部品箱新設 ＋ RIG Detail 載せ替え（r8 → `v15`） | ✅ **CLOSE（2026-09-03 / 046 / Gate 2 PASS）** | 下記「Batch C 結果」 |
+| D | PARTS / LOG Detail 新規 | **着手可（DESIGN レーン。イタヤと相談して開始）** | page-local の Header / 部品コピー 0 |
 | E | Footer / Garage `pit-*` / 未使用資産の掃除 | 実体再確認 | — |
 | F | PC v8 横断 | 独立 | 両テーマ実測・`--cat-*-on` 取りこぼし0 |
 
 A ∥ B → C → D。E・F は独立。PROPAGATION-SHELF / -HEADER は C とは別レーン（上表）。
 
-**✅ Batch C 結果（2026-09-03 / 046 / mock `5b3edde`）**
+**✅ Batch C 結果（2026-09-03 / 046 / Gate 2 PASS・CLOSE / mock `ec3398c`）**
 
-新設した共有4本（すべて `_state/build_detail_system.py` が r8 から生成する。手で編集しない）
+新設した共有4本（**実装の正本。手で保守する。**変更したら `_state/detail_contract_check.py` を通す）
 
 | ファイル | 中身 |
 |---|---|
@@ -145,22 +147,31 @@ A ∥ B → C → D。E・F は独立。PROPAGATION-SHELF / -HEADER は C とは
 版番号入りクラス（`v14r3` / `v14r4` / `v14r5` / `r7` / `r8` / `dg`）を Detail 恒久語彙へ改名し、
 **死んだ規則 102セレクタ**（`discover-*` / `r7-*` / `*-v10` の旧世代）を除去した。
 
-**出口条件（2026-09-03 / 046 再実測。監査対象 mock `5b3edde`）**
+**出口条件（Gate 2 CLOSE 時。mock `ec3398c`）**
 
 | | 結果 |
 |---|---|
-| `_state/detail_parity.py`（**移行専用**） | **62 PASS / 0 FAIL**。故障注入で 10 FAIL |
-| visual | 1440 / 1200 / 1000 / 900 / 700px **× light・dark = 10通りすべて pixel diff 0**（同一ツリー2回撮影のノイズ床と比較して判定） |
+| visual | 1440 / 1200 / 1000 / 900 / 700px **× light・dark = 10条件すべて pixel diff 0**（同一ツリー2回撮影のノイズ床と比較して判定） |
 | behavior | Gallery 9枚・Entity Actions 3種の状態遷移と件数・Comment Modal / reply / ⋯ メニュー・Follow・棚のスクロール量・a11y state |
-| pageerror | r8 / v15 とも 0 |
-| 反証 | v15 の `<style>` / インライン `<script>` / **inline style 属性** / 版番号入りクラス・id すべて 0 |
-| `_state/detail_contract_check.py`（**昇格後も使う**） | **26 PASS / 0 FAIL / 2 WARN**。故障注入で 1 FAIL |
+| pageerror | 0 |
+| 反証 | v15 の `<style>` / インライン `<script>` / inline style 属性 / 版番号入りクラス・id すべて 0 |
+| `_state/detail_contract_check.py` | **31 PASS / 0 FAIL / 0 WARN** |
+| 故障注入 | parity 10 FAIL / contract 1 FAIL（いずれも意図どおり検出） |
 
-**🔵 WARN 2件（C の回帰ではない）:** 044 DECISION の `data-widget`（右レーン）／`data-section`
-（RELATED）が markup に無い。**r8 の時点で未実装**で v15 もその状態を引き継いでいる。
-識別子の命名は仕様判断なので、詳細3面の rail が揃う **Batch D で3面まとめて入れる**。
+**DECISION — 044 の `data-widget` / `data-section` を markup へ降ろした（Gate 2 再監査）。**
+r8 の時点で未実装だったものを C の最後で入れた。**順序の正本は DOM 順のみ。`data-order` は持たない。**
 
-**DECISION — 044 の「既存の `.shelf` / `.cmt-modal` を拡張する」は C では見送る。**
+| | 識別子（DOM 順） |
+|---|---|
+| 右レーン | `builder` / `entity-actions` / `base-model` / `entity-feed` / `ad` / `external-links` / `builder-rigs` / `used-parts` / `ad` |
+| RELATED | `same-model-rigs` / `model-used-parts` / `model-logs` / `category-rigs` / `manufacturer-rigs` |
+
+命名は**責務そのもの**。表示タイトルや具体的な車種名を入れない（データが変われば嘘になる）。
+`entity-` は「その詳細ページの対象そのもの」（RIG 詳細では RIG、PARTS 詳細ではパーツ）。
+**責務が同じなら PARTS / LOG でも同じ識別子を使い、違う責務なら別 ID を足す。**
+全 Detail が同じ widget 一覧を持つ必要はない。
+
+**DECISION — 044 の「既存の `.shelf` / `.cmt-modal` を拡張する」は C では見送った。**
 `SoT_component-catalog-v6.css` の同名部品は Detail 用ではなく（`.shelf__rail` は `gap:16px` と
 `--page-side-padding` を持つ）、その名前を付けると **確定済みの見た目が動く**。
 衝突しない `dt-*` を名乗り、**catalog 側との統合は Gate 4（PARTS Detail 着手前）で裁定する。**
@@ -175,14 +186,17 @@ Detail だけ変える理由は文書に無い（＝ accidental drift）。た�
 **ヘッダーの見た目の SoT は `SoT_app-shell.css` 1本**に保つ。宣言と順序は r8 の原文のまま。
 **永久仕様として正典化したわけではない。** Header 横断の見直しは別の DESIGN / PROPAGATION 裁定で行う。
 
-**DECISION — 生成・parity ツールは「r8 → v15」の移行専用（Gate 2 監査 #1）。**
-`_state/build_detail_system.py` / `_state/detail_parity.py` は r8 を入力に取るので、
-**Gate 2 CLOSE で r8 と同時に active tree から削除する**（履歴は Git）。
-以後 v15 と共有 SoT は手で保守する。**r8 を恒久的な生成元として残さない。**
-昇格後の詳細3面の回帰は **`_state/detail_contract_check.py`（r8 非依存）** で見る。
+**✅ 撤去済み（Gate 2 CLOSE / 2026-09-03）** — 履歴は Git。**`_archive` へ複製しない**
+- `pc/myrig-rig-detail-v14r5-complete-r8.html`（デザインの正本としての役目を終えた）
+- `_state/build_detail_system.py` / `_state/detail_parity.py` / `_state/parity_out/`
+  （r8 を入力に取る移行専用ツール。**r8 を恒久的な生成元として残さない**）
 
-**移行期の並存（CORE L1 の様式で明記済み）**
-- `r8` ＋ 移行専用ツール2本 = `DEPRECATED 2026-09-03 / successor: v15 ＋ 共有 SoT / remove after: Gate 2 CLOSE`
+**🔴 残す検査: `_state/detail_contract_check.py`（r8 非依存）。**
+詳細面（v15・将来の PARTS / LOG）を変更したら必ず通す。見るのは
+「共有部品を使っているか」「Detail の文法を満たしているか」で、特定の見た目は見ない。
+引数でページを足せる。故障注入は `--selftest`。
+
+**移行期の並存（CORE L1 の様式で明記済み。残り1件）**
 - Home ＋ Browse PC 3面の page-local 棚 = `successor: SoT_shelf.js / remove after: PROPAGATION-SHELF parity PASS`
 - 確定済み4面へ入れたのは**コメントのみ**。HEAD 版との pixel diff 0 を実測（差分はいずれも同一ツリー再撮影のノイズ床と一致）
 
@@ -273,10 +287,10 @@ r8 の中身すべてが永久固定ではない。固定したのは **役割�
 **I-1 完了（2026-09-03）:** ガレージ8面＋テンプレ＋カタログG02 の お気に入り（ハート→星）/ ピン留め（星→画鋲）を修正。garage-top SAVED 見出しの文字グリフを SVG へ。Library パーツマスターの「ピン数 203件」を削除（pins 非公開。3項目へ）。
 **旧 RIG Detail 候補14件（v9a〜v14r6・concept 2本）を active tree から除去。** 履歴は `9aacdc8`。`_archive` へは複製しない（041 裁定）。
 
-**ライブ**: `myrig-mockup` = `aa90d7d`
-> **Gate 2 の監査対象コードは `5b3edde`。** `aa90d7d` は依頼書 `_state/GATE2_rig-detail-v15.md` の
-> 更新だけで、監査対象のコードは変えていない。依頼書冒頭とこの行の2箇所で同じことを言う。
-> **SHA を書く場所を増やさない**（2026-09-03 の Gate 2 で、本文と依頼書で SHA がずれた）。
+**ライブ**: `myrig-mockup` = `8f2c86b`（Gate 2 CLOSE 済み。監査対象コードは `ec3398c`）
+> Gate 2 の監査対象コードは `ec3398c`。以降の commit は依頼書 `_state/GATE2_rig-detail-v15.md`
+> の更新だけで、コードは変えていない。**SHA を書く場所を増やさない**
+> （2026-09-03 の Gate 2 で、本文と依頼書で SHA がずれた）。
 > ⚠️ **2026-09-03 時点で push 待ち。** イタヤの手元で `mockup` を回すまでライブは `45aec3f` のまま。
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
 > 2026-08-30、`64f0099` のまま放置していて「後続セッションが古いモックを現在地と誤認する」
