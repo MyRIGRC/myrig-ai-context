@@ -3,15 +3,15 @@
 - Status: **OBSERVATION / NOT CANON。** 正典は `_AI/MyRIG_CURRENT.md`
 - **使い方: 現在の実装状態を上書き更新する。** 履歴を積み上げない（経緯は CURRENT と `_decisions/`、
   ファイルの追跡状態は `git status` を正とする）。表示件数・余白・棚の順番のような UI 調整は書かない
-- 初版: 2026-09-03 14:45 JST（交通整理 Audit）／ 更新: 2026-09-03 16:25 JST（Batch C 反映）
-- 正典: **MYRIG-20260903-045** ／ モック: **`2e4e10d`**（`mock: Batch C`。push 待ち）
+- 初版: 2026-09-03 14:45 JST（交通整理 Audit）／ 更新: 2026-09-03 17:10 JST（Gate 2 指摘4件の修正を反映）
+- 正典: **MYRIG-20260903-046**（045 は GitHub main と一致済み。046 は push 待ち）／ モック: **`5b3edde`**（push 待ち）
 - 実測環境: ローカル静的サーバ + Playwright Chromium（PC 1440×900 / Mobile 390×844）、light・dark
 
 ---
 
 ## 0. 現在地（3行）
 
-1. **Batch C は実装・検証まで完了**（`_state/detail_parity.py` で 54 PASS / 0 FAIL）。次は **Gate 2（GPT 独立監査）**。
+1. **Batch C は実装・検証まで完了し、Gate 2 の指摘4件も修正済み**（parity 62 PASS / 0 FAIL、contract 26 PASS / 0 FAIL / 2 WARN）。**Gate 2 再監査待ち**。
 2. r8 = VISUAL LOCK（デザインの正本）／ v15 = MIGRATING（実装の正本候補）。Launcher は r8 を指す。
    **サイト内リンク 33本は v6 のまま**で、Gate 2 PASS 時に一度だけ v15 へ切り替える。
 3. C に直接関係しない指摘は下表に残し、PROPAGATION-SHELF / PROPAGATION-HEADER / E / F の別レーンへ送った。
@@ -31,8 +31,8 @@
 
 | リポジトリ | local HEAD | origin/main | working tree | 備考 |
 |---|---|---|---|---|
-| `myrig-ai-context` | 045 | `3d77634` 043（`ls-remote` で実確認） | — | **push 待ち。** サンドボックスに credential が無く push はイタヤの手元でのみ可能 |
-| `myrig-mockup` | `2e4e10d` Batch C | `45aec3f`（ローカル ref。private のため remote 未確認） | clean | **push 待ち。** author `MyRIGRC` 正常 |
+| `myrig-ai-context` | 046 | `fcae4ed` 045（`ls-remote` ＋ cache-bust 付き raw の両方で一致を確認） | clean | 045 まで同期済み。046 は push 待ち |
+| `myrig-mockup` | `5b3edde`（Gate 2 修正） | `45aec3f`（ローカル ref。private のため remote 未確認） | clean | **push 待ち。** author `MyRIGRC` 正常。Gate 2 の監査対象 SHA は `5b3edde` |
 
 ---
 
@@ -49,8 +49,8 @@ Launcher = `index.html`（`compare.html` の PAIRS も同一ファイルを指�
 | **PC Browse RIG Root** | LOCK（8/31 039） | 確定 → `pc/myrig-browse-rigs-v3.html` ✔ | cx 共有 | F00 コピー | inline 24ルール + arrow JS（**DEPRECATED 表記済み**） | app-shell / catalog-v6 / browse-sidebar 旧+v5 / browse-shell / footer / card-components / browse-* js ×5 | inline CSS 848行（v8 上書き） | Header済 / 棚 → PROPAGATION-SHELF | 低（B のみ −73行） | diff vs Home = ロゴ部 429px のみ（Browse 3面は互いに一致） |
 | **PC Browse Category** | LOCK（8/31） | 確定 → `pc/myrig-browse-category-v3.html` ✔ | cx 共有（page-local 0） | F00 コピー | inline 27ルール（うち20は Home と同一）+ arrow JS | 同上 + category-taxonomy | inline CSS 577行 | 同上 | 低（B のみ） | 同上 |
 | **PC Browse Parts Root / Motor・ESC** | LOCK（8/31） | 確定 → `pc/myrig-browse-parts-v3.html`（`?category=motor-esc`）✔ | cx 共有（page-local 0） | F00 コピー | inline 24ルール + arrow JS | 同上 + parts-category-demo | inline CSS 845行 | 同上 | 低（B のみ）。`?category=motor-esc` で `src="null"` 404 1件 | 同上 |
-| **PC RIG Detail r8** | **VISUAL LOCK（9/3 044）** | **Launcher / compare が指す**（青＝PC版のみ）。サイト内リンク 33本は v6 のまま | cx 共有 ＋ `.app-header .cx__btn` 6ルール（白地・1px枠 `#A8B0BA`。他7面は `#24292f` 塗り）→ **C で `SoT_detail.css` へ移送し Detail 限定 variant に** | F00 独自版（aria-label 追加・SVG 簡略化。8面版と不一致）→ E | 独自語彙 3世代 → C で `dt-shelf*` へ整理 | app-shell / catalog-v6 / footer / card-components | inline CSS 1,924行・JS 193行 | **DEPRECATED**（successor: v15 / remove after: Gate 2 PASS）。比較元として保持 | なし | v15 と 54 PASS / 0 FAIL |
-| **PC RIG Detail v15** | — （見た目は r8 が正本） | 未掲載（Gate 2 PASS 後に昇格） | 共有 cx ＋ `SoT_detail.css` の Detail variant | F00 コピー（C のスコープ外） | `dt-shelf*` ＋ **共有 `SoT_shelf.js`**（`[data-shelf]`） | ＋ `SoT_detail.css` / `SoT_detail-rail.css` / `SoT_detail-components.js` / `SoT_shelf.js` | **inline `<style>` 0 / インライン `<script>` 0 / 版番号クラス 0** | **MIGRATING** | — | 上記 |
+| **PC RIG Detail r8** | **VISUAL LOCK（9/3 044）** | **Launcher / compare が指す**（青＝PC版のみ）。サイト内リンク 33本は v6 のまま | cx 共有 ＋ `.app-header .cx__btn` 6ルール（白地・1px枠 `#A8B0BA`。他7面は `#24292f` 塗り）→ **C で `SoT_app-shell.css` の `.cx--quiet` variant へ移設** | F00 独自版（aria-label 追加・SVG 簡略化。8面版と不一致）→ E | 独自語彙 3世代 → C で `dt-shelf*` へ整理 | app-shell / catalog-v6 / footer / card-components | inline CSS 1,924行・JS 193行 | **DEPRECATED**（successor: v15 / remove after: Gate 2 CLOSE）。比較元として保持。移行専用ツール2本も同じ撤去条件 | なし | v15 と 62 PASS / 0 FAIL |
+| **PC RIG Detail v15** | — （見た目は r8 が正本） | 未掲載（Gate 2 PASS 後に昇格） | 共有 cx の `.cx--quiet` を選ぶだけ（定義は Header SoT） | F00 コピー（C のスコープ外） | `dt-shelf*` ＋ **共有 `SoT_shelf.js`**（`[data-shelf]`） | ＋ `SoT_detail.css` / `SoT_detail-rail.css` / `SoT_detail-components.js` / `SoT_shelf.js` | **inline `<style>` 0 / インライン `<script>` 0 / inline style 属性 0 / 版番号クラス 0** | **MIGRATING**（Gate 2 再監査待ち） | — | 上記 ＋ contract 26 PASS / 0 FAIL / 2 WARN |
 | PC RIG Detail v6（サイト内リンク 33本が指す） | WIP（要確認） | 未掲載 | **create-soft（Legacy・唯一の残存面）** | F00 コピー | — | app-shell / catalog-v6 / footer | inline CSS 66行・`:root` なし → **v7 色（`--cat-rig #66b900`）** | Gate 2 PASS で v15 へ差し替え | — | — |
 | **MO Home** | LOCK（8/20） | 確定 → `index-e-roomclip.html` ✔ | mobile-shell-header（shell 共有） | なし（bottom nav） | — | css/sot ×3 / mobile-tokens / mobile-shell / mobile-shell.js / browse-directory | inline CSS 75行（v8 `:root` 重複宣言） | 対象外（Mobile shell） | **あり**: 8/30 `mycat-digest` / `mycat-more` / `mycat-encounter` 追加（既定 hidden・裁定記録なし） | — |
 | **MO Search top / results** | LOCK（8/25 CLOSE） | 確定 → `search.html` / `search-results.html?q=TRX-4` ✔ | mobile-shell-header--search | なし | — | 同上 + category-taxonomy | inline CSS 234 / 218行 | 対象外 | **あり（内部）**: 8/30 catsheet を taxonomy 生成へ・slug 化（CLOSE後） | — |
@@ -66,7 +66,7 @@ pageerror: 上記 20 ロード（PC 9 / Mobile 9 / Launcher / compare）すべ�
 
 | Component | SoT（物理） | 適用済み consumer | 未適用 / 逸脱 | 二重管理 |
 |---|---|---|---|---|
-| Header cx | `pc/assets/css/SoT_app-shell.css`（cx 25 + app-nav 5）/ `SoT_app-shell.js` `initCreateMenu()` | pc/*.html 44 中 31 面に cx markup。確定7面は inline cx 0 | **r8: `.cx__btn` 上書き6ルール（見た目差あり）** / **Home: header 系 page-local 17ルール（`.app-logo--image` !important 等）→ ロゴ・タグラインが他6面と約2px不一致** / Search: サジェスト 6ルール（機能） / v6: create-soft（DEPRECATED 明記済み） / `v14r3-rail-tuning-patch`: 同型上書き（孤児） | `css/sot/SoT_app-shell.css`（460行）と **179行乖離**（8/29 の 103行から拡大）。Mobile 42面が読むが `.app-header` markup 0面 |
+| Header cx | `pc/assets/css/SoT_app-shell.css`（cx 25 + app-nav 5）/ `SoT_app-shell.js` `initCreateMenu()` | pc/*.html 44 中 31 面に cx markup。確定7面は inline cx 0 | **✅ 解消: r8 の `.cx__btn` 6ルールは `.cx--quiet` variant として Header SoT へ移設済み** / **Home: header 系 page-local 17ルール（`.app-logo--image` !important 等）→ ロゴ・タグラインが他6面と約2px不一致** / Search: サジェスト 6ルール（機能） / v6: create-soft（DEPRECATED 明記済み） / `v14r3-rail-tuning-patch`: 同型上書き（孤児） | `css/sot/SoT_app-shell.css`（460行）と **179行乖離**（8/29 の 103行から拡大）。Mobile 42面が読むが `.app-header` markup 0面 |
 | Footer F00 | `SoT_footer.css`（261行・PC/mobile 一致）＋ `sot-templates/SoT_footer.html`（include 機構なし） | 33面が markup コピー。確定6面 + v6 + preview = **同一（md5 一致）** | **r8 は独自版**（差分: aria-label / SVG 簡略化）。テンプレ自体も8面版と微差。Feed は page-local `display:none` | markup が 33面複製（Batch E スコープ） |
 | Shelf（挙動） | **`pc/assets/js/SoT_shelf.js`（2026-09-03 新設）** | v15（`[data-shelf]` / step=viewport） | Home ＋ Browse PC 3面は page-local JS のまま（**DEPRECATED 表記済み**） | PROPAGATION-SHELF で解消 |
 | Shelf（見た目） | base `.shelf` 5ルール（catalog-v6。Detail 用ではない） | Home / Browse 3面（page-local 51 / 27 / 24 / 24 ルール） | v15 は `dt-shelf*`（`SoT_detail.css`） | **2系統。統合は Gate 4 で裁定** |
@@ -93,6 +93,7 @@ pageerror: 上記 20 ロード（PC 9 / Mobile 9 / Launcher / compare）すべ�
 | 8 | E | **[事実]** 404 3件: PC Home の画像1（`:` を含むファイル名・既知）/ `browse-parts?category=motor-esc` の `src="null"` / MO browse-rigs の `2304_mickeyrock_3.webp` 欠落 | Batch E |
 | 9 | F | **[事実]** PC の v8 適用が7面のみ（page-local `:root`）、共有 `SoT_tokens-v6.css` は v7 のまま。正典 `color-token-v8.md` は「PC未適用・部分適用禁止」 | Batch F |
 | 10 | Gate 4 | **[事実]** Detail の 棚 / Comment / Modal が `dt-*`（`SoT_detail.css`）と catalog-v6 の同名部品の **2系統**。catalog 側は Detail 用ではなく（`.shelf__rail` は `gap:16px` と `--page-side-padding`）、名前を寄せると確定済みの見た目が動く | PARTS Detail 着手前に裁定 |
+| 12 | Batch D | **[事実]** 044 DECISION の `data-widget`（右レーン）と `data-section`（RELATED）が markup に無い。**r8 の時点で未実装**で v15 も同じ（C の回帰ではない）。`_state/detail_contract_check.py` が WARN として出す。識別子の命名は仕様判断なので、詳細3面の rail が揃う D で3面まとめて入れる | 未着手 |
 | 11 | 記録のみ | **[事実]** Batch B「6面 pixel parity 0px」の証跡ファイルはリポジトリ内に無い（CURRENT 本文の記載のみ）。面内 before→after であって面**間**の一致は測っていない | 再撮影しない。#1 で解消する範囲だけ扱う |
 
 ---
@@ -127,12 +128,14 @@ Launcher の集計（実測）: 確定 12 / PC版のみ 1 / 要確認 45。
 ## 7. 検証環境（再実行のしかた）
 
 ```
-# 共有 Detail システムの再生成（生成物を手で編集しない）
-python3 _state/build_detail_system.py
+# --- 移行専用（r8 → v15）。Gate 2 CLOSE で r8 と同時に撤去する ---
+python3 _state/build_detail_system.py                                       # 生成
+LD_LIBRARY_PATH=$HOME/.local/lib python3 _state/detail_parity.py            # r8 との比較
+LD_LIBRARY_PATH=$HOME/.local/lib python3 _state/detail_parity.py --selftest # 故障注入
 
-# 出口条件の実測（visual / behavior / pageerror / 反証）
-LD_LIBRARY_PATH=$HOME/.local/lib python3 _state/detail_parity.py
-LD_LIBRARY_PATH=$HOME/.local/lib python3 _state/detail_parity.py --selftest   # 故障注入
+# --- 昇格後も使う。r8 に依存しない詳細3面の契約検査 ---
+LD_LIBRARY_PATH=$HOME/.local/lib python3 _state/detail_contract_check.py
+LD_LIBRARY_PATH=$HOME/.local/lib python3 _state/detail_contract_check.py --selftest
 ```
 
 - Playwright は `pip install playwright --break-system-packages` → `python3 -m playwright install chromium`。
