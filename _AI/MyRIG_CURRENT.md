@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260904-054
-updated: 2026-09-04 21:41 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260904-055
+updated: 2026-09-04 21:56 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,33 +14,41 @@ updated: 2026-09-04 21:41 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-04 / revision 054（Phase 2-D 実装完了。REGRESSION 1件でイタヤ裁定待ち）**
+**最終更新: 2026-09-04 / revision 055（2-D の裁定は解消。ロゴ lockup を Home 1面で先行差替・実画面確認待ち）**
 
-> **いま止まっている場所:** **Phase 2-D は実装完了。ただし Home の見た目が1点動いたので
-> 予告どおり REGRESSION として停止し、イタヤ裁定を待っている。** 下記「🔴 2-D の裁定1件」を読むこと。
+> **いま止まっている場所:** **Home のロゴを lockup 版（タグラインを画像に含む）へ先行差替し、
+> イタヤの実画面確認を待っている。** push すれば見られる。2-D の 2.5px 論点はこの裁定で解消済み。
 >
 > | Phase | 状態 |
 > |---|---|
 > | 2-A RIG Detail | ✅ CLOSE（051）。OPEN 型を採用 |
 > | 2-B Global Footer | ✅ CLOSE（051）。1 Shared Source |
 > | 2-C PROPAGATION-SHELF | ✅ CLOSE（053 / Gate 3 PASS / mock `4c58a03`） |
-> | **2-D Home Header** | 🟡 **実装完了・裁定待ち（054 / mock `66d9db9`）。** Home の Header 責務 page-local **22ルール（−83行）**を撤去し、Header の SoT を `SoT_app-shell.css` 1本に。**共有 CSS / JS は無変更。触った HTML は Home 1面だけ** |
+> | **2-D Home Header** | ✅ **実装完了（054 / mock `66d9db9`）。裁定待ちだった 2.5px はロゴ画像化で解消。** Home の Header 責務 page-local **22ルール（−83行）**を撤去し、Header の SoT を `SoT_app-shell.css` 1本に。**共有 CSS / JS は無変更。触った HTML は Home 1面だけ** |
 > | 2-E Search 証跡 | ⚪ 未着手。UI は開けない。回帰スクリプトを slug 語彙へ追随させ 101項目を復旧 |
 >
-> ### 🔴 2-D の裁定1件（DESIGN レーン / イタヤ）
+> ### ✅ 2-D の裁定1件は解消（2026-09-04 / イタヤ裁定で上位の判断が入った）
 >
-> **Home のタグライン「RC GARAGE」の左端が 20.5px → 18.0px（2.5px 左）へ動いた。**
-> 原因は Home だけが持っていた `.app-logo--image{align-items:center}`（共有は `flex-start`）。
-> ロゴは `flex-direction:column` なので、この1宣言がタグラインの水平位置を決めていた。
-> 撤去後は**ロゴ画像の左端に揃い、他10面と同じ位置**になる。
+> 2-D 直後に「タグライン 2.5px（`align-items:center` vs `flex-start`）」を A / B で照会していたが、
+> **イタヤが「RC GARAGE も含めてロゴ画像にする」と裁定したため、論点だった `.app-logo__sub` の
+> span 自体が無くなる。** A / B は選ぶ必要がなくなった（記録として残す。B＝Home 用 variant は作っていない）。
 >
-> | | 案 |
+> ### 🟡 ロゴ lockup 化（DESIGN / **Home 1面で先行差替・実画面確認待ち** / mock `208d1e4`）
+>
+> | | |
 > |---|---|
-> | **A（現在の実装）** | 共有に揃える。PC 11面すべて同じ位置。Header の SoT が1本になる |
-> | **B** | Home の中央寄せを残す。共有 CSS に variant を足して Home だけ選ぶ（1面のための variant が増える） |
+> | 新アセット | `pc/img/myrig_logo_{BK,wh}_v1.2.png`（397×203 / 396×203。マーク145 ＋ すき間4 ＋ タグライン54） |
+> | 色 | light: マーク #000000 / タグライン #717071 ｜ dark: マーク #FFFFFF / タグライン **#FBFF00**（v8 `--cat-rig` に合わせる。イタヤ裁定） |
+> | 色補正 | 原本は #FFFF00 だった。**AA が alpha 側・RGB 単一値だったので #FBFF00 への置換は無劣化**（10,195px を機械置換） |
+> | 共有側 | `SoT_app-shell.css` に **`.app-logo--lockup`** を1ルール追加（`max-height:32px`）。**page-local CSS は足していない** |
+> | markup | lockup 面は `.app-logo__sub` を**持たない**。アクセシブル名は従来どおり `MyRIG RC` |
+> | 採用面 | ⚠️ **Home 1面だけ。**「まず PC 1ページで差替。OK なら全部へ」（イタヤ指示） |
+> | 実測 | マーク 23 → **22.86px** ／ ブロック 62.22×34 → **62.58×31.98** ／ NAV・検索が **0.36px 右**。画素差は**ヘッダー帯だけ**（light y=12..47 / dark y=38..45）で他は 0 |
+> | 他32面 | **無影響を実測。** `browse-rigs`/`feed`/`search` は座標が before と完全一致。`browse-rigs` は画素ごと判定で light/dark とも残り 0 |
 >
-> **Cowork は決めない。** 比較画像は1枚だけ（`~/Desktop/MyRIG/_handoff/phase2d_home_logo_compare.png`）。第3案は作らない。
-> **裁定が出るまで 2-D を CLOSE にしない。**
+> **全面展開のとき決めること:** variant を既定に畳むか 33面に付けるか。
+> **Mobile は比率が違う**（PC マーク23px・すき間1px / Mobile 20px・2px）ので**別アセットが要る。
+> PC と Mobile を同時に動かさない。**
 >
 > **2-D の実測（`_state/header_propagation_check.py`。対象7面 = Home ＋ Browse 3 ＋ Feed ＋ Search ＋ Library）**
 >
@@ -421,7 +429,7 @@ r8 の中身すべてが永久固定ではない。固定したのは **役割�
 **I-1 完了（2026-09-03）:** ガレージ8面＋テンプレ＋カタログG02 の お気に入り（ハート→星）/ ピン留め（星→画鋲）を修正。garage-top SAVED 見出しの文字グリフを SVG へ。Library パーツマスターの「ピン数 203件」を削除（pins 非公開。3項目へ）。
 **旧 RIG Detail 候補14件（v9a〜v14r6・concept 2本）を active tree から除去。** 履歴は `9aacdc8`。`_archive` へは複製しない（041 裁定）。
 
-**ライブ**: `myrig-mockup` = `8817c9a`（2026-09-04 push 済み。origin/main と一致を実測）。**未 push 1コミット = `66d9db9`（Phase 2-D）。** Gate 3 の監査対象コードは `4c58a03`（CLOSE 済み）。
+**ライブ**: `myrig-mockup` = `8817c9a`（2026-09-04 push 済み。origin/main と一致を実測）。**未 push 2コミット = `66d9db9`（Phase 2-D）/ `208d1e4`（ロゴ lockup・Home 1面）。** Gate 3 の監査対象コードは `4c58a03`（CLOSE 済み）。
 > push したらこの行を実値へ。SHA を書く場所は依頼書と本行の2箇所だけ。
 > **SHA を書く場所は依頼書と本行の2箇所だけ**（2026-09-03 の Gate 2 で、本文と依頼書で SHA がずれた）。
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
