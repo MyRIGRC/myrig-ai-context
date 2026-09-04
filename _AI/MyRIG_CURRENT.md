@@ -16,8 +16,19 @@ updated: 2026-09-04 19:40 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 **最終更新: 2026-09-04 / revision 052（Phase 2-C 実装完了・Gate 3 依頼中）**
 
-> **いま止まっている場所:** **Phase 2-C（PROPAGATION-SHELF）の実装が終わり、Gate 3 の独立監査へ回した。**
+> **いま止まっている場所:** **Phase 2-C は Gate 3 へ再提出済み（audit bundle 付き）。監査結果待ち。**
 > 依頼書 `_state/GATE3_propagation-shelf.md`（mockup 側）。**監査対象コードは mock `4c58a03`**（基準は `7437e44`）。
+>
+> 初回の Gate 3 は**全5観点 HOLD。ただし実装・検査設計への指摘は 0** で、
+> 理由は **GPT が `4c58a03` の実体を取得できず独立再実行できなかったこと**だけだった。
+> → `~/Desktop/MyRIG/_handoff/GATE3_bundle_4c58a03.zip`（current / base / logs）を用意し、
+> `shelf_propagation_check.py` に **`PROP_BASE_DIR`（git 不要の基準ツリー指定）**を足して再提出した。
+> **bundle 内で実際に 8 PASS / 0 FAIL になること・故障注入が FAIL することを確認済み。**
+>
+> 🔵 **DECISION（GPT 監査で合意 / 2026-09-04）: 棚のスクロール量3種（`cards` / `viewport` / 固定 `440`）は
+> 1 Shared Shelf の意図的 variant として扱う。** Readiness Gate の必須再裁定項目にはしない。
+> **具体的な実装 / UX の問題が出たときだけ再オープン**する。
+> Browse への状態クラス用 CSS も今は足さない（JS 側は既に情報を出しているので、必要になったら CSS だけで足りる）。
 >
 > | Phase | 状態 |
 > |---|---|
