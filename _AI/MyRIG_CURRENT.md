@@ -23,7 +23,7 @@ updated: 2026-09-04 20:21 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > | 2-A RIG Detail | ✅ CLOSE（051）。OPEN 型を採用 |
 > | 2-B Global Footer | ✅ CLOSE（051）。1 Shared Source |
 > | 2-C PROPAGATION-SHELF | ✅ **CLOSE（053 / Gate 3 PASS / mock `4c58a03`）** |
-> | **2-D Home Header** | ⚪ **次。Header 責務だけ。** 古い「17ルール」という数字を信じず現物を再測定してから対象を決める。**Home 全体の inline CSS cleanup へ拡大しない** |
+> | **2-D Home Header** | ⚪ **次。Header 責務だけ。** 実測 2026-09-04: **23ルール**（`.app-logo` 13 / `.app-header` 2 / `.app-search` 2 / その他 `.app-` 6）。他面は `.app-logo` 系 0。**045 起票時の「17ルール」は実測と合わないので信じない。Home 全体の inline CSS cleanup へ拡大しない** |
 > | 2-E Search 証跡 | ⚪ 未着手。UI は開けない。回帰スクリプトを slug 語彙へ追随させ 101項目を復旧 |
 >
 > **Gate 3 の結果:** 観点1〜5 すべて PASS。棚を共有 JS で動かす面は **6面**（詳細2 ＋ Home ＋ Browse 3）、page-local 実装 0。
@@ -32,6 +32,13 @@ updated: 2026-09-04 20:21 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > 🔵 **DECISION（GPT 監査で合意 / 2026-09-04）: 棚のスクロール量3種（`cards` / `viewport` / 固定 `440`）は
 > 1 Shared Shelf の意図的 variant として維持する。** Readiness Gate の必須再裁定項目にはしない。
 > **具体的な実装 / UX の問題が出たときだけ再オープン。** Browse への状態クラス用 CSS も今は足さない。
+>
+> 📌 **新スレッドはここから: `_state/HANDOFF_20260904_phase2d.md`（mockup 側）。**
+> 現在地・2-D の実測・守るルール・使える検査スクリプト・これまで踏んだ罠7件・未 push・GPT 運用をまとめてある。
+>
+> ⚠️ **2-D の難所:** Home のロゴ／タグラインが他6面と**約2px ズレている**（045 起票）。
+> 共有へ寄せると Home の見た目が動く可能性がある。**動いたら REGRESSION として停止しイタヤ裁定へ上げる**。
+> 「共有の方が正しいので採用」を Cowork が自分で決めない。**2px を揃えること自体は 2-D の目的ではない**（目的は Single Source 化）。
 >
 > 📌 **記録（Gate 3 CLOSE の非 blocker 整理）:** `detail_contract_check.py` は
 > **引数なしだと既定の `pc/myrig-rig-detail-v15.html` 1面だけ**を見る（51 PASS）。
