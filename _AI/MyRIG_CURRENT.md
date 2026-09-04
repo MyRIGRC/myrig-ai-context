@@ -16,12 +16,16 @@ updated: 2026-09-04 11:15 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 **最終更新: 2026-09-04 / revision 047（PARTS Detail PC = VISUAL LOCK 候補 / Gate 4 待ち）**
 
-> **いま止まっている場所:** **PARTS Detail PC（OPEN 型）= VISUAL LOCK 候補。Gate 4 は初回 HOLD → 再提出済み（再監査待ち）。**
-> 依頼書は `_state/GATE4_parts-detail.md`（mockup 側）。**再提出の監査対象コードは mock `db52095`**（依頼書 §8 が唯一の正。初回 `297323d` は HOLD）。
-> HOLD の中身は SYSTEM（DESIGN は問題なし）: CSS / JS は共有でも **DOM 骨格が両 HTML に複製**されていた。
-> → `pc/assets/js/SoT_detail-markup.js` を新設して Gallery / Builder / Entity Actions / Comments / Modal / 棚枠の骨格を1か所へ。
-> ページは宣言タグ＋データだけ。`297323d` との **DOM 完全一致（要素間空白除く）を5状態で実測**、見た目不変。
-> audit bundle: `~/Desktop/MyRIG/_handoff/GATE4_bundle_db52095.zip`（GPT が共有 assets を直接取れなかったため）。
+> **いま止まっている場所:** **PARTS Detail PC（OPEN 型）= VISUAL LOCK 候補。Gate 4 は 2回 HOLD → 再提出2 済み（再監査待ち）。**
+> 依頼書は `_state/GATE4_parts-detail.md`（mockup 側）。**監査対象コードは mock `a8fb315`**（依頼書 §9 が唯一の正。`297323d` / `db52095` は HOLD 済み）。
+> **2回とも DESIGN HOLD ではない**（見た目は変えていない）。SYSTEM の指摘＝ CSS / JS は共有でも **DOM 骨格が各 HTML に複製**されていた。
+> → `pc/assets/js/SoT_detail-markup.js` を新設し、2段階で骨格を1か所へ集約した。
+>   §8: Gallery / Builder / Entity Actions / Comments / Comment Modal / RELATED 棚枠
+>   §9: 右レーン（Rail Section Shell / entity-feed / external-links / Library Bridge / builder-more / rail list / ad）
+>   ページに残るのは **データ・widget ID・variant・配置** だけ（v15 776→453行、OPEN 683→420行）。
+> `297323d` との **DOM 完全一致（要素間空白除く）を5状態で実測**。pixel は 16条件ともノイズ床の範囲。
+> fixture の `?theme=dark` が app-shell に上書きされていた件も修正し contract へ追加。
+> audit bundle: `~/Desktop/MyRIG/_handoff/GATE4_bundle_a8fb315.zip`（GPT が共有 assets を直接取れなかったため）。
 > 候補ページ: `pc/myrig-parts-detail-v1-open.html`。状態違い8件は Launcher ▸ パーツ詳細 ▸ 状態確認。
 >
 > Gate 4 で見るのは共通文法・Single Source・variant の漏れ・behavior/a11y 非回帰・
@@ -319,8 +323,8 @@ r8 の中身すべてが永久固定ではない。固定したのは **役割�
 **I-1 完了（2026-09-03）:** ガレージ8面＋テンプレ＋カタログG02 の お気に入り（ハート→星）/ ピン留め（星→画鋲）を修正。garage-top SAVED 見出しの文字グリフを SVG へ。Library パーツマスターの「ピン数 203件」を削除（pins 非公開。3項目へ）。
 **旧 RIG Detail 候補14件（v9a〜v14r6・concept 2本）を active tree から除去。** 履歴は `9aacdc8`。`_archive` へは複製しない（041 裁定）。
 
-**ライブ**: `myrig-mockup` = `1beaa1c`（push 済み）。**未 push: `db52095`（Gate 4 再提出の監査対象コード）＋ 依頼書 §8 の1コミット。**
-> `db52095` の後は依頼書だけで、コードは変えていない。push したらこの行を実値へ。
+**ライブ**: `myrig-mockup` = `1beaa1c`（push 済み）。**未 push 4コミット。Gate 4 再提出2 の監査対象コードは `a8fb315`。**
+> `a8fb315` の後は依頼書 §9 だけで、コードは変えていない。push したらこの行を実値へ。
 > **SHA を書く場所は依頼書と本行の2箇所だけ**（2026-09-03 の Gate 2 で、本文と依頼書で SHA がずれた）。
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
 > 2026-08-30、`64f0099` のまま放置していて「後続セッションが古いモックを現在地と誤認する」
