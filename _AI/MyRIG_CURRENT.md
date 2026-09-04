@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260904-052
-updated: 2026-09-04 19:40 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260904-053
+updated: 2026-09-04 20:21 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,36 +14,29 @@ updated: 2026-09-04 19:40 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-04 / revision 052（Phase 2-C 実装完了・Gate 3 依頼中）**
+**最終更新: 2026-09-04 / revision 053（Gate 3 PASS / CLOSE。次は Phase 2-D）**
 
-> **いま止まっている場所:** **Phase 2-C は Gate 3 へ再提出済み（audit bundle 付き）。監査結果待ち。**
-> 依頼書 `_state/GATE3_propagation-shelf.md`（mockup 側）。**監査対象コードは mock `4c58a03`**（基準は `7437e44`）。
->
-> 初回の Gate 3 は**全5観点 HOLD。ただし実装・検査設計への指摘は 0** で、
-> 理由は **GPT が `4c58a03` の実体を取得できず独立再実行できなかったこと**だけだった。
-> → `~/Desktop/MyRIG/_handoff/GATE3_bundle_4c58a03.zip`（current / base / logs）を用意し、
-> `shelf_propagation_check.py` に **`PROP_BASE_DIR`（git 不要の基準ツリー指定）**を足して再提出した。
-> **bundle 内で実際に 8 PASS / 0 FAIL になること・故障注入が FAIL することを確認済み。**
->
-> 🔵 **DECISION（GPT 監査で合意 / 2026-09-04）: 棚のスクロール量3種（`cards` / `viewport` / 固定 `440`）は
-> 1 Shared Shelf の意図的 variant として扱う。** Readiness Gate の必須再裁定項目にはしない。
-> **具体的な実装 / UX の問題が出たときだけ再オープン**する。
-> Browse への状態クラス用 CSS も今は足さない（JS 側は既に情報を出しているので、必要になったら CSS だけで足りる）。
+> **いま止まっている場所:** **Gate 3 は PASS / CLOSE。Phase 2-C 完了。次は Phase 2-D（Home Header）。**
 >
 > | Phase | 状態 |
 > |---|---|
-> | 2-A RIG Detail | ✅ **CLOSE。OPEN 型を採用**（051） |
-> | 2-B Global Footer | ✅ **CLOSE。1 Shared Source**（051） |
-> | **2-C PROPAGATION-SHELF** | 🔵 **実装完了・Gate 3 依頼中**（052） |
-> | 2-D Home Header | ⚪ 次。**Header 責務だけ**。Home 全体の cleanup へ広げない |
+> | 2-A RIG Detail | ✅ CLOSE（051）。OPEN 型を採用 |
+> | 2-B Global Footer | ✅ CLOSE（051）。1 Shared Source |
+> | 2-C PROPAGATION-SHELF | ✅ **CLOSE（053 / Gate 3 PASS / mock `4c58a03`）** |
+> | **2-D Home Header** | ⚪ **次。Header 責務だけ。** 古い「17ルール」という数字を信じず現物を再測定してから対象を決める。**Home 全体の inline CSS cleanup へ拡大しない** |
 > | 2-E Search 証跡 | ⚪ 未着手。UI は開けない。回帰スクリプトを slug 語彙へ追随させ 101項目を復旧 |
 >
-> **2-C の要点:** Home ＋ Browse PC 3面の page-local な棚挙動を `SoT_shelf.js` へ。
-> **確定面なので見た目も操作感も変えない**のが要件で、4面とも **behavior parity 完全一致**、
-> **初期表示・スクロール後とも「揺れで説明できない画素 0」**、pageerror 0。
-> スクロール量は `cards`（Home）/ `viewport`（詳細）/ 固定 `440`（Browse）の**3種類のまま統合していない**
-> （統一すると確定面の操作感が変わる。統一の是非は Next.js Readiness Gate で1回だけ決める）。
-> これで棚を共有 JS で動かす面は **6面**（詳細2 ＋ Home ＋ Browse 3）。page-local 実装は 0。
+> **Gate 3 の結果:** 観点1〜5 すべて PASS。棚を共有 JS で動かす面は **6面**（詳細2 ＋ Home ＋ Browse 3）、page-local 実装 0。
+> 4面とも behavior parity 完全一致・「揺れで説明できない画素 0」・pageerror 0。
+>
+> 🔵 **DECISION（GPT 監査で合意 / 2026-09-04）: 棚のスクロール量3種（`cards` / `viewport` / 固定 `440`）は
+> 1 Shared Shelf の意図的 variant として維持する。** Readiness Gate の必須再裁定項目にはしない。
+> **具体的な実装 / UX の問題が出たときだけ再オープン。** Browse への状態クラス用 CSS も今は足さない。
+>
+> 📌 **記録（Gate 3 CLOSE の非 blocker 整理）:** `detail_contract_check.py` は
+> **引数なしだと既定の `pc/myrig-rig-detail-v15.html` 1面だけ**を見る（51 PASS）。
+> 監査 bundle でログ（1面）と JSON（4面）が別実行の産物になり件数が食い違った。
+> **以後、この検査の件数を報告するときは必ず対象面を併記する。**
 
 ### 🔴 MVP 収束フェーズ（2026-09-04 / 049 / イタヤ計画 v1）
 
@@ -62,7 +55,7 @@ updated: 2026-09-04 19:40 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 |---|---|---|
 | 0 | 048 固定（Gate 4 CLOSE / PARTS LOCK / 旧版撤去 / push） ✅ | 新しい設計作業 |
 | **1** | **MVP_CONVERGENCE_MAP 作成** ✅（049） | HTML 変更 |
-| 2 | ✅ 2-A CLOSE / 2-B CLOSE / **2-C 実装完了（Gate 3 依頼中）。** 残り: 2-D Home Header / 2-E Search 証跡 | Home 等の再設計 |
+| 2 | ✅ 2-A / 2-B / **2-C すべて CLOSE。** 残り: **2-D Home Header** / 2-E Search 証跡 | Home 等の再設計 |
 | 3 | LOG Detail PC（確定 Detail System から作る）→ Gate 5 | 第3の Detail 文法の発明 |
 | 4 | Mobile Detail 3面を1バッチで追随 | PC と Mobile の同時進行 |
 | 5 | MVP component hardening（Form 共有境界 / Garage / Library / Mobile の必要箇所） | 全ページの inline CSS 撲滅・Register の再設計 |
@@ -105,7 +98,7 @@ updated: 2026-09-04 19:40 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | ~~**Home 実画面レビュー**~~ | ⚫ **失効（2026-08-31 / 040 イタヤ裁定）** | **開かない。** 下記「失効の理由」参照 |
 | **RIG詳細 / パーツ詳細 / ログ詳細** | ✅ **RIG詳細 PC = `pc/myrig-rig-detail-v15.html`（046）／ パーツ詳細 PC = `pc/myrig-parts-detail-v1-open.html`（048 / Gate 4 CLOSE）。どちらも VISUAL LOCK ＋ SYSTEM VERIFIED** | **確定。開け直さない。** LOG 詳細は未着手（Gate 5 で Detail 3面の横断整合） |
 | **共有UI Single Source 化** | ✅ **A・B・C CLOSE（2026-09-03 / 046）** | 裁定原本 `_decisions/2026-09-02_shared-ui-single-source-v1.md`。C の結果は下記。残るは D / E / F と PROPAGATION 2本 |
-| **PROPAGATION-SHELF** | 🔵 **実装完了・Gate 3 依頼中（052 / mock `4c58a03`）** | 4面とも behavior parity 一致・画素ごとの視覚非回帰 0。恒久検査 `_state/shelf_propagation_check.py` |
+| **PROPAGATION-SHELF** | ✅ **CLOSE（053 / Gate 3 PASS / mock `4c58a03`）** | 4面とも behavior parity 一致・画素ごとの視覚非回帰 0。恒久検査 `_state/shelf_propagation_check.py`（`PROP_BASE_DIR` で git 無しでも回る） |
 | **PROPAGATION-HEADER** | ⚪ **未着手（045 で起票）** | PC Home に残る `.app-logo` 系 page-local 17ルール。Batch B の除去対象から漏れ、ロゴ／タグラインが他6面と約2px不一致 |
 | MyRIG Web文法（横断設計） | 🟡 DRAFT v0 作成済み・**一旦停止** | 追加調査・文書拡張はしない。Homeレビューで判断材料が出たら再開 |
 | Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
@@ -135,7 +128,7 @@ updated: 2026-09-04 19:40 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 |---|---|---|
 | Gate 1 | 045 反映後 | CURRENT / matrix の整合 |
 | Gate 2 | ✅ **PASS / CLOSE（2026-09-03 / 046）** | r8 vs v15 の visual / behavior parity |
-| **Gate 3** | **PROPAGATION-SHELF 完了後（＝いま。依頼済み / 2026-09-04 / mock `4c58a03`）** | Home ＋ Browse CLOSE 面の非回帰。`_state/GATE3_propagation-shelf.md` |
+| Gate 3 | ✅ **PASS / CLOSE（2026-09-04 / 053 / mock `4c58a03`）** | Home ＋ Browse CLOSE 面の非回帰。`_state/GATE3_propagation-shelf.md` |
 | **Gate 4** | ✅ **PASS / CLOSE（2026-09-04 / 048 / mock `10c6445`）** | RIG Detail 共通文法との整合・Single Source・variant 漏れ・behavior/a11y・48状態の反証。`_state/GATE4_parts-detail.md` |
 | Gate 5 | LOG Detail を VISUAL LOCK する前 | Detail 3面の横断整合 |
 
@@ -387,7 +380,7 @@ r8 の中身すべてが永久固定ではない。固定したのは **役割�
 **I-1 完了（2026-09-03）:** ガレージ8面＋テンプレ＋カタログG02 の お気に入り（ハート→星）/ ピン留め（星→画鋲）を修正。garage-top SAVED 見出しの文字グリフを SVG へ。Library パーツマスターの「ピン数 203件」を削除（pins 非公開。3項目へ）。
 **旧 RIG Detail 候補14件（v9a〜v14r6・concept 2本）を active tree から除去。** 履歴は `9aacdc8`。`_archive` へは複製しない（041 裁定）。
 
-**ライブ**: `myrig-mockup` = `f9450b5`（2026-09-04 push 済み）。**未 push 3コミット。Gate 3 の監査対象コードは `4c58a03`。**
+**ライブ**: `myrig-mockup` = `f9450b5`（2026-09-04 push 済み）。**未 push 8コミット。Gate 3 の監査対象コードは `4c58a03`（CLOSE 済み）。**
 > push したらこの行を実値へ。SHA を書く場所は依頼書と本行の2箇所だけ。
 > **SHA を書く場所は依頼書と本行の2箇所だけ**（2026-09-03 の Gate 2 で、本文と依頼書で SHA がずれた）。
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
