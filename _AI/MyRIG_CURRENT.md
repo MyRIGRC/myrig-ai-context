@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260903-046
-updated: 2026-09-03 17:34 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260904-047
+updated: 2026-09-04 11:15 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,15 +14,20 @@ updated: 2026-09-03 17:34 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-03 / revision 046（Batch C 完了・Gate 2 PASS / CLOSE）**
+**最終更新: 2026-09-04 / revision 047（PARTS Detail PC = VISUAL LOCK 候補 / Gate 4 待ち）**
 
-> **いま止まっている場所:** **Gate 2 は PASS / CLOSE。RIG 詳細 PC の SYSTEM 整理は完了した。**
-> `pc/myrig-rig-detail-v15.html` が **SYSTEM VERIFIED**（実装の正本）。
-> Launcher・見比べ・サイト内リンク 33本は v15 へ切り替え済み。r8 と移行専用ツールは撤去済み。
+> **いま止まっている場所:** **PARTS Detail PC（OPEN 型）の DESIGN 探索をイタヤ裁定で止め、
+> VISUAL LOCK 候補として Gate 4（GPT 独立監査）へ回した。** 依頼書は
+> `_state/GATE4_parts-detail.md`（mockup 側）。**監査対象コードは mock `297323d`**（依頼書が唯一の正）。
+> 候補ページ: `pc/myrig-parts-detail-v1-open.html`。状態違い8件は Launcher ▸ パーツ詳細 ▸ 状態確認。
 >
-> **次は PARTS Detail（Batch D）だが、ここから先は再び DESIGN / モック制作。**
-> イタヤと実画面を見ながら始める。**Cowork が単独でデザインを進めない。**
-> Gate 4（Detail 横断裁定・`dt-*` と catalog-v6 の統合）もそのタイミングで扱う。
+> Gate 4 で見るのは共通文法・Single Source・variant の漏れ・behavior/a11y 非回帰・
+> page-local コピー・48状態の反証の7点。**新しい UI 案は広げない。** 判断待ちの論点は依頼書 §6 の A〜E だけ。
+> PASS → PARTS Detail = **VISUAL LOCK**、048、箱型 v1 と旧 v6 を Launcher から畳む。
+>
+> RIG 詳細 PC は `pc/myrig-rig-detail-v15.html` = **VISUAL LOCK ＋ SYSTEM VERIFIED**（046 / Gate 2 CLOSE）のまま。
+> PARTS 作業中に共有ファイルを足したが、v15 は `ec3398c` 比で CSS 由来の pixel 差 0（依頼書 §3-D）。
+> **OPEN 型・Quiet Rail を RIG へ波及させない**（イタヤ指示。判断は Gate 5 以降）。
 
 > 📌 **スレッドをまたぐときは `_state/HANDOFF_20260825.md` も読む。**
 > 本節が「いまどこにいるか」の正本。HANDOFFはそれを補う会話レベルの文脈
@@ -40,7 +45,7 @@ updated: 2026-09-03 17:34 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | **検索 SEARCH-UPDATE-001** | ✅ **CLOSE（2026-08-25）** | 追加監査・cleanup・改善探索を行わない。軽微/横断は Web文法キューへ |
 | **Browse（PC＋Mobile / BROWSE-CONTRACT-001〜003）** | ✅ **CLOSE（2026-08-31 / revision 039）** | **PC・Mobile 両面とも確定。** 4面 × 2レーン = 8面。**ここから先は文言を磨くために構造を開け直さない。** 追加監査・cleanup・改善探索を行わない。次に開けてよいのは §9 のパターン設計トリガー（3つ目のCategory着手時）だけ |
 | ~~**Home 実画面レビュー**~~ | ⚫ **失効（2026-08-31 / 040 イタヤ裁定）** | **開かない。** 下記「失効の理由」参照 |
-| **RIG詳細 / パーツ詳細 / ログ詳細** | ✅ **RIG詳細 PC = `pc/myrig-rig-detail-v15.html` が SYSTEM VERIFIED（2026-09-03 / 046 / Gate 2 CLOSE）** | 次は **パーツ詳細（D）**。ただし**ここから先は DESIGN レーン**なので、イタヤと実画面を見ながら始める。共有部品から作りコピーしない |
+| **RIG詳細 / パーツ詳細 / ログ詳細** | ✅ RIG詳細 PC = `pc/myrig-rig-detail-v15.html` **VISUAL LOCK ＋ SYSTEM VERIFIED**（046） ／ 🟡 **パーツ詳細 PC = `pc/myrig-parts-detail-v1-open.html` VISUAL LOCK 候補・Gate 4 待ち（047 / mock `297323d`）** | Gate 4 の結果待ち。PASS で LOCK → 048。LOG 詳細は未着手（Gate 5） |
 | **共有UI Single Source 化** | ✅ **A・B・C CLOSE（2026-09-03 / 046）** | 裁定原本 `_decisions/2026-09-02_shared-ui-single-source-v1.md`。C の結果は下記。残るは D / E / F と PROPAGATION 2本 |
 | **PROPAGATION-SHELF** | ⚪ **未着手（045 で起票）** | Home ＋ Browse PC 3面の page-local 棚を `SoT_shelf.js` へ。4面それぞれ pixel parity → Gate 3 |
 | **PROPAGATION-HEADER** | ⚪ **未着手（045 で起票）** | PC Home に残る `.app-logo` 系 page-local 17ルール。Batch B の除去対象から漏れ、ロゴ／タグラインが他6面と約2px不一致 |
@@ -71,9 +76,9 @@ updated: 2026-09-03 17:34 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | | タイミング | 見るもの |
 |---|---|---|
 | Gate 1 | 045 反映後 | CURRENT / matrix の整合 |
-| **Gate 2** | **Batch C 完了後（＝いま）** | r8 vs v15 の visual / behavior parity |
+| Gate 2 | ✅ **PASS / CLOSE（2026-09-03 / 046）** | r8 vs v15 の visual / behavior parity |
 | Gate 3 | PROPAGATION-SHELF 完了後 | Home ＋ Browse CLOSE 面の非回帰 |
-| Gate 4 | PARTS Detail を VISUAL LOCK する前 | RIG Detail 共通文法との整合 |
+| **Gate 4** | **PARTS Detail を VISUAL LOCK する前（＝いま。依頼済み / 2026-09-04）** | RIG Detail 共通文法との整合・Single Source・variant 漏れ・behavior/a11y・48状態の反証。`_state/GATE4_parts-detail.md` |
 | Gate 5 | LOG Detail を VISUAL LOCK する前 | Detail 3面の横断整合 |
 
 これ以外でも、**共有部品の変更で複数の LOCK / CLOSE 面の見た目が変わるときは都度 Gate へ戻す。**
@@ -87,7 +92,8 @@ updated: 2026-09-03 17:34 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | **SYSTEM VERIFIED** | 載せ替え後、visual / behavior parity と pageerror まで通した状態。実装の正本 |
 
 Launcher の本流は原則 VISUAL LOCK 以上を指す。**MIGRATING の版を確定版と混同しない。**
-現在: r8 = VISUAL LOCK / v15 = MIGRATING（parity は PASS、Gate 2 待ち）。
+現在（047）: RIG Detail PC `v15` = **VISUAL LOCK ＋ SYSTEM VERIFIED**（r8 は撤去済み。046）／
+PARTS Detail PC `v1-open` = **VISUAL LOCK 候補（Gate 4 待ち）**。MIGRATING の面はいま無い。
 
 #### ⚫ 「Home 実画面レビュー」失効の理由（2026-08-31 / 040）
 
@@ -126,7 +132,7 @@ CORE「物理DELETE禁止」は DB恒久ルール節のもので、Git管理コ�
 | A | RIG Detail 確定 | ✅ **完了（2026-09-03 / r8 をイタヤ確定）** | 右レーンだけでなく PC 版 RIG Detail 全体を確定 |
 | B | Header Single Source 化 | ✅ **完了（`9aacdc8`）** | チェッカー 214/201 FAIL 0・56面 pageerror 0・**CLOSE/現在形6面 pixel parity 0px**（feed light の2pxは同一ツリー再撮影でも出るキャレットノイズ）・cx 7挙動同一 |
 | C | Detail 部品箱新設 ＋ RIG Detail 載せ替え（r8 → `v15`） | ✅ **CLOSE（2026-09-03 / 046 / Gate 2 PASS）** | 下記「Batch C 結果」 |
-| D | PARTS / LOG Detail 新規 | **着手可（DESIGN レーン。イタヤと相談して開始）** | page-local の Header / 部品コピー 0 |
+| D | PARTS / LOG Detail 新規 | 🟡 **PARTS = Gate 4 待ち（047 / `297323d`）**。LOG は未着手 | page-local の Header / 部品コピー 0（PARTS は達成: inline style/script/style属性 0・共有 SoT のみ） |
 | E | Footer / Garage `pit-*` / 未使用資産の掃除 | 実体再確認 | — |
 | F | PC v8 横断 | 独立 | 両テーマ実測・`--cat-*-on` 取りこぼし0 |
 
@@ -252,6 +258,29 @@ C の着手前に、実装が正典より先行していないかを READ のみ
 **回帰スクリプト側を slug へ追随させて再実行し、101項目 PASS を確認するまで CLOSE の証跡は不完全。**
 FAIL が出た場合のみ裁定へ上げる。→ PROPAGATION / Regression レーン
 
+### 🟡 PARTS Detail PC — VISUAL LOCK 候補 / Gate 4 待ち（2026-09-04 / 047 / `pc/myrig-parts-detail-v1-open.html`）
+
+Batch D（DESIGN レーン）。RIG v15 を共通土台に、イタヤと実画面で ① Identity → ② Library 導線 → ③ 装着RIG → ④ HISTORY → ⑤ 本文 → ⑥ RELATED の順で決めた。
+PNG 案ではなく **1本の HTML を直接育てる**方式（イタヤ指示）。監査対象 mock `297323d`、依頼書 `_state/GATE4_parts-detail.md`（mockup 側）。
+
+**イタヤ裁定（D の期間中。LOCK 前だが方向は確定）**
+
+| 項目 | 裁定 |
+|---|---|
+| Identity | **製品名が主役**。メーカーは上段（RIG と同じ cat-badge / maker / category の並び）、型番は直下（`.dt-identity__code`）。メーカー＋製品名を1行に連結しない。取得日・@handle・スケール・素材は Identity に置かない（SPEC の責務。**Identity を可変 SPEC 置き場にしない**） |
+| Gallery | Cover 1 ＋ Sub 4 = **最大5**。共有 Gallery を使う。**写真1枚ならメイン画像のみ**（サムネ列・矢印・1/1 カウンタを出さない。共有側 `SoT_detail.css` で1枚状態だけ正常化、複数枚は不変） |
+| 本文 | **OPEN 型を本線**（見出し無しのリード → 箱なし4節「見出し＋細い罫線＋内容」→ 箱型コメント）。本文タイポ1段上げ、Photo Note caption 可読、罫線は subtle より1段だけ。太線・色帯にしない |
+| 右レーン | **Quiet Rail**（`.dt-rail--quiet`。箱は残しヘッダー帯だけ静める）。共有 CSS に variant として定義し page-local にしない。**RIG へ波及させない**（Gate 5 以降） |
+| 本文の節 | 製品情報（Library 参照・Dual Path）／ 登録情報（parts の実フィールドのみ。**数量は無い**。装着位置は `rig_parts.note`）／ 状態＝`parts.condition`（new/used/modded）と装着状況を分ける ／ 装着RIG ／ フォトノート。**LOG の節は持たない** |
+| entity-feed | `maintenance_logs` に `part_id` が無い → PARTS のフィードは **登録・装着のみ**。「装着RIGのLOG」を「このパーツのLOG」と見せるのは禁止。「交換」は根拠がある場合のみ |
+| RELATED | 4棚: `product-used-by-rigs` ／ `category-parts` ／ `manufacturer-parts` ／ `category-popular-parts`（近い2 → 広告 → 広い2）。**`co-used-parts`（一緒に使われているパーツ）は削除**（説明なしに意味が伝わらず「一緒＝相性・適合」と誤解される） |
+| 本文「このパーツを使っているRIG」と RELATED「この製品を使っているRIG」 | **両方持つ。** 前者＝このページの登録パーツに近い情報 ／ 後者＝製品マスター単位・コミュニティ全体の使用例 |
+| 画面の補助文言 | **ユーザーに実データ・状態を伝える文は残す**（件数・装着中・閲覧数・導線・公開範囲と通報の案内）。**モックの構造や実装意図を説明するだけの文は画面に出さない**（判断理由は HTML コメント側）。aria-label 等の非表示文言は画面 copy と別に、実挙動と整合するよう Cowork が管理する |
+| 空状態 | 写真 0 ／ 外部リンク 0 → **節ごと消す**。装着RIG 0 → **空状態を出す**（「どこにも付いていない」は状態そのもの） |
+
+**やらないこと:** 推測による相性・互換性表示 ／ スキーマに無いフィールド（数量・装着位置フィールド）の発明 ／ OPEN・Quiet Rail の RIG への波及 ／ Gate 4 での新 UI 案。
+**検証:** contract 165 PASS / 0 FAIL / 0 WARN（5面）、48状態 OK、v15 は `ec3398c` 比で CSS 由来の差 0（依頼書 §3）。
+
 ### ✅ RIG Detail PC 確定（2026-09-03 / 044 / `pc/myrig-rig-detail-v14r5-complete-r8.html`）
 
 GPT との実機確認・修正を経てイタヤ裁定。**ここからデザインを再検討しない。** 実装・共有化上の問題だけ報告する。
@@ -280,18 +309,18 @@ r8 の中身すべてが永久固定ではない。固定したのは **役割�
   Home / Browse は確定済みなので、SYSTEM 作業と同じバッチで触らない
 - **既存部品への統合は見送り**（上記 DECISION）。Gallery は既存 `.gallery` のまま、
   棚・Comment・Modal は `dt-*` で新設し、統合は Gate 4 で裁定する
-- **C-6「r8 除去」は Gate 2 PASS 後**。いまは比較元として残す
+- ~~C-6「r8 除去」は Gate 2 PASS 後~~ → **Gate 2 CLOSE で撤去済み（046）**
 - **Footer は C のスコープ外（Batch E）。Header（B）も再オープンしない。** どちらも守った
 - 実施: C-1 共有4ファイル → C-2 v15 → C-3 parity/behavior → C-5 反証 → 報告・停止（Gate 2）
 
 **I-1 完了（2026-09-03）:** ガレージ8面＋テンプレ＋カタログG02 の お気に入り（ハート→星）/ ピン留め（星→画鋲）を修正。garage-top SAVED 見出しの文字グリフを SVG へ。Library パーツマスターの「ピン数 203件」を削除（pins 非公開。3項目へ）。
 **旧 RIG Detail 候補14件（v9a〜v14r6・concept 2本）を active tree から除去。** 履歴は `9aacdc8`。`_archive` へは複製しない（041 裁定）。
 
-**ライブ**: `myrig-mockup` = `8f2c86b`（Gate 2 CLOSE 済み。監査対象コードは `ec3398c`）
-> Gate 2 の監査対象コードは `ec3398c`。以降の commit は依頼書 `_state/GATE2_rig-detail-v15.md`
-> の更新だけで、コードは変えていない。**SHA を書く場所を増やさない**
+**ライブ**: `myrig-mockup` = `81ee1c6`（Gate 4 依頼書＋Launcher 表記。**Gate 4 の監査対象コードは `297323d`**）
+> Gate 4 の監査対象コードは `297323d`。`81ee1c6` は依頼書 `_state/GATE4_parts-detail.md` と
+> Launcher の文言だけで、コードは変えていない。**SHA を書く場所は依頼書と本行の2箇所だけ**
 > （2026-09-03 の Gate 2 で、本文と依頼書で SHA がずれた）。
-> ⚠️ **2026-09-03 時点で push 待ち。** イタヤの手元で `mockup` を回すまでライブは `45aec3f` のまま。
+> ⚠️ **2026-09-04 時点で push 待ち。** イタヤの手元で `mockup` を回すまでライブは `5e5d46d` のまま。
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
 > 2026-08-30、`64f0099` のまま放置していて「後続セッションが古いモックを現在地と誤認する」
 > 状態になっていた（イタヤ指摘）。
