@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260904-053
-updated: 2026-09-04 20:21 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260904-054
+updated: 2026-09-04 21:41 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,17 +14,51 @@ updated: 2026-09-04 20:21 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-04 / revision 053（Gate 3 PASS / CLOSE。次は Phase 2-D）**
+**最終更新: 2026-09-04 / revision 054（Phase 2-D 実装完了。REGRESSION 1件でイタヤ裁定待ち）**
 
-> **いま止まっている場所:** **Gate 3 は PASS / CLOSE。Phase 2-C 完了。次は Phase 2-D（Home Header）。**
+> **いま止まっている場所:** **Phase 2-D は実装完了。ただし Home の見た目が1点動いたので
+> 予告どおり REGRESSION として停止し、イタヤ裁定を待っている。** 下記「🔴 2-D の裁定1件」を読むこと。
 >
 > | Phase | 状態 |
 > |---|---|
 > | 2-A RIG Detail | ✅ CLOSE（051）。OPEN 型を採用 |
 > | 2-B Global Footer | ✅ CLOSE（051）。1 Shared Source |
-> | 2-C PROPAGATION-SHELF | ✅ **CLOSE（053 / Gate 3 PASS / mock `4c58a03`）** |
-> | **2-D Home Header** | ⚪ **次。Header 責務だけ。** 実測 2026-09-04: **23ルール**（`.app-logo` 13 / `.app-header` 2 / `.app-search` 2 / その他 `.app-` 6）。他面は `.app-logo` 系 0。**045 起票時の「17ルール」は実測と合わないので信じない。Home 全体の inline CSS cleanup へ拡大しない** |
+> | 2-C PROPAGATION-SHELF | ✅ CLOSE（053 / Gate 3 PASS / mock `4c58a03`） |
+> | **2-D Home Header** | 🟡 **実装完了・裁定待ち（054 / mock `66d9db9`）。** Home の Header 責務 page-local **22ルール（−83行）**を撤去し、Header の SoT を `SoT_app-shell.css` 1本に。**共有 CSS / JS は無変更。触った HTML は Home 1面だけ** |
 > | 2-E Search 証跡 | ⚪ 未着手。UI は開けない。回帰スクリプトを slug 語彙へ追随させ 101項目を復旧 |
+>
+> ### 🔴 2-D の裁定1件（DESIGN レーン / イタヤ）
+>
+> **Home のタグライン「RC GARAGE」の左端が 20.5px → 18.0px（2.5px 左）へ動いた。**
+> 原因は Home だけが持っていた `.app-logo--image{align-items:center}`（共有は `flex-start`）。
+> ロゴは `flex-direction:column` なので、この1宣言がタグラインの水平位置を決めていた。
+> 撤去後は**ロゴ画像の左端に揃い、他10面と同じ位置**になる。
+>
+> | | 案 |
+> |---|---|
+> | **A（現在の実装）** | 共有に揃える。PC 11面すべて同じ位置。Header の SoT が1本になる |
+> | **B** | Home の中央寄せを残す。共有 CSS に variant を足して Home だけ選ぶ（1面のための variant が増える） |
+>
+> **Cowork は決めない。** 比較画像は1枚だけ（`~/Desktop/MyRIG/_handoff/phase2d_home_logo_compare.png`）。第3案は作らない。
+> **裁定が出るまで 2-D を CLOSE にしない。**
+>
+> **2-D の実測（`_state/header_propagation_check.py`。対象7面 = Home ＋ Browse 3 ＋ Feed ＋ Search ＋ Library）**
+>
+> | | |
+> |---|---|
+> | 検査結果 | **85 PASS / 6 FAIL。** FAIL 6件はすべて上記タグライン1件が原因（geometry 4条件 ＋ pixel 2テーマ） |
+> | 視覚非回帰 | 各ツリー3枚撮りの**画素ごと**判定。**Home 以外の6面は「揺れで説明できない画素 0」**。Home は **y=37..45（タグラインの行）だけ**に light 429px / dark 434px。それ以外の全画素 0 |
+> | 面間一致 | 撤去後、**PC 11面**でロゴ帯の座標・寸法が light / dark とも完全一致 |
+> | pageerror | 7面 × light / dark とも 0 |
+> | 故障注入 | 2種で FAIL を確認（① 基準比較に nav 4px を注入 ② Home へ Header ルールを1本戻す） |
+>
+> 🔴 **記録 — ルール数を grep で数えない。** 起票時の「17ルール」も引き継ぎの「23ルール（`.app-logo` 13）」も
+> **実測と合わなかった**（正しくは **22 / `.app-logo` 12**）。どちらも grep が CSS ルールでない
+> コメント行を数えていた。**CSS ルール数はパーサで数える**（`header_propagation_check.py` の
+> `css_rules()` が `@media` も1段展開して数える）。以後この検査の実測を正とする。
+>
+> 📌 **`.drawer-overlay` / `.home-dir` の drawer 化も Home に共有と同じ定義が残っているが、
+> Header 責務ではないので 2-D では触っていない。** Batch E 以降の判断材料として記録する。
 >
 > **Gate 3 の結果:** 観点1〜5 すべて PASS。棚を共有 JS で動かす面は **6面**（詳細2 ＋ Home ＋ Browse 3）、page-local 実装 0。
 > 4面とも behavior parity 完全一致・「揺れで説明できない画素 0」・pageerror 0。
@@ -36,9 +70,9 @@ updated: 2026-09-04 20:21 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > 📌 **新スレッドはここから: `_state/HANDOFF_20260904_phase2d.md`（mockup 側）。**
 > 現在地・2-D の実測・守るルール・使える検査スクリプト・これまで踏んだ罠7件・未 push・GPT 運用をまとめてある。
 >
-> ⚠️ **2-D の難所:** Home のロゴ／タグラインが他6面と**約2px ズレている**（045 起票）。
-> 共有へ寄せると Home の見た目が動く可能性がある。**動いたら REGRESSION として停止しイタヤ裁定へ上げる**。
-> 「共有の方が正しいので採用」を Cowork が自分で決めない。**2px を揃えること自体は 2-D の目的ではない**（目的は Single Source 化）。
+> ⚠️ **2-D の難所（予告どおり顕在化した）:** Home のロゴ／タグラインが他6面と約2px ズレている件（045 起票）。
+> 実測は **2.5px**、動くのは**タグラインだけ**でロゴ画像は動かなかった。上の「2-D の裁定1件」へ。
+> 「共有の方が正しいので採用」を Cowork が自分で決めない。**2.5px を揃えること自体は 2-D の目的ではない**（目的は Single Source 化）。
 >
 > 📌 **記録（Gate 3 CLOSE の非 blocker 整理）:** `detail_contract_check.py` は
 > **引数なしだと既定の `pc/myrig-rig-detail-v15.html` 1面だけ**を見る（51 PASS）。
@@ -106,7 +140,7 @@ updated: 2026-09-04 20:21 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | **RIG詳細 / パーツ詳細 / ログ詳細** | ✅ **RIG詳細 PC = `pc/myrig-rig-detail-v15.html`（046）／ パーツ詳細 PC = `pc/myrig-parts-detail-v1-open.html`（048 / Gate 4 CLOSE）。どちらも VISUAL LOCK ＋ SYSTEM VERIFIED** | **確定。開け直さない。** LOG 詳細は未着手（Gate 5 で Detail 3面の横断整合） |
 | **共有UI Single Source 化** | ✅ **A・B・C CLOSE（2026-09-03 / 046）** | 裁定原本 `_decisions/2026-09-02_shared-ui-single-source-v1.md`。C の結果は下記。残るは D / E / F と PROPAGATION 2本 |
 | **PROPAGATION-SHELF** | ✅ **CLOSE（053 / Gate 3 PASS / mock `4c58a03`）** | 4面とも behavior parity 一致・画素ごとの視覚非回帰 0。恒久検査 `_state/shelf_propagation_check.py`（`PROP_BASE_DIR` で git 無しでも回る） |
-| **PROPAGATION-HEADER** | ⚪ **未着手（045 で起票）** | PC Home に残る `.app-logo` 系 page-local 17ルール。Batch B の除去対象から漏れ、ロゴ／タグラインが他6面と約2px不一致 |
+| **PROPAGATION-HEADER** | 🟡 **実装完了・裁定待ち（054 / mock `66d9db9`）** | Home の Header 責務 page-local **22ルール（−83行）**を撤去。Header の SoT は `SoT_app-shell.css` 1本。恒久検査 `_state/header_propagation_check.py`。**タグライン 2.5px の1件だけイタヤ裁定へ**（起票時の「17ルール」は実測と合わなかった） |
 | MyRIG Web文法（横断設計） | 🟡 DRAFT v0 作成済み・**一旦停止** | 追加調査・文書拡張はしない。Homeレビューで判断材料が出たら再開 |
 | Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
 | モック全体の第2周 | ⚪ 未着手 | ページ単体ではなくフロー単位で確認する体制へ移行 |
@@ -387,7 +421,7 @@ r8 の中身すべてが永久固定ではない。固定したのは **役割�
 **I-1 完了（2026-09-03）:** ガレージ8面＋テンプレ＋カタログG02 の お気に入り（ハート→星）/ ピン留め（星→画鋲）を修正。garage-top SAVED 見出しの文字グリフを SVG へ。Library パーツマスターの「ピン数 203件」を削除（pins 非公開。3項目へ）。
 **旧 RIG Detail 候補14件（v9a〜v14r6・concept 2本）を active tree から除去。** 履歴は `9aacdc8`。`_archive` へは複製しない（041 裁定）。
 
-**ライブ**: `myrig-mockup` = `f9450b5`（2026-09-04 push 済み）。**未 push 8コミット。Gate 3 の監査対象コードは `4c58a03`（CLOSE 済み）。**
+**ライブ**: `myrig-mockup` = `8817c9a`（2026-09-04 push 済み。origin/main と一致を実測）。**未 push 1コミット = `66d9db9`（Phase 2-D）。** Gate 3 の監査対象コードは `4c58a03`（CLOSE 済み）。
 > push したらこの行を実値へ。SHA を書く場所は依頼書と本行の2箇所だけ。
 > **SHA を書く場所は依頼書と本行の2箇所だけ**（2026-09-03 の Gate 2 で、本文と依頼書で SHA がずれた）。
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
