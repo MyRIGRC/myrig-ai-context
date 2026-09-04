@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260904-048
-updated: 2026-09-04 16:26 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260904-049
+updated: 2026-09-04 17:00 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,17 +14,58 @@ updated: 2026-09-04 16:26 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-04 / revision 048（PARTS Detail PC 確定・Gate 4 PASS / CLOSE）**
+**最終更新: 2026-09-04 / revision 049（MVP収束フェーズへ移行・Phase 1 完了）**
 
-> **いま止まっている場所:** **Gate 4 は PASS / CLOSE。詳細2面（RIG / PARTS）の PC は確定した。**
-> `pc/myrig-parts-detail-v1-open.html` = **VISUAL LOCK ＋ SYSTEM VERIFIED**（デザインの正本かつ実装の正本）。
-> `pc/myrig-rig-detail-v15.html` も同じ状態のまま。比較用の箱型 v1・旧 v6・未使用の `.dt-identity__eyebrow` は撤去済み。
-> Launcher / compare / Search の内部リンク 21本は本線へ切り替え済み。
+> **いま止まっている場所:** **モック探索フェーズを終了し、MVP 収束フェーズへ移行した（イタヤ「MyRIG MVP収束計画 v1」）。**
+> 目的は「モックをさらに良くする」ことではなく、**確定モックを事故なく Next.js へ移せる状態まで収束させること**。
 >
-> **次は PROPAGATION-SHELF → Gate 3。** Home ＋ Browse PC 3面の page-local 棚を `SoT_shelf.js` へ寄せ、
-> 4面それぞれ非回帰を実測する。**確定面のデザインは開け直さない。**
-> LOG Detail（Gate 5）で Detail 3面の横断整合を見る。**OPEN 型・Quiet Rail を RIG へ波及させるかはそこで判断**
-> （論点 A: `dt-*` と catalog-v6 の統合、論点 B: Gallery 1枚規則の置き場 も Gate 5 で実施可否を決める）。
+> **Phase 1 完了: `_state/MVP_CONVERGENCE_MAP.md`（mockup 側）を作成。** PC 44面 / Mobile 42面を
+> Visual state・Component state・MVP必須・PC/Mobile 追随・次アクション・DESIGN 再オープン可否で1行管理する。
+> **以後、このマップに無い横道作業を始めない。**
+>
+> **次は Phase 2（LOG 前収束）。ただし着手前に §「MVP 収束フェーズ」の要裁定3件を先に決める。**
+
+### 🔴 MVP 収束フェーズ（2026-09-04 / 049 / イタヤ計画 v1）
+
+**最重要ルール（CORE の Single Source 原則の運用解釈）**
+
+| | |
+|---|---|
+| **DECISION** | VISUAL LOCK / CLOSE 面は、SYSTEM / PROPAGATION を理由に**見た目を変えない**。共有化で差が出たら「改善」ではなく **REGRESSION として停止** |
+| **DECISION** | 意図的な視覚変更は **DESIGN レーン**として切り出し、イタヤ裁定を必須にする。1回開いて閉じる |
+| **DECISION** | **全 inline CSS の解消を MVP の前提条件にしない。** ページ固有の見た目はモックをそのまま視覚 SoT として持たせる。減らすのは「同一責務・同一挙動なのに複数面へコピーされているもの」だけ |
+| **DECISION** | 孤児・未使用 asset・軽微 cleanup は、Readiness Gate を止める blocker でない限り横道で始めない |
+
+**Phase**
+
+| | やること | やらないこと |
+|---|---|---|
+| 0 | 048 固定（Gate 4 CLOSE / PARTS LOCK / 旧版撤去 / push） ✅ | 新しい設計作業 |
+| **1** | **MVP_CONVERGENCE_MAP 作成** ✅（049） | HTML 変更 |
+| 2 | LOG 前収束（2-A RIG 文法 / 2-B Global Footer / 2-C SHELF / 2-D Home Header / 2-E Search 証跡） | Home 等の再設計 |
+| 3 | LOG Detail PC（確定 Detail System から作る）→ Gate 5 | 第3の Detail 文法の発明 |
+| 4 | Mobile Detail 3面を1バッチで追随 | PC と Mobile の同時進行 |
+| 5 | MVP component hardening（Form 共有境界 / Garage / Library / Mobile の必要箇所） | 全ページの inline CSS 撲滅・Register の再設計 |
+| Final | Next.js Readiness Gate → PASS 後はモックを原則 Freeze | 以後の気軽な再オープン |
+
+**Phase 2 着手前の要裁定 3件**
+
+| # | 事項 | 備考 |
+|---|---|---|
+| ① | **RIG に OPEN 文法を入れるか** | `pc/myrig-rig-detail-v15-open.html` を1本だけ作って実画面比較。第3案を作らない。**採用する場合は「RIG への波及は Gate 5 以降」（048）に対する Override として記録が要る** |
+| ② | **Footer の SNS アイコンをどちらにするか** | Detail 版と多数派の差は `aria-label` 4行・**SVG path/属性 8行（＝視覚差）**・`title` 4行・空白5行。**多数派の見た目を採ると LOCK 済み詳細2面のアイコンが変わる。** a11y 改善は維持する |
+| ③ | **MVP スコープ（Map §5 の ◎○△）** | 40面への割り当ては Cowork の提案。製品判断なのでイタヤ裁定 |
+
+**Phase 1 で確定した横断部品の現在地（実測）**
+
+| 部品 | 実測 |
+|---|---|
+| Footer | **PC 34面 / 7 variant**（27＝多数派・2＝Detail 版・5＝独自）。**Mobile 42面は `<footer>` を持たない**（`SoT_footer.css` は読むが未使用）→ 2-B は PC のみ |
+| Shelf | `SoT_shelf.js` を `<script>` で読むのは**詳細2面だけ**。Home ＋ Browse 3面は未接続で page-local 実装（Home 7 / Browse 各2 の `scrollBy/scrollLeft`） |
+| Header | PC 35面が `app-header`、詳細2面が `.cx--quiet`。**Home だけ page-local が残る**（`.app-logo` 系 11 / `.app-`・`.cx-` 系 21）。2-D はこの責務だけで、Home 全体の cleanup へ広げない |
+| Detail SoT | `SoT_detail-markup.js` ほかを使うのは RIG v15 / PARTS OPEN の2面。Phase 3 で LOG が3面目 |
+| Mobile | 42面すべて同じ共有3ファイルを読む。**共通の inline ブロック4種が28面に重複**（252×10 / 151×8 / 411×7 / 340×3）。Phase 4 でここを出すだけで28面が片付く |
+| inline CSS 0 の PC 面 | **2面だけ**（RIG v15 / PARTS OPEN）。これは目標値ではなく現在地の記録 |
 
 > 📌 **スレッドをまたぐときは `_state/HANDOFF_20260825.md` も読む。**
 > 本節が「いまどこにいるか」の正本。HANDOFFはそれを補う会話レベルの文脈
@@ -326,7 +367,7 @@ r8 の中身すべてが永久固定ではない。固定したのは **役割�
 **I-1 完了（2026-09-03）:** ガレージ8面＋テンプレ＋カタログG02 の お気に入り（ハート→星）/ ピン留め（星→画鋲）を修正。garage-top SAVED 見出しの文字グリフを SVG へ。Library パーツマスターの「ピン数 203件」を削除（pins 非公開。3項目へ）。
 **旧 RIG Detail 候補14件（v9a〜v14r6・concept 2本）を active tree から除去。** 履歴は `9aacdc8`。`_archive` へは複製しない（041 裁定）。
 
-**ライブ**: `myrig-mockup` = `1beaa1c`（push 済み）。**未 push 7コミット。Gate 4 CLOSE は `dfc4a3a`（監査対象コードは `10c6445`）。**
+**ライブ**: `myrig-mockup` = `dfc4a3a`（2026-09-04 push 済み。Gate 4 CLOSE）。**未 push 1コミット（Phase 1 の Map 追加 `76e4c3a`）。**
 > push したらこの行を実値へ。SHA を書く場所は依頼書と本行の2箇所だけ。
 > **SHA を書く場所は依頼書と本行の2箇所だけ**（2026-09-03 の Gate 2 で、本文と依頼書で SHA がずれた）。
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
