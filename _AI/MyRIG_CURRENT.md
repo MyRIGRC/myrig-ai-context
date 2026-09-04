@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260904-051
-updated: 2026-09-04 18:56 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260904-052
+updated: 2026-09-04 19:40 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,27 +14,25 @@ updated: 2026-09-04 18:56 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-04 / revision 051（Phase 2-A / 2-B CLOSE。RIG=OPEN 型・Footer=1 Shared Source）**
+**最終更新: 2026-09-04 / revision 052（Phase 2-C 実装完了・Gate 3 依頼中）**
 
-> **いま止まっている場所:** **Phase 2-A / 2-B を CLOSE。次は 2-C（PROPAGATION-SHELF）→ Gate 3。**
+> **いま止まっている場所:** **Phase 2-C（PROPAGATION-SHELF）の実装が終わり、Gate 3 の独立監査へ回した。**
+> 依頼書 `_state/GATE3_propagation-shelf.md`（mockup 側）。**監査対象コードは mock `4c58a03`**（基準は `7437e44`）。
 >
-> | | 結果 |
+> | Phase | 状態 |
 > |---|---|
-> | **2-A RIG Detail** | ✅ **OPEN 型を採用**（イタヤ実画面裁定）。`pc/myrig-rig-detail-v15.html` の **VISUAL LOCK を更新**。**RIG と PARTS の本文文法が揃った** |
-> | **2-B Global Footer** | ✅ **1 Shared Source 化**（`pc/assets/js/SoT_footer.js` ／ ページは `<site-footer>` 1タグ）。33面の直書き markup → 0。7 variant → 1定義 |
+> | 2-A RIG Detail | ✅ **CLOSE。OPEN 型を採用**（051） |
+> | 2-B Global Footer | ✅ **CLOSE。1 Shared Source**（051） |
+> | **2-C PROPAGATION-SHELF** | 🔵 **実装完了・Gate 3 依頼中**（052） |
+> | 2-D Home Header | ⚪ 次。**Header 責務だけ**。Home 全体の cleanup へ広げない |
+> | 2-E Search 証跡 | ⚪ 未着手。UI は開けない。回帰スクリプトを slug 語彙へ追随させ 101項目を復旧 |
 >
-> **🔴 Override（048 を上書き）:** 「OPEN 型・Quiet Rail の RIG 波及は Gate 5 以降」は**失効**。
-> 理由: Phase 2-A で比較版を1本だけ作り、イタヤが実画面で見て採否を決めたため、先送りする理由が無くなった。
-> Gate 5 は当初どおり **LOG Detail を含む Detail 3面の横断整合**を見る場に戻る。
->
-> **Footer の裁定（2-B）:** VISUAL＝**多数派版**（27面の見た目を維持し、変更を Detail 2面に限定できる）／
-> A11Y＝**Detail 版の改善を統合**（SNS 4個の `aria-label`）。
-> 実測: 多数派27面は Footer **pixel 0**、Detail 2面は**アイコンの描画データだけ**多数派へ（SNS 3種＋言語の地球。位置・寸法は同一）、
-> `error-states` は Discord ボタンが 3→4 に増える（多数派へ揃えた意図的変更）。
->
-> **今回の事故と対策:** Launcher の PC 専用カードが `compare` モードで **黙ってホームへフォールバック**していた（10カード）。
-> `data-pconly` で view mode に関わらず PC を直接開くようにし、`compare.html` は解決できない `?m=` を黙って落とさず警告するようにした。
-> 恒久検査 `_state/launcher_link_check.py`（3モード × 全カードで**実際に読み込まれた文書**を確認）。
+> **2-C の要点:** Home ＋ Browse PC 3面の page-local な棚挙動を `SoT_shelf.js` へ。
+> **確定面なので見た目も操作感も変えない**のが要件で、4面とも **behavior parity 完全一致**、
+> **初期表示・スクロール後とも「揺れで説明できない画素 0」**、pageerror 0。
+> スクロール量は `cards`（Home）/ `viewport`（詳細）/ 固定 `440`（Browse）の**3種類のまま統合していない**
+> （統一すると確定面の操作感が変わる。統一の是非は Next.js Readiness Gate で1回だけ決める）。
+> これで棚を共有 JS で動かす面は **6面**（詳細2 ＋ Home ＋ Browse 3）。page-local 実装は 0。
 
 ### 🔴 MVP 収束フェーズ（2026-09-04 / 049 / イタヤ計画 v1）
 
@@ -53,7 +51,7 @@ updated: 2026-09-04 18:56 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 |---|---|---|
 | 0 | 048 固定（Gate 4 CLOSE / PARTS LOCK / 旧版撤去 / push） ✅ | 新しい設計作業 |
 | **1** | **MVP_CONVERGENCE_MAP 作成** ✅（049） | HTML 変更 |
-| 2 | ✅ **2-A CLOSE / 2-B CLOSE。** 残り: 2-C SHELF / 2-D Home Header / 2-E Search 証跡 | Home 等の再設計 |
+| 2 | ✅ 2-A CLOSE / 2-B CLOSE / **2-C 実装完了（Gate 3 依頼中）。** 残り: 2-D Home Header / 2-E Search 証跡 | Home 等の再設計 |
 | 3 | LOG Detail PC（確定 Detail System から作る）→ Gate 5 | 第3の Detail 文法の発明 |
 | 4 | Mobile Detail 3面を1バッチで追随 | PC と Mobile の同時進行 |
 | 5 | MVP component hardening（Form 共有境界 / Garage / Library / Mobile の必要箇所） | 全ページの inline CSS 撲滅・Register の再設計 |
@@ -72,7 +70,7 @@ updated: 2026-09-04 18:56 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | 部品 | 実測 |
 |---|---|
 | Footer | ✅ **2-B CLOSE。33面が `<site-footer>` 1タグ。直書き 0 / 生成リンク本数は33面で一致**。〈以前: PC 33面 / 7 variant〉。`log-composer-modal` の `modal-footer` はモーダルのアクションバーで責務が違うため対象外。Mobile 42面は `<footer>` を持たない |
-| Shelf | `SoT_shelf.js` を `<script>` で読むのは**詳細2面だけ**。Home ＋ Browse 3面は未接続で page-local 実装（Home 7 / Browse 各2 の `scrollBy/scrollLeft`） |
+| Shelf | ✅ **6面が共有 JS を使用**（詳細2 ＋ Home ＋ Browse 3）。page-local 実装 0。スクロール量は3種（`cards` / `viewport` / 固定 `440`）で**既存の実測値のまま**。統一は横断裁定 |
 | Header | PC 35面が `app-header`、詳細2面が `.cx--quiet`。**Home だけ page-local が残る**（`.app-logo` 系 11 / `.app-`・`.cx-` 系 21）。2-D はこの責務だけで、Home 全体の cleanup へ広げない |
 | Detail SoT | `SoT_detail-markup.js` ほかを使うのは RIG v15 / PARTS OPEN の2面。Phase 3 で LOG が3面目 |
 | Mobile | 42面すべて同じ共有3ファイルを読む。**共通の inline ブロック4種が28面に重複**（252×10 / 151×8 / 411×7 / 340×3）。Phase 4 でここを出すだけで28面が片付く |
@@ -96,7 +94,7 @@ updated: 2026-09-04 18:56 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | ~~**Home 実画面レビュー**~~ | ⚫ **失効（2026-08-31 / 040 イタヤ裁定）** | **開かない。** 下記「失効の理由」参照 |
 | **RIG詳細 / パーツ詳細 / ログ詳細** | ✅ **RIG詳細 PC = `pc/myrig-rig-detail-v15.html`（046）／ パーツ詳細 PC = `pc/myrig-parts-detail-v1-open.html`（048 / Gate 4 CLOSE）。どちらも VISUAL LOCK ＋ SYSTEM VERIFIED** | **確定。開け直さない。** LOG 詳細は未着手（Gate 5 で Detail 3面の横断整合） |
 | **共有UI Single Source 化** | ✅ **A・B・C CLOSE（2026-09-03 / 046）** | 裁定原本 `_decisions/2026-09-02_shared-ui-single-source-v1.md`。C の結果は下記。残るは D / E / F と PROPAGATION 2本 |
-| **PROPAGATION-SHELF** | ⚪ **未着手（045 で起票）** | Home ＋ Browse PC 3面の page-local 棚を `SoT_shelf.js` へ。4面それぞれ pixel parity → Gate 3 |
+| **PROPAGATION-SHELF** | 🔵 **実装完了・Gate 3 依頼中（052 / mock `4c58a03`）** | 4面とも behavior parity 一致・画素ごとの視覚非回帰 0。恒久検査 `_state/shelf_propagation_check.py` |
 | **PROPAGATION-HEADER** | ⚪ **未着手（045 で起票）** | PC Home に残る `.app-logo` 系 page-local 17ルール。Batch B の除去対象から漏れ、ロゴ／タグラインが他6面と約2px不一致 |
 | MyRIG Web文法（横断設計） | 🟡 DRAFT v0 作成済み・**一旦停止** | 追加調査・文書拡張はしない。Homeレビューで判断材料が出たら再開 |
 | Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
@@ -126,7 +124,7 @@ updated: 2026-09-04 18:56 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 |---|---|---|
 | Gate 1 | 045 反映後 | CURRENT / matrix の整合 |
 | Gate 2 | ✅ **PASS / CLOSE（2026-09-03 / 046）** | r8 vs v15 の visual / behavior parity |
-| Gate 3 | PROPAGATION-SHELF 完了後 | Home ＋ Browse CLOSE 面の非回帰 |
+| **Gate 3** | **PROPAGATION-SHELF 完了後（＝いま。依頼済み / 2026-09-04 / mock `4c58a03`）** | Home ＋ Browse CLOSE 面の非回帰。`_state/GATE3_propagation-shelf.md` |
 | **Gate 4** | ✅ **PASS / CLOSE（2026-09-04 / 048 / mock `10c6445`）** | RIG Detail 共通文法との整合・Single Source・variant 漏れ・behavior/a11y・48状態の反証。`_state/GATE4_parts-detail.md` |
 | Gate 5 | LOG Detail を VISUAL LOCK する前 | Detail 3面の横断整合 |
 
@@ -378,7 +376,7 @@ r8 の中身すべてが永久固定ではない。固定したのは **役割�
 **I-1 完了（2026-09-03）:** ガレージ8面＋テンプレ＋カタログG02 の お気に入り（ハート→星）/ ピン留め（星→画鋲）を修正。garage-top SAVED 見出しの文字グリフを SVG へ。Library パーツマスターの「ピン数 203件」を削除（pins 非公開。3項目へ）。
 **旧 RIG Detail 候補14件（v9a〜v14r6・concept 2本）を active tree から除去。** 履歴は `9aacdc8`。`_archive` へは複製しない（041 裁定）。
 
-**ライブ**: `myrig-mockup` = `dfc4a3a`（2026-09-04 push 済み）。**未 push 9コミット（Phase 1 Map ／ Launcher 事故修正 ／ Phase 2-A・2-B）。**
+**ライブ**: `myrig-mockup` = `f9450b5`（2026-09-04 push 済み）。**未 push 3コミット。Gate 3 の監査対象コードは `4c58a03`。**
 > push したらこの行を実値へ。SHA を書く場所は依頼書と本行の2箇所だけ。
 > **SHA を書く場所は依頼書と本行の2箇所だけ**（2026-09-03 の Gate 2 で、本文と依頼書で SHA がずれた）。
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
