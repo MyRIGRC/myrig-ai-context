@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260904-049
-updated: 2026-09-04 17:00 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260904-050
+updated: 2026-09-04 17:23 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-04 17:00 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-04 / revision 049（MVP収束フェーズへ移行・Phase 1 完了）**
+**最終更新: 2026-09-04 / revision 050（Phase 2 着手・裁定用の比較物2つを作成）**
 
 > **いま止まっている場所:** **モック探索フェーズを終了し、MVP 収束フェーズへ移行した（イタヤ「MyRIG MVP収束計画 v1」）。**
 > 目的は「モックをさらに良くする」ことではなく、**確定モックを事故なく Next.js へ移せる状態まで収束させること**。
@@ -23,7 +23,15 @@ updated: 2026-09-04 17:00 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > Visual state・Component state・MVP必須・PC/Mobile 追随・次アクション・DESIGN 再オープン可否で1行管理する。
 > **以後、このマップに無い横道作業を始めない。**
 >
-> **次は Phase 2（LOG 前収束）。ただし着手前に §「MVP 収束フェーズ」の要裁定3件を先に決める。**
+> **Phase 2 着手。裁定3件のうち ③ MVP スコープは確定、① ② は比較物を作って裁定待ち。**
+>
+> | | 状態 |
+> |---|---|
+> | ① RIG に OPEN 文法を入れるか | 🔵 **比較版 `pc/myrig-rig-detail-v15-open.html` 作成済み。実画面裁定待ち。** 現 v15 は未変更・第3案なし |
+> | ② Footer の SNS アイコン | 🔵 **比較ページ `pc/myrig-footer-sns-compare.html` 作成済み。採用側はまだ決めない** |
+> | ③ MVP スコープ | ✅ **確定（◎22 / ○12 / △6）。** Library Master Detail 2面は Library Bridge の着地点なので ◎ 維持 |
+>
+> **Mobile 28面の共通 inline ブロック4種は Phase 2 へ前倒ししない。Phase 4 開始時の最初の SYSTEM 作業とする**（イタヤ裁定）。
 
 ### 🔴 MVP 収束フェーズ（2026-09-04 / 049 / イタヤ計画 v1）
 
@@ -52,9 +60,9 @@ updated: 2026-09-04 17:00 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 | # | 事項 | 備考 |
 |---|---|---|
-| ① | **RIG に OPEN 文法を入れるか** | `pc/myrig-rig-detail-v15-open.html` を1本だけ作って実画面比較。第3案を作らない。**採用する場合は「RIG への波及は Gate 5 以降」（048）に対する Override として記録が要る** |
-| ② | **Footer の SNS アイコンをどちらにするか** | Detail 版と多数派の差は `aria-label` 4行・**SVG path/属性 8行（＝視覚差）**・`title` 4行・空白5行。**多数派の見た目を採ると LOCK 済み詳細2面のアイコンが変わる。** a11y 改善は維持する |
-| ③ | **MVP スコープ（Map §5 の ◎○△）** | 40面への割り当ては Cowork の提案。製品判断なのでイタヤ裁定 |
+| ① | **RIG に OPEN 文法を入れるか** | 🔵 **比較版作成済み（`pc/myrig-rig-detail-v15-open.html`）。裁定待ち。** 現 v15 は未変更・第3案なし。差は3点だけ（1節目を見出しごと外して `.dt-lead` ／ 残り6節を `.section--flat` ／ 右レーンに `.dt-rail--quiet`）。共有 CSS / JS は未変更。**採用する場合は「RIG への波及は Gate 5 以降」（048）に対する Override として記録が要る** |
+| ② | **Footer の SNS アイコンをどちらにするか** | 🔵 **比較ページ作成済み（`pc/myrig-footer-sns-compare.html`）。採用側はまだ決めない。** 実サイズ・拡大・重ねの3通りで横並び。**差があるのは Instagram / YouTube / Discord の3つで、X は完全同一。** どちらを採っても `aria-label`（a11y 改善）は維持する |
+| ③ | ~~MVP スコープ~~ | ✅ **確定（2026-09-04）。** ◎22 / ○12 / △6。Library Master Detail 2面は Bridge 着地点なので ◎ 維持 |
 
 **Phase 1 で確定した横断部品の現在地（実測）**
 
@@ -367,7 +375,7 @@ r8 の中身すべてが永久固定ではない。固定したのは **役割�
 **I-1 完了（2026-09-03）:** ガレージ8面＋テンプレ＋カタログG02 の お気に入り（ハート→星）/ ピン留め（星→画鋲）を修正。garage-top SAVED 見出しの文字グリフを SVG へ。Library パーツマスターの「ピン数 203件」を削除（pins 非公開。3項目へ）。
 **旧 RIG Detail 候補14件（v9a〜v14r6・concept 2本）を active tree から除去。** 履歴は `9aacdc8`。`_archive` へは複製しない（041 裁定）。
 
-**ライブ**: `myrig-mockup` = `dfc4a3a`（2026-09-04 push 済み。Gate 4 CLOSE）。**未 push 1コミット（Phase 1 の Map 追加 `76e4c3a`）。**
+**ライブ**: `myrig-mockup` = `dfc4a3a`（2026-09-04 push 済み。Gate 4 CLOSE）。**未 push 4コミット（Phase 1 Map ＋ Phase 2 比較物）。**
 > push したらこの行を実値へ。SHA を書く場所は依頼書と本行の2箇所だけ。
 > **SHA を書く場所は依頼書と本行の2箇所だけ**（2026-09-03 の Gate 2 で、本文と依頼書で SHA がずれた）。
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
