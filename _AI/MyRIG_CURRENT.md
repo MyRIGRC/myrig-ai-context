@@ -16,9 +16,12 @@ updated: 2026-09-04 11:15 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 **最終更新: 2026-09-04 / revision 047（PARTS Detail PC = VISUAL LOCK 候補 / Gate 4 待ち）**
 
-> **いま止まっている場所:** **PARTS Detail PC（OPEN 型）の DESIGN 探索をイタヤ裁定で止め、
-> VISUAL LOCK 候補として Gate 4（GPT 独立監査）へ回した。** 依頼書は
-> `_state/GATE4_parts-detail.md`（mockup 側）。**監査対象コードは mock `297323d`**（依頼書が唯一の正）。
+> **いま止まっている場所:** **PARTS Detail PC（OPEN 型）= VISUAL LOCK 候補。Gate 4 は初回 HOLD → 再提出済み（再監査待ち）。**
+> 依頼書は `_state/GATE4_parts-detail.md`（mockup 側）。**再提出の監査対象コードは mock `db52095`**（依頼書 §8 が唯一の正。初回 `297323d` は HOLD）。
+> HOLD の中身は SYSTEM（DESIGN は問題なし）: CSS / JS は共有でも **DOM 骨格が両 HTML に複製**されていた。
+> → `pc/assets/js/SoT_detail-markup.js` を新設して Gallery / Builder / Entity Actions / Comments / Modal / 棚枠の骨格を1か所へ。
+> ページは宣言タグ＋データだけ。`297323d` との **DOM 完全一致（要素間空白除く）を5状態で実測**、見た目不変。
+> audit bundle: `~/Desktop/MyRIG/_handoff/GATE4_bundle_db52095.zip`（GPT が共有 assets を直接取れなかったため）。
 > 候補ページ: `pc/myrig-parts-detail-v1-open.html`。状態違い8件は Launcher ▸ パーツ詳細 ▸ 状態確認。
 >
 > Gate 4 で見るのは共通文法・Single Source・variant の漏れ・behavior/a11y 非回帰・
@@ -316,9 +319,8 @@ r8 の中身すべてが永久固定ではない。固定したのは **役割�
 **I-1 完了（2026-09-03）:** ガレージ8面＋テンプレ＋カタログG02 の お気に入り（ハート→星）/ ピン留め（星→画鋲）を修正。garage-top SAVED 見出しの文字グリフを SVG へ。Library パーツマスターの「ピン数 203件」を削除（pins 非公開。3項目へ）。
 **旧 RIG Detail 候補14件（v9a〜v14r6・concept 2本）を active tree から除去。** 履歴は `9aacdc8`。`_archive` へは複製しない（041 裁定）。
 
-**ライブ**: `myrig-mockup` = `1beaa1c`（2026-09-04 11:19 JST push 済み。**Gate 4 の監査対象コードは `297323d`**）
-> `297323d` → `1beaa1c` の差は依頼書 `_state/GATE4_parts-detail.md`・Launcher の文言・
-> 置き忘れ PNG 1枚の削除だけで、`pc/` `js/` `mobile/` のコードは変えていない（`git diff --stat 297323d 1beaa1c -- pc/ js/ mobile/` で PNG のみ）。
+**ライブ**: `myrig-mockup` = `1beaa1c`（push 済み）。**未 push: `db52095`（Gate 4 再提出の監査対象コード）＋ 依頼書 §8 の1コミット。**
+> `db52095` の後は依頼書だけで、コードは変えていない。push したらこの行を実値へ。
 > **SHA を書く場所は依頼書と本行の2箇所だけ**（2026-09-03 の Gate 2 で、本文と依頼書で SHA がずれた）。
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
 > 2026-08-30、`64f0099` のまま放置していて「後続セッションが古いモックを現在地と誤認する」
