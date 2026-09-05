@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260905-057
-updated: 2026-09-05 10:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260905-058
+updated: 2026-09-05 10:38 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-05 10:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-05 / revision 057（056 に残っていた陳腐化2箇所を整合。Phase 2-D CLOSE は変更なし）**
+**最終更新: 2026-09-05 / revision 058（Phase 2-E CLOSE。Phase 2 は全て完了。次は Phase 3）**
 
 > 📌 **057 の内容:** GPT の再確認で 056 本文後段に2-D 以前の古い記述が2箇所残っていた
 > （MVP Phase 表の「残り: 2-D」／横断部品表 Header 行の「Home だけ page-local が残る」）。
@@ -22,7 +22,7 @@ updated: 2026-09-05 10:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > 85 PASS/6 FAIL が「2-D 前を基準にした historical audit evidence」であり 057時点の
 > 回帰基準ではないことを mockup 側 Map（§8.7）に明記した。
 
-> **いま止まっている場所:** **Phase 2-D は CLOSE。次は Phase 2-E（Search 証跡）。**
+> **いま止まっている場所:** **Phase 2 は 2-A〜2-E すべて CLOSE。次は Phase 3（LOG Detail PC → Gate 5）。**
 >
 > | Phase | 状態 |
 > |---|---|
@@ -30,7 +30,31 @@ updated: 2026-09-05 10:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > | 2-B Global Footer | ✅ CLOSE（051）。1 Shared Source |
 > | 2-C PROPAGATION-SHELF | ✅ CLOSE（053 / Gate 3 PASS / mock `4c58a03`） |
 > | **2-D Home Header ＋ ロゴ lockup 化** | ✅ **CLOSE（056 / mock 3コミット）。** 下記参照 |
-> | 2-E Search 証跡 | ⚪ **次。** UI は開けない。回帰スクリプトを slug 語彙へ追随させ 101項目を復旧 |
+> | 2-E Search 証跡 | ✅ **CLOSE（058 / mock `ff8406e`・`13434f0`）。101項目 / 101 PASS / 0 FAIL。** UI は開けていない。下記参照 |
+>
+> ### ✅ Phase 2-E の顛末（2026-09-05）
+>
+> **テスト側の前提誤り2件**（判定内容は1つも書き換えていない）: ① サンドボックスの絶対パス直書きで
+> **別セッションでは1項目も走らなかった** → スクリプト位置からルートを導く形へ ②
+> `[data-scat="ロッククローラー"]` → `[data-scat="rock-crawler"]`（8/30 の slug 化に追随。
+> 表示ラベルは日本語のまま・選択肢24件も不変を実測。pcat は slug 化していないので日本語のまま）。
+>
+> **実装側の回帰1件**（イタヤ裁定 A で修正 / mock `ff8406e`）:
+> `?type=rig&scat=Rock Crawler`（英語名）が解除されず保持されていた。
+> 正典の rig_categories 24件は正規 slug で定義され英語名の列を持たない
+> （`docs/schema/db-schema-answers-v1.md` L1）。原因は `js/category-taxonomy.js` で
+> **24件中 `rock-crawler` だけ**が `name: 'Rock Crawler'` を持ち `toId()` が別名として
+> 拾っていたこと（実測でも `Buggy`・`Drift`・`Monster Truck` は解除される非対称）。
+> **`name` は `browse-category.html` の英語見出しで表示に使われているのでプロパティは消さず、
+> `toId()` 側で canonical URL 入力として拾わないようにした。**
+> 英語 alias を正式採用するなら Research 側で24件全体の方針として決める
+> （aliases の正本は `master_aliases`）。**App 側が1件だけ先取りしない。**
+>
+> 📌 **記録（2-E の blocker にはしていない）:** ① ルート `img/2304_mickeyrock_3.webp` が無く
+> Mobile `browse-rigs.html` の画像1件が読めない（`pc/img/` には在る。本件と無関係の既存事象）
+> ② 正典 `cross-ref-category-names-v4.md` は ai-context main に在るが、**v4 が参照する
+> `cross-ref-category-names-v2.md` が ai-context に無い**（ワークスペースの `_archive/` にのみ在る）。
+> 今回必要な24 slug は `db-schema-answers-v1.md` L1 にあるため進行は止めていない。**所在整理は別途。**
 >
 > ### ✅ Phase 2-D の顛末（2026-09-04〜05）
 >
@@ -83,7 +107,7 @@ updated: 2026-09-05 10:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 |---|---|---|
 | 0 | 048 固定（Gate 4 CLOSE / PARTS LOCK / 旧版撤去 / push） ✅ | 新しい設計作業 |
 | **1** | **MVP_CONVERGENCE_MAP 作成** ✅（049） | HTML 変更 |
-| 2 | ✅ 2-A / 2-B / 2-C / **2-D すべて CLOSE。** 残り: **2-E Search 証跡** | Home 等の再設計 |
+| 2 | ✅ **2-A / 2-B / 2-C / 2-D / 2-E すべて CLOSE。** 次は Phase 3 | Home 等の再設計 |
 | 3 | LOG Detail PC（確定 Detail System から作る）→ Gate 5 | 第3の Detail 文法の発明 |
 | 4 | Mobile Detail 3面を1バッチで追随 | PC と Mobile の同時進行 |
 | 5 | MVP component hardening（Form 共有境界 / Garage / Library / Mobile の必要箇所） | 全ページの inline CSS 撲滅・Register の再設計 |
@@ -332,10 +356,10 @@ C の着手前に、実装が正典より先行していないかを READ のみ
 
 **Search の CLOSE 後変更（記録）:** 8/30 に `js/category-taxonomy.js` を入れて
 `scat` の語彙を日本語ラベルから slug へ移した（PC / Mobile 両面）。内部語彙の変更であって
-仕様変更ではない。ただし `_state/search_regression.py` は旧語彙 3箇所を前提にしており
-**現状そのままでは 13項目目で停止する**（2026-09-03 実走で確認。それまでは 12 PASS / 0 FAIL）。
-**回帰スクリプト側を slug へ追随させて再実行し、101項目 PASS を確認するまで CLOSE の証跡は不完全。**
-FAIL が出た場合のみ裁定へ上げる。→ PROPAGATION / Regression レーン
+仕様変更ではない（表示ラベルは日本語のまま・選択肢24件も不変を 2026-09-05 に実測で確認）。
+✅ **2026-09-05 / Phase 2-E で証跡を復旧し CLOSE。101項目 / 101 PASS / 0 FAIL。**
+テスト側の前提誤り2件を直し、実装側の回帰1件（英語名 `Rock Crawler` が解除されなかった件）は
+イタヤ裁定 A で修正した。詳細は上記 NOW の「Phase 2-E の顛末」。
 
 ### ✅ PARTS Detail PC 確定（2026-09-04 / 048 / `pc/myrig-parts-detail-v1-open.html` / Gate 4 PASS・CLOSE）
 
@@ -408,7 +432,7 @@ r8 の中身すべてが永久固定ではない。固定したのは **役割�
 **I-1 完了（2026-09-03）:** ガレージ8面＋テンプレ＋カタログG02 の お気に入り（ハート→星）/ ピン留め（星→画鋲）を修正。garage-top SAVED 見出しの文字グリフを SVG へ。Library パーツマスターの「ピン数 203件」を削除（pins 非公開。3項目へ）。
 **旧 RIG Detail 候補14件（v9a〜v14r6・concept 2本）を active tree から除去。** 履歴は `9aacdc8`。`_archive` へは複製しない（041 裁定）。
 
-**ライブ**: `myrig-mockup` = `6d50c96`（2026-09-04 push 済み。origin/main と一致を実測）。**未 push 1コミット = `923df08`（ロゴ lockup を PC 全33面へ展開・Phase 2-D CLOSE）。** Gate 3 の監査対象コードは `4c58a03`（CLOSE 済み）。
+**ライブ**: `myrig-mockup` = `6d50c96`（2026-09-04 push 済み。origin/main と一致を実測）。**未 push = `923df08`（ロゴ lockup 全33面）/ `37191e1`（Map 整合）/ `f2b4e03`・`ff8406e`・`13434f0`（Phase 2-E）。** Gate 3 の監査対象コードは `4c58a03`（CLOSE 済み）。
 > push したらこの行を実値へ。SHA を書く場所は依頼書と本行の2箇所だけ。
 > **SHA を書く場所は依頼書と本行の2箇所だけ**（2026-09-03 の Gate 2 で、本文と依頼書で SHA がずれた）。
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
