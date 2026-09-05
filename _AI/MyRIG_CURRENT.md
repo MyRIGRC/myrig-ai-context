@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260904-055
-updated: 2026-09-04 21:56 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260905-056
+updated: 2026-09-05 09:45 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,73 +14,46 @@ updated: 2026-09-04 21:56 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-04 / revision 055（2-D の裁定は解消。ロゴ lockup を Home 1面で先行差替・実画面確認待ち）**
+**最終更新: 2026-09-05 / revision 056（Phase 2-D CLOSE。ロゴ lockup を PC 全33面へ展開・既定へ統合）**
 
-> **いま止まっている場所:** **Home のロゴを lockup 版（タグラインを画像に含む）へ先行差替し、
-> イタヤの実画面確認を待っている。** push すれば見られる。2-D の 2.5px 論点はこの裁定で解消済み。
+> **いま止まっている場所:** **Phase 2-D は CLOSE。次は Phase 2-E（Search 証跡）。**
 >
 > | Phase | 状態 |
 > |---|---|
 > | 2-A RIG Detail | ✅ CLOSE（051）。OPEN 型を採用 |
 > | 2-B Global Footer | ✅ CLOSE（051）。1 Shared Source |
 > | 2-C PROPAGATION-SHELF | ✅ CLOSE（053 / Gate 3 PASS / mock `4c58a03`） |
-> | **2-D Home Header** | ✅ **実装完了（054 / mock `66d9db9`）。裁定待ちだった 2.5px はロゴ画像化で解消。** Home の Header 責務 page-local **22ルール（−83行）**を撤去し、Header の SoT を `SoT_app-shell.css` 1本に。**共有 CSS / JS は無変更。触った HTML は Home 1面だけ** |
-> | 2-E Search 証跡 | ⚪ 未着手。UI は開けない。回帰スクリプトを slug 語彙へ追随させ 101項目を復旧 |
+> | **2-D Home Header ＋ ロゴ lockup 化** | ✅ **CLOSE（056 / mock 3コミット）。** 下記参照 |
+> | 2-E Search 証跡 | ⚪ **次。** UI は開けない。回帰スクリプトを slug 語彙へ追随させ 101項目を復旧 |
 >
-> ### ✅ 2-D の裁定1件は解消（2026-09-04 / イタヤ裁定で上位の判断が入った）
+> ### ✅ Phase 2-D の顛末（2026-09-04〜05）
 >
-> 2-D 直後に「タグライン 2.5px（`align-items:center` vs `flex-start`）」を A / B で照会していたが、
-> **イタヤが「RC GARAGE も含めてロゴ画像にする」と裁定したため、論点だった `.app-logo__sub` の
-> span 自体が無くなる。** A / B は選ぶ必要がなくなった（記録として残す。B＝Home 用 variant は作っていない）。
+> 1. **Header 責務の page-local 撤去**（mock `66d9db9`）: Home にだけ残っていた 22ルールを撤去し、
+>    Header の SoT を `SoT_app-shell.css` 1本に。副作用としてタグライン「RC GARAGE」が2.5px動く差分が判明
+> 2. **イタヤ裁定「RC GARAGE も含めてロゴ画像にする」**: 2.5px の A/B 照会は論点の span 自体が
+>    無くなるため不要に。Home 1面で lockup 画像へ先行差替・**実画面で承認**（mock `208d1e4`）
+> 3. **PC 全33面へ展開・既定へ統合**（2026-09-05 / mock 3コミット目）: 展開前に**別のロゴ variant を
+>    必要とする consumer が無いことを実体調査で確認**（33面すべて同一 markup）。`--lockup` は
+>    試験用 variant として残さず `SoT_app-shell.css` §2.1 の**既定へ統合**。33面すべて page-local
+>    ロゴ責務 0・light/dark とも座標完全一致・pageerror 0。詳細は mockup 側 `_state/MVP_CONVERGENCE_MAP.md` §8.9
 >
-> ### 🟡 ロゴ lockup 化（DESIGN / **Home 1面で先行差替・実画面確認待ち** / mock `208d1e4`）
+> **新アセット:** `pc/img/myrig_logo_{BK,wh}_v1.2.png`（397×203。マーク145＋すき間4＋タグライン54）。
+> dark のタグラインは #FFFF00 原本を **#FBFF00**（v8 `--cat-rig`）へ機械置換（AA が alpha 側のため無劣化）。
 >
-> | | |
-> |---|---|
-> | 新アセット | `pc/img/myrig_logo_{BK,wh}_v1.2.png`（397×203 / 396×203。マーク145 ＋ すき間4 ＋ タグライン54） |
-> | 色 | light: マーク #000000 / タグライン #717071 ｜ dark: マーク #FFFFFF / タグライン **#FBFF00**（v8 `--cat-rig` に合わせる。イタヤ裁定） |
-> | 色補正 | 原本は #FFFF00 だった。**AA が alpha 側・RGB 単一値だったので #FBFF00 への置換は無劣化**（10,195px を機械置換） |
-> | 共有側 | `SoT_app-shell.css` に **`.app-logo--lockup`** を1ルール追加（`max-height:32px`）。**page-local CSS は足していない** |
-> | markup | lockup 面は `.app-logo__sub` を**持たない**。アクセシブル名は従来どおり `MyRIG RC` |
-> | 採用面 | ⚠️ **Home 1面だけ。**「まず PC 1ページで差替。OK なら全部へ」（イタヤ指示） |
-> | 実測 | マーク 23 → **22.86px** ／ ブロック 62.22×34 → **62.58×31.98** ／ NAV・検索が **0.36px 右**。画素差は**ヘッダー帯だけ**（light y=12..47 / dark y=38..45）で他は 0 |
-> | 他32面 | **無影響を実測。** `browse-rigs`/`feed`/`search` は座標が before と完全一致。`browse-rigs` は画素ごと判定で light/dark とも残り 0 |
+> **別レポート（Header 責務ではないので触っていない）:** `myrig-auth-v1.html` の `.auth-logo__img`、
+> `register-rig` / `register-parts` の投稿モーダル `logo-*-src` data 属性、`error-states` の
+> メンテナンス演出 `is-light`/`is-dark` の3か所は、いずれも `.app-header .app-logo` とは別系統の
+> ロゴ表示。旧 `v1.1` アセットは今もこれらが参照しているため削除していない。
 >
-> **全面展開のとき決めること:** variant を既定に畳むか 33面に付けるか。
-> **Mobile は比率が違う**（PC マーク23px・すき間1px / Mobile 20px・2px）ので**別アセットが要る。
-> PC と Mobile を同時に動かさない。**
+> **Mobile は今回のスコープ外。** PC とロゴの比率が違う（PC マーク23px・すき間1px / Mobile 20px・2px）ため
+> 別アセット・別バッチとする。
 >
-> **2-D の実測（`_state/header_propagation_check.py`。対象7面 = Home ＋ Browse 3 ＋ Feed ＋ Search ＋ Library）**
->
-> | | |
-> |---|---|
-> | 検査結果 | **85 PASS / 6 FAIL。** FAIL 6件はすべて上記タグライン1件が原因（geometry 4条件 ＋ pixel 2テーマ） |
-> | 視覚非回帰 | 各ツリー3枚撮りの**画素ごと**判定。**Home 以外の6面は「揺れで説明できない画素 0」**。Home は **y=37..45（タグラインの行）だけ**に light 429px / dark 434px。それ以外の全画素 0 |
-> | 面間一致 | 撤去後、**PC 11面**でロゴ帯の座標・寸法が light / dark とも完全一致 |
-> | pageerror | 7面 × light / dark とも 0 |
-> | 故障注入 | 2種で FAIL を確認（① 基準比較に nav 4px を注入 ② Home へ Header ルールを1本戻す） |
->
-> 🔴 **記録 — ルール数を grep で数えない。** 起票時の「17ルール」も引き継ぎの「23ルール（`.app-logo` 13）」も
-> **実測と合わなかった**（正しくは **22 / `.app-logo` 12**）。どちらも grep が CSS ルールでない
-> コメント行を数えていた。**CSS ルール数はパーサで数える**（`header_propagation_check.py` の
-> `css_rules()` が `@media` も1段展開して数える）。以後この検査の実測を正とする。
+> 🔴 **記録 — ルール数を grep で数えない。** 起票時の「17ルール」も引き継ぎの「23ルール」も実測と
+> 合わなかった（正しくは撤去前22ルール）。grep が CSS ルールでないコメント行を数えていたため。
+> **CSS ルール数はパーサで数える**（`_state/header_propagation_check.py` の `css_rules()`）。
 >
 > 📌 **`.drawer-overlay` / `.home-dir` の drawer 化も Home に共有と同じ定義が残っているが、
 > Header 責務ではないので 2-D では触っていない。** Batch E 以降の判断材料として記録する。
->
-> **Gate 3 の結果:** 観点1〜5 すべて PASS。棚を共有 JS で動かす面は **6面**（詳細2 ＋ Home ＋ Browse 3）、page-local 実装 0。
-> 4面とも behavior parity 完全一致・「揺れで説明できない画素 0」・pageerror 0。
->
-> 🔵 **DECISION（GPT 監査で合意 / 2026-09-04）: 棚のスクロール量3種（`cards` / `viewport` / 固定 `440`）は
-> 1 Shared Shelf の意図的 variant として維持する。** Readiness Gate の必須再裁定項目にはしない。
-> **具体的な実装 / UX の問題が出たときだけ再オープン。** Browse への状態クラス用 CSS も今は足さない。
->
-> 📌 **新スレッドはここから: `_state/HANDOFF_20260904_phase2d.md`（mockup 側）。**
-> 現在地・2-D の実測・守るルール・使える検査スクリプト・これまで踏んだ罠7件・未 push・GPT 運用をまとめてある。
->
-> ⚠️ **2-D の難所（予告どおり顕在化した）:** Home のロゴ／タグラインが他6面と約2px ズレている件（045 起票）。
-> 実測は **2.5px**、動くのは**タグラインだけ**でロゴ画像は動かなかった。上の「2-D の裁定1件」へ。
-> 「共有の方が正しいので採用」を Cowork が自分で決めない。**2.5px を揃えること自体は 2-D の目的ではない**（目的は Single Source 化）。
 >
 > 📌 **記録（Gate 3 CLOSE の非 blocker 整理）:** `detail_contract_check.py` は
 > **引数なしだと既定の `pc/myrig-rig-detail-v15.html` 1面だけ**を見る（51 PASS）。
@@ -148,7 +121,7 @@ updated: 2026-09-04 21:56 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | **RIG詳細 / パーツ詳細 / ログ詳細** | ✅ **RIG詳細 PC = `pc/myrig-rig-detail-v15.html`（046）／ パーツ詳細 PC = `pc/myrig-parts-detail-v1-open.html`（048 / Gate 4 CLOSE）。どちらも VISUAL LOCK ＋ SYSTEM VERIFIED** | **確定。開け直さない。** LOG 詳細は未着手（Gate 5 で Detail 3面の横断整合） |
 | **共有UI Single Source 化** | ✅ **A・B・C CLOSE（2026-09-03 / 046）** | 裁定原本 `_decisions/2026-09-02_shared-ui-single-source-v1.md`。C の結果は下記。残るは D / E / F と PROPAGATION 2本 |
 | **PROPAGATION-SHELF** | ✅ **CLOSE（053 / Gate 3 PASS / mock `4c58a03`）** | 4面とも behavior parity 一致・画素ごとの視覚非回帰 0。恒久検査 `_state/shelf_propagation_check.py`（`PROP_BASE_DIR` で git 無しでも回る） |
-| **PROPAGATION-HEADER** | 🟡 **実装完了・裁定待ち（054 / mock `66d9db9`）** | Home の Header 責務 page-local **22ルール（−83行）**を撤去。Header の SoT は `SoT_app-shell.css` 1本。恒久検査 `_state/header_propagation_check.py`。**タグライン 2.5px の1件だけイタヤ裁定へ**（起票時の「17ルール」は実測と合わなかった） |
+| **PROPAGATION-HEADER** | ✅ **CLOSE（056）** | Home の Header 責務 page-local 22ルールを撤去→SoT を1本化→ロゴ lockup 化を PC 全33面へ展開・既定へ統合。恒久検査 `_state/header_propagation_check.py`。詳細は上記 NOW と mockup 側 Map §8.9 |
 | MyRIG Web文法（横断設計） | 🟡 DRAFT v0 作成済み・**一旦停止** | 追加調査・文書拡張はしない。Homeレビューで判断材料が出たら再開 |
 | Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
 | モック全体の第2周 | ⚪ 未着手 | ページ単体ではなくフロー単位で確認する体制へ移行 |
@@ -341,7 +314,7 @@ C の着手前に、実装が正典より先行していないかを READ のみ
 | 分類 | 件 | 扱い |
 |---|---|---|
 | **BLOCKER**（C 開始前に処理） | 4 | 044 未push / Header の扱い / Launcher が v6 を指す / Shelf の影響範囲 → **すべて 045 で処理済み** |
-| **REGRESSION**（確定面の整合確認が要る） | 4 | Home ロゴ 2px → PROPAGATION-HEADER ／ Search の CLOSE 後 taxonomy 変更 → 回帰再実行 ／ Home 8/26 と Mobile Home 8/30 の記録欠落 → **記録として残す。Home は再設計しない** |
+| **REGRESSION**（確定面の整合確認が要る） | 4 | Home ロゴ 2px → PROPAGATION-HEADER（✅ **2026-09-05 解消。ロゴ lockup 化で PC 全33面へ展開・CLOSE**） ／ Search の CLOSE 後 taxonomy 変更 → 回帰再実行 ／ Home 8/26 と Mobile Home 8/30 の記録欠落 → **記録として残す。Home は再設計しない** |
 | **CANON-STALE**（実装が正しく CURRENT が古い） | 2 | PC Feed の3タブ（下記）／ Batch B parity の証跡 |
 | **SEPARATE-BATCH** | 5 | Footer r8 独自 markup → E ／ `SoT_app-shell.css` の PC⇄Mobile 乖離 179行 → E ／ 孤児2件 → E ／ 404 3件 → E ／ PC v8 → F |
 
@@ -429,7 +402,7 @@ r8 の中身すべてが永久固定ではない。固定したのは **役割�
 **I-1 完了（2026-09-03）:** ガレージ8面＋テンプレ＋カタログG02 の お気に入り（ハート→星）/ ピン留め（星→画鋲）を修正。garage-top SAVED 見出しの文字グリフを SVG へ。Library パーツマスターの「ピン数 203件」を削除（pins 非公開。3項目へ）。
 **旧 RIG Detail 候補14件（v9a〜v14r6・concept 2本）を active tree から除去。** 履歴は `9aacdc8`。`_archive` へは複製しない（041 裁定）。
 
-**ライブ**: `myrig-mockup` = `8817c9a`（2026-09-04 push 済み。origin/main と一致を実測）。**未 push 2コミット = `66d9db9`（Phase 2-D）/ `208d1e4`（ロゴ lockup・Home 1面）。** Gate 3 の監査対象コードは `4c58a03`（CLOSE 済み）。
+**ライブ**: `myrig-mockup` = `6d50c96`（2026-09-04 push 済み。origin/main と一致を実測）。**未 push 1コミット = `923df08`（ロゴ lockup を PC 全33面へ展開・Phase 2-D CLOSE）。** Gate 3 の監査対象コードは `4c58a03`（CLOSE 済み）。
 > push したらこの行を実値へ。SHA を書く場所は依頼書と本行の2箇所だけ。
 > **SHA を書く場所は依頼書と本行の2箇所だけ**（2026-09-03 の Gate 2 で、本文と依頼書で SHA がずれた）。
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
