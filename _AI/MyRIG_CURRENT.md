@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260905-056
-updated: 2026-09-05 09:45 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260905-057
+updated: 2026-09-05 10:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,13 @@ updated: 2026-09-05 09:45 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-05 / revision 056（Phase 2-D CLOSE。ロゴ lockup を PC 全33面へ展開・既定へ統合）**
+**最終更新: 2026-09-05 / revision 057（056 に残っていた陳腐化2箇所を整合。Phase 2-D CLOSE は変更なし）**
+
+> 📌 **057 の内容:** GPT の再確認で 056 本文後段に2-D 以前の古い記述が2箇所残っていた
+> （MVP Phase 表の「残り: 2-D」／横断部品表 Header 行の「Home だけ page-local が残る」）。
+> 実装のやり直しではなく**記述の整合のみ**。あわせて `header_propagation_result.json` の
+> 85 PASS/6 FAIL が「2-D 前を基準にした historical audit evidence」であり 057時点の
+> 回帰基準ではないことを mockup 側 Map（§8.7）に明記した。
 
 > **いま止まっている場所:** **Phase 2-D は CLOSE。次は Phase 2-E（Search 証跡）。**
 >
@@ -77,7 +83,7 @@ updated: 2026-09-05 09:45 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 |---|---|---|
 | 0 | 048 固定（Gate 4 CLOSE / PARTS LOCK / 旧版撤去 / push） ✅ | 新しい設計作業 |
 | **1** | **MVP_CONVERGENCE_MAP 作成** ✅（049） | HTML 変更 |
-| 2 | ✅ 2-A / 2-B / **2-C すべて CLOSE。** 残り: **2-D Home Header** / 2-E Search 証跡 | Home 等の再設計 |
+| 2 | ✅ 2-A / 2-B / 2-C / **2-D すべて CLOSE。** 残り: **2-E Search 証跡** | Home 等の再設計 |
 | 3 | LOG Detail PC（確定 Detail System から作る）→ Gate 5 | 第3の Detail 文法の発明 |
 | 4 | Mobile Detail 3面を1バッチで追随 | PC と Mobile の同時進行 |
 | 5 | MVP component hardening（Form 共有境界 / Garage / Library / Mobile の必要箇所） | 全ページの inline CSS 撲滅・Register の再設計 |
@@ -97,7 +103,7 @@ updated: 2026-09-05 09:45 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 |---|---|
 | Footer | ✅ **2-B CLOSE。33面が `<site-footer>` 1タグ。直書き 0 / 生成リンク本数は33面で一致**。〈以前: PC 33面 / 7 variant〉。`log-composer-modal` の `modal-footer` はモーダルのアクションバーで責務が違うため対象外。Mobile 42面は `<footer>` を持たない |
 | Shelf | ✅ **6面が共有 JS を使用**（詳細2 ＋ Home ＋ Browse 3）。page-local 実装 0。スクロール量は3種（`cards` / `viewport` / 固定 `440`）で**既存の実測値のまま**。統一は横断裁定 |
-| Header | PC 35面が `app-header`、詳細2面が `.cx--quiet`。**Home だけ page-local が残る**（`.app-logo` 系 11 / `.app-`・`.cx-` 系 21）。2-D はこの責務だけで、Home 全体の cleanup へ広げない |
+| Header | ✅ **2-D CLOSE。** PC 35面が `app-header`、詳細2面が `.cx--quiet`。**PC 全33面で page-local ロゴ責務 0**。ロゴは lockup 画像（タグライン「RC GARAGE」を画像に内包）を `SoT_app-shell.css` §2.1 の**既定へ統合**（`--lockup` variant は残していない）。展開前の実体調査で**別のロゴ variant を必要とする consumer は 0件**と確認済み。**Mobile は比率が違うため別バッチのまま未着手** |
 | Detail SoT | `SoT_detail-markup.js` ほかを使うのは RIG v15 / PARTS OPEN の2面。Phase 3 で LOG が3面目 |
 | Mobile | 42面すべて同じ共有3ファイルを読む。**共通の inline ブロック4種が28面に重複**（252×10 / 151×8 / 411×7 / 340×3）。Phase 4 でここを出すだけで28面が片付く |
 | inline CSS 0 の PC 面 | **2面だけ**（RIG v15 / PARTS OPEN）。これは目標値ではなく現在地の記録 |
