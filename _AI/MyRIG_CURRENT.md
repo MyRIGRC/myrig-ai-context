@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260905-058
-updated: 2026-09-05 10:38 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260905-059
+updated: 2026-09-05 11:12 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-05 10:38 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-05 / revision 058（Phase 2-E CLOSE。Phase 2 は全て完了。次は Phase 3）**
+**最終更新: 2026-09-05 / revision 059（Mobile ロゴ lockup 小バッチ CLOSE。次は Phase 3）**
 
 > 📌 **057 の内容:** GPT の再確認で 056 本文後段に2-D 以前の古い記述が2箇所残っていた
 > （MVP Phase 表の「残り: 2-D」／横断部品表 Header 行の「Home だけ page-local が残る」）。
@@ -22,7 +22,27 @@ updated: 2026-09-05 10:38 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > 85 PASS/6 FAIL が「2-D 前を基準にした historical audit evidence」であり 057時点の
 > 回帰基準ではないことを mockup 側 Map（§8.7）に明記した。
 
-> **いま止まっている場所:** **Phase 2 は 2-A〜2-E すべて CLOSE。次は Phase 3（LOG Detail PC → Gate 5）。**
+> **いま止まっている場所:** **Phase 2 は 2-A〜2-E すべて CLOSE。Mobile ロゴ lockup の小バッチも CLOSE。
+> 次は Phase 3（LOG Detail PC → Gate 5）。**
+>
+> ### ✅ Mobile ロゴ lockup 化（2026-09-05 / CLOSE / mock `3ab967e`・`231a7e1`）
+>
+> PC 承認済みの lockup を Mobile へ展開した小バッチ。**Mobile Header 以外は触っていない。
+> Phase 4（Mobile Detail）とは別物。**
+>
+> | | |
+> |---|---|
+> | consumer | Mobile 42面中 **5面**（Home / feed / garage / search / user-garage）。残り37面はサブページ型ヘッダーでロゴを持たない。**実効的に描画されるのは3面**（garage / user-garage は `header.mobile-shell-header` が `display:none` で元から 0×0。既存事象） |
+> | アセット | `img/myrig_logo_{BK,wh}_v1.2m.png`（397×214）。**PC の単純縮小ではなく Mobile 専用に再構成。** PC 承認済みアートワークのマーク(145px)とタグライン(54px)を一切リサンプルせず、すき間だけ 4px→15px に組み替え、Mobile 従来の「マーク20px・すき間2px」に一致させた（145:15 = 20:2.07）。単純縮小だとすき間が 0.55px になり崩れる |
+> | 共有側 | 寸法の正本は `mobile-shell.css` の `.mobile-logo--sm .mobile-logo__img` **1本だけ**。variant は残さず既定へ統合。**重複を減らした**（同責務の `.page-e3` 定義と、死んだ `.mobile-logo__sub` 定義2件を撤去） |
+> | 実測 | マーク 19.99px / すき間 2.07px / タグライン 7.44px。ロゴ帯 57.2→54.72px、検索窓が 2.48px 左へ広がる。画素差は**ヘッダー帯のみ**（y=5..54）で **y≧56 の残り 0**、pageerror 0（5面 × light/dark） |
+>
+> ⚠️ **踏んだ罠（記録）:** 基底 `.mobile-logo__img` の `max-height:28px` は「マーク1枚だけ」の頃の上限で、
+> lockup では 28px に頭打ちになりマークが 18.97px まで縮む。**縦に長いアセットへ替えるときは
+> `height` と `max-height` を一緒に見ること。**
+>
+> 📌 **触っていない別系統（報告のみ）:** `garage` / `user-garage` の `.cw-brand__img`（JS生成の別ブランドバー）。
+> Mobile Header の consumer ではない。旧 `v1.1` アセットはこれらが参照しているため削除していない。
 >
 > | Phase | 状態 |
 > |---|---|
@@ -432,7 +452,7 @@ r8 の中身すべてが永久固定ではない。固定したのは **役割�
 **I-1 完了（2026-09-03）:** ガレージ8面＋テンプレ＋カタログG02 の お気に入り（ハート→星）/ ピン留め（星→画鋲）を修正。garage-top SAVED 見出しの文字グリフを SVG へ。Library パーツマスターの「ピン数 203件」を削除（pins 非公開。3項目へ）。
 **旧 RIG Detail 候補14件（v9a〜v14r6・concept 2本）を active tree から除去。** 履歴は `9aacdc8`。`_archive` へは複製しない（041 裁定）。
 
-**ライブ**: `myrig-mockup` = `6d50c96`（2026-09-04 push 済み。origin/main と一致を実測）。**未 push = `923df08`（ロゴ lockup 全33面）/ `37191e1`（Map 整合）/ `f2b4e03`・`ff8406e`・`13434f0`（Phase 2-E）。** Gate 3 の監査対象コードは `4c58a03`（CLOSE 済み）。
+**ライブ**: `myrig-mockup` = `6d50c96`（2026-09-04 push 済み。origin/main と一致を実測）。**未 push は mockup 側のみ（`mockup` を回すと反映）。** Gate 3 の監査対象コードは `4c58a03`（CLOSE 済み）。
 > push したらこの行を実値へ。SHA を書く場所は依頼書と本行の2箇所だけ。
 > **SHA を書く場所は依頼書と本行の2箇所だけ**（2026-09-03 の Gate 2 で、本文と依頼書で SHA がずれた）。
 > この行は `mockup` を回すたび古くなる。**モック側を push したら CURRENT のここも更新する。**
