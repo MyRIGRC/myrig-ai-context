@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260905-059
-updated: 2026-09-05 11:12 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260905-060
+updated: 2026-09-05 11:48 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-05 11:12 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-05 / revision 059（Mobile ロゴ lockup 小バッチ CLOSE。次は Phase 3）**
+**最終更新: 2026-09-05 / revision 060（Mobile ロゴ lockup CLOSE。可視ブランドバーも是正済み。次は Phase 3）**
 
 > 📌 **057 の内容:** GPT の再確認で 056 本文後段に2-D 以前の古い記述が2箇所残っていた
 > （MVP Phase 表の「残り: 2-D」／横断部品表 Header 行の「Home だけ page-local が残る」）。
@@ -25,7 +25,7 @@ updated: 2026-09-05 11:12 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > **いま止まっている場所:** **Phase 2 は 2-A〜2-E すべて CLOSE。Mobile ロゴ lockup の小バッチも CLOSE。
 > 次は Phase 3（LOG Detail PC → Gate 5）。**
 >
-> ### ✅ Mobile ロゴ lockup 化（2026-09-05 / CLOSE / mock `3ab967e`・`231a7e1`）
+> ### ✅ Mobile ロゴ lockup 化（2026-09-05 / CLOSE / mock `3ab967e`・`231a7e1`・`3a4e1b0`）
 >
 > PC 承認済みの lockup を Mobile へ展開した小バッチ。**Mobile Header 以外は触っていない。
 > Phase 4（Mobile Detail）とは別物。**
@@ -41,8 +41,22 @@ updated: 2026-09-05 11:12 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > lockup では 28px に頭打ちになりマークが 18.97px まで縮む。**縦に長いアセットへ替えるときは
 > `height` と `max-height` を一緒に見ること。**
 >
-> 📌 **触っていない別系統（報告のみ）:** `garage` / `user-garage` の `.cw-brand__img`（JS生成の別ブランドバー）。
-> Mobile Header の consumer ではない。旧 `v1.1` アセットはこれらが参照しているため削除していない。
+> 🔴 **追補（同日 / イタヤ指摘で是正 / mock `3a4e1b0`）:** 当初 `garage` / `user-garage` の
+> `.cw-brand__img` を「Mobile Header の consumer ではない」として対象外にしたが、**実体確認すると
+> この2面でユーザーが実際に見るロゴは `.cw-brand` の方**だった（`.mobile-logo` 側は
+> `header` が `display:none` で 0×0）。旧 v1.1 のままでは「見た目に出るロゴだけ旧版」になるため揃えた。
+> 実測: `garage` [12,12.2,72,26.6] / `user-garage` [12,64.2,72,26.6] とも**可視・ヒットテスト通過**。
+> 変更は `src` だけ（CSS 不変）。`.cw-bar` 52px と `.cw-brand` 72×48 は不変、マーク実寸 26.6→26.3px。
+> 画素差はバー内のみ、バーより下 0、pageerror 0。
+> **これで「画面に出る Mobile ロゴ」は5面すべて lockup 化済み。**
+>
+> 🔴 **検査の空振りを踏んだ（記録）:** 画素比較スクリプトが `img{visibility:hidden}` を入れていたため、
+> **画像だけを変える本件では「差分 0」と出た。** 画像を見せる設定にして測り直した。
+> **変更対象を隠す検査は空振りする**（036 の L1「検査が空振りしていないことを検査する」の実例）。
+>
+> 📌 **残る別責務（触っていない・報告のみ）:** `.cw-brand__img` の CSS は2面に page-local で2コピー。
+> 今回は src だけ揃えたので重複は増やしていない。共有化は別バッチの判断。
+> 旧 `v1.1` アセットは PC 側の `auth-v1` / `register-*` / `error-states` がまだ参照しているため削除していない。
 >
 > | Phase | 状態 |
 > |---|---|
