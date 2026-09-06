@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260906-065
-updated: 2026-09-06 15:10 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260906-066
+updated: 2026-09-06 16:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-06 15:10 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-06 / revision 065（Feed と LOG Detail の役割定義を裁定。Phase 3 継続中）**
+**最終更新: 2026-09-06 / revision 066（065 の過剰裁定を修正。DECISION は役割と状態一貫性のみ。Phase 3 継続中）**
 
 > 🔴 **063 で決まったこと（イタヤ裁定 2026-09-06）: ユーザー投稿画像の上限は RIG 7 / PARTS 5 / LOG 3。**
 > RIG は Cover 1 ＋ Sub 最大6（従来 Cover 1 ＋ Sub 8 = 9 を**失効**）。PARTS 5・LOG 3 は従来どおり変更なし。
@@ -37,50 +37,44 @@ updated: 2026-09-06 15:10 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > **いま止まっている場所:** **Phase 2 は 2-A〜2-E すべて CLOSE。Mobile ロゴ lockup の小バッチも CLOSE。
 > 次は Phase 3（LOG Detail PC → Gate 5）。**
 >
-> ### 🔵 DECISION（2026-09-06 / イタヤ裁定）— Feed と LOG Detail は「簡易版 / 完全版」ではない
+> ### 🔵 DECISION（2026-09-06 / イタヤ裁定）— Feed と LOG Detail の役割
 >
-> **同じ1レコードに対する、用途の違う2つの閲覧面**として設計する。
+> **ここに固定するのは役割と状態一貫性だけ。UI の配置・表示件数・個別機能の採否は固定しない。**
 >
-> | | 定義 |
-> |---|---|
-> | **Feed** | timeline / activity surface。「**今、みんなの Garage で何が起きているかを見る場所**」。活動を流れの中で発見し、その場で読んで軽く反応する |
-> | **LOG Detail** | canonical record surface。「**その出来事を1件の Garage 記録として読む場所**」。記録資産として深く読む |
+> 1. Feed と LOG Detail は「**簡易版 / 完全版**」ではなく、**用途の違う2面**である
+> 2. **Feed = timeline / activity surface**
+> 3. **LOG Detail = canonical Garage record surface**
+> 4. 同じ LOG の **reaction / comment 状態は Feed と Detail で一貫させる**
+> 5. 🔴 **同一責務の state / behavior を Feed 用・Detail 用に複製しない（Shared Source）**
+>    → §8.13 `<dt-actions>`（rail / inline = 表示 variant、state / count / aria = 共通契約）
 >
-> **Feed を「Detail へのリンク集」にしない。** Feed 上だけで 本文を読む／「続きを読む」で全文／写真を見る／
-> いいね／共有／**軽いコメント** まで自然に完結できる方向にする。
-> → **「続きを読む」は Feed 内展開が正解**（本文全文を読むためだけに遷移させない）。
+> ### 🟡 PENDING / PROPOSAL（未裁定）
 >
-> **Feed 内コメントは「あった方が良い」側。** ただし Detail のコメント機能を丸ごと複製しない。
-> 💬 を押す → カード内に quick comment UI → 短文投稿 → 直近1〜2件だけ表示 →
-> 「コメントをすべて見る」→ **Detail の `#comments`**。
-> **Feed = 会話への入口 / Detail = 会話全体。** Feed には返信階層・管理UI・全件一覧を持たせない。
-> LOG コメントは正典どおり flat chronological なので、**Feed 側にも reply UI は作らない**。
+> 方向性として議論はしているが、**イタヤ裁定はまだ出ていない**。
+> **ここを根拠に実装を進めない。** Feed continuity batch で実画面を見ながら決める。
 >
-> **Detail だけが持つもの**（＝「Feed の長い版」ではない理由）:
-> ① LOG 単体の**恒久 URL**（Browse / Search / 外部共有 / 将来の検索エンジンの着地点）
-> ② Garage 記録としての完全情報（logged_at / 場所 / 路面 / 天候 / 作業・走行時間 / tags）
-> ③ **expanded media**（Feed は compact grid・crop 可 / Detail は自然比率・crop なし）
-> ④ コメント全件 ⑤ Garage 文脈（このLOGのRIG / Builder / このRIGの他のLOG）
+> - Feed 内 **quick comment の採否**
+> - quick comment の**入力形式**
+> - Feed に**何件コメントを表示するか**
+> - 「**コメントをすべて見る**」の具体遷移
+> - **Browse / Search からの LOG 着地規則**
+> - **Feed カード全体の click policy**
+> - **Detail への明示導線**
+> - **pin の扱い**（LOG から pin を無くすかどうか。
+>   実確認: App schema は LOG を pins の対象に含む。`pins` は polymorphic
+>   `(entity_type, entity_id)`、`page-role-matrix-v1.md` の `/garage/pins` は
+>   「ピン留め一覧（**RIG/PARTS/LOG**/Users）」。UI だけで決めると schema と乖離する。
+>   モックが pin を出していないのは**検討中の非表示**であって、
+>   「LOG に pin は無い」という正典ではない）
+> - 3タブの正典不整合（`page-role-matrix-v1.md` は「おすすめ / フォロー中」の2本だが、
+>   実装と CURRENT は3タブ）
 >
-> **Browse / Search から見つけた LOG は Detail へ着地する。** ユーザーの意図が「流れを見る」ではなく
-> 「このLOGを見たい」だから。逆に Feed では巡回中なので、なるべく遷移させない。
-> **Feed カード全体を巨大な Detail リンクにしない。** RIG chip → RIG Detail、
-> ユーザー名 / avatar → User / Garage と、要素ごとに意味のある場所へ遷移させる。
+> ### ⚪ OBSERVATION（現行実装の事実。裁定ではない）
 >
-> 🔴 **状態の一貫性は Shared Source で担保する。** 別画面でも同じ1レコードなので、
-> Feed でいいね → Detail でも liked、Feed でコメント → Detail にも即反映、件数も一致すること。
-> **UI の見せ方は違ってよいが、reaction / comment の責務は同じ。
-> ロジックを Feed 用・Detail 用で別実装に複製しない。**
->
-> 📌 **MVP で広げないもの:** 「RIG chip を押すとその RIG の他 LOG を Feed 内へ差し込む」案は
-> 面白いが MVP では採らない。RIG chip → RIG Detail で十分。
-> まずは **Feed → quick interaction → 必要なら Detail** という基本ループを強くする。
->
-> 📌 **Feed 側は今すぐ再設計しない。** LOG Detail が固まった後の
-> **「Feed → Detail continuity batch」**で、quick comment ／ comment count・state 同期 ／
-> 「コメントをすべて見る」→ `#comments` ／ Detail への明示導線 ／ **3タブの正典不整合**
-> （`page-role-matrix-v1.md` は「おすすめ / フォロー中」の2本だが実装と CURRENT は3タブ）
-> をまとめて扱う。
+> - 現行 PC Feed の「**続きを読む**」は `<button class="pc-feed-card__more">`（href なし）で、
+>   **Feed 内でその場に展開する**実装になっている（本文は `-webkit-line-clamp: 4`）。
+> - 現行 PC Feed のコメントは `<a href="#">` で、**Feed 内に入力欄は無い**。
+>   いいね・共有は `<button>`（その場で処理）。
 >
 > ### 🔵 DECISION（2026-09-06 / イタヤ裁定）— PC Detail の Lightbox は Gate 5 の論点 C へ送る
 >
