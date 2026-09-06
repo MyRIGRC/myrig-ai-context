@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260906-063
-updated: 2026-09-06 09:50 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260906-064
+updated: 2026-09-06 14:30 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-06 09:50 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-06 / revision 063（画像枚数上限を RIG 7 / PARTS 5 / LOG 3 へ確定。モック反映は別スレッド。次は Phase 3）**
+**最終更新: 2026-09-06 / revision 064（PC Detail の Lightbox を Gate 5 論点 C へ送る裁定。Phase 3 継続中）**
 
 > 🔴 **063 で決まったこと（イタヤ裁定 2026-09-06）: ユーザー投稿画像の上限は RIG 7 / PARTS 5 / LOG 3。**
 > RIG は Cover 1 ＋ Sub 最大6（従来 Cover 1 ＋ Sub 8 = 9 を**失効**）。PARTS 5・LOG 3 は従来どおり変更なし。
@@ -36,6 +36,25 @@ updated: 2026-09-06 09:50 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 > **いま止まっている場所:** **Phase 2 は 2-A〜2-E すべて CLOSE。Mobile ロゴ lockup の小バッチも CLOSE。
 > 次は Phase 3（LOG Detail PC → Gate 5）。**
+>
+> ### 🔵 DECISION（2026-09-06 / イタヤ裁定）— PC Detail の Lightbox は Gate 5 の論点 C へ送る
+>
+> LOG Detail の写真を expanded media（crop なし・自然比率・縦積み）へ変えた際、
+> 「Lightbox は維持」という方針に対して**実体を確認したところ、PC 詳細面には元から実装が無かった**。
+>
+> | 実測（2026-09-06） | |
+> |---|---|
+> | 実装**あり** | Mobile（`log-detail.html` / `feed.html` / `parts-detail.html` / `garage-*`）と PC の composer モーダル |
+> | 実装**なし** | **PC 詳細面 3面すべて**（`rig-detail-v15` / `parts-detail-v1-open` / `log-detail-v1`） |
+>
+> 正典側も「未実装として残るのは ImageLightbox と無限スクロール」と記録済みで、実装と一致していた。
+>
+> **裁定: 今回の LOG Detail バッチでは新設しない（＝未実装のまま維持）。**
+> 理由は **Lightbox が LOG 固有機能ではなく、採用するなら RIG / PARTS / LOG の PC Detail 3面共通機能**になるため。
+> LOG のバッチで1面だけ先に入れると、また「1面だけ先取り」の非対称を作る。
+>
+> **Gate 5 の論点 C として判断する。** 採用する場合のみ **Shared Source として3面に実装**し、
+> **LOCK / CLOSE 面（RIG v15 / PARTS v1-open）への影響と Gate 再検証**を含めて扱う。
 >
 > ### ✅ Mobile ロゴ lockup 化（2026-09-05 / CLOSE / mock `3ab967e`・`231a7e1`・`3a4e1b0`）
 >
@@ -230,7 +249,7 @@ updated: 2026-09-06 09:50 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | Gate 2 | ✅ **PASS / CLOSE（2026-09-03 / 046）** | r8 vs v15 の visual / behavior parity |
 | Gate 3 | ✅ **PASS / CLOSE（2026-09-04 / 053 / mock `4c58a03`）** | Home ＋ Browse CLOSE 面の非回帰。`_state/GATE3_propagation-shelf.md` |
 | **Gate 4** | ✅ **PASS / CLOSE（2026-09-04 / 048 / mock `10c6445`）** | RIG Detail 共通文法との整合・Single Source・variant 漏れ・behavior/a11y・48状態の反証。`_state/GATE4_parts-detail.md` |
-| Gate 5 | LOG Detail を VISUAL LOCK する前 | Detail 3面の横断整合 |
+| Gate 5 | LOG Detail を VISUAL LOCK する前 | Detail 3面の横断整合。**論点 A**（`dt-*` と catalog-v6 の統合）／**B**（Gallery 1枚規則を catalog-v6 へ移すか）／**C**（**PC Detail 3面に共通 Lightbox を入れるか**）／OPEN 型・Quiet Rail の RIG 波及 |
 
 これ以外でも、**共有部品の変更で複数の LOCK / CLOSE 面の見た目が変わるときは都度 Gate へ戻す。**
 
@@ -453,7 +472,7 @@ PNG 案ではなく **1本の HTML を直接育てる**方式（イタヤ指示�
 | 証明 | `297323d` との **rendered DOM 完全一致**（要素間空白除く・要素数も同数）。視覚非回帰は総量比較をやめ **画素ごとの判定**（差のある画素 − 同一ツリー内で揺れる画素 = 0） |
 | 恒久チェッカー | `detail_contract_check.py`（骨格・a11y・契約 246項目）/ `detail_dom_parity.py`（DOM 等価）/ `detail_pixel_proof.py`（画素ごとの視覚非回帰）。いずれも故障注入で FAIL することを確認済み |
 | 撤去 | 箱型 `myrig-parts-detail-v1.html` / 旧 `myrig-parts-detail-v6.html` / 使用面 0 の `.dt-identity__eyebrow`。Search の内部リンク 21本を本線へ |
-| 送り先 | 論点 A（`dt-*` と catalog-v6 の統合）と B（Gallery 1枚規則を catalog-v6 へ移すか）は **Gate 5 で実施可否を決める**。OPEN 型・Quiet Rail の RIG への波及も Gate 5 |
+| 送り先 | 論点 A（`dt-*` と catalog-v6 の統合）と B（Gallery 1枚規則を catalog-v6 へ移すか）は **Gate 5 で実施可否を決める**。OPEN 型・Quiet Rail の RIG への波及も Gate 5。**2026-09-06 に論点 C を追加: PC Detail 3面に共通 Lightbox を入れるか**（下記 NOW 参照） |
 
 **イタヤ裁定（D の期間中。LOCK 前だが方向は確定）**
 
