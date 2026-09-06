@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260905-061
-updated: 2026-09-05 12:20 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260906-062
+updated: 2026-09-06 09:39 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-05 12:20 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-05 / revision 061（060 の陳腐化2箇所を整合。次は Phase 3）**
+**最終更新: 2026-09-06 / revision 062（インフラ／コスト耐性方針を PROPOSAL として追加。モック側は 061 のまま・次は Phase 3）**
 
 > 📌 **057 の内容:** GPT の再確認で 056 本文後段に2-D 以前の古い記述が2箇所残っていた
 > （MVP Phase 表の「残り: 2-D」／横断部品表 Header 行の「Home だけ page-local が残る」）。
@@ -189,6 +189,7 @@ updated: 2026-09-05 12:20 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | MyRIG Web文法（横断設計） | 🟡 DRAFT v0 作成済み・**一旦停止** | 追加調査・文書拡張はしない。Homeレビューで判断材料が出たら再開 |
 | Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
 | モック全体の第2周 | ⚪ 未着手 | ページ単体ではなくフロー単位で確認する体制へ移行 |
+| **インフラ／コスト耐性** | 🔵 **3AI 独立検証完了・統合案あり・裁定待ち（062）** | イタヤ裁定 → `_decisions/2026-09-06_infra-cost-resilience-v1.md` を DECISION 化 → docs/schema・support へ反映。裁定前に Next.js 実装へ入らない |
 
 #### 🔵 レーン運用（2026-09-03 / 045 / イタヤ裁定）
 
@@ -245,6 +246,34 @@ Launcher の本流は原則 VISUAL LOCK 以上を指す。**MIGRATING の版を�
 **削除ではなく失効として残す**（なぜ以前そう書かれていたかを追えるようにするため）。
 
 🔴 **教訓: レーンを閉じたとき、次の行へ機械的に繰り上げない。** 中身が生きているかを確認する。
+
+### 🔵 インフラ／コスト耐性方針（2026-09-06 / 062 / PROPOSAL・裁定待ち）
+
+**裁定原本（案）: `_decisions/2026-09-06_infra-cost-resilience-v1.md`**
+（3AI 独立検証の統合、不採用理由、2026-09-05 時点の公式単価、試算、未確認事項はすべてそこ。
+原資料は `_proposals/2026-09-05_infra-cost-resilience_claude-v1.md` と
+`_proposals/2026-09-06_infra-cost-resilience_gpt-final.md`）
+
+Claude / GPT / Gemini が同一依頼で独立調査 → GPT が統合 → Claude が整形。**イタヤ裁定前。**
+ここは索引。裁定後に docs/ へ反映する差分だけを列挙する。
+
+| # | 種別 | 内容 | 影響先 |
+|---|---|---|---|
+| 1 | PROPOSAL | MVP 構成 = **Vercel Pro ＋ Supabase Pro(Tokyo) ＋ Cloudflare R2 ＋ Upstash ＋ Turnstile ＋ Custom SMTP**。Cloudflare を Vercel の reverse proxy 前段に置かない（Vercel 公式が非推奨） | implementation_checklist §0・§5 |
+| 2 | PROPOSAL | 画像正本を Cloudflare Images Hosted → **R2**。配信課金（$1/10万配信・キャッシュヒット込み・上限機能なし）が成長時の最大変動費 | App_Ready_Design_Rules Rule 5 / checklist Phase 3 |
+| 3 | PROPOSAL | DB は完全 URL ではなく **`storage_key`** を保存し、描画時に配信ドメインと合成 | schema v1_6 `images.url` / `thumbnail_url` / `profiles.avatar_url` / `cover_image_url` |
+| 4 | PROPOSAL | バリアントはアップロード時に固定種を一度だけ生成。リクエスト時の動的変換を基本にしない（蓄積画像 × バリアント数に比例して Hosted より高くなり得る）。生成場所は実装時に決定 | checklist Phase 3 |
+| 5 | PROPOSAL | 可搬性原則: Vercel 固有 API を正本にしない／provider ヘッダは request-context 層に閉じる／rate limit store を抽象化／移行時点の Cloudflare 公式推奨方式で Workers ビルド可能な状態を維持。**アダプタ名（OpenNext / vinext）・移行金額は固定しない** | App_Ready_Design_Rules |
+| 6 | PROPOSAL | 非機能要件: **多段 degraded mode**（normal / economy / restricted / readonly / frozen）。緊急状態の権威を **Supabase に置かない**。Vercel 期 = Upstash。取得不能時は READ = economy・WRITE = restricted で fail closed（normal へ戻らない）。frozen は Cloudflare DNS 切替の独立レバー | docs/support 新規 |
+| 7 | PROPOSAL | DB 負荷是正を**ベンダー変更より先に**: `view_count` 直接 UPDATE → buffer＋batch／like・favorite・comment 件数 → counter 列／Feed は cursor・1 クエリ・N+1 禁止・無限 polling 禁止／Search は MVP では Postgres のみ／Realtime 中心 Feed 不採用 | schema v1_6「統計カウントの方針」 |
+| 8 | STATE | 試算・監視では **Total MAU と Authenticated MAU を分離**。Auth 率を正典で固定しない（試算時のみ Base 40% / Heavy 70% / Stress 100%。公開後は実測へ） | — |
+| 9 | STATE | Provider 側の停止装置: Vercel Spend Management（pause）／Supabase Spend Cap ON（compute・PITR は対象外）／Upstash max budget。**Cloudflare は通知のみ** → アプリ側 rate limit / kill switch で防御 | checklist §5 |
+| 10 | STATE | 財務ガードレール: インフラ予算は「実現済み収益（trailing 3 か月）」と「イタヤが明示した自己負担上限」の**小さい方**に拘束。割合・金額は運用値で固定しない。spend limit の引き上げは収益実績かイタヤの明示承認なしに行わない | — |
+| 11 | HOLD | Auth 基盤の変更は **Supabase Auth quota の 80% 到達で再審査**（継続／Spend Cap 解除／移行）。「8万」等の数値は固定しない | — |
+| 12 | REJECT（恒久ではない） | Cloudflare D1（10GB 上限・SQLite・RLS 非互換）／Neon（東京なし・hard cap なし）／自前 VPS（ソロ運用負荷）／Cloudflare Images Hosted／**Vercel Hobby（商用不可）**／MAU 課金型 Auth SaaS／外部 Search SaaS／Realtime 中心 Feed | — |
+| 13 | 要確認 | Vercel / Supabase の**使用量取得 API**。取れない場合 degraded mode の判定はプロバイダ通知を受けた手動運用。「自動縮退」と書く前に実測 | — |
+
+**このフェーズで守ること:** 数値（単価・閾値・金額）は CURRENT に固定しない。裁定原本へ日付付きで残す。
 
 ### 🔵 詳細3面と共有化の実行順序（2026-09-02 / revision 041 / DECISION）
 
