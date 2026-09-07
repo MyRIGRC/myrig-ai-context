@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260907-074
-updated: 2026-09-07 20:54 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260907-075
+updated: 2026-09-07 22:11 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-07 20:54 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-07 / revision 074（Mobile Detail Phase: RIG / PARTS / LOG Detail Mobile の3面を1バッチで着工完了。merge / drop 候補は比較モードで🔴イタヤ裁定待ち D2〜D10）**
+**最終更新: 2026-09-07 / revision 075（Mobile Detail finishing: D2〜D10 決着・比較枝撤去・3面 CLOSE。次は Garage / Public Garage Mobile）**
 
 > 🔴 **063 で決まったこと（イタヤ裁定 2026-09-06）: ユーザー投稿画像の上限は RIG 7 / PARTS 5 / LOG 3。**
 > RIG は Cover 1 ＋ Sub 最大6（従来 Cover 1 ＋ Sub 8 = 9 を**失効**）。PARTS 5・LOG 3 は従来どおり変更なし。
@@ -59,45 +59,47 @@ updated: 2026-09-07 20:54 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > 071 で LOG 着地規則と Feed タブも決着。**continuity は `pin` を残して完了。**
 > 072 で **PC Core Convergence Audit と是正が完了**。073 で **Launcher の status 整理**と
 > **RIG 画像 7枚化（Cover 1 ＋ Sub 6）** も完了。
-> ✅ **074: Mobile Detail Phase（Phase 4）— RIG / PARTS / LOG Detail Mobile の3面を1バッチで着工完了**（イタヤ指示 2026-09-07「途中で戻さず、3面まとめて一度だけ見てもらう」）。
-> 基準は現行 PC 実体（RIG = v15 / PARTS = v1-open / LOG = v1）＋ 067〜073。旧 v6 設計図（§6 #6〜#8）は基準にしていない。
-> 🔴 **いまやること: イタヤの実画面裁定（D2〜D10）。** Launcher の各 Detail グループ「Mobile 着工（2026-09-07）— 比較モードで裁定」から開く。
-> 裁定が出たら候補案を既定へ畳み（クエリ分岐を撤去）、処遇表を「裁定済み」へ更新して Mobile Detail を CLOSE する。
-> **Garage / Public Garage へはまだ進まない**（Mobile Detail 3面の CLOSE が先）。
-> LOG Detail はページローカルな見た目調整へ戻さない（067 / Gate 5 CLOSE）。
-> **Feed の本文・コメント・action row・author 導線も開け直さない（068）。**
-> 未裁定 UI を実装者判断で確定しない。
+> ✅ **075: Mobile Detail Phase（Phase 4）CLOSE — RIG / PARTS / LOG Detail Mobile の3面が完成形**。
+> 074 で3面を着工し、イタヤ実画面レビュー＋GPT 実ソース監査を受けて 075 で finishing を完了した。
+> **比較枝（`?rail=` / `?legacy=` / `?buy=` / `data-when`）は撤去済みで、完成形は各面1つ。**
+> Launcher は各 Detail グループ = **完成候補1枚 ＋ 状態確認**（未ログイン / 所有者 / ダーク）。
+> 🔴 **次は Garage / Public Garage Mobile。** Detail 3面の論点（コメント位置・action row・owner row・LOG 本文構造・
+> RELATED 棚の種類・Lightbox 採否・pin・PC Detail VISUAL LOCK・Feed）は**再オープンしない**。
 >
-> ### 🔴 Mobile Detail Phase 着工（2026-09-07 / 074 / 比較モードで裁定待ち）
+> ### ✅ Mobile Detail 3面 CLOSE（2026-09-07 / 075）
 >
-> モック: `myrig-mockup` `rig-detail.html` / `parts-detail.html` / `log-detail.html`（HEAD）。
-> 処遇表: `_state/MOBILE_RIG_DETAIL_TREATMENT.md`（v2）/ `_state/MOBILE_PARTS_DETAIL_TREATMENT.md` / `_state/MOBILE_LOG_DETAIL_TREATMENT.md`。
-> Gate: `_state/GATE_MOBILE_DETAIL_20260907.md`（RIG 67 / PARTS 60 / LOG 59 / source 17 PASS・0 FAIL。PC 非回帰: entity_actions 36 PASS・画素差 0・contract 51 PASS・Launcher 225 PASS）。
-> 恒久検査: `_state/mobile_detail_check.py {rig|parts|log|source}`。
+> モック: `myrig-mockup` `rig-detail.html` / `parts-detail.html` / `log-detail.html`。
+> 処遇表（裁定済み）: `_state/MOBILE_RIG_DETAIL_TREATMENT.md`（v3）/ `_PARTS_`（v2）/ `_LOG_`（v2）。
+> Gate: `_state/GATE_MOBILE_DETAIL_20260907.md`。恒久検査: `_state/mobile_detail_check.py {rig|parts|log|source}`。
+>
+> **DECISION（イタヤ実画面レビュー 2026-09-07）**
+> | # | 論点 | 裁定 |
+> |---|---|---|
+> | D2〜D4 | 右レーン要素（base-model / parts-master / entity-feed / used-parts / used-by-rigs） | **主列の同責務節へ merge** |
+> | D6 / D8 / D10 | 旧 Mobile 固有（RECENT ACTIVITY / 共有行 / 暖色 BUY-INFO / このパーツのログ / ガレージ RIG 棚 / SHARE 節 / 同カテゴリ棚） | **drop** |
+> | **D7** | RIG ベースモデルの購入導線 | **残す（buy=on）**。🔴 旧推奨の `buy=off` は**失効**。理由: ベースモデルに紐づく「製品情報 / 購入先」は MyRIG の重要な収益導線であり、Mobile だから消すのではなく **適切な強度で残す**。2026-07-24 の「RIG に購入枠を出さない」は RIG 本体を売り物に見せない趣旨として維持し、**ベースモデル製品への導線には適用しない** |
+> | D9 | LOG の builder | **上部 identity へ統合**（ページ途中に author を再登場させない） |
+> | D1 | Lightbox | Mobile 現行を維持 |
+> | D5 | 「同じ RC4WD のRIG」drop | **取り下げ**（PC v15 に `manufacturer-rigs` があり Mobile 固有ではなかった） |
 >
 > **Shared Source（3面で同一責務は1か所）**
 > | 責務 | 正本 |
 > |---|---|
-> | Mobile Detail の style / markup / 挙動（gallery・写真行・フォトノート・actions・builder・Library Bridge・行リスト・LOG 節・棚・links・ad・comments・Lightbox・共有シート・比較モード） | `css/mobile-detail.css` / `js/mobile-detail.js`（`<md-*>` Light-DOM replacement。PC `SoT_detail-markup.js` と同じ流儀） |
-> | Entity Actions（state / count / aria / 認証ゲート / 楽観更新 / rollback） | `pc/assets/js/SoT_entity-actions.js` — **PC と同じファイル**。Mobile では LoginRequiredModal / toast を Shell へ委譲 |
-> | bottom-sheet（コメント全件 / ⋯操作 / 共有） | Shell Dialog Controller。`mobile-shell.js` v0.6 に公式フック `registerSheet` を追加 |
-> | like pressed 色 | Mobile `css/sot/SoT_tokens-v6.css` に `--color-like-on`（PC と同値）を追加 |
+> | Mobile Detail の style / markup / 挙動（`<md-*>` Light-DOM replacement） | `css/mobile-detail.css` / `js/mobile-detail.js` |
+> | **製品・購入情報**（RIG ベースモデル / PARTS 製品情報の**共通** monetization ブロック） | `<md-commerce>` / `.rd-commerce*`。neutral inset・2導線・購入 CTA だけ一段強く・shop は下段で gap・affiliate 注記。🔴 **RIG / PARTS で別実装を作らない**（`md-bridge` / `.rd-dual` / `.rd-bridge` / 暖色 `g-sec--shop` は撤去済み。書き戻さない） |
+> | Entity Actions | `pc/assets/js/SoT_entity-actions.js`（**PC と同じファイル**。Mobile では LoginRequiredModal / toast を Shell へ委譲） |
+> | bottom-sheet | Shell Dialog Controller（`mobile-shell.js` v0.6 の `registerSheet`） |
 >
-> 3面とも page-local `<style>` / inline `<script>` / 旧 `data-p3` は 0。画像は `pc/img/` を直接参照。
+> **Gate**: mobile_detail_check rig 58 / parts 55 / log 47 / source 23 PASS・**0 FAIL**。
+> PC 非回帰: RIG v15・PARTS v1-open・LOG v1・Feed v3 の画素差 **0**、entity_actions 36 PASS、contract 51 PASS、launcher 186 PASS、Mobile 既存 12面 問題 0。
 >
-> **🔴 イタヤ裁定（§1 R4: 実モック比較。既定 = PC を carry/adapt した基準案、クエリ = 候補案）**
-> | # | 面 | 論点 | 基準 | 候補（推奨） |
-> |---|---|---|---|---|
-> | D2〜D4 | RIG | rail base-model / entity-feed / used-parts → 主列の同責務節へ統合 | `rig-detail.html` | `?rail=merge` |
-> | D6 | RIG | 旧 Mobile 固有（RECENT ACTIVITY / 共有行）を落とす | 同 | `?legacy=drop` |
-> | D7 | RIG | ベースモデル節の「購入先を見る」（PC v15）と 2026-07-24 Mobile 裁定「RIG に購入枠を出さない」の交差 | 同（出す） | `?buy=off`（出さない） |
-> | D2〜D4 | PARTS | rail parts-master / used-by-rigs / entity-feed → 製品情報 / 使っているRIG / 登録情報へ統合 | `parts-detail.html` | `?rail=merge` |
-> | D8 | PARTS | 旧 Mobile 固有（BUY/INFO 暖色枠 / このパーツのログ / ガレージ RIG 棚 / 共有行）を落とす | 同 | `?legacy=drop` |
-> | D9 | LOG | rail builder → byline / linked-rig → RIG chip / entity-feed → RELATED ① | `log-detail.html` | `?rail=merge` |
-> | D10 | LOG | 旧 Mobile 固有（SHARE 節 / 同カテゴリ棚）を落とす | 同 | `?legacy=drop` |
->
-> D1（Lightbox = Mobile 現行維持）は 2026-09-07 イタヤ「そのまま進めて」で確定。
-> **D5（「同じ RC4WD のRIG」drop）は取り下げ**: PC v15 の RELATED は 5棚＋AD で `manufacturer-rigs` があり、Mobile 固有ではなかった（処遇表 v1 の誤り。v2 で訂正）。
+> 🔴 **HOLD（Detail の外で扱う）**
+> | # | 内容 |
+> |---|---|
+> | H1 | **PC v15 のフォトノートが 8枚（うち2枚は既出画像の重複）**。Gallery は 063/073 で Cover 1 ＋ Sub 6 = 7枚へ縮んだのに、フォトノートの枚数と `section__count">8枚` が追随していない。**Sub 6 に対して 8枚は成立しない** → 063 / 073 の**追随漏れ**。PC は VISUAL LOCK なので Mobile 側だけ 4枚へ是正し、**PC は改変していない**。是正するかはイタヤ裁定 |
+> | H2 | `--cat-rig / --cat-parts / --cat-log` の Mobile v8 値と PC 旧 palette の差 → **cross-surface token rollout** の論点。Detail 単独で解決しない（今回 Detail identity の見え方だけ整え、**色値は触っていない**） |
+> | H3 | `pin` の露出（066 から継続の PENDING） |
+> | H4 | GPT 参考パッチ ZIP は本セッションに添付されていなかったため、指示文の内容を現 repo HEAD へ**再実装**した。ZIP 実差分との突き合わせは未実施 |
 >
 > ### ✅ Feed continuity 1「基本導線」CLOSE（2026-09-07 / 068 / イタヤ裁定）
 >
