@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260907-075
-updated: 2026-09-07 22:11 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260907-076
+updated: 2026-09-08 08:59 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-07 22:11 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-07 / revision 075（Mobile Detail finishing: D2〜D10 決着・比較枝撤去・3面 CLOSE。次は Garage / Public Garage Mobile）**
+**最終更新: 2026-09-07 / revision 076（Mobile Feed convergence CLOSE。次は Garage / Public Garage Mobile）**
 
 > 🔴 **063 で決まったこと（イタヤ裁定 2026-09-06）: ユーザー投稿画像の上限は RIG 7 / PARTS 5 / LOG 3。**
 > RIG は Cover 1 ＋ Sub 最大6（従来 Cover 1 ＋ Sub 8 = 9 を**失効**）。PARTS 5・LOG 3 は従来どおり変更なし。
@@ -59,6 +59,40 @@ updated: 2026-09-07 22:11 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > 071 で LOG 着地規則と Feed タブも決着。**continuity は `pin` を残して完了。**
 > 072 で **PC Core Convergence Audit と是正が完了**。073 で **Launcher の status 整理**と
 > **RIG 画像 7枚化（Cover 1 ＋ Sub 6）** も完了。
+> ✅ **076: Mobile Feed convergence CLOSE。** PC Feed が 068〜072 で確定した continuity を Mobile へ追随させた
+> （Feed 設計の再検討ではない。3タブ = 071 のまま・Feed のトップレベル面としての役割も不変）。
+> 🔴 **次は Garage / Public Garage Mobile。** Feed / Detail の論点は再オープンしない。
+>
+> ### ✅ Mobile Feed convergence（2026-09-07 / 076）
+>
+> モック: `myrig-mockup` `feed.html`。Gate: `_state/mobile_feed_check.py`（**53 PASS / 0 FAIL**）。
+> 差分と設計は `_state/MVP_CONVERGENCE_MAP.md` §8.22。
+>
+> **Mobile へ反映したもの（068 の4点）**
+> | # | 内容 |
+> |---|---|
+> | 本文 | 通常長は **Feed 内で全文**。`long` だけ折り畳み、「続きを読む」は **Feed 内展開**（長さで Detail 遷移へ切り替えない）。**超長文だけ**末尾に「このログの全文を記録ページで読む →」。閾値は正典で固定せず `data-longmax`（fixture 値）。確認用に `?longmax=<N>` |
+> | Action row | いいね / コメント / 共有 / **記録** の4。記録は `<a>` ＋ aria-label・title「このログの記録を見る」・keyboard reachable。PC の「4等分」責務を保ったまま Mobile は 4列 grid ＋ 各 48px へ adapt |
+> | Comments | カード内 conversation（初期2件 / さらに N 件 / その場で投稿 / 件数同期）。Feed と LOG Detail で**同じ state・同じデータ**。UI を新造せず、Detail Conversation の compact variant |
+> | Author | avatar / 表示名 / @handle → Public Garage。**時刻はリンクにしない**。avatar は `tabindex="-1"`。interactive に `aria-hidden` を付けない |
+>
+> **Shared Source（面をまたいで二重管理しない）**
+> | 責務 | 正本 |
+> |---|---|
+> | 続きを読む / 全文導線 | **`pc/assets/js/SoT_feed-continuity.js`（076 新設）**。`SoT_card-components.js` のクラス決め打ちから移設し、**PC / Mobile が同じファイルを読む** |
+> | 面内 conversation | `pc/assets/js/SoT_comments.js`。セレクタを **`[data-feed-card]` 契約**へ（`.pc-feed-card` 決め打ちを撤去）。会話の器は中立名 **`.feed-conv`**。コメント1件は `setUnitRenderer()` で面の語彙（Mobile は `.comment-row`＝Detail と同じ実装） |
+> | Entity Actions | `pc/assets/js/SoT_entity-actions.js`。🔴 束縛条件を「`<a>` でない」→ **「`aria-pressed` を持つ」**へ是正（Mobile の comment `<button>` を like と誤認し、押すだけで件数が +1 される欠陥を実測して修正） |
+> | Feed カード markup（Mobile） | `js/mobile-feed.js`（`<md-feed-card>`）/ `css/mobile-feed.css`。**契約属性を出すだけで挙動を持たない** |
+>
+> Mobile の page-local 旧実装（`data-fc-like` の直接 ±1 / 独自 Lightbox / 続きを読むトグル / 共有トースト）は**撤去**。**書き戻さない。**
+> PC Feed の視覚デザインは Mobile へ機械コピーしていない（Feed は timeline 面なので Detail の section separator も持ち込まない）。
+>
+> **非回帰**: PC Feed v3 / RIG v15 / PARTS v1-open / LOG v1 の画素差 **0**、`entity_actions_check` 36 PASS、
+> `detail_contract_check` 51 PASS、`launcher_link_check` 189 PASS、Mobile Detail 3面 58 / 55 / 47 ＋ source 23 PASS、Mobile 既存 10 面 問題 0。
+>
+> 🔴 **HOLD（Feed の外）**: H1 PC v15 フォトノート 8枚（063/073 追随漏れ・PC 未改変）/ H2 `--cat-*` の cross-surface token rollout /
+> H3 `pin` の露出（066 継続）。076 で新たに増えた blocker は無い。
+
 > ✅ **075: Mobile Detail Phase（Phase 4）CLOSE — RIG / PARTS / LOG Detail Mobile の3面が完成形**。
 > 074 で3面を着工し、イタヤ実画面レビュー＋GPT 実ソース監査を受けて 075 で finishing を完了した。
 > **比較枝（`?rail=` / `?legacy=` / `?buy=` / `data-when`）は撤去済みで、完成形は各面1つ。**
