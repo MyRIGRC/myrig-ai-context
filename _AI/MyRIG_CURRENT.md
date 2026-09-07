@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260907-072
-updated: 2026-09-07 16:18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260907-073
+updated: 2026-09-07 17:19 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-07 16:18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-07 / revision 072（PC Core Convergence Audit → 是正完了。BUG 5→0 / DRIFT 5→0＋保留1。Feed 本命案を既定化・Feed Card / Comments / Shelf を Shared Source 化・contrast と like token を整理）**
+**最終更新: 2026-09-07 / revision 073（Launcher status 整理 ＋ RIG 画像 7枚化・Gate 2 再検証 PASS。次は Mobile Detail Phase / RIG Detail Mobile の着工前処遇表）**
 
 > 🔴 **063 で決まったこと（イタヤ裁定 2026-09-06）: ユーザー投稿画像の上限は RIG 7 / PARTS 5 / LOG 3。**
 > RIG は Cover 1 ＋ Sub 最大6（従来 Cover 1 ＋ Sub 8 = 9 を**失効**）。PARTS 5・LOG 3 は従来どおり変更なし。
@@ -22,11 +22,29 @@ updated: 2026-09-07 16:18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > 7枚で不足が実測されたら 9 へ増やすのは容易だが、9 が定着してから削るのは難しい。
 > **正典で固定するのは上限値だけ。「7枚だからこの並べ方」といった表示レイアウトは固定しない**（実装・モック側で最適化）。
 >
-> ⚠️ **モック側は 9枚前提の実装が残っている見込み**（`myrig-mockup` は本セッション未接続のため**実体未確認**）。
-> 7枚化は**別スレッドの独立バッチ**で行う。確認対象: Cover＋Sub のスロット数 ／ 登録フォームのアップロード枠 ／
-> 詳細ギャラリー ／ Mobile 表示 ／ 画像枚数バリデーション。
-> **RIG Detail PC `v15` は VISUAL LOCK ＋ SYSTEM VERIFIED の CLOSE 面**なので、デモ画像を 7枚へ減らすと
-> Gate 2 の pixel parity 基準と `detail_contract_check.py` の期待値が変わる。**そのバッチでは Gate 2 を再実行し証跡を更新すること。**
+> ✅ **モック側の 7枚化は完了（2026-09-07 / 073 / mock `2158000`）。** 独立小バッチで実施し Gate 2 を再検証した。
+>
+> | 対象 | 結果 |
+> |---|---|
+> | `pc/myrig-rig-detail-v15.html` | `<dt-gallery>` の重複2枚（`data-mock-slot="7"/"8"`）を撤去 → **7枚**（Cover 1 ＋ Sub 6） |
+> | `pc/myrig-register-rig-v2.9.5.html` | `MAX_SUB_PHOTOS` 8 → **6**、文言2箇所（「サブ写真 最大6枚」「4列で最大6枚」） |
+> | `_state/detail_contract_check.py` | Gallery 枚数の許容上限 `<= 9` → **`<= 7`** |
+> | 共有 JS（`SoT_detail-components.js` / `-markup.js`） | 見出しコメントを「Cover 1 + Sub 6 = 最大7枚」へ。**コードは枚数を固定していないので実装変更なし** |
+> | Mobile `rig-detail.html` | **変更なし**（`IMGS` は元から5枚で上限内。「最大7枚」と矛盾しないので、この理由だけで7枚へ増やさない） |
+> | PARTS 5 / LOG 3 | **変更なし**（063 のとおり） |
+>
+> **Gate 2 再検証 PASS**: `detail_contract_check` 51 PASS / 0 FAIL / 0 WARN ／
+> Gallery 挙動（サムネ7枚・`1 / 7`・next 一周・prev・サムネ直接クリック・`aria-label` の連番）**全一致** ／ pageerror 0 ／
+> PARTS・LOG は画素差 0 ／ register-rig はサンプル読み込みで Cover 1 ＋ サブ 6 で打ち止め。証跡は `_state/GATE2_rig-detail-v15.md` の追記。
+>
+> ✅ **イタヤ裁定（2026-09-07）: 7枚化で生じたレイアウト差は現状を採用する。**
+> `.gallery__thumb{flex:1; aspect-ratio:3/2}`（共有 CSS）でサムネは行幅を等分するため、
+> 枚数が減ると1枚が広く＝高くなる（9枚 ≈102px幅 → 7枚 ≈132px幅。サムネ列 68→89px）。
+> その結果 `.dt-main` 以下が **21px 下へ平行移動**し、ページ高 7666→7687px。
+> 画素差を分解した結果、**「ギャラリーが +21px、その下が同じだけ動いた」以外の変化は無い**
+> （右レーンと identity は y も高さも不変。パンくず・ヘッダーも不変）。
+> 🔴 **これは Cover 1 ＋ Sub 6 から自然に生じたレイアウト差であって他要素の崩れではない。
+> 旧9枚時代の見た目を保つ目的だけで `thumb` の `max-width` 等を足さないこと。**
 
 > 📌 **057 の内容:** GPT の再確認で 056 本文後段に2-D 以前の古い記述が2箇所残っていた
 > （MVP Phase 表の「残り: 2-D」／横断部品表 Header 行の「Home だけ page-local が残る」）。
@@ -39,7 +57,17 @@ updated: 2026-09-07 16:18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > Feed continuity の 1「基本導線」も 068 で CLOSE。
 > continuity 2「reaction」も 069 で裁定し、**Entity Actions を Shared Source へ統合済み。**
 > 071 で LOG 着地規則と Feed タブも決着。**continuity は `pin` を残して完了。**
-> 072 で **PC Core Convergence Audit と是正が完了**（下記）。**次は新規ページへ進める区切り。**
+> 072 で **PC Core Convergence Audit と是正が完了**。073 で **Launcher の status 整理**と
+> **RIG 画像 7枚化（Cover 1 ＋ Sub 6）** も完了。
+> 🔴 **次は Mobile Detail Phase（Phase 4）。順番は RIG → PARTS → LOG。**
+> **いまやること: RIG Detail Mobile の着工前処遇表**（`docs/ui/pc-mobile-spec-inheritance-v1.1.md` §3）。
+> 各 PC セクション / 右レーン panel / modal / action を **carry / adapt / merge / defer / drop** で1行ずつ宣言する。
+> **merge / defer / drop はイタヤ裁定が必要。無断省略は禁止。**
+> 🔴 **基準は現行 PC 実体（RIG = v15 / PARTS = v1-open / LOG = v1）と CURRENT 067〜073 の後発裁定。**
+> 同文書 §6 の Detail 設計図は**旧 PC v6 時代の記述**なので、食い違ったら**PC 現物を正とし、旧 v6 構成へ戻さない**。
+> 既存 Mobile `rig-detail.html` は「現在の Mobile 実装の参考」であって、
+> **PC から引き継ぐべき要素を欠落させてよい根拠にはしない。**
+> **Garage / Public Garage へはまだ進まない**（Mobile Detail 3面の完成が先）。
 > LOG Detail はページローカルな見た目調整へ戻さない（067 / Gate 5 CLOSE）。
 > **Feed の本文・コメント・action row・author 導線も開け直さない（068）。**
 > continuity の残りは「比較できる実画面を作ってイタヤ裁定を受ける」ところまでが実装者の範囲で、
@@ -72,10 +100,12 @@ updated: 2026-09-07 16:18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > **失効（戻さない）:** 時刻リンク ／ カード全体 click ／ 本文全体 click ／ 毎カード下部の大きなテキスト CTA ／
 > 3点メニュー内だけ ／「続きを読む」で Detail 遷移 ／ action row の「3等分＋auto 列」。
 >
-> ⚠️ **Shared Source 統合は「採用後」。** 実行時の Feed カードは page-local `.pc-feed-card` で、
-> Detail の `<dt-actions>` 契約（`data-action` / `data-base-count` / `aria-pressed`）を持っていない。
-> **今回は fixture のまま CLOSE し、先に大規模リファクタしない**（イタヤ指示）。
-> 次バッチで reaction / comment の state / count / aria / behavior を1か所へ寄せる。
+> ⚠️ **【068 時点の記述・072 で解消済み】** 当時は「実行時の Feed カードが page-local `.pc-feed-card` で
+> `<dt-actions>` 契約を持たないため、fixture のまま CLOSE し先に大規模リファクタしない」としていた。
+> → ✅ **069 で reaction の state / behavior / aria を `SoT_entity-actions.js` へ統合し、
+> 072 で Feed 本命案を既定へ昇格 ＋ Feed カードを共有 `<myrig-log-card variant="feed">` へ昇格した。**
+> `?flow=inline` の fixture 分岐・死んだ静的カード14枚・旧 shadow `feed` variant は撤去済み。
+> **「Feed は fixture のまま」「Shared Source 統合は次バッチ」は失効。**
 >
 > **今回の blocker にしないもの（記録のみ）:** モックの Public Garage が固定ユーザー1面で `h1` を持たない
 > （**後の Garage 監査で拾う**）／ モックに LOG ごとの面が無く全カードが同じ v1 へ着く。
@@ -152,6 +182,23 @@ updated: 2026-09-07 16:18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > 最初に展開したツリーと比べ続ける。`detail_pixel_proof.py` で 2026-09-06 に起きた事故と同じ形）。
 > docstring に **「baseline はテストを PASS させるために HEAD へ動かさない。貼り直しはイタヤ裁定が要る」**
 > を恒久ルールとして明記し、`BASE` 定義の直上に貼り直しの履歴と理由を残した。
+>
+> ### ✅ Launcher の status 整理 ＋ RIG 画像 7枚化（2026-09-07 / 073 / mock `8efcaa1`・`2158000`）
+>
+> **1. Launcher の stale 表示を是正**（ページ実体・CLOSE 済み設計は触っていない）
+>
+> - **LOG Detail カード = PC CLOSE**。`card--wip` → `card--done` ＋ `PC` バッジ。
+>   説明文「作り直し中（2026-09-06 / Phase 3 / WIP）」→「**確定（2026-09-07 / 正典 067 Gate 5 PASS・CLOSE）**」
+> - **`card--state` は独立した進捗状態ではない。** 「代表ページの状態確認デモ」として
+>   **代表カードの状態を継承**する。🔴 DOM の位置や「直前のカード」から暗黙推測せず、
+>   **`data-state-of="<代表カードの id>"` で明示参照**する（代表カードに id を付与。未解決参照 0）。
+>   代表を解決できないときは黙って done にせず wip のまま＝取りこぼしが目に見える
+> - 📌 **Feed に残っていた「要確認」2件は未裁定ではなかった。**
+>   072 で追加した reaction の**確認用 state カード**（`card--state`）で、
+>   旧 `stateOf()` が `card--done` 以外を一律 wip に落としていたための表示上の分類だった。
+>   継承後は「確定」、ログ詳細は「PC版のみ」になる。`launcher_link_check` 174 PASS / 0 FAIL
+>
+> **2. RIG 画像 7枚化**（上記 063 の節に実施内容と Gate 2 再検証を反映済み）
 >
 > ### ✅ PC Core Convergence Audit → 是正完了（2026-09-07 / 072 / イタヤ裁定 / mock `75fc806`〜`9086794`）
 >
