@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260907-069
-updated: 2026-09-07 13:41 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260907-070
+updated: 2026-09-07 14:26 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-07 13:41 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-07 / revision 069（continuity 2「reaction」裁定 → Entity Actions を Shared Source へ統合。次は残る PENDING）**
+**最終更新: 2026-09-07 / revision 070（Entity Actions 統合 ＋ shelf 検査の baseline 貼り直し。次は残る PENDING）**
 
 > 🔴 **063 で決まったこと（イタヤ裁定 2026-09-06）: ユーザー投稿画像の上限は RIG 7 / PARTS 5 / LOG 3。**
 > RIG は Cover 1 ＋ Sub 最大6（従来 Cover 1 ＋ Sub 8 = 9 を**失効**）。PARTS 5・LOG 3 は従来どおり変更なし。
@@ -129,12 +129,28 @@ updated: 2026-09-07 13:41 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > （`PERSIST` の中だけ。差し替えれば API に載る）／ どの LOG かは `?log=`（本番は `/log/[id]`）／
 > `?ea_fail=<0-100>` は rollback を実画面で見るためのもの。**fixture の逃げは残していない。**
 >
-> 🔴 **検査ツール側の指摘（実装の問題ではない・裁定待ち）**
-> `_state/shelf_propagation_check.py` の基準が `7437e44`（PROPAGATION-SHELF 直前）のままで、
-> Home / Browse 3面が**一律 2381px の差**で FAIL する。2026-09-04 の保存結果は「差 0」なので、
-> **2026-09-05 のロゴ lockup 全33面展開（2-D / 承認済みの視覚変更）以降のドリフト**とみられる
-> （差が全面で同一値 = ヘッダー帯の変化と整合）。**本バッチの寄与は 0**（変更前 `a02f81c` と現在で
-> Home / Browse とも画素差 0 を実測）。**基準の貼り直しは承認済み変更の再基準化なので勝手にやらない。**
+> ### ✅ shelf_propagation_check の baseline 貼り直し（2026-09-07 / 070 / イタヤ承認 / mock `3102b1e`）
+>
+> | | |
+> |---|---|
+> | old baseline | `7437e44`（PROPAGATION-SHELF 直前） |
+> | **new baseline** | **`923df08`**（`design: ロゴ lockup 化を PC 全33面へ展開・既定へ統合` / 2026-09-05） |
+> | 更新理由 | **承認済みの視覚変更「ロゴ lockup 全33面展開」**により旧基準が意図的変更より前の状態になったため |
+> | 旧 baseline との差 | Home / Browse 3面で **一律 2381px**（全面同一値 = ヘッダー帯の変化と整合） |
+> | Entity Actions batch（`fb84702`）の寄与 | **0** |
+>
+> 🔴 **「テストを PASS させるために現在の HEAD を baseline 化する」ことはしていない。**
+> 新基準は**意図した視覚変更が入った commit そのもの**に置いた。
+> `923df08` の直後 `37191e1` は docs のみで画素に影響しない。
+> `923df08` 以降、Home / Browse 4面の HTML に触れた commit は **0**（実測）。
+>
+> **再実行結果（基準 `923df08`）: 4面とも 8 PASS / 0 FAIL、合計 32 PASS / 0 FAIL。**
+> 初期表示・スクロール後とも差 0。`shelf_propagation_result.json` を新基準で再生成した。
+>
+> **併せて直したこと**: 基準ツリーのキャッシュを **BASE ごと**に分けた（固定パスだと基準を変えても
+> 最初に展開したツリーと比べ続ける。`detail_pixel_proof.py` で 2026-09-06 に起きた事故と同じ形）。
+> docstring に **「baseline はテストを PASS させるために HEAD へ動かさない。貼り直しはイタヤ裁定が要る」**
+> を恒久ルールとして明記し、`BASE` 定義の直上に貼り直しの履歴と理由を残した。
 >
 > ### 🔵 PROPOSAL / 裁定候補（2026-09-07 / 068）— Browse / Feed / Library は独立したトップレベル体験
 >
