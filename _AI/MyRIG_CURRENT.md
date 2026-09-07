@@ -563,7 +563,7 @@ updated: 2026-09-07 17:19 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | Web文法 実装バッチ1 | ✅ 完了・deploy済み（`054e6e0`） | PC app-nav 90本を実結線 / PCへ未実装route共通handler / Home切替の hidden 破れ修正 |
 | モック全体の第2周 | ⚪ 未着手 | ページ単体ではなくフロー単位で確認する体制へ移行 |
 | **インフラ／コスト耐性** | 🔵 **3AI 独立検証完了・統合案あり・裁定待ち（062）** | イタヤ裁定 → `_decisions/2026-09-06_infra-cost-resilience-v1.md` を DECISION 化 → docs/schema・support へ反映。裁定前に Next.js 実装へ入らない |
-| **画像枚数 7/5/3 のモック反映** | ⚪ **未着手・別スレッド（063 で上限だけ確定）** | `myrig-mockup` を実体調査し 9枚前提の箇所だけ 7枚へ。対象: Cover＋Sub スロット数 / 登録フォーム枠 / 詳細ギャラリー / Mobile / バリデーション。**v15 のデモを減らすなら Gate 2 再実行と証跡更新が必須**。表示レイアウトは正典化しない |
+| **画像枚数 7/5/3 のモック反映** | ✅ **完了（2026-09-07 / 073 / mock `2158000`）** | RIG = Cover 1 ＋ Sub 6。`myrig-rig-detail-v15`（重複2枚を撤去）／ `register-rig`（`MAX_SUB_PHOTOS` 8→6・文言）／ `detail_contract_check`（上限 9→7）／ 共有 JS のコメント。Mobile `rig-detail.html` は元から5枚で上限内のため変更なし。PARTS 5・LOG 3 は従来どおり。**Gate 2 再検証 PASS**（証跡は mock `_state/GATE2_rig-detail-v15.md` 追記） |
 
 #### 🔵 レーン運用（2026-09-03 / 045 / イタヤ裁定）
 
