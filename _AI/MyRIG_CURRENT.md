@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260907-071
-updated: 2026-09-07 15:07 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260907-072
+updated: 2026-09-07 16:18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-07 15:07 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-07 / revision 071（LOG 着地 CLOSE ／ Feed 3タブを正典化＝#28 失効 ／ トップレベル体験原則を DECISION へ昇格。次は PC Core Convergence Audit）**
+**最終更新: 2026-09-07 / revision 072（PC Core Convergence Audit → 是正完了。BUG 5→0 / DRIFT 5→0＋保留1。Feed 本命案を既定化・Feed Card / Comments / Shelf を Shared Source 化・contrast と like token を整理）**
 
 > 🔴 **063 で決まったこと（イタヤ裁定 2026-09-06）: ユーザー投稿画像の上限は RIG 7 / PARTS 5 / LOG 3。**
 > RIG は Cover 1 ＋ Sub 最大6（従来 Cover 1 ＋ Sub 8 = 9 を**失効**）。PARTS 5・LOG 3 は従来どおり変更なし。
@@ -39,7 +39,7 @@ updated: 2026-09-07 15:07 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > Feed continuity の 1「基本導線」も 068 で CLOSE。
 > continuity 2「reaction」も 069 で裁定し、**Entity Actions を Shared Source へ統合済み。**
 > 071 で LOG 着地規則と Feed タブも決着。**continuity は `pin` を残して完了。**
-> 次は **PC Core Convergence Audit**（Home / Browse / Search / Feed / RIG Detail / PARTS Detail / LOG Detail）。**
+> 072 で **PC Core Convergence Audit と是正が完了**（下記）。**次は新規ページへ進める区切り。**
 > LOG Detail はページローカルな見た目調整へ戻さない（067 / Gate 5 CLOSE）。
 > **Feed の本文・コメント・action row・author 導線も開け直さない（068）。**
 > continuity の残りは「比較できる実画面を作ってイタヤ裁定を受ける」ところまでが実装者の範囲で、
@@ -152,6 +152,31 @@ updated: 2026-09-07 15:07 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > 最初に展開したツリーと比べ続ける。`detail_pixel_proof.py` で 2026-09-06 に起きた事故と同じ形）。
 > docstring に **「baseline はテストを PASS させるために HEAD へ動かさない。貼り直しはイタヤ裁定が要る」**
 > を恒久ルールとして明記し、`BASE` 定義の直上に貼り直しの履歴と理由を残した。
+>
+> ### ✅ PC Core Convergence Audit → 是正完了（2026-09-07 / 072 / イタヤ裁定 / mock `75fc806`〜`9086794`）
+>
+> **裁定原本: `_decisions/2026-09-07_core-convergence-v1.md`。**
+> 監査レポート・生データ・是正結果は `myrig-mockup` `_state/CORE_CONVERGENCE_AUDIT_20260907.md`。
+>
+> 対象は PC Core 9面のみ（44面監査にしない）。結論: **壊れは少なく、ズレは共有化の取りこぼしとトークンの未整理。**
+> BUG 5 → **0** ／ DRIFT 5 → **0＋保留1** ／ INTENTIONAL 11 ／ TUNING 6（後回し）。
+>
+> | 是正 | 内容 |
+> |---|---|
+> | Feed 既定化 | 068 CLOSE の本命案を**既定へ昇格**。fixture `?flow=inline` 撤去。旧 `?flow=inline` と画素差 0 |
+> | Shared Source 新設 | Feed カード `<myrig-log-card variant="feed">`（light DOM）＋ `SoT_feed-card.css` ／ コメント ⋯通報 `SoT_comments.js/.css`（Feed 面内会話でも動く）／ `SoT_shelf.css`（Browse 2面の md5 一致 52 行） |
+> | 撤去 | 死んだ静的 Feed カード14枚 ／ 旧 shadow `feed` variant（`--cat-parts` を like に流用していた）／ Feed page-local の card CSS 76 行 |
+> | entity カード配線 | Core 7面 **257件**（RIG 104 / PARTS 104 / LOG 49）を canonical Detail へ。実クリック着地確認・画素差 0。🔴 Garage 等へ広げていない |
+> | contrast | `--color-text-tertiary` light #6a737e（4.81）/ dark #7a838e（4.50）、dark `--color-accent` #1b80f6（4.50）。装飾用途は **`--color-decor-tertiary`（旧値）へ分離**し色不変。「差分＝トークン値だけ」を9面で画素証明 |
+> | like pressed | **`--color-like-on`**（like 専用。light #e12f35 / dark #e64c50）を rail / inline / Feed が読む。favorite / pin は現行維持。🔴 `--cat-parts` を流用しない |
+> | a11y | Feed に `<main>` / `<h1>` ／ Browse stage の h1→h2 ＋ 面の h1 ／ header active に `aria-current="page"`。画素差 0 |
+>
+> 🔴 **直さないと裁定したもの: B-5「Feed 右レーン radius 14 vs Detail 9」。** Feed と Detail は役割が異なり、
+> 右レーンの見た目まで機械的に揃える根拠がない（071 の原則）。INTENTIONAL 寄りで保留。
+>
+> 📌 記録: LOG inline の favorite pressed は `--cat-parts` のまま（裁定どおり触っていない。カテゴリ色を操作状態色に使う箇所として残る）／
+> `myrig-garage-logs-v6.html` は共有 `feed` variant の実体が変わったため `pc` variant へ写した（Garage バッチで詰める）／
+> 🔴 **PC カテゴリ色 v8 の全面展開は別バッチ**（今回の contrast 修正と混ぜていない）。
 >
 > ### ✅ Browse / Search からの LOG 着地規則（2026-09-07 / 071 / CLOSE・実装変更なし）
 >
@@ -282,40 +307,18 @@ updated: 2026-09-07 15:07 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > 5. 🔴 **同一責務の state / behavior を Feed 用・Detail 用に複製しない（Shared Source）**
 >    → §8.13 `<dt-actions>`（rail / inline = 表示 variant、state / count / aria = 共通契約）
 >
-> ### 🟡 PENDING / PROPOSAL（未裁定）
+> ### 🟡 PENDING（continuity で未裁定なのは **`pin` の扱いだけ**）
 >
-> 方向性として議論はしているが、**イタヤ裁定はまだ出ていない**。
-> **ここを根拠に実装を進めない。** Feed continuity batch で実画面を見ながら決める。
+> 🔴 **`pin`**: schema 上 LOG は pins の対象（`pins` は polymorphic `(entity_type, entity_id)`、
+> `page-role-matrix-v1.md` の `/garage/pins` は「ピン留め一覧（RIG/PARTS/LOG/Users）」）。
+> **Feed / LOG Detail のどこに UI を出すかが未裁定。** モックが pin を出していないのは検討中の非表示であって
+> 「LOG に pin は無い」という正典ではない。`SoT_entity-actions.js` は `data-action="pin"` を扱えるので、
+> 裁定が出れば属性を渡すだけ。**ここを根拠に実装を進めない。**
 >
-> ✅ **068 で決着したもの（上の「Feed continuity 1 CLOSE」が正）:**
-> ①「続きを読む」の扱い ②Feed 内展開と Detail 遷移の関係 ③Detail への明示導線
-> ④Feed カード全体の click policy（**不採用**）⑤Feed 内コメント表示件数（最新2件程度）
-> ⑥quick comment の採否（**採用＝その場で投稿できる**）⑦その入力形式 ⑧「さらに ○ 件」でカード内展開
-> ⑩comment state / count の同期（**Feed と Detail で同一 state**）／ author 導線 = Public Garage。
->
-> ✅ **069 で決着したもの:** ⑨**reaction** の state / count 同期と Shared Source 境界
-> （楽観更新 / rollback+notice / 未ログイン auth gate を含めて `SoT_entity-actions.js` へ統合）。
->
-> ✅ **071 で決着したもの:** ⑪Browse / Search からの LOG 着地規則（下記 CLOSE）／
-> ⑫Feed 3タブ（#28 を失効させ3タブを正典化）。
->
-> 🟡 **まだ残っているもの: `pin` の扱いだけ**（schema 上 LOG は pins 対象。UI をどこに出すかが未裁定）。
-> **ここを根拠に実装を進めない。**
->
-> - Feed 内 **quick comment の採否**
-> - quick comment の**入力形式**
-> - Feed に**何件コメントを表示するか**
-> - 「**コメントをすべて見る**」の具体遷移
-> - **Browse / Search からの LOG 着地規則**
-> - **Feed カード全体の click policy**
-> - **Detail への明示導線**
-> - **pin の扱い**（LOG から pin を無くすかどうか。
->   実確認: App schema は LOG を pins の対象に含む。`pins` は polymorphic
->   `(entity_type, entity_id)`、`page-role-matrix-v1.md` の `/garage/pins` は
->   「ピン留め一覧（**RIG/PARTS/LOG**/Users）」。UI だけで決めると schema と乖離する。
->   モックが pin を出していないのは**検討中の非表示**であって、
->   「LOG に pin は無い」という正典ではない）
-> - ~~3タブの正典不整合~~ ✅ **071 で決着**（#28 の2タブを失効させ、3タブを正典化。上記参照）
+> 📌 066 で PENDING にしていた他の項目は **すべて決着済み**（旧箇条書きは 072 で整理・撤去）:
+> 続きを読む／Feed 内展開と Detail 遷移／Detail への明示導線／click policy／コメント表示件数／
+> quick comment の採否と形式／「さらに ○ 件」／comment・reaction の state 同期 → **068・069**。
+> Browse・Search からの LOG 着地規則／Feed 3タブ → **071**。
 >
 > ### ⚪ OBSERVATION（現行実装の事実。裁定ではない）
 >
