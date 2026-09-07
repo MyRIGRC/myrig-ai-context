@@ -8,8 +8,8 @@
 > 差分を明示すればイタヤ裁定で変更できる。
 
 **作成日:** 2026-05-03
-**最終更新:** 2026-08-22
-**ステータス:** 確定ベース v1.5
+**最終更新:** 2026-09-07
+**ステータス:** 確定ベース v1.6
 
 **目的:** MyRIG全体のページ構成・役割・優先度を固め、V3モック制作・Next.js実装・管理画面設計で迷わない状態にする
 
@@ -60,7 +60,7 @@ Public Browse
 ├─ /category/[rigType]/[categorySlug]   SubCategory Top（例: /category/rock-crawler/comp）
 ├─ /parts                               Parts Browse Top
 ├─ /parts/category/[partCategorySlug]   Parts SubCategory（例: /parts/category/tire）
-├─ /feed                                Feed（LOG中心 / おすすめ・フォロー中の2タブ）
+├─ /feed                                Feed（LOG中心 / おすすめ・新着・フォロー中の3タブ）
 └─ /search                              Search Results
 
 Detail
@@ -118,7 +118,7 @@ Admin
 | Parts Browse Top | `/parts` | Browse | パーツ専用Browse Top。ブランド・カテゴリ・使用RIG数を軸に | パーツを探す / 使用人数を見る | Must | A | 収益導線・Library連携の中核 |
 | Parts SubCategory | `/parts/category/[partCategorySlug]` | Browse | パーツカテゴリ別Browse。タイヤ・ESC・ショック等 | 特定カテゴリのパーツを比較する | Should | B | Parts Browse Top V3 完成後 |
 | Search Results | `/search` | Browse | 目的検索の固定UI。browse_md grid + list。フィルター・ソート優先 | 特定のRIG・パーツ・ユーザーを探す | Must | A | section-driven ではない。固定UI |
-| Feed | `/feed` | Relationship | LOG中心のアクティビティフィード | 最新ログを眺める / フォロー中の動向を見る | Should | A | **「おすすめ / フォロー中」の2タブ**（#28裁定。§6参照）。⚠️ PC正本 `myrig-feed-v3.html` は未適用（3タブのまま）なので参照実装にしない |
+| Feed | `/feed` | Relationship | LOG中心のアクティビティフィード。**Feed 単体で目的を完結できるトップレベル体験** | 最新ログを眺める / フォロー中の動向を見る | Should | A | **「おすすめ / 新着 / フォロー中」の3タブ**（2026-09-07 イタヤ裁定。#28 の2タブは失効。§6参照）。PC 正本 `myrig-feed-v3.html` / Mobile `feed.html` とも適用済み |
 | RIG Detail | `/rig/[rigId]` | Detail | ユーザーRIG個別ページ。スペック・パーツ・ログ・写真 | このRIGの構成を見る | Must | S | ✅ v6 完成済み |
 | PARTS Detail | `/parts/[partId]` | Detail | ユーザーパーツ個別ページ。スペック・使用RIG・レビュー | このパーツの詳細を見る | Must | S | ✅ v6 完成済み |
 | LOG Detail | `/log/[logId]` | Detail | 整備・走行・カスタムログ個別ページ | このログの内容を読む | Must | S | ✅ v6 完成済み |
@@ -231,24 +231,54 @@ GarageShell は **GarageShell-List**（一覧・管理ハブページ群）と *
 
 ## 6. Feed Definition
 
-**本§は #28裁定（2026-07-23 イタヤ実機裁定）による現行定義。**
+**本§は 2026-09-07 イタヤ裁定による現行定義。**
+裁定原本: `_decisions/2026-09-07_feed-tabs-v1.md`。
+🔴 **#28裁定（2026-07-23）の「2タブ・全投稿時系列を置かない」は失効。**
 
 ### Feed の基本思想
 
-Feed は「SNS的な拡散の場」ではなく「フォローしているガレージの更新履歴」として設計する。
+Feed は「SNS的な拡散の場」ではない。
+そして **Browse や Library の派生でもなく、Feed 単体で目的を完結できるトップレベル体験**である
+（`_decisions/2026-09-07_toplevel-surfaces-v1.md`）。
+人・RIG・LOG の活動を時間軸で見る面として、読む → reaction → comment → 次の投稿、が Feed 内で完結する。
 
-### タブ構成 = 「おすすめ / フォロー中」の2本
+### タブ構成 = 「おすすめ / 新着 / フォロー中」の3本
 
-**「すべて（全投稿時系列）」タブは置かない**（X型）。
+**3つは入口の性質が違う。**
+
+| タブ | 何を基準に並ぶか |
+|---|---|
+| おすすめ | **興味・発見ベース** |
+| 新着 | **全公開 LOG の純時系列**（加工なし） |
+| フォロー中 | **social graph ベース** |
+
+🔴 **なぜ #28 の2タブから変えたか（2026-09-07）**
+
+「現行実装が3タブだから正典を合わせた」のではない。
+**Feed / LOG Detail continuity を詰めた結果、Feed の独立性を再検討して裁定を更新した。**
+
+Feed が独立したトップレベル体験であるなら、Feed 内に3つの入口が要る。
+とくに **MVP の「おすすめ」は完全な推薦アルゴリズムではない**（下記のとおり擬似ミックス）ため、
+**加工されていない全公開 LOG の時系列入口を残す価値がある**。
+#28 が退けた「すべて（全投稿時系列）」は X 型の拡散導線としての話であり、
+本裁定の「新着」は**推薦が未成熟な間の素の入口**という別の役割で置く。
 
 ### おすすめ（デフォルト）
 
 - 流れるコンテンツ: **LOG のみ**
 - ユーザーフォロー関係に関係なく全公開LOGが対象
+- 基準は**興味・発見**
 - **MVPのおすすめロジックは「新着＋人気の擬似ミックス」で可**
 - card_variant: **`log-feed`**（`myrig-log-card variant="feed"`）
   - ⚠️ `browse`（browse_md）は Browse ページ用。Feed では使用しない
   - `feed` variant は `SoT_card-components.js` に実装済み（旧 `myrig-log-feed`）
+
+### 新着（タブ切替）
+
+- 流れるコンテンツ: **全公開 LOG**
+- 並びは**投稿日時順のみ。推薦・人気による加工をしない**
+- card_variant: **`log-feed`**（おすすめタブと同じ）
+- 🔴 おすすめが本格的な推薦になっても、**「素の時系列を見る入口」として残す**
 
 ### フォロー中（タブ切替）
 
@@ -305,7 +335,7 @@ Feed は「SNS的な拡散の場」ではなく「フォローしているガレ
 | 2 | `myrig-parts-browse-v3.html` | `/parts` | 収益導線・Library 連携の中核。Parts Master との接続設計を固める |
 | 3 | `myrig-search-v3.html` | `/search` | 固定 UI（section-driven 非使用）のテンプレートを確立。browse_md grid + browse_list |
 | 4 | Global Layout / App Shell | — | **前倒し（↑ 6位→4位）。** Header / Sidebar / Drawer / Bottom Nav の設計。Feed・Public Garage など関係系ページのナビ構造を先に固める。現 V3 モックは Main Content only |
-| 5 | `myrig-feed-v3.html` | `/feed` | 「おすすめ / フォロー中」2タブ構成。LOG カード `log-feed` variant を主役に。`activity_item` コンポーネント設計もここで行う |
+| 5 | `myrig-feed-v3.html` | `/feed` | 「おすすめ / 新着 / フォロー中」3タブ構成（2026-09-07 裁定）。LOG カード `log-feed` variant を主役に。`activity_item` コンポーネント設計もここで行う |
 | 6 | `myrig-public-garage-v3.html` | `/user/[username]` | Own Garage v6 との表示分岐整理。GarageShell の共通化方針確定 |
 | 7 | `myrig-library-v3.html` 系 | `/library/*` | RIG Master / Parts Master Detail。SEO・アフィリエイト収益の中核 |
 

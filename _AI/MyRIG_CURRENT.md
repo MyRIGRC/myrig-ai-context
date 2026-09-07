@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260907-070
-updated: 2026-09-07 14:26 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260907-071
+updated: 2026-09-07 15:07 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-07 14:26 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-07 / revision 070（Entity Actions 統合 ＋ shelf 検査の baseline 貼り直し。次は残る PENDING）**
+**最終更新: 2026-09-07 / revision 071（LOG 着地 CLOSE ／ Feed 3タブを正典化＝#28 失効 ／ トップレベル体験原則を DECISION へ昇格。次は PC Core Convergence Audit）**
 
 > 🔴 **063 で決まったこと（イタヤ裁定 2026-09-06）: ユーザー投稿画像の上限は RIG 7 / PARTS 5 / LOG 3。**
 > RIG は Cover 1 ＋ Sub 最大6（従来 Cover 1 ＋ Sub 8 = 9 を**失効**）。PARTS 5・LOG 3 は従来どおり変更なし。
@@ -38,7 +38,8 @@ updated: 2026-09-07 14:26 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > Phase 3（LOG Detail PC）も Gate 5 PASS で CLOSE。
 > Feed continuity の 1「基本導線」も 068 で CLOSE。
 > continuity 2「reaction」も 069 で裁定し、**Entity Actions を Shared Source へ統合済み。**
-> 次は残る PENDING（pin の扱い／Browse・Search からの LOG 着地規則／Feed 3タブ正典不整合）。**
+> 071 で LOG 着地規則と Feed タブも決着。**continuity は `pin` を残して完了。**
+> 次は **PC Core Convergence Audit**（Home / Browse / Search / Feed / RIG Detail / PARTS Detail / LOG Detail）。**
 > LOG Detail はページローカルな見た目調整へ戻さない（067 / Gate 5 CLOSE）。
 > **Feed の本文・コメント・action row・author 導線も開け直さない（068）。**
 > continuity の残りは「比較できる実画面を作ってイタヤ裁定を受ける」ところまでが実装者の範囲で、
@@ -152,11 +153,51 @@ updated: 2026-09-07 14:26 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > docstring に **「baseline はテストを PASS させるために HEAD へ動かさない。貼り直しはイタヤ裁定が要る」**
 > を恒久ルールとして明記し、`BASE` 定義の直上に貼り直しの履歴と理由を残した。
 >
-> ### 🔵 PROPOSAL / 裁定候補（2026-09-07 / 068）— Browse / Feed / Library は独立したトップレベル体験
+> ### ✅ Browse / Search からの LOG 着地規則（2026-09-07 / 071 / CLOSE・実装変更なし）
 >
-> 🟡 **まだ DECISION ではない。** イタヤから設計思想として共有されたが、
-> 「continuity がまとまった区切りで正典化すべきか判断する」という扱いのまま置いている。
-> **DECISION に上げるかは次の裁定で決める。**
+> **全PC面を実測した結果、LOG カードと RIG カードは全面で完全に同じ href 文法だった。
+> LOG 固有の不整合は無い。** → **追加作業なしで CLOSE。**
+>
+> | 面 | LOG カード | RIG カード |
+> |---|---|---|
+> | Search v3 | 実リンク → `myrig-log-detail-v1.html`（24） | 実リンク → `myrig-rig-detail-v15.html`（42） |
+> | Library RIG / PARTS Master Detail | 実リンク → v1（各5） | 実リンク → v15（各6） |
+> | Home / Browse 3面 / Garage 系 / Public Garage / RIG Detail / preview | `href="#"` | `href="#"` |
+>
+> 着地規則そのものは 067（Search / Library を v1 へ）と 068（Browse / Search / Garage / Related からは
+> LOG Detail が正規の受け皿）で満たされている。カードの click 文法も共有部品側で決まっている
+> （`SoT_card-components.js`: `href` があればカード全体が `<a>`、無ければ `<div>`）。
+>
+> 📌 **残っている `href="#"` は LOG の問題ではなく、全 entity 共通の「モックが未配線」という状態。**
+> RIG カードも同じだけ死んでいる。**LOG だけ先に配線すると「LOG だけ押せる」非対称を作る**ので、
+> **次の PC Core Convergence Audit で entity 横断の論点として扱う。**
+>
+> ### ✅ Feed のタブを3本に（2026-09-07 / 071 / イタヤ裁定 / #28 は失効）
+>
+> **裁定原本: `_decisions/2026-09-07_feed-tabs-v1.md`。** 正典 `docs/ui/page-role-matrix-v1.md` §6 を改訂。
+>
+> | タブ | 何を基準に並ぶか |
+> |---|---|
+> | おすすめ | **興味・発見ベース** |
+> | 新着 | **全公開 LOG の純時系列**（推薦・人気による加工をしない） |
+> | フォロー中 | **social graph ベース** |
+>
+> 🔴 **「現行実装が3タブだから正典を合わせた」のではない。**
+> continuity を詰めた結果 **Feed の独立性を再検討し、その結果として裁定を更新した。**
+> Feed が独立したトップレベル体験である以上、Feed 内に3つの入口が要る。
+> とくに **MVP の「おすすめ」は完全な推薦アルゴリズムではない**ので、
+> **加工されていない全公開 LOG の時系列入口を残す価値がある。**
+> #28 が退けた「すべて（全投稿時系列）」は X 型の拡散導線の話であり、
+> 本裁定の「新着」は**推薦が未成熟な間の素の入口**という別の役割。
+> 🔴 おすすめが本格的な推薦になっても**「新着」は残す**。
+>
+> **実装変更は無い**（PC / Mobile とも元から3タブ・同じ順序・同じラベル）。
+> 正典側の「⚠️ PC正本は未適用（3タブのまま）なので参照実装にしない」という注記は不要になり削除した。
+>
+> ### ✅ DECISION（2026-09-07 / 071 / イタヤ裁定）— Browse / Feed / Library は独立したトップレベル体験
+>
+> **裁定原本: `_decisions/2026-09-07_toplevel-surfaces-v1.md`。**
+> 068 では PROPOSAL だったが、continuity がまとまった区切りで **DECISION へ昇格**した。
 >
 > **Browse / Feed / Library は「同じコンテンツを別表示する3つのタブ」ではない。**
 > それぞれが独立した目的・回遊文法を持ち、**その面だけを使っていても成立するトップレベルの体験面**である。
@@ -255,9 +296,11 @@ updated: 2026-09-07 14:26 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ✅ **069 で決着したもの:** ⑨**reaction** の state / count 同期と Shared Source 境界
 > （楽観更新 / rollback+notice / 未ログイン auth gate を含めて `SoT_entity-actions.js` へ統合）。
 >
-> 🟡 **まだ残っているもの:** ⑪Browse / Search からの LOG 着地規則 ／ ⑫Feed 3タブ正典不整合 ／
-> **pin の扱い**（schema 上 LOG は pins 対象。UI をどこに出すかが未裁定）。
-> **ここを根拠に実装を進めない。** 比較可能な実画面を作って裁定を受ける。
+> ✅ **071 で決着したもの:** ⑪Browse / Search からの LOG 着地規則（下記 CLOSE）／
+> ⑫Feed 3タブ（#28 を失効させ3タブを正典化）。
+>
+> 🟡 **まだ残っているもの: `pin` の扱いだけ**（schema 上 LOG は pins 対象。UI をどこに出すかが未裁定）。
+> **ここを根拠に実装を進めない。**
 >
 > - Feed 内 **quick comment の採否**
 > - quick comment の**入力形式**
@@ -272,8 +315,7 @@ updated: 2026-09-07 14:26 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 >   「ピン留め一覧（**RIG/PARTS/LOG**/Users）」。UI だけで決めると schema と乖離する。
 >   モックが pin を出していないのは**検討中の非表示**であって、
 >   「LOG に pin は無い」という正典ではない）
-> - 3タブの正典不整合（`page-role-matrix-v1.md` は「おすすめ / フォロー中」の2本だが、
->   実装と CURRENT は3タブ）
+> - ~~3タブの正典不整合~~ ✅ **071 で決着**（#28 の2タブを失効させ、3タブを正典化。上記参照）
 >
 > ### ⚪ OBSERVATION（現行実装の事実。裁定ではない）
 >
@@ -1337,6 +1379,24 @@ search-results-ux-v1 / search-contract-v1）はPROPOSAL。正典扱いしない�
 2026-07-30
 FEED文法はモバイル基準（おすすめ/フォロー中タブ）。
 PC版を差し替える（_decisions/p22-c21 参照）。実装待ち。
+
+⚠️ **2026-09-07 失効**: タブ本数の部分は下記 071 で改訂された。
+PC / Mobile を揃えるという方針自体は有効。
+
+2026-09-07
+🔴 **#28裁定（2026-07-23）「Feed はおすすめ / フォロー中の2タブ。全投稿時系列は置かない」を失効。**
+正典原本は `_decisions/2026-09-07_feed-tabs-v1.md`。
+Feed のタブは **「おすすめ（興味・発見）/ 新着（全公開LOGの純時系列）/ フォロー中（social graph）」の3本**。
+理由は「実装が3タブだから」ではなく、**Feed の独立性を再検討した結果**
+（`_decisions/2026-09-07_toplevel-surfaces-v1.md`）。
+MVP のおすすめが完全な推薦ではないため、**加工されていない時系列の入口を残す**。
+`docs/ui/page-role-matrix-v1.md` は §6 / サイトマップ / Page Matrix / ロードマップ表を改訂済み（v1.6）。
+
+2026-09-07
+**Browse / Feed / Library は独立したトップレベル体験であり、共通 entity を介して自然に相互接続する。**
+正典原本は `_decisions/2026-09-07_toplevel-surfaces-v1.md`。
+🔴 **この原則を理由に3面の見た目や構造を機械的に揃えない。** UI 文法は違ってよい。
+共通化するのは**同じ entity・同じ state / behavior / aria など同一責務の部分だけ**。
 
 ## モック是正キュー（2026-08-21 正典⇄モック全面照合で検出）
 

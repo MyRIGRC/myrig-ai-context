@@ -134,7 +134,9 @@
 
 **#3 myrig-feed-v3.html — `/feed`** ✅済（P13系）
 - PC構成: 3カラム（左＝フィルターパネル: FEEDタブ All/Following/Trending＋種別 / 中央＝日付セパレータ＋フィードカード・アクティビティ行＋loading skeleton＋empty state / 右＝Trending RIGs＋Suggested Users＋広告枠2種［Affiliate / AdSense］）
-- 特記: モバイルはタブ「おすすめ/フォロー中」置換（#28）・グリッド画像＋ImageLightbox・無限スクロール（#25例外）で**確定固定済み**。PC右列（おすすめユーザー/トレンド）の受け皿は現行モバイル確定形に従い、改修時のみ処遇宣言。
+- 特記: モバイルはタブ置換・グリッド画像＋ImageLightbox・無限スクロール（#25例外）で**確定固定済み**。
+  🔴 **2026-09-07 改訂**: タブ本数は **「おすすめ / 新着 / フォロー中」の3本**（`_decisions/2026-09-07_feed-tabs-v1.md`）。
+  **#28 の「おすすめ/フォロー中の2タブ」は失効。** PC / Mobile とも3タブで一致している。PC右列（おすすめユーザー/トレンド）の受け皿は現行モバイル確定形に従い、改修時のみ処遇宣言。
 
 **#4 myrig-browse-category-v3.html — `/category/[rigType]`**
 - 主列: cat-hero（カテゴリ名＋説明＋統計 RIGS/PARTS/LOGS/車種＋検索＋Open Library）→ browse棚×8（今週の注目 / 新着 / 人気車種 / 最近の整備・走行ログ / よく使われているタイヤ / メーカー別新着×2 / 注目モデル）→ lib-section（カテゴリLibrary導線）→ AD枠 → Editorial
