@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260907-068
-updated: 2026-09-07 10:52 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260907-069
+updated: 2026-09-07 13:41 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-07 10:52 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-07 / revision 068（Feed continuity 1「基本導線」CLOSE。次は 2「reaction」＋ Shared Source 統合）**
+**最終更新: 2026-09-07 / revision 069（continuity 2「reaction」裁定 → Entity Actions を Shared Source へ統合。次は残る PENDING）**
 
 > 🔴 **063 で決まったこと（イタヤ裁定 2026-09-06）: ユーザー投稿画像の上限は RIG 7 / PARTS 5 / LOG 3。**
 > RIG は Cover 1 ＋ Sub 最大6（従来 Cover 1 ＋ Sub 8 = 9 を**失効**）。PARTS 5・LOG 3 は従来どおり変更なし。
@@ -37,7 +37,8 @@ updated: 2026-09-07 10:52 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > **いま止まっている場所:** **Phase 2 は 2-A〜2-E すべて CLOSE。Mobile ロゴ lockup の小バッチも CLOSE。
 > Phase 3（LOG Detail PC）も Gate 5 PASS で CLOSE。
 > Feed continuity の 1「基本導線」も 068 で CLOSE。
-> 次は continuity の 2「reaction」＋ 採用内容の Shared Source 統合。**
+> continuity 2「reaction」も 069 で裁定し、**Entity Actions を Shared Source へ統合済み。**
+> 次は残る PENDING（pin の扱い／Browse・Search からの LOG 着地規則／Feed 3タブ正典不整合）。**
 > LOG Detail はページローカルな見た目調整へ戻さない（067 / Gate 5 CLOSE）。
 > **Feed の本文・コメント・action row・author 導線も開け直さない（068）。**
 > continuity の残りは「比較できる実画面を作ってイタヤ裁定を受ける」ところまでが実装者の範囲で、
@@ -77,6 +78,63 @@ updated: 2026-09-07 10:52 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 >
 > **今回の blocker にしないもの（記録のみ）:** モックの Public Garage が固定ユーザー1面で `h1` を持たない
 > （**後の Garage 監査で拾う**）／ モックに LOG ごとの面が無く全カードが同じ v1 へ着く。
+>
+> ### ✅ Entity Actions を Shared Source へ統合（2026-09-07 / 069 / イタヤ裁定 / mock `fb84702`）
+>
+> **裁定原本: `_decisions/2026-09-07_entity-actions-shared-v1.md`。**
+> モック側の実測は `myrig-mockup` `_state/MVP_CONVERGENCE_MAP.md` §8.16。
+>
+> 🔴 **統合前は、同じ「いいね」が3つの別実装だった。**
+>
+> | 場所 | 実装 | 動いていたか |
+> |---|---|---|
+> | Feed `.pc-feed-card` | page-local `[data-pc-like]` | 動く |
+> | **LOG Detail 本文 `<dt-actions>`** | `.dt-action[data-action]` | 🔴 **一度も動いていなかった** |
+> | RIG v15 / PARTS v1-open 右レーン | `.rail-action[data-action]` | 動く |
+>
+> 原因は共有 JS のセレクタ `.rail-action[data-action]` に**クラスが入っていた**こと。
+> 契約も markup も正しく、**セレクタだけが漏れていた**ので DOM を見る検査では見つからなかった。
+> 065 の「挙動は `[data-action]` に対して1か所で実装する」という設計意図と実装がずれていた。
+>
+> **DECISION（4論点）**
+>
+> | | |
+> |---|---|
+> | reaction 更新 | **楽観更新を採用。** 失敗時は rollback し、🔴 **黙って戻さず短い notice を出す**。🔴 **notice の比較案を増やさず、既存の通知文法（`MyRIG.toast` = `.app-toast` / `role=status` / `aria-live=polite`）を再利用する** |
+> | 未ログイン | 新しい UX 裁定にしない。likes / favorites / pins は `user_id NOT NULL` のユーザー操作なので、**Feed / Detail とも同じ LoginRequired 契約へ統一**。Feed だけモーダルがあり LOG Detail で何も起きない状態は **cross-surface 不整合として修正** |
+> | LOG Detail rail actions | 🔴 **追加しない。** 現行 inline を維持。**今回のバッチを理由に VISUAL CLOSE 済み面へ二重の action surface を作らない** |
+> | pin | **PENDING 維持。** schema 上 LOG は pins 対象だが、UI をどこに出すかは別論点。🔴 **統合の blocker にしない** |
+>
+> **正本の所在**
+>
+> `pc/assets/js/SoT_entity-actions.js` — like / favorite / pin の
+> **state / count / aria / 挙動 / 認証ゲート / 楽観更新 / rollback**、および LoginRequired
+> （markup / CSS / 文言 / capture ハンドラ）を1か所で持つ。読み込むのは Feed / LOG Detail / RIG v15 / PARTS v1-open の4面。
+>
+> 🔴 **書き戻し禁止:** `SoT_detail-components.js` に `.rail-action[data-action]` の挙動を戻さない ／
+> Feed に `[data-pc-like]` の挙動と page-local LoginRequiredModal を戻さない ／
+> **共有側のセレクタにクラスを混ぜない**（`[data-action]` だけで拾う）。
+>
+> **契約**: `data-action` / `data-base-count` / `aria-pressed` / `data-auth`（share には付けない）/ `data-entity-key`。
+> 数え方は既存規則のまま（初期 pressed=true → base+(pressed?0:-1)／false → base+(pressed?1:0)）。
+> **見え方はページの語彙、契約は共通**（`.rail-action` / `.dt-action` / `.pc-feed-card__action` は表示 variant）。
+>
+> **非回帰（恒久）**: `_state/entity_actions_check.py` を新設。**38項目 / 38 PASS / 0 FAIL**（`--selftest` 付き）。
+> 「契約があるか」ではなく **「押したら実際に count と `aria-pressed` が変わるか」** を見る
+> （今回の欠陥はセレクタ漏れで、DOM を見る検査では見つからないため）。
+> 画素は RIG v15 / PARTS v1-open / LOG Detail / Feed とも **揺れで説明できない画素 0**、
+> 無関係面の対照（Home / Browse RIGs）も 0。
+>
+> 🟡 **モックの都合（本番では消える）**: ページをまたぐ state は `sessionStorage` が代役
+> （`PERSIST` の中だけ。差し替えれば API に載る）／ どの LOG かは `?log=`（本番は `/log/[id]`）／
+> `?ea_fail=<0-100>` は rollback を実画面で見るためのもの。**fixture の逃げは残していない。**
+>
+> 🔴 **検査ツール側の指摘（実装の問題ではない・裁定待ち）**
+> `_state/shelf_propagation_check.py` の基準が `7437e44`（PROPAGATION-SHELF 直前）のままで、
+> Home / Browse 3面が**一律 2381px の差**で FAIL する。2026-09-04 の保存結果は「差 0」なので、
+> **2026-09-05 のロゴ lockup 全33面展開（2-D / 承認済みの視覚変更）以降のドリフト**とみられる
+> （差が全面で同一値 = ヘッダー帯の変化と整合）。**本バッチの寄与は 0**（変更前 `a02f81c` と現在で
+> Home / Browse とも画素差 0 を実測）。**基準の貼り直しは承認済み変更の再基準化なので勝手にやらない。**
 >
 > ### 🔵 PROPOSAL / 裁定候補（2026-09-07 / 068）— Browse / Feed / Library は独立したトップレベル体験
 >
@@ -178,8 +236,11 @@ updated: 2026-09-07 10:52 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ⑥quick comment の採否（**採用＝その場で投稿できる**）⑦その入力形式 ⑧「さらに ○ 件」でカード内展開
 > ⑩comment state / count の同期（**Feed と Detail で同一 state**）／ author 導線 = Public Garage。
 >
-> 🟡 **まだ残っているもの:** ⑨**reaction** の state / count 同期と Shared Source 境界 ／
-> ⑪Browse / Search からの LOG 着地規則 ／ ⑫3タブ正典不整合 ／ **pin の扱い**。
+> ✅ **069 で決着したもの:** ⑨**reaction** の state / count 同期と Shared Source 境界
+> （楽観更新 / rollback+notice / 未ログイン auth gate を含めて `SoT_entity-actions.js` へ統合）。
+>
+> 🟡 **まだ残っているもの:** ⑪Browse / Search からの LOG 着地規則 ／ ⑫Feed 3タブ正典不整合 ／
+> **pin の扱い**（schema 上 LOG は pins 対象。UI をどこに出すかが未裁定）。
 > **ここを根拠に実装を進めない。** 比較可能な実画面を作って裁定を受ける。
 >
 > - Feed 内 **quick comment の採否**
