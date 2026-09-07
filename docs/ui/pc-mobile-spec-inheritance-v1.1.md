@@ -154,16 +154,19 @@
 - 右列（上から）: ownerミニパネル → アクション（いいね/お気に入り/ピン留め）→ 統計（閲覧/お気に入り/ピン留め）→ BUY / INFO（Library製品情報導線＋アフィCTA）→ SHARE → EXTERNAL LINKS → AD枠 → RECENT ACTIVITY
 - 付随: img-modal（Lightbox）/ cmt-modal
 - 特記: エンゲージ数は訪問者にも表示（正典）。アフィCTA（E4）はモバイル再利用部品。
+- 🔴 **2026-09-07 改訂（074）**: 現行 PC は `pc/myrig-rig-detail-v15.html`。上の設計図は旧 v6 の記述で、v15 とは 主列（RIG情報 / ベースモデルの分離・owner-section 無し・RELATED 5棚＋AD）/ 右列（統計・RECENT ACTIVITY 無し・SHARE は entity-actions 内）/ 付随（Lightbox は PC 未実装維持）が食い違う。**PC 現物が正**。差異表と Mobile 処遇表は `myrig-mockup` `_state/MOBILE_RIG_DETAIL_TREATMENT.md`（v2）。
 
 **#7 myrig-parts-detail-v6.html — `/parts/[partId]`**
 - 主列: breadcrumb → ptb → gallery（#6と同文法）→ DESCRIPTION → SPEC → PHOTO NOTES → USED IN RIG → LOG → COMMENTS → owner-section（ガレージ導線＋RIG/パーツ/ログタブ）→ 関連棚: @userの他の登録パーツ → 同じ[メーカー]の人気パーツ → このパーツが使われている人気RIG（recommend）
 - 右列: ownerミニパネル → アクション（いいね/お気に入り/ピン留め）→ 統計 → BUY / INFO → SHARE → EXTERNAL LINKS → AD枠 → HISTORY
 - 付随: img-modal / cmt-modal
+- 🔴 **2026-09-07 改訂（074）**: 現行 PC は `pc/myrig-parts-detail-v1-open.html`。**LOG 節は作らない**（part_id が無い）/ SPEC は 製品情報 と 登録情報 に分離 / 右列 BUY・INFO・HISTORY は parts-master（Library Bridge）と entity-feed（登録・装着・取り外しのみ）/ RELATED 4棚＋AD。**PC 現物が正**。`_state/MOBILE_PARTS_DETAIL_TREATMENT.md`。
 
 **#8 myrig-log-detail-v6.html — `/log/[logId]`**（direct）
 - 主列: breadcrumb → log-title＋メタ → 本文＋画像 → LINKED TO（対象RIGカード）→ COMMENTS → 関連棚: @userの他のRIGのログ → 同じRIGの他のログ → 同じカテゴリの最近のログ（recommend）
 - 右列: ownerミニパネル → アクション（いいね/お気に入り/ピン留め）→ 統計 → SHARE → このRIGのログ → AD枠
 - 付随: img-modal / cmt-modal
+- 🔴 **2026-09-07 改訂（074）**: 現行 PC は `pc/myrig-log-detail-v1.html`（067 CLOSE）。identity は meta → author → RIG chip → title / 写真は本文の後・最大3枚・同じ高さ・crop なし / actions は本文 inline（pin は PENDING）/ 右列は builder・linked-rig・entity-feed・ad のみ / RELATED は 同じRIGの他LOG・ビルダーの他RIG・tags 由来の関連LOG（**同カテゴリで関連付けない**）。**PC 現物が正**。`_state/MOBILE_LOG_DETAIL_TREATMENT.md`。
 
 ### Garage（Own）
 
