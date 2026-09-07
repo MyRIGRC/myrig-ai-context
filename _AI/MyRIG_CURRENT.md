@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260906-066
-updated: 2026-09-06 16:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260907-067
+updated: 2026-09-07 09:35 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-06 16:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-06 / revision 066（065 の過剰裁定を修正。DECISION は役割と状態一貫性のみ。Phase 3 継続中）**
+**最終更新: 2026-09-07 / revision 067（Gate 5 PASS・CLOSE。LOG Detail 導線を v1 へ機械修復。本流は Feed / LOG Detail continuity へ）**
 
 > 🔴 **063 で決まったこと（イタヤ裁定 2026-09-06）: ユーザー投稿画像の上限は RIG 7 / PARTS 5 / LOG 3。**
 > RIG は Cover 1 ＋ Sub 最大6（従来 Cover 1 ＋ Sub 8 = 9 を**失効**）。PARTS 5・LOG 3 は従来どおり変更なし。
@@ -35,7 +35,57 @@ updated: 2026-09-06 16:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > 回帰基準ではないことを mockup 側 Map（§8.7）に明記した。
 
 > **いま止まっている場所:** **Phase 2 は 2-A〜2-E すべて CLOSE。Mobile ロゴ lockup の小バッチも CLOSE。
-> 次は Phase 3（LOG Detail PC → Gate 5）。**
+> Phase 3（LOG Detail PC）も Gate 5 PASS で CLOSE。
+> 次の本流は「Feed / LOG Detail continuity batch」。**
+> LOG Detail はページローカルな見た目調整へ戻さない（067 / Gate 5 CLOSE）。
+> continuity batch は「比較できる実画面を作ってイタヤ裁定を受ける」ところまでが実装者の範囲で、
+> 未裁定 UI を実装者判断で確定しない。
+>
+> ### ✅ Gate 5 PASS / CLOSE（2026-09-07 / 067 / GPT の PC 全体横断監査 → イタヤ裁定）
+>
+> **Phase 3 = LOG Detail PC を CLOSE する。以下6点を DECISION として固定する。**
+>
+> | # | DECISION |
+> |---|---|
+> | 1 | **PC Detail Lightbox は MVP では RIG / PARTS / LOG 3面とも未実装のまま維持**（064 の論点 C はこれで決着） |
+> | 2 | **PARTS / LOG の OPEN 本文・Quiet Rail を RIG へ自動波及させない**（見た目の機械的な揃えを禁じる） |
+> | 3 | **Detail の `dt-*` と `catalog-v6` は見た目まで無理に統合しない**（Gate 5 論点 A はこれで決着） |
+> | 4 | **同一責務の state / behavior / aria は Shared Source にする**（052 / §8.13 の再確認） |
+> | 5 | **Gallery の1枚時規則は Detail 共有側の責務として維持する**（Gate 5 論点 B はこれで決着） |
+> | 6 | 🔴 **LOG Detail のページローカルな微調整へは戻らない**（VISUAL CLOSE） |
+>
+> ⚠️ **2 と 3 は「揃えない」という裁定であって、4 の Shared Source を緩める根拠にはしない。**
+> 揃えないのは**見た目・役割**であって、**同一責務の state / behavior / aria は 1 か所**のままにする。
+>
+> ### ✅ LOG Detail 導線の機械的修復（2026-09-07 / 067 / mock 側で実施・UX 裁定なし）
+>
+> **既に LOG Detail へのリンクを持っていて、旧世代 `pc/myrig-log-detail-v6.html` を向いていた 22 箇所だけ**を
+> 現行 `pc/myrig-log-detail-v1.html` へ機械的に付け替えた。**新しい導線・click policy は1つも足していない。**
+>
+> | 面 | 変更 |
+> |---|---|
+> | `pc/myrig-search-v3.html` | 12 → v1 |
+> | `pc/myrig-library-rig-master-detail-v3.html` | 5 → v1 |
+> | `pc/myrig-library-parts-master-detail-v3.html` | 5 → v1 |
+> | Launcher（`index.html` / `compare.html`） | 既に v1（4件・修正不要を実測で確認） |
+>
+> **触っていない面（リンク自体が無い。次の continuity batch で実画面裁定する）**
+> Feed 14 / Home 12 / Browse 3面 19 / Garage 系 27 / Public Garage 9 / RIG Detail 18 / preview 12 —
+> いずれも `href="#"` か href 属性なしで、**Detail 導線を持っていない**。
+>
+> **v6 の扱い: この時点では削除しない。** active tree に残る v6 文字列は
+> **リンク 0 / コメント・ドキュメント 4件のみ**（`pc/myrig-log-detail-v1.html` の注記1 /
+> Mobile `log-detail.html` の「正典は PC v6」という記述2 / `_state/HANDOFF_20260907` 1）。
+> Mobile 側の2件は **Mobile の正典参照先が旧世代のままという別件**で、Phase 4 の論点として残す。
+>
+> **検証（実測 / 2026-09-07）**
+> `search_regression.py` 101/101 PASS ／ `launcher_link_check.py` 168 checked・0 FAIL ／
+> 変更3面の pixel 非回帰（`PIX_BASE=ddcd742`・1440 light / 1280 dark）**揺れで説明できない画素 0** ／
+> 3面の LOG カード計 34枚を実ブラウザで解決し、**全て v1 に着地・`.dt-grid` 有り・pageerror 0**。
+>
+> 🔴 **検査ツールの欠陥をもう1件直した:** `_state/detail_pixel_proof.py` は撮影の一時ファイルが
+> `/tmp/s.png` 固定で、別ユーザーが残した同名ファイルがあると **PermissionError で1枚も撮れなかった**。
+> プロセスごとの一時ディレクトリへ変更。（前スレッドで直した `PIX_BASE` キャッシュ欠陥に続いて2件目）
 >
 > ### 🔵 DECISION（2026-09-06 / イタヤ裁定）— Feed と LOG Detail の役割
 >
@@ -52,6 +102,14 @@ updated: 2026-09-06 16:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 >
 > 方向性として議論はしているが、**イタヤ裁定はまだ出ていない**。
 > **ここを根拠に実装を進めない。** Feed continuity batch で実画面を見ながら決める。
+>
+> 📌 **067 追記:** 下の一覧はそのまま **Feed / LOG Detail continuity batch の裁定対象**である。
+> 067 の導線修復では**1つも決めていない**（既存リンクの向き先を変えただけ）。
+> continuity batch では、①「続きを読む」の扱い ②Feed 内展開と Detail 遷移の関係
+> ③Detail への明示導線 ④Feed カード全体の click policy ⑤Feed 内コメント表示件数
+> ⑥quick comment の採否 ⑦その入力形式 ⑧「コメントをすべて見る」の遷移
+> ⑨reaction state / count の同期 ⑩comment state / count の同期
+> ⑪Browse / Search からの LOG 着地規則 ⑫3タブ正典不整合 — を**比較可能な実画面**にして裁定を受ける。
 >
 > - Feed 内 **quick comment の採否**
 > - quick comment の**入力形式**
@@ -95,6 +153,10 @@ updated: 2026-09-06 16:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > **Gate 5 の論点 C として判断する。** 採用する場合のみ **Shared Source として3面に実装**し、
 > **LOCK / CLOSE 面（RIG v15 / PARTS v1-open）への影響と Gate 再検証**を含めて扱う。
 >
+> ✅ **決着（2026-09-07 / 067 / Gate 5 CLOSE）: MVP では3面とも未実装のまま維持する。**
+> `data-lightbox` 属性は将来フックとして残すが、`cursor:zoom-in` / hover の明度変化は出さない
+> （未実装なのに「拡大できる」と約束しないため）。
+>
 > ### ✅ Mobile ロゴ lockup 化（2026-09-05 / CLOSE / mock `3ab967e`・`231a7e1`・`3a4e1b0`）
 >
 > PC 承認済みの lockup を Mobile へ展開した小バッチ。**Mobile Header 以外は触っていない。
@@ -135,6 +197,7 @@ updated: 2026-09-06 16:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > | 2-C PROPAGATION-SHELF | ✅ CLOSE（053 / Gate 3 PASS / mock `4c58a03`） |
 > | **2-D Home Header ＋ ロゴ lockup 化** | ✅ **CLOSE（056 / mock 3コミット）。** 下記参照 |
 > | 2-E Search 証跡 | ✅ **CLOSE（058 / mock `ff8406e`・`13434f0`）。101項目 / 101 PASS / 0 FAIL。** UI は開けていない。下記参照 |
+> | **3 LOG Detail PC** | ✅ **CLOSE（067 / Gate 5 PASS）。** `pc/myrig-log-detail-v1.html`。導線は v1 へ機械修復済み。上記参照 |
 >
 > ### ✅ Phase 2-E の顛末（2026-09-05）
 >
@@ -211,8 +274,8 @@ updated: 2026-09-06 16:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 |---|---|---|
 | 0 | 048 固定（Gate 4 CLOSE / PARTS LOCK / 旧版撤去 / push） ✅ | 新しい設計作業 |
 | **1** | **MVP_CONVERGENCE_MAP 作成** ✅（049） | HTML 変更 |
-| 2 | ✅ **2-A / 2-B / 2-C / 2-D / 2-E すべて CLOSE。** 次は Phase 3 | Home 等の再設計 |
-| 3 | LOG Detail PC（確定 Detail System から作る）→ Gate 5 | 第3の Detail 文法の発明 |
+| 2 | ✅ **2-A / 2-B / 2-C / 2-D / 2-E すべて CLOSE** | Home 等の再設計 |
+| **3** | ✅ **CLOSE（067 / Gate 5 PASS）。** LOG Detail PC `v1`。導線も v1 へ機械修復済み。**次は Feed / LOG Detail continuity batch** | 第3の Detail 文法の発明／LOG Detail のページローカル微調整への出戻り |
 | 4 | Mobile Detail 3面を1バッチで追随 | PC と Mobile の同時進行 |
 | 5 | MVP component hardening（Form 共有境界 / Garage / Library / Mobile の必要箇所） | 全ページの inline CSS 撲滅・Register の再設計 |
 | Final | Next.js Readiness Gate → PASS 後はモックを原則 Freeze | 以後の気軽な再オープン |
@@ -232,7 +295,7 @@ updated: 2026-09-06 16:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | Footer | ✅ **2-B CLOSE。33面が `<site-footer>` 1タグ。直書き 0 / 生成リンク本数は33面で一致**。〈以前: PC 33面 / 7 variant〉。`log-composer-modal` の `modal-footer` はモーダルのアクションバーで責務が違うため対象外。Mobile 42面は `<footer>` を持たない |
 | Shelf | ✅ **6面が共有 JS を使用**（詳細2 ＋ Home ＋ Browse 3）。page-local 実装 0。スクロール量は3種（`cards` / `viewport` / 固定 `440`）で**既存の実測値のまま**。統一は横断裁定 |
 | Header | ✅ **2-D CLOSE。** PC 35面が `app-header`、詳細2面が `.cx--quiet`。**PC 全33面で page-local ロゴ責務 0**。ロゴは lockup 画像（タグライン「RC GARAGE」を画像に内包）を `SoT_app-shell.css` §2.1 の**既定へ統合**（`--lockup` variant は残していない）。展開前の実体調査で**別のロゴ variant を必要とする consumer は 0件**と確認済み。**Mobile も 2026-09-05 の小バッチで lockup 化済み**（別アセット `v1.2m`。上記 NOW 参照） |
-| Detail SoT | `SoT_detail-markup.js` ほかを使うのは RIG v15 / PARTS OPEN の2面。Phase 3 で LOG が3面目 |
+| Detail SoT | ✅ **3面。** `SoT_detail-markup.js` ほかを使うのは RIG v15 / PARTS OPEN / **LOG v1（067 で CLOSE）**。第3の Detail System は作っていない |
 | Mobile | 42面すべて同じ共有3ファイルを読む。**共通の inline ブロック4種が28面に重複**（252×10 / 151×8 / 411×7 / 340×3）。Phase 4 でここを出すだけで28面が片付く |
 | inline CSS 0 の PC 面 | **2面だけ**（RIG v15 / PARTS OPEN）。これは目標値ではなく現在地の記録 |
 
