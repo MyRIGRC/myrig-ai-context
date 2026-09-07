@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260907-067
-updated: 2026-09-07 09:35 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260907-068
+updated: 2026-09-07 10:52 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,7 @@ updated: 2026-09-07 09:35 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-07 / revision 067（Gate 5 PASS・CLOSE。LOG Detail 導線を v1 へ機械修復。本流は Feed / LOG Detail continuity へ）**
+**最終更新: 2026-09-07 / revision 068（Feed continuity 1「基本導線」CLOSE。次は 2「reaction」＋ Shared Source 統合）**
 
 > 🔴 **063 で決まったこと（イタヤ裁定 2026-09-06）: ユーザー投稿画像の上限は RIG 7 / PARTS 5 / LOG 3。**
 > RIG は Cover 1 ＋ Sub 最大6（従来 Cover 1 ＋ Sub 8 = 9 を**失効**）。PARTS 5・LOG 3 は従来どおり変更なし。
@@ -36,10 +36,79 @@ updated: 2026-09-07 09:35 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 > **いま止まっている場所:** **Phase 2 は 2-A〜2-E すべて CLOSE。Mobile ロゴ lockup の小バッチも CLOSE。
 > Phase 3（LOG Detail PC）も Gate 5 PASS で CLOSE。
-> 次の本流は「Feed / LOG Detail continuity batch」。**
+> Feed continuity の 1「基本導線」も 068 で CLOSE。
+> 次は continuity の 2「reaction」＋ 採用内容の Shared Source 統合。**
 > LOG Detail はページローカルな見た目調整へ戻さない（067 / Gate 5 CLOSE）。
-> continuity batch は「比較できる実画面を作ってイタヤ裁定を受ける」ところまでが実装者の範囲で、
+> **Feed の本文・コメント・action row・author 導線も開け直さない（068）。**
+> continuity の残りは「比較できる実画面を作ってイタヤ裁定を受ける」ところまでが実装者の範囲で、
 > 未裁定 UI を実装者判断で確定しない。
+>
+> ### ✅ Feed continuity 1「基本導線」CLOSE（2026-09-07 / 068 / イタヤ裁定）
+>
+> **裁定原本: `_decisions/2026-09-07_feed-continuity-v1.md`。**
+> モック側の実測は `myrig-mockup` `_state/MVP_CONVERGENCE_MAP.md` §8.15。
+>
+> **前提: Feed の閲覧体験は原則 Feed 内で完結させる。読むたびに別ページへ追い出さない。**
+> LOG Detail は Feed の「完全版ページ」ではなく **canonical Garage record** として独立し、
+> Browse / Search / Garage / Related から LOG を発見したときの**正規の受け皿**になる。
+>
+> | | DECISION |
+> |---|---|
+> | 本文 | 「続きを読む」は **Feed 内展開**。**LOG の長さで挙動を変えない**。通常長は Feed 内で全文を読む |
+> | 本文 | 超長文だけ、上限まで展開した**末尾**に「このログの全文を記録ページで読む →」 |
+> | 本文 | 🔴 **長文の境界値を正典で固定しない。** 当面「1000字前後」を **fixture 値**として扱う |
+> | action row | **like / comment / share / LOG Detail の4等分**。🔴 **LOG Detail を後付けの auto 列にしない** |
+> | action row | LOG Detail は `<a>`。`title` / `aria-label` =「このログの記録を見る」。キーボード到達可 |
+> | action row | アイコンは document / record 系を維持。🔴 **アイコン違いの比較案を増やさない** |
+> | コメント | comment action で**カード内に conversation**。初期表示 **最新2件程度**。その場で投稿可。続きは「さらに ○ 件」 |
+> | コメント | 🔴 **Feed と LOG Detail のコメントは同一 state・同一データ。** UI も新造せず **Feed 用 compact variant** |
+> | author | **avatar / 表示名 / `@handle`** を **Public Garage（`/user/[username]`）** へ |
+> | author | 🔴 **時刻はリンクにしない** ／ 🔴 **Feed 内に「そのユーザーだけの Feed」を作らない** |
+> | author | 「この人の投稿だけ見たい」は **Public Garage 側の LOG 一覧**で満たす。Public Garage 本体の設計は別バッチ |
+> | a11y | avatar リンクは **`tabindex="-1"` のみ**。🔴 **`aria-hidden="true"` を付けない**（クリックできる要素を支援技術から完全に隠さない） |
+>
+> **失効（戻さない）:** 時刻リンク ／ カード全体 click ／ 本文全体 click ／ 毎カード下部の大きなテキスト CTA ／
+> 3点メニュー内だけ ／「続きを読む」で Detail 遷移 ／ action row の「3等分＋auto 列」。
+>
+> ⚠️ **Shared Source 統合は「採用後」。** 実行時の Feed カードは page-local `.pc-feed-card` で、
+> Detail の `<dt-actions>` 契約（`data-action` / `data-base-count` / `aria-pressed`）を持っていない。
+> **今回は fixture のまま CLOSE し、先に大規模リファクタしない**（イタヤ指示）。
+> 次バッチで reaction / comment の state / count / aria / behavior を1か所へ寄せる。
+>
+> **今回の blocker にしないもの（記録のみ）:** モックの Public Garage が固定ユーザー1面で `h1` を持たない
+> （**後の Garage 監査で拾う**）／ モックに LOG ごとの面が無く全カードが同じ v1 へ着く。
+>
+> ### 🔵 PROPOSAL / 裁定候補（2026-09-07 / 068）— Browse / Feed / Library は独立したトップレベル体験
+>
+> 🟡 **まだ DECISION ではない。** イタヤから設計思想として共有されたが、
+> 「continuity がまとまった区切りで正典化すべきか判断する」という扱いのまま置いている。
+> **DECISION に上げるかは次の裁定で決める。**
+>
+> **Browse / Feed / Library は「同じコンテンツを別表示する3つのタブ」ではない。**
+> それぞれが独立した目的・回遊文法を持ち、**その面だけを使っていても成立するトップレベルの体験面**である。
+>
+> | 面 | 目的 |
+> |---|---|
+> | Browse | RIG / PARTS / カテゴリから世界を探索する discovery / exploration の面。**Browse だけでも探索体験が成立する** |
+> | Feed | 人・RIG・LOG の活動を時間軸で見る面。読む → reaction → comment → 次の投稿 |
+> | Library | メーカー・製品・マスター情報を調べる参照系の面。**Community の簡易版でも Browse の下位ページでもない** |
+>
+> 🔴 **「独立して成立する」≠「互いに分断する」。**
+> MyRIG らしさは、それぞれの世界を壊さずに**自然な文脈で別の世界へつながる**こと。
+> 「別の世界へ遷移させること」が主目的なのではなく、
+> **今いる面で目的を果たしたうえで、興味が生まれた場所に自然な扉を置く。**
+>
+> 想定する接続の例:
+> Feed → 気になる RIG → RIG Detail → Base Model → Library → 同モデルを使った別 RIG → Browse ／
+> Browse → 気になる LOG → LOG Detail → author → Public Garage → Follow → その後 Feed で活動を見る ／
+> Library → 製品情報 → その製品を使っている RIG → Community 側へ
+>
+> ⚠️ **この原則を理由に Browse / Feed / Library の見た目や構造を機械的に揃えない。**
+> 目的が違うので **UI 文法は違ってよい**。共通化するのは
+> **同じ entity・同じ state / behavior / aria など同一責務の部分だけ**。
+>
+> 📌 068 の Feed 裁定（本文・コメントを Feed 内で完結させる／LOG Detail は常設の出口だが必須遷移にしない）は、
+> この考え方から導かれている。
 >
 > ### ✅ Gate 5 PASS / CLOSE（2026-09-07 / 067 / GPT の PC 全体横断監査 → イタヤ裁定）
 >
@@ -103,13 +172,15 @@ updated: 2026-09-07 09:35 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > 方向性として議論はしているが、**イタヤ裁定はまだ出ていない**。
 > **ここを根拠に実装を進めない。** Feed continuity batch で実画面を見ながら決める。
 >
-> 📌 **067 追記:** 下の一覧はそのまま **Feed / LOG Detail continuity batch の裁定対象**である。
-> 067 の導線修復では**1つも決めていない**（既存リンクの向き先を変えただけ）。
-> continuity batch では、①「続きを読む」の扱い ②Feed 内展開と Detail 遷移の関係
-> ③Detail への明示導線 ④Feed カード全体の click policy ⑤Feed 内コメント表示件数
-> ⑥quick comment の採否 ⑦その入力形式 ⑧「コメントをすべて見る」の遷移
-> ⑨reaction state / count の同期 ⑩comment state / count の同期
-> ⑪Browse / Search からの LOG 着地規則 ⑫3タブ正典不整合 — を**比較可能な実画面**にして裁定を受ける。
+> ✅ **068 で決着したもの（上の「Feed continuity 1 CLOSE」が正）:**
+> ①「続きを読む」の扱い ②Feed 内展開と Detail 遷移の関係 ③Detail への明示導線
+> ④Feed カード全体の click policy（**不採用**）⑤Feed 内コメント表示件数（最新2件程度）
+> ⑥quick comment の採否（**採用＝その場で投稿できる**）⑦その入力形式 ⑧「さらに ○ 件」でカード内展開
+> ⑩comment state / count の同期（**Feed と Detail で同一 state**）／ author 導線 = Public Garage。
+>
+> 🟡 **まだ残っているもの:** ⑨**reaction** の state / count 同期と Shared Source 境界 ／
+> ⑪Browse / Search からの LOG 着地規則 ／ ⑫3タブ正典不整合 ／ **pin の扱い**。
+> **ここを根拠に実装を進めない。** 比較可能な実画面を作って裁定を受ける。
 >
 > - Feed 内 **quick comment の採否**
 > - quick comment の**入力形式**
