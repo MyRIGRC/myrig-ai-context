@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260907-076
-updated: 2026-09-08 08:59 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260909-077
+updated: 2026-09-09 12:16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,79 @@ updated: 2026-09-08 08:59 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-07 / revision 076（Mobile Feed convergence CLOSE。次は Garage / Public Garage Mobile）**
+**最終更新: 2026-09-09 / revision 077（Garage Owner RIG / PARTS Detail **PC visual / structure CLOSE**。次は Mobile Garage RIG / PARTS Detail）**
+
+> ## ✅ 077: Garage Owner Detail PC CLOSE ＋ Cross-surface Color / Theme 収束（2026-09-09）
+>
+> モック: `myrig-mockup` `pc/myrig-garage-rig-detail-v7.html` / `pc/myrig-garage-parts-detail-v7.html`。
+> 恒久検査: `_state/garage_check.py`（**485 PASS / 0 FAIL**）。
+> mockup HEAD `7bfb47a`（Vercel production `dpl_HZbyi8QTpifGRT93rhZnusj2mti8` = 同 SHA / READY で **origin 反映を独立確認**）。
+>
+> ### STATE
+> ✅ **Garage Owner RIG / PARTS Detail は PC visual / structure CLOSE。**
+> 最新 Public Detail（v15 / v1-open）を骨格に Owner 差分だけを上乗せした v7 で確定。
+> canvas 1560・7:3・OPEN 型本文・共有 gallery / comments を継承。Owner 差分は
+> Context Bar（sticky）・Garage Drawer・MANAGE・QUICK NOTE（明示保存）・BUILD PARTS MAP・統計4値。
+> reaction / 購入 CTA / RELATED は載せない。
+> 🔴 **PC Garage Detail の視覚・構造は再オープンしない。** v6 8面はファイルとして残すが Launcher の参照先ではない。
+>
+> ### DECISION 1 — Owner Control は entity category binding
+> Owner Control（`data-gd-owner` を持つ rail section）の強調色は **その entity のカテゴリ色**に従う。
+>
+> | 面 | binding | 実測（Light / Dark 共通） | contrast |
+> |---|---|---|---|
+> | RIG（MANAGE / QUICK NOTE / BUILD PARTS MAP） | `--cat-rig` / `--cat-rig-on` | `#FBFF00` / `#151515` | 16.87 |
+> | PARTS（MANAGE / QUICK NOTE） | `--cat-parts` / `--cat-parts-on` | `#D92D20` / `#ffffff` | 4.83 |
+>
+> 実装は `<html data-gd-entity="rig|parts">` と `SoT_garage-detail.css` の2行だけ。
+> 🔴 **色値を page-local に hardcode しない。** Public Detail と同じ category token を参照する。
+> component 構造は RIG / PARTS で共通のまま、**binding だけ**を entity で切り替える。
+> Light / Dark で同じ category identity（theme 切替は token 側が持つので `--gd-control` の Dark override を置かない）。
+> 旧文法「Garage の操作領域だから RIG / PARTS とも黄」は**失効**。
+> ⚠️ H2（`--cat-*` の cross-surface rollout）とは別件。**category 色の値そのものは変更していない。**
+>
+> ### DECISION 2 — semantic color token の物理供給元を Single Source 化
+> 🔴 **semantic token の物理供給元は `pc/assets/css/SoT_tokens-v6.css` の1つだけ。**
+>
+> | 以前あった二重管理 | 処遇 |
+> |---|---|
+> | `css/sot/SoT_tokens-v6.css`（Mobile 用の別コピー。A-4 / B-1 が届いていなかった） | **`@import` shim**。値を持たない |
+> | `css/mobile-tokens.css` の `--ms-*` | `var(--color-*)` への**参照**。Dark 再定義ブロックを撤去 |
+> | 14面の私設 `:root` palette（24〜40行 × 14 = 414 宣言） | 撤去して token を link |
+> | P22-C3 の Dark 階調（`SoT_detail.css` ＋ 6面の page-local コピー） | **token file へ昇格**し、コピーを撤去 |
+> | `color-scheme` | `html[data-theme]` 契約で token が供給（library 5面・composer の page-local 宣言を撤去） |
+>
+> **塗り（fill）とその上の文字（on）は別 token。** `--color-accent-fill` / `--color-accent-on`、
+> `--rig-status-*-on`。component が `color:#fff` を直書きしない。
+> 🔴 **Mobile 用コピー / page-local 重複を恒久化しない。** 面を足すときも token を link するだけにする。
+>
+> **実測（50面 × Light/Dark = 100 render）**: `--color-bg` / `--color-surface` / `--color-text-tertiary` /
+> `--color-accent` が Light・Dark とも **50面で単一値**。`color-scheme` light 50 / dark 50。
+> 低 contrast 箇所 **2,251 → 485（−78%）**、pageerror 0、横 overflow 0。
+>
+> ### DECISION 3 — Entity Action の active は accent 文法1つ
+> like / favorite / pin の active は **同じ `--ea-active`（= `--color-accent`）**。
+> **like だけ赤にしない**（実画面で違和感が確認され、同列の3操作なのに意味色が分裂していた）。
+> pressed surface（rail の青い面）は持たず、色字＋色枠だけで active を示す。
+> 🔴 **reaction state へ category token（`--cat-*`）や通知色を流用しない。**
+> 🔴 **danger / delete の赤（`--color-danger`）とは責務が別。** reaction = accent / 破壊操作 = danger。
+> `--color-like-on` は footer の ♥ 等の**装飾**として残すが、reaction の state 色ではない。
+> 比較用の `--ea-active-like` / `html[data-ea-variant]` / `?ea=b` は**撤去済み**（Shared Source は完成状態1つ）。
+> 実測: PC rail Light 5.19 / Dark 4.50、Mobile action bar Light 5.19 / Dark 4.92（3操作とも同値）。
+>
+> ### PENDING
+> | # | 内容 |
+> |---|---|
+> | **Owner Edit Interaction** | まとめて編集 → Register edit mode ／ section 編集 → scoped modal ／ Build Detail → large modal。**別バッチ**。read-first 調査済み（登録フォームに同じ field 責務が既にあり、足りないのは①フォトノート caption ②パーツ削除 UI の2つ。障害は登録ページが page-local CSS 1807行で部品化されていないこと）。**PC visual CLOSE を妨げない** |
+> | **最終 Convergence へ回す** | H2 `--cat-*` cross-surface rollout ／ filter・tab 文法整理（S2）／ Feed scrollbar の thin tuning ／ Color TUNING 群（footer ♥・avatar イニシャル・写真上文字・breadcrumb `/`・bell badge）。**全モック完成後**にまとめて扱う |
+>
+> ✅ **H1 は CLOSE。** PC v15 のフォトノートを 8 → **6枚**へ（7件目・8件目は 3件目 / 5件目と同一画像の重複で、
+> caption も枠合わせだった）。Garage v7 も同時に追随。CSS で隠していない。Gallery 本体（7枚）は不変。
+>
+> ### NOW
+> 🔴 **次は Mobile Garage RIG / PARTS Detail。**
+> PC Garage Owner Detail で確定した **Owner 責務を Mobile へ adapt** する作業であって、
+> PC Detail の再設計ではない。**Mobile Public Detail 3面（075 で CLOSE）も再オープンしない。**
 
 > 🔴 **063 で決まったこと（イタヤ裁定 2026-09-06）: ユーザー投稿画像の上限は RIG 7 / PARTS 5 / LOG 3。**
 > RIG は Cover 1 ＋ Sub 最大6（従来 Cover 1 ＋ Sub 8 = 9 を**失効**）。PARTS 5・LOG 3 は従来どおり変更なし。
@@ -90,7 +162,7 @@ updated: 2026-09-08 08:59 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > **非回帰**: PC Feed v3 / RIG v15 / PARTS v1-open / LOG v1 の画素差 **0**、`entity_actions_check` 36 PASS、
 > `detail_contract_check` 51 PASS、`launcher_link_check` 189 PASS、Mobile Detail 3面 58 / 55 / 47 ＋ source 23 PASS、Mobile 既存 10 面 問題 0。
 >
-> 🔴 **HOLD（Feed の外）**: H1 PC v15 フォトノート 8枚（063/073 追随漏れ・PC 未改変）/ H2 `--cat-*` の cross-surface token rollout /
+> 🔴 **HOLD（Feed の外）**: ~~H1 PC v15 フォトノート 8枚~~（**077 で CLOSE**。8 → 6枚へ是正済み）/ H2 `--cat-*` の cross-surface token rollout /
 > H3 `pin` の露出（066 継続）。076 で新たに増えた blocker は無い。
 
 > ✅ **075: Mobile Detail Phase（Phase 4）CLOSE — RIG / PARTS / LOG Detail Mobile の3面が完成形**。
