@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260909-079
-updated: 2026-09-09 18:16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260909-080
+updated: 2026-09-09 20:46 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,90 @@ updated: 2026-09-09 18:16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-09 / revision 079（**Garage Top PC v7 CLOSE**。Own Garage 6面の1本目が完了。次は 2「RIG一覧」— ただし着手前に棚卸しと変更方針の報告で一度止まる）**
+**最終更新: 2026-09-09 / revision 080（**RIG一覧 PC v7 CLOSE**。Own Garage 6面のうち 2本 完了し、**一覧5面の器が確定**。次は 3「PARTS一覧」— 着手前に棚卸しと PARTS 固有差分の報告で一度止まる）**
+
+> ## ✅ 080: Garage RIG一覧 PC v7 CLOSE — 一覧5面の器が確定（2026-09-09 / イタヤ実画面レビュー通過）
+>
+> モック: `myrig-mockup` `pc/myrig-garage-rigs-v7.html`（HEAD `b534f8d`。
+> Vercel production `dpl_6xSZ8JDBDUaj1E5C3XGE2taoYfC2` = 同 SHA / READY で **origin 反映を独立確認**）。
+> 恒久検査: `_state/garage_list_check.py`（**176 PASS / 0 FAIL**・故障注入 selftest あり）。
+>
+> ### STATE
+> ✅ **RIG一覧（/garage/rigs）は PC visual / structure CLOSE。**
+> ✅ **Own Garage 一覧5面の器がここで確定した。**3〜6面目は器を再利用し、中身の差分だけを扱う。
+> 🔴 **Garage Top / RIG一覧は再オープンしない。** v6 はファイルとして残すが Launcher の参照先ではない。
+>
+> ### DECISION 1 — 一覧の器を Shared Source 化（棚卸しの実測が根拠）
+> `.main-2col` / `.page-title-bar` / `.filter-panel` 系は **v6 の一覧5面すべてが page-local に複製**
+> していた（定義本体の md5 は 5面中4面が一致 ／ page-local CSS は5面合計 **1,158行** ／
+> `myrig-garage-rigs-v6.html` の中だけでも `.filter-panel` が **2回**定義）。
+> CORE 共有UI Single Source（L1）の昇格条件をとうに超えていた。
+>
+> | ファイル | 責務 |
+> |---|---|
+> | `pc/assets/css/SoT_garage-page.css` | **Garage 6面共通** … canvas / cover / 節見出し / **`.grid-md`** / 左レーンの v7 差分 |
+> | `pc/assets/css/SoT_garage-list.css`（080 新設） | **一覧5面専用** … `.main-2col` / `.main-content` / `.page-title-bar` / `.filter-panel` 系 / 空状態 |
+> | `pc/assets/js/SoT_garage-list.js`（080 新設） | filter / sort の**挙動と aria state** |
+>
+> 🔴 `.grid-md` は `SoT_garage-top.css` → **`SoT_garage-page.css` へ昇格**（イタヤ裁定。Top と一覧の
+> 両方が使うため）。一覧側で作り直さない。Garage Top は filter rail を持たないので **`SoT_garage-list.css` を読まない**。
+> 面の page-local CSS / JS は **0**。
+>
+> ### DECISION 2 — filter は style だけでなく behavior / aria state も共有側（イタヤ指示）
+> 契約は **data 属性だけ**。id 決め打ちにしない。
+> `[data-garage-list]` / `[data-list-items]` / `[data-list-count]` / `[data-list-empty]` /
+> `[data-filter-reset]` / `[data-filter-chips="<key>"]` / `[data-filter-select="<key>"]` / `[data-sort]`。
+> 対象要素は `data-<key>`（「,」区切りで複数可）。単一選択と `aria-pressed`、件数同期（`aria-live`）、
+> 0件の空状態、条件クリアと focus 復帰、並べ替えを**部品が持つ**。
+> v6 の filter は見た目だけで、押しても何も起きず `aria-pressed` も無かった。
+>
+> 🔴 **罠の記録: 並べ替えで DOM を動かしてはいけない。**
+> `appendChild` で付け替えると、カード（Web Component）の `connectedCallback` が再実行され
+> `attachShadow` が「already hosts a shadow tree」で throw する（実測 pageerror 7〜35件）。
+> **grid の `order` だけを書き換える。** 検査 GL13 が `appendChild` の再発を縛る。
+>
+> ### DECISION 3 — filter の色と、一覧の責務分離
+> | 対象 | 決定 |
+> |---|---|
+> | filter の見出し | v6 の `--color-accent`（青）を撤去し **本文色**（NG-6「行の名前は本文色」） |
+> | 選択中のチップ | accent 塗りを撤去し **中立の選択面＋太字**（NG-7 の職域表。Garage Top の「ピットを編集」押下と同じ文法）。実測 Light 地 `#eff1f3` / Dark 地 `#06080c`・weight 800 |
+> | 流用禁止 | **カテゴリ色 / accent を操作状態へ流用しない。** 色値は hardcode せず既存 semantic token を参照 |
+> | 責務分離（PC 確定） | **左 = Garage identity / navigation ／ 中央 = 一覧本体 ／ 右 = その一覧に対する filter・sort**。実測 x 座標 sidebar 100 < content 384 < filter 1240 |
+>
+> Library / Search の `SoT_filter-sidebar.css` は**使わない**。冒頭に「**非適用: Garage 系**」と
+> 明記があり、あちらは「左が filter」の構造で Garage とは前提が違う。
+>
+> ### DECISION 4 — カード
+> `variant="md" context="owner"` を維持。🔴 **browse variant へ変えない**（Own Garage は発見面ではない）。
+> 絞り込み用に `data-category` / `data-maker` / `data-status` / `data-date` / `data-likes` を付与する。
+> 一覧なので**全 7 台**を並べた（v6 は 6枚で「7台」と表示し、Sidebar の RIG 7 と食い違っていた）。
+>
+> ### 非回帰
+> `garage_check` **491**（garage グループの確認導線 5→8 本で +3）／ `garage_top_check` 247 ／
+> `detail_contract` 51 ／ `entity_actions` 36 ／ `launcher_link` 177 ／ `footer_single_source` 4 ／
+> `mobile_garage_detail` 134 ／ `mobile_detail` 58・55・47・23 ／ `mobile_feed` 63 — すべて 0 FAIL。
+> pageerror 0 ／ 横 overflow 0（1280・1440・1600・1920 × Light / Dark）。
+> 低コントラストは v6 比 light 17→19 / dark 6→6。増分2件は**カードが 6→7 枚**になった分で、
+> 今回新設した要素は 1 件も出ていない。Garage Top のページ高は 4090px で不変（`.grid-md` 移送は無影響）。
+>
+> ### 検査の範囲（先回りしない）
+> `garage_list_check.py` が拘束するのは **RIG一覧＋共有器まで**。
+> 未移行の PARTS / LOG / Favorites / Pins の将来 UI は固定していない（`.view-toggle` 等は書かない）。
+> GL12 は **未移行4面が Launcher / compare で v6 のまま**であることも見る。
+>
+> ### NOW
+> 🔴 **次は Own Garage 3「PARTS一覧」（`/garage/parts`）。**
+> **実装前に一度止まり**、`myrig-garage-parts-v6.html` を棚卸しして
+> **PARTS 固有の差分だけ**を報告し、イタヤ裁定を受ける（2026-09-09 イタヤ指示）。
+> 080 で確定した `SoT_garage-page.css` / `SoT_garage-list.css` / `SoT_garage-list.js` /
+> 左レーン・filter rail・neutral selection 文法を**そのまま再利用する**（作り直さない）。
+> 残り: ~~2 RIG一覧~~（**080 で CLOSE**）→ **3 PARTS一覧** → 4 LOG一覧 → 5 お気に入り → 6 ピン留め。
+> **Public Garage は Own Garage 6面の完了後。**
+>
+> 🔴 **既存 PENDING のまま最終 Convergence へ**（このバッチでも扱わない）:
+> H2 `--cat-*` cross-surface rollout ／ PIT の中立 status と カード Web Component の色 status の2系統 ／
+> `.cat-badge--*` が catalog では `color:#fff` で Detail だけ `!important` で黒へ戻している二重管理 ／
+> `.view-toggle`（Favorites / Pins のグリッド⇄リスト切替。その2面で昇格させる）。
 
 > ## ✅ 079: Garage Top PC v7 CLOSE（2026-09-09 / イタヤ実画面レビュー通過）
 >
@@ -77,11 +160,9 @@ updated: 2026-09-09 18:16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > `SoT_detail.css` / `SoT_garage-detail.css` からの物理移送は、Detail 5面 × Light/Dark の計算値・幾何が完全一致
 > （ハッシュが揺れた件は同一ビルドの反復でも両方の値が出る非決定要素で、移送起因でないことを確認済み）。
 >
-> ### NOW
-> 🔴 **次は Own Garage 2「RIG一覧」（`/garage/rigs`）。**
-> ただし**改修に着手する前に一度止まり**、現行 `myrig-garage-rigs-v6.html` の構造・既存 Shared Source・
-> 最新カード文法を棚卸しして、変更方針を報告してからイタヤ裁定を受ける（2026-09-09 イタヤ指示）。
-> 残り: 2 RIG一覧 → 3 PARTS一覧 → 4 LOG一覧 → 5 お気に入り → 6 ピン留め。
+> ### NOW → ✅ **2「RIG一覧」は 080 で完了**
+> 🔴 次は Own Garage 3「PARTS一覧」。
+> 残り: ~~2 RIG一覧~~（**080 で CLOSE**）→ **3 PARTS一覧** → 4 LOG一覧 → 5 お気に入り → 6 ピン留め。
 > **Public Garage は Own Garage 6面の完了後。**
 >
 > | 方針（078 から継続） | |
