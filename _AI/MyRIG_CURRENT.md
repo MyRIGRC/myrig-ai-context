@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260909-077
-updated: 2026-09-09 12:16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260909-078
+updated: 2026-09-09 13:47 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,76 @@ updated: 2026-09-09 12:16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-09 / revision 077（Garage Owner RIG / PARTS Detail **PC visual / structure CLOSE**。次は Mobile Garage RIG / PARTS Detail）**
+**最終更新: 2026-09-09 / revision 078（Mobile Garage RIG / PARTS Detail CLOSE。**Owner Detail 4面が PC / Mobile とも CLOSE**。次は Own Garage の残り6面）**
+
+> ## ✅ 078: Mobile Garage Owner Detail CLOSE（2026-09-09 / イタヤ実画面レビュー通過）
+>
+> モック: `myrig-mockup` `garage-rig-detail.html` / `garage-parts-detail.html`（HEAD `80087ff`）。
+> 恒久検査: `_state/mobile_garage_detail_check.py`（**134 PASS / 0 FAIL**）。
+> 処遇表: `_state/MOBILE_GARAGE_DETAIL_TREATMENT.md`（KEEP / ADAPT / DROP / OWNER ONLY ＋ Q-1〜Q-6）。
+>
+> ### STATE
+> ✅ **Mobile Garage RIG Detail CLOSE**
+> ✅ **Mobile Garage PARTS Detail CLOSE**
+> ✅ **Owner Detail 4面（PC RIG / PC PARTS / Mobile RIG / Mobile PARTS）が visual / structure CLOSE**
+> 🔴 **Owner Edit Interaction は別 PENDING のまま**（まとめて編集 → Register edit mode ／
+>    section 編集 → scoped modal ／ Build Detail → large modal）。CLOSE を妨げない。
+>
+> 骨格は **Mobile Public Detail（075 CLOSE）をそのまま再利用**し、Owner 差分だけを上乗せした。
+> 旧 Mobile Garage Detail は Shared Source 化より前の世代で、page-local `<style>` を 208行 / 382行
+> 持ち、うち **63件 / 105件が Public と同名クラスの再定義**だった（PC の Garage v6 → v7 と同じ構図）。
+> → page-local `<style>` / `<script>` は **0**。`mobile-detail.css` / `mobile-detail.js` を正本として読む。
+>
+> ### 裁定（Q-1〜Q-6 / 2026-09-09 イタヤ）
+> | # | 裁定 |
+> |---|---|
+> | Q-1 | **分割**。identity 直下に compact な Owner 領域（統計4値 / QUICK NOTE / 「管理」入口）、MANAGE の詳細操作は **bottom-sheet**（Shell の `registerSheet` を再利用。page-local sheet を新造しない）、BUILD PARTS MAP は **RIG 本文の Build Detail 直後** |
+> | Q-2 | Owner 領域の見出しは **PC と同じ思想の全面色帯**（RIG=`--cat-rig` 黄 16.87 / PARTS=`--cat-parts` 赤 4.83）。MANAGE シートも同じ category identity を細い accent として継承。**色値を Mobile 側に書かない** |
+> | Q-3 | **Mobile 専用 Garage Drawer を追加しない**。Shell hamburger ／ bottom navigation ／ `rd-subhdr` の戻るで足りる。1 viewport に同じ責務の navigation trigger を増やさない |
+> | Q-4 | **PIT TABLE 設定は Garage Detail から DROP**。PIT TABLE の編集・設定は **Garage Top の責務**（PC v7 と揃える。Mobile だけ Detail に残さない） |
+> | Q-5 | **Owner Garage では購入 CTA を出さない**。情報のみ残す（RIG ベースモデル / PARTS 製品情報）。Public Detail の収益導線裁定 **075 D7 を Owner 面へ機械適用しない**。Garage は MVP では**管理ワークスペース**として扱う |
+> | Q-6 | 統計は PC と同じ **4値**（閲覧 / いいね / お気に入り / ピン留め）。Mobile だけ閲覧数を落とさない |
+>
+> ### Shared Source（面をまたいで二重管理しない）
+> | 責務 | 正本 |
+> |---|---|
+> | Mobile Detail の器・部品（`<md-*>`） | `css/mobile-detail.css` / `js/mobile-detail.js` — **Garage 用に複製しない** |
+> | Owner 差分（Owner 領域 / MANAGE シート / BUILD PARTS MAP / 編集ボタン） | **`css/mobile-garage-detail.css` ＋ `js/mobile-garage-detail.js`（078 新設）**。`<mg-owner>` / `<mg-manage>` / `<mg-parts-map>`。**RIG / PARTS で複製しない**（差は `data-gd-entity` の binding だけ） |
+> | Owner Control の強調色トークン | **`pc/assets/css/SoT_garage-control.css`（078 新設）**。PC の `SoT_garage-detail.css` と Mobile の `mobile-garage-detail.css` が **同じ物理ファイル**を `@import` する。両面に2行を複製しない |
+> | 購入 CTA の有無 | `<md-commerce>` の **`no-buy` opt-in**（078 追加）。属性が無いときの出力は不変で、**Public Detail 3面の `main` innerHTML 完全一致**を確認済み |
+> | bottom-sheet | Shell Dialog Controller（`mobile-shell.js` v0.6 の `registerSheet`） |
+>
+> ### Owner 面に戻さないもの
+> reaction（`<md-actions>`）／ builder 行 ／ RELATED 棚 ／ `<md-ad>` ／ SHARE 行 ／ PIT TABLE 設定 ／
+> 購入 CTA ／ **PARTS の暖色 BUY / INFO 枠（`g-sec--shop`）**（075 で Public から撤去済みの旧実装）。
+>
+> ### 実画面レビューでの軽量化（2026-09-09）
+> Owner 領域の縦ウェイトが高く本文前の圧迫感が強かったため、**構造は維持したまま**見え方を軽くした。
+> 左端の 3px アクセント罫を廃止して全面色帯へ（＝ PC と同じ思想）、「管理」ボタンを帯の右へ収容して
+> 独立1段を畳み、統計を圧縮、QUICK NOTE は `details` 化して **メモが空なら閉じて始まる**、
+> BUILD PARTS MAP に本文と同じ左右 gutter。
+> **Owner 領域 293 → 224px、本文 `.rd-lead` の開始 RIG 725 → 657 / PARTS 675 → 607（−68px）。**
+> QUICK NOTE の明示保存の仕様は変更していない。
+>
+> **非回帰**: `garage_check` 485 ／ `mobile_detail_check` 58 ／ `mobile_feed_check` 63 ／
+> `detail_contract_check` 51 ／ `entity_actions_check` 36 ／ `launcher_link_check` 177 — すべて 0 FAIL。
+> pageerror 0・横 overflow なし（RIG / PARTS × Light / Dark）。
+>
+> ### NOW
+> 🔴 **次は Own Garage の残り6面。** 順番は
+> **1. Garage Top → 2. RIG一覧 → 3. PARTS一覧 → 4. LOG一覧 → 5. お気に入り → 6. ピン留め**。
+>
+> | 方針 | |
+> |---|---|
+> | 基本 | **PC v6 の既存コンセプトを基本維持**。Detail ほど深掘りせず **完成優先** |
+> | Garage Top | **PIT TABLE が中心**。**大1台 ＋ 小2台の3台構成を崩さない** |
+> | RIG / PARTS 一覧 | **現行カード文法を継承**。PARTS は **Garage 内絞り込みを維持** |
+> | LOG 一覧 | **リスト型** |
+> | お気に入り / ピン留め | 既存案を土台にする |
+> | 収束 | **古い color token / page-local 重複は現行 Shared Source へ追随**（077 DECISION 2 の Single Source、078 の `SoT_garage-control.css`・`mobile-garage-detail.css`） |
+> | 順序 | **Public Garage は Own Garage 6面の完了後に着手** |
+>
+> 🔴 Owner Detail 4面（PC / Mobile）と Mobile Public Detail 3面の論点は**再オープンしない**。
 
 > ## ✅ 077: Garage Owner Detail PC CLOSE ＋ Cross-surface Color / Theme 収束（2026-09-09）
 >
@@ -83,10 +152,10 @@ updated: 2026-09-09 12:16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ✅ **H1 は CLOSE。** PC v15 のフォトノートを 8 → **6枚**へ（7件目・8件目は 3件目 / 5件目と同一画像の重複で、
 > caption も枠合わせだった）。Garage v7 も同時に追随。CSS で隠していない。Gallery 本体（7枚）は不変。
 >
-> ### NOW
-> 🔴 **次は Mobile Garage RIG / PARTS Detail。**
-> PC Garage Owner Detail で確定した **Owner 責務を Mobile へ adapt** する作業であって、
-> PC Detail の再設計ではない。**Mobile Public Detail 3面（075 で CLOSE）も再オープンしない。**
+> ### NOW → ✅ **078 で完了**
+> ~~次は Mobile Garage RIG / PARTS Detail。~~ → **078 で CLOSE**（上の節を参照）。
+> PC Garage Owner Detail で確定した Owner 責務を Mobile へ adapt する作業であって、
+> PC Detail の再設計ではなかった。**Mobile Public Detail 3面（075 で CLOSE）も再オープンしていない。**
 
 > 🔴 **063 で決まったこと（イタヤ裁定 2026-09-06）: ユーザー投稿画像の上限は RIG 7 / PARTS 5 / LOG 3。**
 > RIG は Cover 1 ＋ Sub 最大6（従来 Cover 1 ＋ Sub 8 = 9 を**失効**）。PARTS 5・LOG 3 は従来どおり変更なし。
