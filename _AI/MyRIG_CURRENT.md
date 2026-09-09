@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260909-078
-updated: 2026-09-09 13:47 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260909-079
+updated: 2026-09-09 18:16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,89 @@ updated: 2026-09-09 13:47 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-09 / revision 078（Mobile Garage RIG / PARTS Detail CLOSE。**Owner Detail 4面が PC / Mobile とも CLOSE**。次は Own Garage の残り6面）**
+**最終更新: 2026-09-09 / revision 079（**Garage Top PC v7 CLOSE**。Own Garage 6面の1本目が完了。次は 2「RIG一覧」— ただし着手前に棚卸しと変更方針の報告で一度止まる）**
+
+> ## ✅ 079: Garage Top PC v7 CLOSE（2026-09-09 / イタヤ実画面レビュー通過）
+>
+> モック: `myrig-mockup` `pc/myrig-garage-top-v7.html`（HEAD `219f63e`。
+> Vercel production `dpl_Af2ivenf4S49bk38giHAD2e1VBJ9` = 同 SHA / READY で **origin 反映を独立確認**）。
+> 恒久検査: `_state/garage_top_check.py`（**247 PASS / 0 FAIL**・故障注入 selftest あり）。
+>
+> ### STATE
+> ✅ **Garage Top（/garage）は PC visual / structure CLOSE。**
+> v6 の情報構造を維持したまま、現行の Shell / Shared Source / token / component 文法へ載せ替えた。
+> 🔴 **再オープンしない。** v6（`myrig-garage-top-v6.html`）はファイルとして残すが Launcher の参照先ではない
+> （`garage_check` G1 が sha256 を凍結しているので v6 は触らない）。
+>
+> ### DECISION 1 — Own Garage の器と中身を分ける
+> | 責務 | 正本 |
+> |---|---|
+> | カテゴリ色 v8（`--cat-*` / `--cat-*-on`） | **`pc/assets/css/SoT_category-tokens-v8.css`（079 新設・物理正本）**。`SoT_detail.css` は @import で読む。値・宣言・詳細度は移送前と同一 |
+> | Owner 面の統計の目盛り | **`pc/assets/css/SoT_garage-stats.css`（079 新設）**。Owner Detail（`SoT_garage-detail.css`）と Garage 一覧の左レーンが**同じ物理ファイル**を読む |
+> | Garage 一覧6面の器（canvas / cover / 節見出し / 左レーンの v7 差分） | **`pc/assets/css/SoT_garage-page.css`（079 新設）** |
+> | Garage Top 固有（PIT TABLE / SAVED / FOLLOWING） | **`pc/assets/css/SoT_garage-top.css` ＋ `pc/assets/js/SoT_garage-top.js`（079 新設）** |
+> | Sidebar / Header / Footer / カード | 既存 SoT をそのまま読む（複製しない） |
+>
+> page-local CSS **197行 → 0** ／ インライン JS **22行 → 0**（いずれも非空行）。
+> 🔴 `SoT_garage-sidebar.css` **本体は触らない**（v6 の5面も読む）。v7 の差分は `SoT_garage-page.css` で上書きし、
+> **remove after: Garage 一覧6面がすべて v7 になったとき**を同ファイルに明記した。
+>
+> ### DECISION 2 — Own Garage の色の職域（実画面レビュー3往復の結論）
+> | 対象 | 決定 |
+> |---|---|
+> | **節見出し** | **全節そろって `.section__title`**（catalog-v6 素の 20px / Barlow Condensed / 800 / uppercase）。カテゴリ色は**見出し左の 8×8px マーカー**だけが持つ。件数は `.section__count`（12px / tertiary）。**色の面積を増やさない・同じラベルを二重表示しない** |
+> | **status** | Owner 面は**色の面で出さない**。PIT TABLE は中立の黒半透明チップ＋白文字＋**8px の状態ドット**。Owner Detail が中立 `<select class="g-select">` で status を扱うのと同じ思想 |
+> | **主操作** | **中立ソリッド**（color-token-v8 §3）。既存の `--color-text` / `--color-bg` の対を再利用し、**新しい値も token も足さない**（`.app-theme-opt.is-on` / `.filter-btn.is-active` / `.shelf__arrow:hover` と同じ文法）。実測 Light 15.80 / Dark 15.62 |
+> | **選択・押下** | 淡いピル＋太字。塗りで反転させない（NG-7 の職域表）。黒を塗るのは主操作だけ |
+> | **Nav の現在地** | accent を使わない。**地を一段濃く ＋ 太字 ＋ 中立色の縦棒**（`SoT_browse-sidebar-v5.css` の `.sb-dir-row.is-current` と同じ。NG-4 / NG-6） |
+>
+> 🔴 **PC の action token 化（`--color-action-primary`）を Garage 側で新設しない。**
+> 必要になったら semantic token の物理正本 `SoT_tokens-v6.css` を owner にして最終 Convergence で扱う。
+> 検査 GT14 が Garage の CSS に `#1F2328` / `#E6EDF3` / `--color-action-primary` が現れないことを縛る。
+>
+> ### DECISION 3 — 左レーンの並び
+> **Profile（＋自分の数）→ Garage Nav → RECENT ACTIVITY（今週 summary ＋ 履歴）。**
+> v6 で main にあった「今週のアクティビティ」は **RECENT ACTIVITY パネルの上段へ統合**した（別の箱を作らない）。
+> 🔴 **Navigation の優先順位を下げない。** Profile と Nav の間に何かを挟まない
+> （Garage は管理ハブなので、左で最優先はプロフィールの次に Navigation）。
+>
+> ### 経緯（同じ往復をしないための記録）
+> 見出しは3パスかかった。**1**: 28px の塗りバッジを新造 → 既存正本 `.cat-badge` を確認していなかった。
+> **2**: `.cat-badge`（10px / 52×20）を見出しに使用 → 正本は使えたが RIG / PARTS / LOG だけ見出しの格が落ち、
+> PIT TABLE / SAVED / FOLLOWING とタイポグラフィが揃わなくなった。**3**: 全節そろえて色はマーカーだけ（採用）。
+> 🔴 **教訓: 「情報構造を維持」は「見た目も旧版のまま」ではない。**
+> 新しい見た目を作る前に、同じ責務の**既存正本があるかを先に探す**（CORE 検証原則）。
+> 3パスぶんの理由は `pc/assets/css/SoT_garage-page.css` §3 にコード側の記録として残してある。
+>
+> ### 非回帰
+> `garage_check` **488**（garage グループの確認導線 2→5 本で +3）／ `detail_contract` 51 ／
+> `entity_actions` 36 ／ `launcher_link` 177 ／ `footer_single_source` 4 ／ `mobile_garage_detail` 134 ／
+> `mobile_detail` 58・55・47・23 ／ `mobile_feed` 63 — すべて 0 FAIL。
+> pageerror 0 ／ 横 overflow 0（1280・1440・1600・1920 × Light / Dark）。
+> 低コントラストは v6 比 **light 30→27 / dark 9→6**（差は LOG カードの tag-badge が v8 化で解消した分）。
+> `SoT_detail.css` / `SoT_garage-detail.css` からの物理移送は、Detail 5面 × Light/Dark の計算値・幾何が完全一致
+> （ハッシュが揺れた件は同一ビルドの反復でも両方の値が出る非決定要素で、移送起因でないことを確認済み）。
+>
+> ### NOW
+> 🔴 **次は Own Garage 2「RIG一覧」（`/garage/rigs`）。**
+> ただし**改修に着手する前に一度止まり**、現行 `myrig-garage-rigs-v6.html` の構造・既存 Shared Source・
+> 最新カード文法を棚卸しして、変更方針を報告してからイタヤ裁定を受ける（2026-09-09 イタヤ指示）。
+> 残り: 2 RIG一覧 → 3 PARTS一覧 → 4 LOG一覧 → 5 お気に入り → 6 ピン留め。
+> **Public Garage は Own Garage 6面の完了後。**
+>
+> | 方針（078 から継続） | |
+> |---|---|
+> | 基本 | PC v6 の既存コンセプトを基本維持。Detail ほど深掘りせず **完成優先** |
+> | RIG / PARTS 一覧 | **現行カード文法を継承**。PARTS は Garage 内絞り込みを維持 |
+> | LOG 一覧 | リスト型 |
+> | お気に入り / ピン留め | 既存案を土台にする |
+> | 収束 | 古い color token / page-local 重複は現行 Shared Source へ追随。**079 で敷いた器（`SoT_garage-page.css` / `SoT_garage-stats.css` / `SoT_category-tokens-v8.css`）をそのまま使う** |
+> | filter / search rail | 079 では**作っていない**（2面目が無かったため）。RIG 一覧で2面目になるので、そこで page-local から共有へ昇格させる |
+>
+> 🔴 **Garage Top は再オープンしない。** Owner Detail 4面・Mobile Public Detail 3面も同様。
+> 🔴 **既存 PENDING のまま最終 Convergence へ送るもの**（このバッチで扱わない）:
+> H2 `--cat-*` cross-surface rollout ／ PIT の中立 status と カード Web Component の色 status の2系統 ／
+> `.cat-badge--*` が catalog では `color:#fff` で Detail だけ `!important` で黒へ戻している二重管理。
 
 > ## ✅ 078: Mobile Garage Owner Detail CLOSE（2026-09-09 / イタヤ実画面レビュー通過）
 >
@@ -69,9 +151,9 @@ updated: 2026-09-09 13:47 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > `detail_contract_check` 51 ／ `entity_actions_check` 36 ／ `launcher_link_check` 177 — すべて 0 FAIL。
 > pageerror 0・横 overflow なし（RIG / PARTS × Light / Dark）。
 >
-> ### NOW
-> 🔴 **次は Own Garage の残り6面。** 順番は
-> **1. Garage Top → 2. RIG一覧 → 3. PARTS一覧 → 4. LOG一覧 → 5. お気に入り → 6. ピン留め**。
+> ### NOW → ✅ **1「Garage Top」は 079 で完了**
+> 🔴 次は Own Garage の残り6面。順番は
+> ~~1. Garage Top~~（**079 で CLOSE**）→ **2. RIG一覧** → 3. PARTS一覧 → 4. LOG一覧 → 5. お気に入り → 6. ピン留め。
 >
 > | 方針 | |
 > |---|---|
