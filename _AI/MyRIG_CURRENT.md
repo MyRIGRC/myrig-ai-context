@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260909-080
-updated: 2026-09-09 20:46 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260910-081
+updated: 2026-09-10 11:25 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,124 @@ updated: 2026-09-09 20:46 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-09 / revision 080（**RIG一覧 PC v7 CLOSE**。Own Garage 6面のうち 2本 完了し、**一覧5面の器が確定**。次は 3「PARTS一覧」— 着手前に棚卸しと PARTS 固有差分の報告で一度止まる）**
+**最終更新: 2026-09-10 / revision 081（**Own Garage PC 6面すべて v7 実装済み**。色の職域収束と横断機能監査の修正も完了。**まだ Garage 全体 CLOSE ではない** — 残るデザイン判断項目の実画面確認後に CLOSE 判定する）**
+
+> ## 🟡 081: Own Garage PC 6面 実装完了 ＋ 色の職域収束 ＋ 横断機能監査の修正（2026-09-10）
+>
+> モック: `myrig-mockup` HEAD `6a861e7`。
+> 🔴 **これは CLOSE ではない。** 実装と機能不具合の是正が済んだ状態であって、
+> 残るデザイン判断項目の実画面確認が終わるまで Garage 全体 CLOSE とは書かない。
+>
+> ### STATE — 実装
+> ✅ **Own Garage PC 6面すべて v7 実装済み**（Garage Top / RIG一覧 / PARTS一覧 / LOG一覧 /
+> お気に入り / ピン留め）。Launcher・`compare.html` とも 6面すべて v7 を既定参照にし、
+> 確認導線（ライト / ダーク / 旧 v6）は 20本。
+> ✅ Garage Top（079）と RIG一覧（080）は**イタヤ実画面レビュー通過済み・再オープンしない**。
+> 🟡 **残り4面（PARTS / LOG / お気に入り / ピン留め）は実画面レビュー未了。**
+>
+> | 面 | 実装 | レビュー |
+> |---|---|---|
+> | Garage Top | v7 | ✅ CLOSE（079） |
+> | RIG一覧 | v7 | ✅ CLOSE（080） |
+> | PARTS一覧 / LOG一覧 / お気に入り / ピン留め | v7 | 🟡 未了 |
+>
+> 保存2面（お気に入り / ピン留め）の表示切替は `pc/assets/css/SoT_garage-saved.css` /
+> `pc/assets/js/SoT_garage-saved.js` へ昇格（v6 は2面に同一の block と同じ14行の
+> page-local script を複製していた。md5 一致 `bb3a3afe6813`）。
+> 面の page-local CSS / JS は 6面とも **0**。収益導線 0。
+> 080 PENDING の `.view-toggle` はここで閉じた。
+>
+> ### STATE — 色の職域収束（Own Garage 6面）
+> ✅ 旧 v7 カテゴリ色（緑 / 紫 / 橙）は **v7 6面ともに 0件**（疑似要素・SVG・影・枠まで走査）。
+> レビューで見えた緑紫橙は **Favorites v6 / Pins v6**。v6 は `SoT_category-tokens-v8.css` を
+> 読まないため `SoT_tokens-v6.css` の旧値へ落ちる。v6 は比較の基準なので是正しない（H2 の対象）。
+> ✅ Owner の状態チップ `.gs` を **中立チップ + 8px status ドット**へ収束（079 の PIT 文法）。
+> 旧実装は status 色の全面塗り + `color:#fff` で active CR 2.28 / building 3.68、かつ
+> `--rig-status-*` を参照せず light 値を直書きしていた（ダークでも light 値）。
+> `.gs` は rig / part / gc の3部品とも **owner 分岐でしか描かれない**ので非 Owner へ波及しない。
+> ✅ `.cat-badge--*` の文字色を正本（`SoT_component-catalog-v6.css`）で `--cat-*-on` へ是正し、
+> browse×3 / feed / search / Detail の **`!important` 打ち消し6箇所（page-local 15行）を全廃**。
+> 実測: その5面は `.cat-badge` を markup に1つも持たず、15行は完全な死蔵だった。
+> ✅ accent blue に残った責務は **link のみ**。現在地 / 選択 filter / 選択 view / filter 見出しは 0件。
+> ✅ 低コントラスト: Garage Top light 27→22 dark 6→1 ／ RIG一覧 light 19→14 dark 6→1。
+> 新規の低CR は 0。
+>
+> ### STATE — 横断機能監査の修正（外部監査 2026-09-10・全件追試して再現を確認）
+> | # | 症状 | 原因と是正 |
+> |---|---|---|
+> | ③ | **Garage 一覧5面の日付ソートが壊れていた**（080 の回帰） | `parseFloat('2026.03.20')` が `2026.03` を返し日が落ちていた。値**全体**が数値のときだけ数値比較へ。LOG 古い順は新しい順と完全一致、保存2面は月だけ昇順・日は降順、RIG/PARTS は各月1件という fixture の偶然で正しく見えていた |
+> | ⑤ | 画像切れ5件 | カード部品が属性値を素通しで補間（`src="${img}"` 48箇所）。`_h()` は `"` を逃がさないため実ファイル名のインチ記号で src が切れていた → 属性用 `_at()` を新設。ほか `image:null` の `../img/null`、モバイル欠損ファイルを是正 |
+> | ② | モバイル公開ガレージに自分用UI | 「保存済み / お気に入り / ピン留め」が他人のガレージに出て、押すと可視 tabpanel 0 で本文が消えた。`IS_OWNER` で出し分け／不明キーで `switchTab` を no-op ／見出しを「RIG」へ／自分用ヘッダーは markup ごと除去（`hidden` は `.cw-bar{display:flex}` に負けていた） |
+> | ① | PC ヘッダー検索が全面で無反応 | 送信が検索結果ページの page-local にしか無かった。`SoT_app-shell.js` へ集約（契約: `.app-search input` / `[data-search-entry]` / `[data-search-local]` / `[data-search-action]`）。HOME 中央検索と候補チップも同経路。文言を現行の検索対象へ |
+> | ⑥ | 検索面だけ `?theme` が効かない | 面が `?q=` 管理で URL を書き換え、shell が読む前に `location.search` を空にしていた。検索状態でないパラメータを持ち越す |
+> | ④ | カードのピン留めが無反応 | `event.stopPropagation()` だけで `aria-pressed` も無かった。押された見た目は部品が既に持っている（`_ic_pin_push_fill` / `.br__pin--pinned`）ので**状態と aria state だけ**を追加。見た目は不変 |
+>
+> ### DECISION（2026-09-10 イタヤ裁定）
+> - **並べ替えのキーが空・欠損の項目は、昇順でも降順でも常に末尾。** 向きで反転させない
+> - **`myrig:pin` は暫定の内部イベント。** Entity Actions の確定契約ではない。
+>   名前も detail の形も変わりうるので、面・他部品・検査がこの名前に依存しない。
+>   `detail.provisional = true` を持たせてある
+> - Garage Top の節見出しの RIG ドットは **ライトで CR 1.02（実測）＝ NG-2 該当だが、
+>   イタヤ裁定により現状維持**（2026-09-10）
+>
+> ### 検査
+> `garage_list_check` **734**（GL9 を「並んだ結果の単調性」＋「欠損は末尾」まで見る形へ拡張。
+> 68 → 137項目。従来は件数しか見ておらず日付ソートの破損を PASS させていた）／
+> `garage_top_check` 287（GT17 新設: 旧 v7 色 0・状態チップの token 整合）／
+> `garage_check` 503 ／ **`image_integrity_check` 63（新設**: II1 画像切れ0・II2 属性補間と
+> `_at()` の往復を実画面で検証・II3 参照実体）／ `detail_contract` 51 ／ `entity_actions` 36 ／
+> `launcher_link` 177 ／ `footer_single_source` 4 ／ `mobile_garage_detail` 134 ／
+> `mobile_detail` 58・55・47・23 ／ `mobile_feed` 63 — **すべて 0 FAIL**。
+> 故障注入 selftest も全本で FAIL を検知（garage_list 56 / garage_top 14 / image_integrity 10）。
+>
+> 🔴 **検査の教訓（再発防止）**: DOM 走査は必ず `shadowRoot` を再帰すること。
+> 画像切れを最初「0件」と誤判定した。design-nogo-list「検査の盲点 #1」に名指しされている落とし穴。
+>
+> ### NOW
+> 🔴 **次は「残るデザイン判断項目」の実画面確認。** ここを通してから Garage 全体 CLOSE を判定する。
+>
+> | # | 項目 | 状態 |
+> |---|---|---|
+> | D1 | **PARTS / LOG / お気に入り / ピン留め の実画面レビュー** | 未了 |
+> | D2 | **H2-a: カテゴリ色を文字色・線色・操作色から外す** | 未着手。棚卸し済み（下記） |
+> | D3 | **H2-b: `--cat-*` の v8 版上げ本体** | 未着手。D2 の後 |
+> | D4 | サンプル写真と名称の不整合（S15 Drift King にクローラー写真 等） | 未裁定 |
+> | D5 | 表示密度（モバイル一覧の上部 ~450px / RIG詳細 375px で ~7,500px / 検索の0件メーカー / FEED 右レール） | 未裁定 |
+> | D6 | お気に入りとピン留めの使い分けが操作地点で伝わりにくい | 未裁定 |
+> | D7 | 保存の永続化（ピン留めを押した後の状態保持）と Entity Actions の正式契約 | 未裁定 |
+> | D8 | Own Garage の Users 保存対象（`myrig-user-card` が存在しない） | 未裁定（`page-role-matrix v1` との差分） |
+>
+> ### 🔴 H2 の棚卸し実測（着手前に必ず読む・2026-09-10）
+> `color-token-v8.md` の「**部分適用は禁止**」はこの状態を指している。いま flip すると悪化する。
+>
+> - live PC 40面のうち **v8 は 17面のみ / 旧 v7 が 23面**
+> - `--cat-*` 参照は PC で **445箇所**、`color-mix` によるカテゴリ色の淡色化が **92箇所**
+> - **塗りは安全**。カテゴリ色の塗りの上の白文字 15種はすべて PARTS / LOG（正しい）。
+>   RIG の塗りは全面すでに黒文字で、1.08 の事故は起きない
+> - **危ないのは文字色と線色**。旧 v7 緑 `#66b900` は白地 2.47 だが v8 黄 `#FBFF00` は **1.08 で消える**。
+>   該当: about / library-v3 / library-maker-detail / library-rig-master-detail / support-us /
+>   register-rig / browse-category / browse-rigs / home / feed
+> - `register-rig` は `accent-color: var(--cat-rig)` でラジオ、`border-color` でドラッグ枠まで category 色
+> - **NG-1 の 4px 色帯が実画面に残存**: `myrig-library-v3.html` の `.door--rig` / `.door--parts`
+>   （canon が「PC側に未撤去」と名指ししているもの）
+> - `SoT_browse-shell.css` の `.category-side__cta--parts` は CTA をカテゴリ色で塗っている（NG-7 流用）
+>
+> 順序: **D2（NG-1/NG-2/NG-7 の是正）→ D3（flip 本体 ＋ page-local `--cat-*` コピー10ファイル撤去
+> ＋ 中立操作色の直書き 54箇所を `--color-action-primary` へ移送）**。
+> `--color-action-primary` / `-text` / `--color-action-quiet-bg` は `SoT_tokens-v6.css` に
+> **敷設済み・未参照**（挙動不変）なので、D3 はそこへ寄せるだけでよい。
+>
+> ### 閉じた PENDING
+> - `.view-toggle`（保存2面で昇格・081 で解消）
+> - `.cat-badge--*` の二重管理（正本を `--cat-*-on` へ是正し打ち消し6箇所を全廃・081 で解消）
+> - PC フォトノート 8枚問題（現物は6枚。`pc/myrig-rig-detail-v15.html:145` を実測確認。HOLD H1 を閉じる）
+>
+> ### 継続 PENDING
+> - **H2 `--cat-*` cross-surface rollout**（上記 D2 / D3）
+> - PIT の中立 status と カード Web Component の色 status の2系統
+>   → 081 でカード側を中立へ寄せたため**差は縮んだ**が、PIT は暗いスクリム地・カードは淡色地で
+>     地の作り方が違う。最終 Convergence で1つに畳むか判断する
+> - Public Garage（Own Garage の CLOSE 後）
 
 > ## ✅ 080: Garage RIG一覧 PC v7 CLOSE — 一覧5面の器が確定（2026-09-09 / イタヤ実画面レビュー通過）
 >
@@ -85,14 +202,10 @@ updated: 2026-09-09 20:46 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > 未移行の PARTS / LOG / Favorites / Pins の将来 UI は固定していない（`.view-toggle` 等は書かない）。
 > GL12 は **未移行4面が Launcher / compare で v6 のまま**であることも見る。
 >
-> ### NOW
-> 🔴 **次は Own Garage 3「PARTS一覧」（`/garage/parts`）。**
-> **実装前に一度止まり**、`myrig-garage-parts-v6.html` を棚卸しして
-> **PARTS 固有の差分だけ**を報告し、イタヤ裁定を受ける（2026-09-09 イタヤ指示）。
-> 080 で確定した `SoT_garage-page.css` / `SoT_garage-list.css` / `SoT_garage-list.js` /
-> 左レーン・filter rail・neutral selection 文法を**そのまま再利用する**（作り直さない）。
-> 残り: ~~2 RIG一覧~~（**080 で CLOSE**）→ **3 PARTS一覧** → 4 LOG一覧 → 5 お気に入り → 6 ピン留め。
-> **Public Garage は Own Garage 6面の完了後。**
+> ### NOW → ✅ **3〜6面は 081 で実装完了**（レビューは未了）
+> 残り: ~~2 RIG一覧~~（080 CLOSE）→ ~~3 PARTS一覧~~ → ~~4 LOG一覧~~ → ~~5 お気に入り~~ →
+> ~~6 ピン留め~~（**すべて 081 で v7 実装済み**）。
+> **Public Garage は Own Garage の CLOSE 後。**
 >
 > 🔴 **既存 PENDING のまま最終 Convergence へ**（このバッチでも扱わない）:
 > H2 `--cat-*` cross-surface rollout ／ PIT の中立 status と カード Web Component の色 status の2系統 ／
