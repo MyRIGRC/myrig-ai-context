@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260910-082
-updated: 2026-09-10 16:45 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260910-083
+updated: 2026-09-10 22:31 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,99 @@ updated: 2026-09-10 16:45 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-10 / revision 082（**Own Garage PC 6面は CLOSE**（イタヤ裁定「pc 版は一旦これクローズ」）。**Mobile Own Garage 6面 ＋ Public 3面を PC v7 の実体で作り直し済み**（イタヤ実画面レビュー未了）。**まだ Garage 全体 CLOSE ではない**）**
+**最終更新: 2026-09-10 / revision 083（**Own Garage PC 6面 CLOSE**。**外部監査の Integrity 修正 11件を一括実施**（v6 逆流・状態分岐・データ横断整合・画像対応・件数意味・PIT 管理入口・LOG 検索・絞り込み契約）。**Mobile Own Garage 6面は CLOSE 候補**（イタヤ実画面レビュー待ち）。**まだ Garage 全体 CLOSE ではない**。Public Garage へは進まない）**
+
+> ## 🟡 083: Own Garage CLOSE前 Integrity 一括修正（外部監査 2026-09-10）
+>
+> モック: `myrig-mockup` HEAD `11cda8f`（未 push。`origin/main` は `1db9092`）。
+>
+> ### なぜこの節があるか
+> 082 時点で恒久検査は **2795 PASS / 0 FAIL** だった。それでも外部監査（GPT Astra）は
+> **v7 面から旧 v6 へ戻るリンク 33本**と**同じ RIG の status の食い違い**を見つけた。
+> 🔴 **PASS 数を完成根拠にしない。** 検査していない種類の穴は、何本 PASS しても見つからない。
+>
+> ### 採用した修正（#1〜#8 / #10 / #12 / #14）
+> | # | 内容 |
+> |---|---|
+> | 1 | **v6 逆流の全廃**。PC v7 8面の通常導線 33本を v7 へ統一。旧版の入口は Launcher の「旧 v6 を見る」だけ |
+> | 2 | **状態確認リンクを実装**。`?guest=1` / `?empty=1` / `?pit=0` を別状態として描く。Launcher の確認導線 20→21 |
+> | 3 | **データ横断整合**（下記の規則） |
+> | 4 | **PARTS 画像**。確認できた4件を実写へ、確認できない4件は placeholder へ退避 |
+> | 5 | **Owner RIG Detail の PC / Mobile 整合**。gallery 5→7 / フォトノート 4→6 / md-logs total 14→12 / 使用パーツ 11→10 |
+> | 6 | **PC PARTS 1280px の回帰**。カード footer を折返し可に。文字は小さくしない |
+> | 7 | **Mobile nav の現在地**を初期表示で可視領域へ |
+> | 8 | **絞り込みシートを draft / commit / cancel** へ。focus trap ＋ trigger 復帰 |
+> | 10 | **Mobile PIT の管理入口**（既存裁定 Q-4 の実装。語彙は「作業台」） |
+> | 12 | **Mobile LOG 検索**（keyword / 期間）を filter sheet へ adapt |
+> | 14 | **件数を total / 絞り込み結果 / 読込済み の3つに分離**（PC・Mobile 両方） |
+>
+> ### DECISION — 数字が食い違ったときの採り方（2026-09-10）
+> 🔴 **同じ対象の値は1つ。2箇所以上で一致している値を採り、単独出典で意味の説明が無い値は落とす。**
+> 意味の違う集計が実在する場合だけ、ラベルで区別する（「現在装着中」「登録パーツ」等）。
+> ⛔ 意味を推測して新しい数字を作らない。
+>
+> 適用結果:
+> - TF2 / TRX-4 の status → **セッティング中**（PIT ＋ Detail MANAGE の2箇所と一致。一覧の「運用中」を是正）
+> - Cliffhanger の status → **ビルド中**（PIT と一致。一覧の「保管中」を是正）
+> - TF2 のパーツ数 → **10**（BUILD PARTS MAP の内訳 3+4+2+1 と一致。PIT の 38 と 使用パーツの 11 は単独出典のため落とす）
+> - TF2 のサーボ → **Reefs RC 360HD**（ビルド詳細 ＋ LOG と一致。RIG説明の SAMIX を是正）
+> - 使用パーツの ESC → **AXE R2**（現在構成と一致。QuicRun 1080 は旧 ESC）
+>
+> ### DECISION — 件数の意味（2026-09-10）
+> | 語 | 意味 | 例 |
+> |---|---|---|
+> | total | そのガレージの登録総数（表示上の総数） | 全 312 点 |
+> | loaded | **この面に用意されているサンプル数** | サンプル 8 点 |
+> | result | 絞り込み後の該当数 | サンプル 8 点中 1 点が該当 |
+>
+> ⛔ total に対して loaded しか無いのに「すべて表示しました」を出さない。
+> ⛔ 同じカードを総数まで複製して数字を埋めない。
+> 面内に残りがあるときだけ「もっと見る（+N件）」を出し、total までの残りは一覧へのリンクで渡す。
+>
+> ### DECISION — 語彙（2026-09-10）
+> **PIT ＝「作業台」。保存2面の「ピン留め」と語を混ぜない。**
+> PC の「ピン留めを外す」「ピン留めするRIGを選ぶ」も「作業台から外す / 作業台に置くRIGを選ぶ」へ。
+>
+> ### 素材が足りていないもの（イタヤ確認事項）
+> 次の4パーツは**写真が素材に存在しない**ため placeholder で退避している。
+> 実写が用意できれば差し替えるだけで直る。推測で別画像を当てていない。
+> - SCX10 III Aluminum Skid / Warn 9.5cti Winch / LCG Battery Tray / 25T Metal Servo Horn
+>
+> ### 恒久検査
+> `_state/garage_integrity_check.py` を新設（**153 PASS / 0 FAIL**・故障注入 selftest で 40 FAIL を確認）。
+>
+> | ID | 検出するもの |
+> |---|---|
+> | GI1 | 通常導線から旧版へ戻らない / リンク先が実在する |
+> | GI2 | 同じ RIG の status・件数が面をまたいで一致する |
+> | GI3 | Mobile 共有 fixture が PC v7 の実体と一致する（画像の対応表を含む） |
+> | GI4 | guest / empty / PIT未設定 が別状態として描かれる |
+> | GI5 | 現在地タブが初期表示で可視領域に入る |
+> | GI6 | draft / commit / cancel / focus 復帰 |
+> | GI7 | total / 結果 / 読込済み を混同しない |
+>
+> 既存検査の期待値も新契約へ更新した（`mobile_garage_list_check` の MG6→MG8 draft/commit、
+> `mobile_garage_detail_check` の M9 baseline、`garage_check` の G20 確認導線 20→21、
+> `mobile_detail_check` の「もっと見る」契約）。
+>
+> **検査 13本 合計 3054 PASS / 0 FAIL。**
+> 横断確認: PC 8面 × 1280/1440 × Light/Dark ＝ 32、Mobile 8面 × 360/390 × Light/Dark ＝ 32。
+> はみ出し・画像切れ・pageerror いずれも 0。
+>
+> ### NOW
+> 🔴 **次は Mobile Own Garage 6面の実画面レビュー（イタヤ）。** 通れば **Mobile 6面 CLOSE**。
+> Public Garage へはまだ進まない。
+>
+> | # | 項目 | 状態 |
+> |---|---|---|
+> | D1' | Mobile Own Garage 6面の実画面レビュー | 未了（CLOSE 候補） |
+> | D9 | **監査 #9** お気に入り / ピン留めの行メニュー・整理操作 | PENDING（今回スコープ外） |
+> | D11 | **監査 #11** RIG status filter / PARTS の管理情報強化 | PENDING（今回スコープ外） |
+> | D13 | **監査 #13** Owner Detail の status 表示・ページ内 navigation | PENDING（今回スコープ外） |
+> | D-IMG | 4パーツの実写差し替え | 素材待ち |
+> | D2 | H2-a: カテゴリ色を文字色・線色・操作色から外す | 未着手（081 の棚卸しをそのまま使う） |
+> | D3 | H2-b: `--cat-*` の v8 版上げ本体 | 未着手。D2 の後 |
+> | D4〜D8 | 081 のまま | 未裁定 |
 
 > ## 🟡 082: Mobile Own Garage を PC v7 の実体で作り直し ＋ PC 6面 CLOSE（2026-09-10）
 >
