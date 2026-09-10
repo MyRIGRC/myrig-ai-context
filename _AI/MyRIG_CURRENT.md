@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260910-081
-updated: 2026-09-10 11:25 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260910-082
+updated: 2026-09-10 16:45 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,109 @@ updated: 2026-09-10 11:25 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-10 / revision 081（**Own Garage PC 6面すべて v7 実装済み**。色の職域収束と横断機能監査の修正も完了。**まだ Garage 全体 CLOSE ではない** — 残るデザイン判断項目の実画面確認後に CLOSE 判定する）**
+**最終更新: 2026-09-10 / revision 082（**Own Garage PC 6面は CLOSE**（イタヤ裁定「pc 版は一旦これクローズ」）。**Mobile Own Garage 6面 ＋ Public 3面を PC v7 の実体で作り直し済み**（イタヤ実画面レビュー未了）。**まだ Garage 全体 CLOSE ではない**）**
+
+> ## 🟡 082: Mobile Own Garage を PC v7 の実体で作り直し ＋ PC 6面 CLOSE（2026-09-10）
+>
+> モック: `myrig-mockup` HEAD `0a581db`（未 push。`origin/main` は `07d604a`）。
+>
+> ### DECISION（2026-09-10 イタヤ裁定）
+> | # | 裁定 | 原文 |
+> |---|---|---|
+> | 1 | **Own Garage PC 6面は CLOSE**。081 の D1（残り4面の実画面レビュー）は実施せずに閉じる | 「pc 版は一旦これクローズでいいと思います」 |
+> | 2 | Mobile は PC の対象面であり、**PC に入っているサムネイル・投稿数をそのまま反映**する | 「pc 版に対しての対象のモバイル版なんで 現在 pc ページに入っているサムネイルとか投稿の数とか含めて 反映してほしい」 |
+> | 3 | **同一カードの連打で件数を埋めるのを禁止** | 「同じやつを全部不必要に連打して並べているだけじゃん パーツとかログとか そういうのやめてください」 |
+> | 4 | 小分けの確認待ちをやめ、M3→M1→M2→M4 を1回で仕上げる | 「保険をかけすぎて、ちょっといろんな進みが遅すぎる」 |
+>
+> ### STATE — Mobile Own Garage（Top ＋ 一覧5面）＋ Public 3面
+> ✅ **データを PC v7 の card 属性から取る**（`js/mobile-garage-data.js`）。
+> RIG 7 / PARTS 8 / LOG 6 / お気に入り 12 / ピン留め 6。面へ複製しない。
+> 表示件数（312点 / 84件）は `owner.counts` の**表示上の総数**であって配列長ではない、と
+> ファイル先頭に明記した。旧実装は同じカードを件数ぶん複製しており、これが裁定3の対象。
+> ✅ **Top の Garage 独自ヘッダー（ロゴ＋色付き登録3本＋ベル）を撤去**し、Home / Feed と同じ
+> 共有 Mobile Shell Header に統一。owner identity を作り直し（単独の「編集」ボタンは廃止／
+> RIG・PARTS・LOG 件数／フォロー数／公開ページを見る／owner menu）。nav は「概要」始まりの6本。
+> ✅ **サブページ 8面の上部を圧縮**。cover ＋ プロフィール全部の再掲をやめ、
+> App bar → Garage nav → page title / 並び順・絞り込み → content にした。
+> 先頭カードの上端 **454px → 300px 未満**（390×844 のうち 54% が器だった状態を解消）。
+> ✅ **面固有 App bar を新造しない**。共有 `.mobile-shell-header` の SubHeader variant
+> （`mobile-component-contract-v0.5` §3.9・`__back` + `__pagettl`）を使う。
+> 🔴 その過程で**契約違反を1件発見して撤去**した: サブページのヘッダーに置いていたアバターは
+> 契約 §3.1「通知アイコン・アバターは置かない」／§3.2「ガレージタブのアバターは
+> `.mobile-bottom-nav__avatar`」に反する。しかも実画面では**イニシャル円と img が二重に出て
+> 円からはみ出す壊れ方**をしていた（`overflow` 指定なし）。
+>
+> ### STATE — card 文法（PC list variant との突合で決めた）
+> | 面 | 種別 badge | 根拠 |
+> |---|---|---|
+> | RIG / PARTS / LOG 一覧 | **出さない** | その面に1種しか無く情報を足さない。PC Own Garage と同じ |
+> | お気に入り / ピン留め | **v8 badge を出す** | RIG / PARTS / LOG が混在する |
+>
+> ⛔ badge を消した代わりに色線・色帯を足していない（NG-1 / NG-2 を実測で検出）。
+> ✅ 保存2面の badge は **meta 行の先頭へ inline**（PC `.list__meta` と同じ）。写真の上に載せない。
+> ✅ meta は PC `.list__meta-text` と同じく**行全体で1回だけ ellipsis**。
+> 旧実装は区切りごとに切っており「Hobbywi… · Motor & E… · TF2 Mojav…」と三重に切れていた。
+> ✅ PARTS の装着 RIG は meta ではなく独立行（PC `.list__rig` 相当）。
+> ✅ LOG 行の大きな青帯を撤去し、サムネ幅を固定して本文の折返しを安定させた。
+> ✅ PIT / RIG の status は**中立チップ + status ドット**（PC Owner の `.gs` と同じ思想）。
+>
+> ### STATE — Shared Source
+> | 部品 | 実体 | 面への複製 |
+> |---|---|---|
+> | データ | `js/mobile-garage-data.js` | 0 |
+> | card 文法 | `js/mobile-garage-cards.js` | 0 |
+> | Top 描画 | `js/mobile-garage-top.js` | 0 |
+> | 一覧の挙動 | `js/mobile-garage-list.js` | 0 |
+> | 器 | `css/mobile-garage.css` / `css/mobile-garage-list.css` | 0 |
+>
+> 9面とも page-local `<style>` 0 / 実行される page-local `<script>` 0。
+>
+> ### 検査（全て 0 FAIL・合計 2749 PASS）
+> | 検査 | 結果 |
+> |---|---|
+> | `mobile_garage_list_check`（MG1〜MG16） | **639 PASS**（selftest で故障注入 → FAIL 106 を確認） |
+> | `garage_list_check` | 734 PASS |
+> | `garage_check` | 503 PASS |
+> | `garage_top_check` | 287 PASS |
+> | `launcher_link_check` | 177 PASS |
+> | `mobile_garage_detail_check` | 134 PASS |
+> | `image_integrity_check` | 63 PASS |
+> | `mobile_feed_check` | 63 PASS |
+> | `mobile_detail_check` | 58 PASS |
+> | `detail_contract_check` | 51 PASS |
+> | `entity_actions_check` | 36 PASS |
+> | `footer_single_source_check` | 4 PASS |
+>
+> 082 で新設した検査（いずれも故障注入で FAIL が出ることを確認済み）:
+> - **MG15** サブページ 8面が共有 Shell Header の SubHeader variant を使い、
+>   面固有 App bar を新造せず、ヘッダーにアバター・通知を置かない（契約 §3.1 / §3.2 / §3.9）
+> - **MG16** 絞り込みチップ ↔ 共有データの不一致検出（markup と data が黙ってズレない）
+>
+> ### PC 側の同時修正
+> `pc/myrig-garage-parts-v7.html` の maker 選択肢ラベル **`Rc4Wd` → `RC4WD`**。
+> slug（`rc4wd`）を title case した文字列がそのまま表示に出ていた。value は変えていない。
+> モバイル側の同じラベルも合わせた。
+>
+> ### NOW
+> 🔴 **次は Mobile Own Garage 9面の実画面レビュー（イタヤ）。** ここを通してから Public Garage へ進む。
+> Light / Dark のスクリーンショットは `_state/shots_mobile/` にコミット済み（14枚 ＋ 絞り込みシート2枚）。
+>
+> | # | 項目 | 状態 |
+> |---|---|---|
+> | D1 | ~~PARTS / LOG / お気に入り / ピン留め の実画面レビュー~~ | ✅ 裁定1で CLOSE |
+> | D1' | **Mobile Own Garage 9面の実画面レビュー** | 未了 |
+> | D2 | H2-a: カテゴリ色を文字色・線色・操作色から外す | 未着手（081 の棚卸しをそのまま使う） |
+> | D3 | H2-b: `--cat-*` の v8 版上げ本体 | 未着手。D2 の後 |
+> | D4〜D8 | 081 のまま | 未裁定 |
+>
+> ### 継続 PENDING（082 追加）
+> - 🟡 **`css/sot/SoT_app-shell.css` が PC 正本の fork のまま**（mobile 460行 / PC 666行）。
+>   同じ `css/sot/` の他3本（tokens-v6 / component-catalog-v6 / category-tokens-v8）は
+>   `@import` の再輸出へ寄せたが、app-shell だけは中身が違う（mobile 側は PC にある
+>   `.app-auth` / `.app-avatar--btn` / `.app-usermenu` / `.app-theme-opt` 系を持たない部分集合）。
+>   42面が読んでいるので、寄せるなら独立バッチで実測してから。
+> - 🟡 `css/sot/SoT_footer.css` は PC 正本と **md5 一致の物理コピー**（261行×2）。
+>   値は同じなので事故は起きていないが、二重管理であることは変わらない。
 
 > ## 🟡 081: Own Garage PC 6面 実装完了 ＋ 色の職域収束 ＋ 横断機能監査の修正（2026-09-10）
 >
