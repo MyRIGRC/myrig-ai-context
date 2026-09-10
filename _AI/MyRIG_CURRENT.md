@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260910-084
-updated: 2026-09-10 23:12 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260910-085
+updated: 2026-09-11 08:36 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,47 @@ updated: 2026-09-10 23:12 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-10 / revision 084（**Own Garage PC 6面 CLOSE**。外部監査 Integrity 11件 ＋ **再監査の残存5点も修正済み**（LOG導線の条件引き継ぎ・RIG詳細のデータ・ESC画像・作業台の追加・PITの重なり）。**Mobile Own Garage 6面は CLOSE 候補**（イタヤ実画面レビュー待ち）。**まだ Garage 全体 CLOSE ではない**。Public Garage へは進まない）**
+**最終更新: 2026-09-10 / revision 085（**Own Garage は PC 6面・Mobile 6面とも CLOSE**（イタヤ裁定 2026-09-10）。モック `313cd0c` / 正典 `6141415` は GitHub main へ push 済み。**次は Public Garage**。**Garage 全体 CLOSE ではない**）**
+
+> ## ✅ 085: Mobile Own Garage 6面 CLOSE（2026-09-10 / イタヤ裁定・外部再監査 通過）
+>
+> モック: `myrig-mockup` `313cd0c`（push 済み）。正典: `6141415`（084・push 済み）。
+>
+> ### 裁定
+> 🔴 **Own Garage は PC 6面・Mobile 6面とも CLOSE。** 見た目の再設計として再オープンしない。
+> 外部再監査（簡易）で 084 の残存5点がすべて解消と判定され、新しい重大問題も出なかった。
+>
+> | 確認項目 | 結果 |
+> |---|---|
+> | LOG 遷移 | TF2 条件が保持され、詳細・一覧とも 8件 |
+> | 駆動系 | PC / Mobile とも 3 items |
+> | ESC 画像 | 一覧 / 詳細 / 右欄とも placeholder |
+> | 作業台 | 追加・解除・空状態からの復帰を検査で確認 |
+> | Mobile の重なり | 検出なし |
+> | `garage_integrity_check` | 196 PASS / 0 FAIL |
+>
+> ⚠️ 再監査は**簡易**。全画面・全条件の再走査と 3097件の再実行は行っていない。
+> CLOSE は「この範囲で重大問題が無い」ことの裁定であって、全条件の無欠陥証明ではない。
+>
+> ### CLOSE の範囲
+> ✅ Own Garage 6面（Top / RIG / PARTS / LOG / お気に入り / ピン留め）PC・Mobile
+> ✅ 併せて直した Owner RIG Detail / Owner PARTS Detail の**整合項目**（再設計は未着手）
+> ⛔ Garage 全体の CLOSE ではない。Public Garage が残る。
+>
+> ### CLOSE 後も残っている PENDING（再オープンではなく次の作業）
+> | # | 項目 | 種別 |
+> |---|---|---|
+> | D9 / D11 / D13 | 監査 #9 保存一覧の整理操作 / #11 RIG status filter・PARTS 管理情報 / #13 Owner Detail の status 表示・ページ内 navigation | 改善提案 |
+> | D-IMG | 実写差し替え 5件（SCX10 III Skid / Warn Winch / LCG Battery Tray / 25T Servo Horn / AXE R2 ESC） | 素材待ち |
+> | D-PERIOD | 期間フィルターの意味（暦の今週・今月 or 直近N日） | 未裁定 |
+> | D-TRAP | 一覧の focus trap / 開閉を Owner Detail の共有 Shell へ集約 | 実装統合 |
+> | D-PARTS | TRX-4 15点 / Cliffhanger 22点 のパーツ数に導出元が無い | データ待ち |
+> | D-SHELL | `css/sot/SoT_app-shell.css` が PC 正本の fork（mobile 460行 / PC 666行） | 082 から継続 |
+> | D2 / D3 | H2-a / H2-b（`--cat-*` の cross-surface rollout） | 未着手 |
+> | D4〜D8 | 081 のまま | 未裁定 |
+>
+> ### NOW
+> 🔴 **次は Public Garage。** 着手前に棚卸し報告で一度止まる（079 / 080 と同じ進め方）。
 
 > ## 🟡 084: 再監査の残存5点を修正 — 導線とデータをつなぐ（2026-09-10）
 >
