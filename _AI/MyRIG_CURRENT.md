@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260910-085
-updated: 2026-09-11 08:36 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260911-086
+updated: 2026-09-11 10:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,101 @@ updated: 2026-09-11 08:36 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-10 / revision 085（**Own Garage は PC 6面・Mobile 6面とも CLOSE**（イタヤ裁定 2026-09-10）。モック `313cd0c` / 正典 `6141415` は GitHub main へ push 済み。**次は Public Garage**。**Garage 全体 CLOSE ではない**）**
+**最終更新: 2026-09-11 / revision 086（**Public Garage の構造・データ・route を分離して実装**（イタヤ裁定 2026-09-11）。モック `05c0c09` / 正典 `086` は**未 push**。**次は Public Garage の実画面レビュー**。**CLOSE ではない**）**
+
+> ## 🟡 086: Public Garage — 人物・公開範囲・route を Own から分離（2026-09-11 / イタヤ裁定）
+>
+> モック: `myrig-mockup` HEAD `05c0c09`（**未 push**。`origin/main` は `313cd0c`。`0321160` と2本）。
+> 正典: この 086（**未 push**。`origin/main` は `9fae794`）。
+>
+> 🔴 **これは CLOSE ではない。** 構造・データ・route・検査までで、実画面レビューは未了。
+>
+> ### DECISION（2026-09-11 イタヤ裁定）
+> | # | 裁定 |
+> |---|---|
+> | 1 | **Public Garage の identity は `@trail_builder`。** Own（`@crawler_junkie`）と fixture ごと分ける。`fav / pin / PIT / owner reactions` は Public Source へ持ち込まない。⛔ 分けるのは**人物・公開範囲・route**であって、カード部品ではない |
+> | 2 | **D-PERIOD = rolling period。** ラベルは「直近7日 / 直近1か月 / 直近3か月 / 直近6か月」。Production は**現在日**、Mock は fixture / 面が明示した **`referenceDate`**。PC の手書き `data-period` は廃止し、`data-date` だけを根拠にする |
+> | 3 | **PC Public RIG / PARTS / LOG に共有 filter / sort を導入。** ⛔ **無限スクロールは入れない**（PC→Mobile 正典でも限定例外）。共有するのは filter / sort / count semantics / aria state / empty state まで。Own 管理UIへ寄せない |
+> | 4 | **PC の `--cat-*` v8 rollout は今回やらない。** Public だけ例外化すると「どこまで v8 済みか」の棚卸しが再び要る。**H2-a / H2-b（D2 / D3）レーンに残す** |
+> | 5 | **公開ページは未ログインで閲覧できる。** ログインを求めるのは**操作**（フォロー / 報告 / ブロック）だけ ＝ P3 Login Modal。共有は求めない |
+>
+> ### 着手前の棚卸しで判明していた実測（すべて是正済み）
+> - Mobile Public 一覧3面が **Own と同じ fixture** を読み、`@crawler_junkie` の 7 / 312 / 84 を「他人のガレージ」として出していた。PC Public は `@trail_builder` の 5 / 198 / 67 で、**PC と Mobile で人物そのものが違っていた**
+> - PC Public 4面の相互リンクが**実装URL**（`/user/trail_builder/rigs`）で、モック内に実体が無かった
+> - Mobile Public Top から一覧3面への**前進リンクが 0本**（「すべて見る」は `href="#"`）。往復が閉じていなかった
+> - PC Public の filter は**見た目だけ**。`aria-pressed` も無く、選択状態を `--color-accent-fill` で塗っていた（NG-7）
+> - `?guest=1` が公開ページで**全面 authwall** を出し、しかも `next` が **Own の `/garage`** を指していた
+>
+> ### STATE — 実装
+> | 面 | 変更 |
+> |---|---|
+> | `user-garage.html`（Mobile Public Top） | **1059行 → 113行**。page-local style 293 / script 572 → **0 / 0**。描画は `js/mobile-public-garage-top.js`、器は `css/mobile-garage.css` ＋ 差分だけ `css/mobile-public-garage.css` |
+> | `user-garage-{rigs,parts,logs}.html` | `data-garage-list-store="MYRIG_PUBLIC_GARAGE"` を宣言。総数 5 / 198 / 67。チップを Public の実データへ |
+> | PC Public 4面 | 実装URL → 実体。ロゴ・カード・「もっと見る」の行き先を公開 Detail へ。page-local script **4×16行 → 0**（⋯ は `SoT_public-garage-sidebar.js` へ昇格）。左レーンは `data-active` 以外 **4面完全一致**（drift 0） |
+> | PC Public 一覧3面 | `.pg-sub-2col` / `.pg-title-bar` / `.flt-*` を撤去し `SoT_garage-list.css` / `.js` の契約へ。無限スクロールは無し |
+>
+> **新設（物理正本は1本）**
+> ```
+> js/mobile-public-garage-data.js      @trail_builder の fixture（RIG 5 / PARTS 8 / LOG 6）
+> js/mobile-public-garage-top.js       Public Top の描画
+> css/mobile-public-garage.css         Public 固有の差分だけ（cover / 名前＋@ / bio / フォロー行）
+> pc/assets/js/SoT_period.js           rolling period の物理正本。Mobile も直読み
+> pc/assets/js/SoT_public-garage-sidebar.js  Public 左レーンの ⋯（4面で同一だった16行）
+> img/avatar_trail_builder.svg         外部ホストを1件減らすためのローカル資産（pc/img/ にも配置）
+> ```
+>
+> ### STATE — データの是正（抽出時に見つかった PC 内の不一致）
+> 🔴 **より具体的な面（一覧面）を正とした。** ラベルが複数箇所で一致することは正しさの証明にならない。
+> - LOG の rig 表記が Top と一覧で **3通り**（`RC4WD TF2 Mojave` / `RC4WD TF2 Mojave II` / `Trail Finder 2 MOJAVE II`）→ RIG 一覧の title `TF2 Mojave II Trail Build` へ統一
+> - PARTS「SCX10 III Aluminum Skid Plate」の装着 RIG が Top `SCX10 III` / 一覧 `Cliffhanger HD` → 一覧側（`SCX10 III` は @trail_builder の5台に無い）
+> - LOG の `likes` / `comments` は **PC Public に存在しない**。⛔ 無い数字をモックへ作らない。よって Public LOG の並び替えに「人気順」を置かない
+>
+> ### 検査
+> | 検査 | 085 | 086 |
+> |---|---|---|
+> | `garage_integrity_check` | 196 | **395**（GI11 / GI12 / GI13 / GIP3 新設） |
+> | `mobile_garage_list_check` | 789 | **804**（store を面ごとに読む形へ） |
+> | `garage_check` | 504 | **505** |
+> | 他10本 | — | 増減なし・新規 FAIL 0 |
+>
+> ```
+> GI11 owner leak       Public に PIT / お気に入り / ピン留め / 編集・登録 / owner counts が出ない
+> GI12 public identity  PC / Mobile の Public 全面が @trail_builder。Own と混線しない。件数も一致
+> GI13 public round trip Public Top → 一覧3面 → Public Detail → Public Top。owner route へ1本も入らない
+> GIP3 public auth      公開ページは未ログインで閲覧できる。求めるのは操作だけ。共有は求めない
+> ```
+> `--selftest` の故障注入で **68 FAIL** を検出（新設分も含めて検査が生きていることを確認）。
+>
+> ⚠️ **検査は cloud コンテナで実行した。** デスクトップ VM に Playwright が無く、
+> 網も無いため install できなかった。着手前の HEAD `0321160` で同じ環境の
+> baseline を取り、**その baseline との差分**で判定している。
+> 外部ホスト（`i.pravatar.cc` / `placehold.co` / Google Fonts）が cloud では塞がれるため、
+> `image_integrity_check` 45/18・`mobile_feed_check` 60/3・`mobile_detail_check` 55/4・
+> `mobile_garage_detail_check` 132/2 は **baseline と同値**（＝環境要因で、変更由来ではない）。
+> イタヤの Mac で 13本を流し直すこと。
+>
+> ### 実画面監査 — 360 / 390 / 1280 / 1440 × Light / Dark（32組）
+> はみ出し **0** / 重なり **0** / pageerror **0** / **新規の低CR 0**。
+> `user-garage.html` の低CR 2件（旧・文字アバター CR 3.08）は解消。
+> PC 左レーンに残る低CR 3件（`MAINTENANCE` 2.57 / `RUN` 2.28 / `♥` 3.58 dark）は
+> **着手前と同一**。カテゴリ色を文字色に使っている分で **D2（H2-a）の対象**。
+>
+> ### NOW
+> 🔴 **次は Public Garage の実画面レビュー**（PC 4面 / Mobile 4面）。ここを通してから CLOSE を判定する。
+>
+> | # | 項目 | 状態 |
+> |---|---|---|
+> | D-PUBDETAIL | **公開 Detail 3面（`rig-detail` / `parts-detail` / `log-detail`）が まだ `@crawler_junkie` の内容**。Public 一覧から降りると人物が変わる。今回は導線だけ中身に合わせて Own 側へ向け直した（GI2 / GI3 / GI8 が中身と遷移先を突き合わせるため）。Detail レーンの契約（`detail_contract` / `mobile_detail` / `mobile_garage_detail` の M9 baseline）にかかるので分離は別バッチ | **未裁定** |
+> | D-PUBNUM | `@trail_builder` のフォロー 49 / フォロワー 312 が Own と同値（PC の原文ママ）。数字を作らずに残してある | 未裁定 |
+> | D2 / D3 | H2-a / H2-b。Public だけ先行させない（裁定 4） | 未着手 |
+> | D-IMG / D-PARTS / D-TRAP / D-SHELL / D4〜D8 / D9 / D11 / D13 | 085 のまま | 継続 |
+>
+> ### 要 push
+> ```
+> myrig-mockup      0321160, 05c0c09   （fast-forward 可）
+> myrig-ai-context  9fae794 の次（086） （fast-forward 可）
+> ```
+> ⛔ force push 禁止。
 
 > ## ✅ 085: Mobile Own Garage 6面 CLOSE（2026-09-10 / イタヤ裁定・外部再監査 通過）
 >
@@ -46,7 +140,7 @@ updated: 2026-09-11 08:36 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > |---|---|---|
 > | D9 / D11 / D13 | 監査 #9 保存一覧の整理操作 / #11 RIG status filter・PARTS 管理情報 / #13 Owner Detail の status 表示・ページ内 navigation | 改善提案 |
 > | D-IMG | 実写差し替え 5件（SCX10 III Skid / Warn Winch / LCG Battery Tray / 25T Servo Horn / AXE R2 ESC） | 素材待ち |
-> | D-PERIOD | 期間フィルターの意味（暦の今週・今月 or 直近N日） | 未裁定 |
+> | D-PERIOD | 期間フィルターの意味 | **086 で裁定済み**（rolling period） |
 > | D-TRAP | 一覧の focus trap / 開閉を Owner Detail の共有 Shell へ集約 | 実装統合 |
 > | D-PARTS | TRX-4 15点 / Cliffhanger 22点 のパーツ数に導出元が無い | データ待ち |
 > | D-SHELL | `css/sot/SoT_app-shell.css` が PC 正本の fork（mobile 460行 / PC 666行） | 082 から継続 |
