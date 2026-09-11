@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260911-089
-updated: 2026-09-11 14:20 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260911-090
+updated: 2026-09-11 15:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,59 @@ updated: 2026-09-11 14:20 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-11 / revision 089（**M9: Public Detail baseline（`_state/mobile_garage_detail_public_baseline.json`）を旧版と全文diffし、D-PUBDETAIL起因以外の差分0件を確認。baselineをcommitで回帰基準として確定**。モック `a52f705` / 正典 `089` は**未 push（GitHubへのegressがこの環境で403、要リトライ）**。**残るのはMac側の他12検査と実機390px最終確認**。🔴 **CLOSE ではない**。その後 Web Fundamentals Audit）**
+**最終更新: 2026-09-11 / revision 090（**🟢 Public Garage CLOSE（イタヤ裁定）**。13検査合計 3525 PASS / 0 FAIL。実機390pxのローカルナビ最終確認済み。モック `fc0df27` / 正典 `090`。**次は Web Fundamentals Audit**（500〜1280px の responsive を MyRIG 全体で横断）**）**
+
+> ## 🟢 090: Public Garage CLOSE（2026-09-11 / イタヤ裁定）
+>
+> モック: `myrig-mockup` HEAD `fc0df27`（push待ち）。
+> 正典: この 090（push待ち）。089 の `7289a80` は push 済み。
+>
+> ### CLOSE判定
+> 086〜089 で積み上げた是正・確認がすべて揃い、イタヤが Public Garage の CLOSE を裁定した。
+>
+> - 086: 人物・公開範囲・route を Own から分離（`@trail_builder` fixture／P3 auth）
+> - 087: Own と同じ Garage 骨格へ揃える（カード寸法・grid・breakpoint 一致／RIG status／D-PUBDETAIL着手）
+> - 088: 最終レビュー2点（ローカルナビ1行固定／Launcher の Owner Manage 改称）
+> - 089: M9（Public Detail baseline）を旧版と全文diffし、D-PUBDETAIL起因以外の差分0件を確認・確定
+> - 090（今回）: Mac実Terminalで**残り12検査を本走** — 3393 PASS / 0 FAIL
+>   （13検査合計 **3525 PASS / 0 FAIL**）。**実機390pxのローカルナビ折り返しもイタヤ確認済み**。
+>
+> ### 検査（Mac実Terminal本走・2026-09-11）
+> | 検査 | PASS | FAIL |
+> |---|---|---|
+> | `garage_list_check` | 734 | 0 |
+> | `mobile_garage_list_check` | 804 | 0 |
+> | `garage_check` | 505 | 0 |
+> | `garage_top_check` | 287 | 0 |
+> | `garage_integrity_check` | 610 | 0 |
+> | `launcher_link_check` | 177 | 0 |
+> | `image_integrity_check` | 63 | 0 |
+> | `mobile_feed_check` | 63 | 0 |
+> | `mobile_detail_check` | 59 | 0 |
+> | `detail_contract_check` | 51 | 0（WARN 0） |
+> | `entity_actions_check` | 36 | 0 |
+> | `footer_single_source_check` | 4 | 0 |
+> | `mobile_garage_detail_check`（089でMac実行済み） | 132 | 0 |
+> | **合計 13本** | **3525** | **0** |
+>
+> 実行に伴い `_state/garage_check_result.json`（504→505）／
+> `_state/mobile_garage_list_result.json`（789→804）の記録カウンタを実測値へ更新（`fc0df27`）。
+> 検査項目数の増加（G21・MG16 等）に記録が追いついていなかっただけで、fail は 0 のまま変化なし。
+>
+> ### PENDING（CLOSE後へ持ち越し・blockerではない）
+> - **Web Fundamentals Audit**: 500〜1280px の responsive を MyRIG 全体で横断（本題）
+> - Public fixture に残存する廃止済みLOG種別「セットアップ」のcleanup（M9・D-PUBDETAILとは無関係）
+> - D-PUBNUM: Follow 49 / Followers 312 が Own と同値（誤りの根拠も代替値も無いため現状維持）
+>
+> ### NOW
+> 🟢 **Public Garage CLOSE。** 次のスレッドは Web Fundamentals Audit から開始する。
+>
+> ### 要 push
+> ```
+> myrig-mockup      fc0df27   （fast-forward 可）
+> myrig-ai-context  090       （fast-forward 可）
+> ```
+> ⛔ force push 禁止。
 
 > ## 🟡 089: M9 — Public Detail baseline を承認済み回帰基準として確定（2026-09-11）
 >
