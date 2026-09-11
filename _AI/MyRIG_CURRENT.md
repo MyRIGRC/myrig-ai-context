@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260911-088
-updated: 2026-09-11 15:20 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260911-089
+updated: 2026-09-11 14:20 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,50 @@ updated: 2026-09-11 15:20 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-11 / revision 088（**最終レビューの2点（ローカルナビ1行固定 / Launcher の Owner Manage 改称）を反映**。モック `ecff2a0` / 正典 `088` は**未 push**。**次はイタヤの最終実画面確認**。🔴 **CLOSE ではない**。その後 Web Fundamentals Audit）**
+**最終更新: 2026-09-11 / revision 089（**M9: Public Detail baseline（`_state/mobile_garage_detail_public_baseline.json`）を旧版と全文diffし、D-PUBDETAIL起因以外の差分0件を確認。baselineをcommitで回帰基準として確定**。モック `a52f705` / 正典 `089` は**未 push（GitHubへのegressがこの環境で403、要リトライ）**。**残るのはMac側の他12検査と実機390px最終確認**。🔴 **CLOSE ではない**。その後 Web Fundamentals Audit）**
+
+> ## 🟡 089: M9 — Public Detail baseline を承認済み回帰基準として確定（2026-09-11）
+>
+> モック: `myrig-mockup` HEAD `a52f705`（**未 push**。GitHubへのegressがこの環境で403 Forbidden。
+> `origin/main` は `ecff2a0`）。
+> 正典: この 089（未 push）。088 の `a90397a` は push 済み。
+>
+> ### 経緯
+> 918d6e7（087）で D-PUBDETAIL 適用時に `_state/mobile_garage_detail_public_baseline.json` を
+> 意図的に削除（Public Detail の中身を @crawler_junkie → @trail_builder へ変えたため）。
+> `mobile_garage_detail_check.py` の M9 は baseline 不在時に自動再生成 → 自動 PASS する仕様なので、
+> 「再生成されたら即正常扱い」にはせず、旧baseline（削除前コミットの親）と全文diffして確認した。
+>
+> ### 確認内容
+> - 3面（rig-detail / parts-detail / log-detail）とも、差分は `data-widget="builder"` 区間
+>   （アバター・氏名・@handle・rig/parts/log件数・ガレージ導線・M11 LOG・M12 使用パーツ・
+>   R7 このビルダーの他のRIG・コメント欄owner表示）に限定。
+> - 区間の前後（ヘッダー〜本体スペック、RELATED棚 `data-treat="S1"` 以降）は旧新で完全一致。
+> - **D-PUBDETAIL起因以外の差分は0件。** イタヤ確認済み。
+>
+> baselineを `myrig-mockup` へ commit し、次回実行時からの回帰比較基準として確定した
+> （未追跡のままだと別環境で自動再生成され、回帰検査として機能しないため）。
+>
+> ### 既知の別件（M9とは無関係・CLOSE blockerでもない）
+> 「セットアップ」はスキーマ v1.2 で廃止済みの LOG 種別（`myrig-feed-v3.html` の注記参照）だが、
+> PC Public LOG ページ（`myrig-public-garage-logs-v3.html`）に既存の値として残存しており、
+> @trail_builder のPublic fixtureへそのまま継承されていた。M9の異常でもD-PUBDETAIL起因でもない。
+> 後続cleanupのPENDINGとして別管理する。
+>
+> ### PENDING
+> - 新 `mobile_garage_detail_public_baseline.json` の push（この環境のegress 403待ち）
+> - Public fixture の「セットアップ」廃止値cleanup（Public Garage CLOSEとは分離）
+>
+> ### NOW
+> M9はほぼ片付いた。残るのは Mac実機での他12検査、および実機390px（ローカルナビ折り返し）の
+> 最終確認。通ったら Public Garage CLOSE を判定 → その後 Web Fundamentals Audit。
+>
+> ### 要 push
+> ```
+> myrig-mockup      a52f705   （fast-forward 可。現在 403 でリトライ待ち）
+> myrig-ai-context  089       （fast-forward 可。現在 403 でリトライ待ち）
+> ```
+> ⛔ force push 禁止。
 
 > ## 🟡 088: 最終レビューの2点 — ナビの1行固定と Launcher の分類（2026-09-11）
 >
