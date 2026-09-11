@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260911-086
-updated: 2026-09-11 10:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260911-087
+updated: 2026-09-11 12:40 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,118 @@ updated: 2026-09-11 10:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-11 / revision 086（**Public Garage の構造・データ・route を分離して実装**（イタヤ裁定 2026-09-11）。モック `05c0c09` / 正典 `086` は**未 push**。**次は Public Garage の実画面レビュー**。**CLOSE ではない**）**
+**最終更新: 2026-09-11 / revision 087（**Public Garage を Own と同じ Garage 骨格へ揃え、公開 Detail の人物を継続させた**（イタヤ実画面レビュー 2026-09-11）。モック `918d6e7` は**未 push**（`05c0c09` / 正典 `2314b78` は push 済み）。**次はイタヤの最終実画面確認**。🔴 **CLOSE ではない**）**
+
+> ## 🟡 087: Public Garage — Own と同じ Garage 骨格へ揃える（2026-09-11 / イタヤ実画面レビュー）
+>
+> モック: `myrig-mockup` HEAD `918d6e7`（**未 push**。`origin/main` は `05c0c09`）。
+> 正典: この 087（未 push）。086 の `2314b78` は push 済み。
+>
+> 🔴 **CLOSE ではない。** イタヤの最終実画面確認待ち。
+>
+> ### 基本概念（2026-09-11 イタヤ裁定・単純化）
+> **Public Garage は「Own Garage とは別の UI 体系」ではない。**
+> 未ログインの人、またはログイン済みユーザーが他人の Garage を見に来たときの
+> **Garage 公開ビュー**（`page-role-matrix`: 「Own Garage との表示分岐。別ページではなくビュー切替」）。
+>
+> > 同じ Garage の骨格・カード・サイズ・レスポンシブ文法を使い、
+> > **viewer context によって見せる情報と操作だけを変える**。
+>
+> ⛔ 086 の @trail_builder fixture 分離 / private・owner data 除去 / Public route 分離 /
+> P3 auth / Shared Source 化は**維持**する。戻す話ではない。
+>
+> ### 1. カード寸法・grid の是正（実測 → 一致）
+> | | 着手前 Own | 着手前 Public |
+> |---|---|---|
+> | ページ器 | `.page` `min(1400px)` | `.pg-wrap` `min(1240px)` → 1440 で本文 **828 / 668** |
+> | RIG grid | `.grid-md--top-rig` `auto-fit minmax(280px)` gap20 | `.grid-rig` `auto-fill minmax(200px)` gap14 |
+> | RIG 1280px | **2列・カード 328px** | **3列・カード 213px** |
+> | PARTS | gap 20 | gap 14 |
+> | LOG | `.list-stack` | `.log-list{gap:0}` |
+>
+> 是正後は RIG / PARTS / LOG とも `pageW` / `pageCols` / `twoCols` / `contentW` /
+> `filterW` / `itemsCols` / `gap` / カード幅 / 列数が **1280・1440 で完全一致**。
+> 残る差は**サンプル件数だけ**（Own 7・8・12 / Public 5・8・6 ＝ データの違い）。
+>
+> 撤去した page-local: `.pg-outer` / `.pg-wrap` / `.pg-main` / `.grid-rig` / `.grid-parts` /
+> `.log-list` / `.section*` の上書き / reset の重複。器は `SoT_garage-page.css` ＋
+> `SoT_garage-list.css` へ。**PC Public の page-local CSS は `button` / `svg` の2規則だけ**になった。
+> ⛔ reset にあった無条件 `a:hover{text-decoration:underline}` も撤去。正本は 2026-09-10 に
+> `@media(hover:hover)` で囲ってあり、面へ書き戻すとタッチ端末の :hover 張り付きが戻る。
+>
+> ### 2. breakpoint（Public 専用 responsive は作らない）
+> 900〜1500px の **13幅 × 3対**で実測し、折り返しの挙動が全幅で一致。
+> `1100px` = filter が本文下 / `1024px` = 左レーンが下。どちらも共有側の既存規則。
+> ⚠️ 500〜1280px 全域の responsive 設計は **Public CLOSE 後の Web Fundamentals Audit**
+> で MyRIG 全体を横断して扱う（今回は広げない）。
+>
+> ### 3. RIG status を Public でも出す
+> `SoT_card-components.js` に **`context="public"`** を追加し、owner と同じ
+> 「中立チップ + 8px status ドット」を描く。filter に status があるのに
+> カードに出ていない状態を解消した（出さないなら filter からも外す、という判断の前者を採用）。
+> ⛔ `mixed` / `model` / `normal` / `usage` の分岐は触らない
+> （081 の「`.gs` は owner 分岐でしか描かれないので非 Owner へ波及しない」安全性は維持）。
+>
+> 🔴 **副次的に見つかった欠陥**: Public RIG カードは `context` 無し ＝ `mixed` に落ちており、
+> `title` が **空**（`model-name` 未指定）で **RIG 名がカードに出ていなかった**。これも解消。
+>
+> ### 4. D-PUBDETAIL 解消
+> `rig-detail` / `parts-detail` / `log-detail` を **@trail_builder の公開 Detail** にした。
+> Public 一覧から降りても人物・content context が切れない。
+> 対象: `md-builder`（名前・@・5/198/67・ガレージ導線）/ M11 LOG 3件 / M12 使用パーツ 4点 /
+> R7 このビルダーの他のRIG 4台 / コメントの owner 返信。
+> ⛔ Owner Detail の再デザインはしない。Detail 構造・共有部品はそのまま。
+> ⛔ RELATED 棚（S1〜S7）は「他人 / カテゴリ全体」なので対象外。
+> `js/mobile-detail.js` のアバター判定に `svg` を追加（ローカル svg が頭文字フォールバックへ
+> 落ち、ダークで CR 3.08 になっていた）。
+> **M9 baseline は意図的変更のため削除。次回実行時に自動再生成される**（検査に明記あり）。
+>
+> ### 5. Public 固有として維持するもの
+> | Own | Public |
+> |---|---|
+> | 公開ページをプレビュー / プロフィール編集 / お気に入り / ピン留め / 設定 / PIT TABLE / owner analytics・RECENT ACTIVITY | Follow / … menu / Block・Report / LATEST LOGS / Garage・RIG・PARTS・LOG のみ |
+>
+> 「Public を Own そっくりに戻す」のではなく、**管理者専用部分だけを viewer 用へ差し替える**。
+>
+> ### 検査
+> | 検査 | 086 | 087 |
+> |---|---|---|
+> | `garage_integrity_check` | 395 | **486**（**GI14 view parity** 66項目 新設） |
+> | 他12本 | — | 増減なし・新規 FAIL 0 |
+>
+> ```
+> GI14 view parity  同じ viewport で一覧の器・カード寸法・grid・gap・列数・
+>                   breakpoint が Own と一致する（データ件数は対象外）
+> ```
+> `--selftest` の故障注入で **110 FAIL** を検出（GI14 は 24/66 ＝ 新設分も生きている）。
+>
+> ⚠️ 検査は 086 と同じく cloud で実行し、着手前 `0321160` の baseline との差分で判定。
+> 外部ホストが塞がれる 4本（`image_integrity` 45/18・`mobile_feed` 60/3・
+> `mobile_detail` 55/4）は baseline と同値。`mobile_garage_detail` は M9 baseline を
+> 削除したため 132/0。**Mac 側で13本流し直すこと**（初回に M9 baseline が作られる）。
+>
+> ### 実画面監査 — 360 / 390 / 1280 / 1440 × Light / Dark（44組・公開 Detail 3面を追加）
+> はみ出し **0** / 重なり **0** / pageerror **0** / **新規の低CR 0**。
+> Public Garage 8面は**低CR 0**。PC 左レーンの3件（`MAINTENANCE` 2.57 / `RUN` 2.28 /
+> `♥` 3.58 dark）と公開 Detail の既存分は**着手前と同一**で、**D2（H2-a）の対象**。
+>
+> ### NOW
+> 🔴 **イタヤの最終実画面確認待ち。** ここを通してから Public Garage CLOSE を判定する。
+> その後に **Web Fundamentals Audit**（500〜1280px の responsive を MyRIG 全体で横断）。
+>
+> | # | 項目 | 状態 |
+> |---|---|---|
+> | D-PUBNUM | フォロー 49 / フォロワー 312 が Own と同値（PC の原文ママ）。誤りの根拠も代替値も無いので数字を作らず現状維持 | **CLOSE blocker にしない** |
+> | D2 / D3 | H2-a / H2-b。Public だけ先行させない | 未着手 |
+> | D-IMG / D-PARTS / D-TRAP / D-SHELL / D4〜D8 / D9 / D11 / D13 | 085 のまま | 継続 |
+> | D-PUBDETAIL | **087 で解消** | 完了 |
+>
+> ### 要 push
+> ```
+> myrig-mockup      918d6e7   （fast-forward 可）
+> myrig-ai-context  087       （fast-forward 可）
+> ```
+> ⛔ force push 禁止。
 
 > ## 🟡 086: Public Garage — 人物・公開範囲・route を Own から分離（2026-09-11 / イタヤ裁定）
 >
@@ -98,7 +209,7 @@ updated: 2026-09-11 10:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 >
 > | # | 項目 | 状態 |
 > |---|---|---|
-> | D-PUBDETAIL | **公開 Detail 3面（`rig-detail` / `parts-detail` / `log-detail`）が まだ `@crawler_junkie` の内容**。Public 一覧から降りると人物が変わる。今回は導線だけ中身に合わせて Own 側へ向け直した（GI2 / GI3 / GI8 が中身と遷移先を突き合わせるため）。Detail レーンの契約（`detail_contract` / `mobile_detail` / `mobile_garage_detail` の M9 baseline）にかかるので分離は別バッチ | **未裁定** |
+> | D-PUBDETAIL | ✅ **087 で解消**。（以下は当時の記録）**公開 Detail 3面（`rig-detail` / `parts-detail` / `log-detail`）が まだ `@crawler_junkie` の内容**。Public 一覧から降りると人物が変わる。今回は導線だけ中身に合わせて Own 側へ向け直した（GI2 / GI3 / GI8 が中身と遷移先を突き合わせるため）。Detail レーンの契約（`detail_contract` / `mobile_detail` / `mobile_garage_detail` の M9 baseline）にかかるので分離は別バッチ | **未裁定** |
 > | D-PUBNUM | `@trail_builder` のフォロー 49 / フォロワー 312 が Own と同値（PC の原文ママ）。数字を作らずに残してある | 未裁定 |
 > | D2 / D3 | H2-a / H2-b。Public だけ先行させない（裁定 4） | 未着手 |
 > | D-IMG / D-PARTS / D-TRAP / D-SHELL / D4〜D8 / D9 / D11 / D13 | 085 のまま | 継続 |
