@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260911-091
-updated: 2026-09-11 15:12 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260911-092
+updated: 2026-09-11 15:21 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,44 @@ updated: 2026-09-11 15:12 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-11 / revision 091（**Launcher是正: Public Garage 4面が `card--plain`（今回更新扱い外）のまま放置されイタヤが実画面で発見。`card--review` へ修正し確認導線を追加**。モック `a9e6841` / 正典 `091` は**push待ち（GitHubへのegressがこの環境で403）**。**🟢 Public Garage CLOSE は維持**（実体の検査結果・実機確認には影響しない、Launcher表示のみの是正）。**次は Web Fundamentals Audit**）**
+**最終更新: 2026-09-11 / revision 092（**🟢 Garage制作レーン全体CLOSE。Launcherも card--done へ同期**（My Garage 6 / Owner Manage 2 / Public Garage 4 の計12面を card--review → card--done）。通常Detail 3面は既存の card--done のまま。モック `e71a700` / 正典 `092` は**push待ち（GitHubへのegressがこの環境で403）**。**次は Web Fundamentals Audit**）**
+
+> ## 🟢 092: Garage制作レーン全体CLOSE — Launcherを card--done へ同期（2026-09-11 / イタヤ裁定）
+>
+> モック: `myrig-mockup` HEAD `e71a700`（push待ち。`origin/main` は `7d7a893`）。
+> 正典: この 092（push待ち）。091 の commit（ai-context）は push 待ちのまま。
+>
+> ### 裁定
+> 「Garage系は制作・監査ともCLOSE済みなので、Launcherも最終状態へ揃えてほしい」。
+> `card--review`（黄・今回更新＝レビュー待ち）は091で仮に付けたものであり、
+> CLOSE済みのGarage制作レーンには残さない。`card--done`（緑・確定）へ最終昇格した。
+>
+> ### 対象（計12面。href / data-mo / data-pc / altrow等の確認導線は変更なし）
+> - My Garage 6面: garage / garage-rigs / garage-parts / garage-logs /
+>   garage-favorites / garage-pins
+> - Owner Manage 2面: garage-rig-detail / garage-parts-detail
+> - Public Garage 4面: user-garage / user-garage-rigs / user-garage-parts /
+>   user-garage-logs
+>
+> 通常Detail 3面（RIG Detail / PARTS Detail / LOG Detail）は既存の `card--done`
+> のまま維持（091のPENDINGとして残っていた「今回更新へ一時的に上げるか」は、
+> イタヤ裁定により**据え置き**で決着）。
+>
+> ### 構造確認
+> 編集前後で `<a>` 98/98・`<div>` 52/52・`<details>` 21/21 が一致（`class`属性と
+> `group__wip` の手書きラベルのみの変更）。`launcher_link_check.py` はこの環境が
+> playwright未導入のため実行不能（Mac実Terminalでの実行が必要）。
+>
+> ### NOW
+> 🟢 **Garage制作レーン（My Garage / Owner Manage / Public Garage）全体CLOSE。**
+> Launcher表示も実体に同期済み。次は Web Fundamentals Audit。
+>
+> ### 要 push
+> ```
+> myrig-mockup      e71a700   （fast-forward 可）
+> myrig-ai-context  092       （fast-forward 可）
+> ```
+> ⛔ force push 禁止。
 
 > ## 🟡 091: Launcher是正 — Public Garage 4面の card--plain 放置を修正（2026-09-11）
 >
