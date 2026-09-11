@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260911-087
-updated: 2026-09-11 12:40 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260911-088
+updated: 2026-09-11 15:20 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,79 @@ updated: 2026-09-11 12:40 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-11 / revision 087（**Public Garage を Own と同じ Garage 骨格へ揃え、公開 Detail の人物を継続させた**（イタヤ実画面レビュー 2026-09-11）。モック `918d6e7` は**未 push**（`05c0c09` / 正典 `2314b78` は push 済み）。**次はイタヤの最終実画面確認**。🔴 **CLOSE ではない**）**
+**最終更新: 2026-09-11 / revision 088（**最終レビューの2点（ローカルナビ1行固定 / Launcher の Owner Manage 改称）を反映**。モック `ecff2a0` / 正典 `088` は**未 push**。**次はイタヤの最終実画面確認**。🔴 **CLOSE ではない**。その後 Web Fundamentals Audit）**
+
+> ## 🟡 088: 最終レビューの2点 — ナビの1行固定と Launcher の分類（2026-09-11）
+>
+> モック: `myrig-mockup` HEAD `ecff2a0`（**未 push**。`origin/main` は `918d6e7`）。
+> 正典: この 088（未 push）。087 の `004a0c2` は push 済み。
+>
+> 🔴 **CLOSE ではない。** 087 の実画面レビューで「大きな構造問題なし・PC / Mobile とも
+> 087 の方向で OK」との評価。CLOSE 前の残り2点をここで閉じた。
+>
+> ### 1. Mobile Garage ローカルナビ（Shared Garage UI の不具合修正）
+> 390px の実機で「概要」「パーツ」「ログ」、および「絞り込み」が**2行に割れていた**。
+> Public 固有ではなく**共有部品**なので、Own（`garage-*.html`）にも同じ修正が効く。
+> ⛔ Own の再設計はしない。共有部品の不具合修正として同時反映した。
+>
+> ```
+> css/mobile-garage.css       .g2-nav__item / .g2-nav__n   → white-space: nowrap
+> css/mobile-garage-list.css  .gl-filter-btn               → white-space: nowrap
+>                             .gl-filter-btn svg           → flex: 0 0 14px
+>                             .gl-toolbar                  → flex-wrap: nowrap
+>                             .gl-sorts                    → min-width: 0
+> ```
+> 器は横スクロールするので、**縮めず・折らず・はみ出したぶんはスクロールで見せる**形に固定。
+> ⛔ 文字を小さくして詰め込まない。⛔ Public 専用の規則を別に作らない。
+>
+> ⚠️ 🔴 **この環境では症状を再現できなかった。**
+> 外部フォント（Noto Sans JP / Barlow Condensed / Inter）が読めず実機より字幅が狭い。
+> `letter-spacing` を **+5px** まで足して広い書体を再現しても、`flex:0 0 auto` ＋
+> `overflow-x:auto` のため折り返しは起きなかった。
+> **したがって今回の修正は「折れない契約を明示する」防御**であって、
+> イタヤが見た折り返しの**引き金そのものを特定して直したものではない**。
+> 実機でまだ折れるなら、ブラウザ名とスクリーンショットが要る。
+>
+> ### 2. Launcher の分類
+> 「**Owner Detail**」→「**Owner Manage**」（`data-g` も `garage-owner-manage` へ）。
+>
+> | | 置き場所 |
+> |---|---|
+> | RIG Detail `/rig/[rigId]` / PARTS Detail `/parts/[partId]` / LOG Detail `/log/[logId]` | **「詳細ページ」グループのまま**。Browse / Search / Feed / Public Garage など**複数入口から到達する通常のユーザーコンテンツ Detail**なので Public Garage 配下へ移さない |
+> | RIG管理（オーナー）`/garage/rigs/[id]` / パーツ管理（オーナー）`/garage/parts/[id]` | **Owner Manage**（Garage 配下の管理ページ） |
+>
+> カード名も「RIG詳細（オーナー編集）」→「**RIG管理（オーナー）**」、
+> 「パーツ詳細（オーナー編集）」→「**パーツ管理（オーナー）**」。
+> ⛔ 三種類を揃えるためだけに **Own LOG 管理詳細を新設しない**
+> （`/garage/logs/[id]` が無いのは現行仕様どおり。画面カードは 2 枚のまま）。
+>
+> ### 検査
+> | 検査 | 087 | 088 |
+> |---|---|---|
+> | `garage_integrity_check` | 486 | **610 PASS / 0 FAIL** |
+> | `garage_check` | 505 | 505（グループ名の変更に追随） |
+> | 他11本 | — | 増減なし・新規 FAIL 0 |
+>
+> **GI5 を 20 → 144 項目へ拡張。** ラベルの実測行数（素 ＋ `letter-spacing +2.5px` の
+> 広い書体再現）に加えて、**computed `white-space` が `nowrap` である契約**も検査する。
+> 🔴 実測だけでは、この環境の狭い書体で「たまたま折れていない」としか言えない。
+> Public 一覧3面も同じ検査対象へ入れた（**Own だけ直して満足しない**）。
+> 故障注入（`white-space` を外す）で GI5 が FAIL することを確認済み。
+>
+> ### 実画面監査 — 360 / 390 / 1280 / 1440 × Light / Dark（44組）
+> **087 と完全同一。** はみ出し 0 / 重なり 0 / pageerror 0 / 新規の低CR 0。
+>
+> ### NOW
+> 🔴 **イタヤの最終実画面確認待ち。** とくに 1 の折り返しが実機で直っているか。
+> 通ったら Public Garage CLOSE を判定 → その後 **Web Fundamentals Audit**
+> （500〜1280px の responsive を MyRIG 全体で横断）。
+>
+> ### 要 push
+> ```
+> myrig-mockup      ecff2a0   （fast-forward 可）
+> myrig-ai-context  088       （fast-forward 可）
+> ```
+> ⛔ force push 禁止。
 
 > ## 🟡 087: Public Garage — Own と同じ Garage 骨格へ揃える（2026-09-11 / イタヤ実画面レビュー）
 >
