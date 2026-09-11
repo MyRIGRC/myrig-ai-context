@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260911-090
-updated: 2026-09-11 15:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260911-091
+updated: 2026-09-11 15:12 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,57 @@ updated: 2026-09-11 15:05 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-11 / revision 090（**🟢 Public Garage CLOSE（イタヤ裁定）**。13検査合計 3525 PASS / 0 FAIL。実機390pxのローカルナビ最終確認済み。モック `fc0df27` / 正典 `090`。**次は Web Fundamentals Audit**（500〜1280px の responsive を MyRIG 全体で横断）**）**
+**最終更新: 2026-09-11 / revision 091（**Launcher是正: Public Garage 4面が `card--plain`（今回更新扱い外）のまま放置されイタヤが実画面で発見。`card--review` へ修正し確認導線を追加**。モック `a9e6841` / 正典 `091` は**push待ち（GitHubへのegressがこの環境で403）**。**🟢 Public Garage CLOSE は維持**（実体の検査結果・実機確認には影響しない、Launcher表示のみの是正）。**次は Web Fundamentals Audit**）**
+
+> ## 🟡 091: Launcher是正 — Public Garage 4面の card--plain 放置を修正（2026-09-11）
+>
+> モック: `myrig-mockup` HEAD `a9e6841`（push待ち。`origin/main` は `7d7a893`）。
+> 正典: この 091（push待ち）。090 の commit（ai-context）は push 待ちのまま。
+>
+> ### 発見経緯
+> イタヤが実画面（Launcher `index.html`）でPublic Garage CLOSEを最終確認した際、
+> My Garage / Owner Manage には黄色「今回更新」バッジが付くのに、
+> Public Garage 4面にだけ付いていない、RIG一覧・パーツ一覧・ログ一覧には
+> ライト/ダーク確認導線すら無いことを発見。「ランチャーが変わってない」と指摘。
+>
+> ### 原因
+> Launcher のバッジ・件数はすべて `card--review`（今回更新）/ `card--plain`
+> （今回は触っていない）/ `card--done`（確定）のクラスから JS が自動生成する
+> （手書きの `group__wip` テキストは実行時に上書きされる）。
+> Public Garage 4面は 2026-09-08 時点で `card--plain` を付けたまま、086〜090の
+> 実体変更（@trail_builder fixture分離・Garage骨格統一・D-PUBDETAIL・13検査CLOSE）
+> の間ずっと放置されていた。Launcher自体は今回のPublic Garage作業の対象に
+> 一度も入っていなかったため気づけなかった。
+>
+> ### 対応
+> - 4面（Top / RIG一覧 / パーツ一覧 / ログ一覧）を `card--plain` → `card--review` へ変更
+> - RIG一覧・パーツ一覧・ログ一覧の3面に `cardwrap` + `altrow`（ライト/ダーク）を追加
+>   （旧バージョンファイルが存在しないため「旧を見る」導線は追加せず。
+>   guest/empty のデモクエリもこの3面には実装が無いため追加していない）
+> - Top（`user-garage.html`）の altrow は既存の 未ログイン/公開0件/検索経由 に
+>   ライト/ダークを追加
+> - `href` / `data-mo` / `data-pc` は変更していない（リンク先の契約は不変）
+>
+> ### 影響範囲の切り分け
+> これはLauncherの表示（レビュー用メタ情報）のみの是正であり、
+> 090で確定した実体（13検査 3525 PASS / 0 FAIL、実機390px確認）には影響しない。
+> **Public Garage CLOSEの判定自体は維持**。
+>
+> ### PENDING（未確認・要判断）
+> - `rig-detail.html` / `parts-detail.html` / `log-detail.html` の3枚は
+>   D-PUBDETAILで内容を大きく変えたが、Launcher上は既存の `card--done`（確定）
+>   のまま。「今回更新」に一時的に上げるべきかはイタヤ判断待ち
+>   （どちらも既に別サイクルでCLOSE済みの面なので、据え置きでも矛盾はない）。
+>
+> ### NOW
+> Launcher表示の是正のみ。push待ち。次は Web Fundamentals Audit。
+>
+> ### 要 push
+> ```
+> myrig-mockup      a9e6841   （fast-forward 可）
+> myrig-ai-context  091       （fast-forward 可）
+> ```
+> ⛔ force push 禁止。
 
 > ## 🟢 090: Public Garage CLOSE（2026-09-11 / イタヤ裁定）
 >
