@@ -362,7 +362,7 @@ Feed が独立したトップレベル体験であるなら、Feed 内に3つの
 
 ---
 
-※ Breakpoint正典: desktop=1025px↑ / tablet=721-1024px / mobile=720px↓（詳細: `docs/design-rules.md` Breakpoint正典セクション参照）
+※ Breakpoint（現状の実測値。⚠️ 2026-09-12 訂正: `docs/design-rules.md` は repo に存在せず、具体 px は正典化しない方針 — `region-behavior-matrix-v1.md` §0）: desktop=1025px↑ / tablet=721-1024px / mobile=720px↓ は Shell の切替値。面ごとの実測境界（Detail 1050 / Library 980 等）は Matrix §4 を参照
 
 ※ **幅ごとに各領域が何へ変身するか**は `docs/ui/region-behavior-matrix-v1.md`（L2 / 2026-09-12）が持つ。
 　 PC 面の **W / M / PC Narrow Fallback** と、専用 Mobile 面の **C** は別契約。

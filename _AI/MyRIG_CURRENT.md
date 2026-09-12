@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260912-093
-updated: 2026-09-12 19:51 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260912-094
+updated: 2026-09-12 22:35 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,9 +14,79 @@ updated: 2026-09-12 19:51 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-12 / revision 093（**🟢 Garage M / Web Fundamentals batch CLOSE**。モック `b78a2f4`（push 済み・origin/main と同期）。Mac 実機 regression 14本 **4,089 PASS / 0 FAIL**。Region Behavior Matrix v1.1 を **L2 として `docs/ui/` へ昇格**。**次は Region Behavior Matrix の残り（Feed M / Detail M / Garage filter M）を別 batch で**）**
+**最終更新: 2026-09-12 / revision 094（**🔴 093 の「Garage M / Web Fundamentals batch CLOSE」は新しい独立反証により失効 → REOPEN**。**Recovery Batch 1（R-01 / R-03 / R-04）を実装・検査・commit 済み**: モック `17f4210`（**push 待ち**。`origin/main` は `b78a2f4`）。契約を **W static / M static / PC Narrow Fallback static** へ改訂、hit-test Gate 新設。**Garage M はまだ再 CLOSE しない**（Global Shell M が未完）。**次は Recovery Batch 2 — Global Shell M / Common Drawer（R-02）**）**
 
-> ## 🟢 093: Garage M / Web Fundamentals batch CLOSE（2026-09-12 / イタヤ裁定）
+> ## 🔴 094: Web Fundamentals Recovery Batch 1 — 093 CLOSE 失効・REOPEN（2026-09-12 / GPT 裁定・Cowork 実装）
+>
+> モック: `myrig-mockup` **`17f4210`**（**push 待ち**。`origin/main` は `b78a2f4`）。正典: この 094。
+>
+> ### 失効
+> **093 の「Garage M / Web Fundamentals batch CLOSE」は失効。** Cowork の独立反証レビュー
+> （`MyRIG_Responsive_CounterEvidence_Audit_20260912`・cloud 34 面 × 95 幅 ＋ Mac 内蔵ブラウザで再現）と、
+> Astra（GPT Work）が途中まで独立に再現した R-01 相当・Public 狭幅により、新証拠で REOPEN。
+>
+> | ID | Sev | 何が起きていたか | 起因 |
+> |---|---|---|---|
+> | **R-01** | P0 | PC ≤1024px で**閉じたままの透明 `.drawer-overlay`（全画面 fixed・z 65）が本文・レール・カードの pointer 操作をすべて奪う**。Mac 実機 900px で Nav「パーツ」クリック → 遷移せず、1100px → 遷移。Header だけ操作可、キーボードは通る | **Garage 変更起因ではなく既存 Shell 欠陥**（`SoT_app-shell.css` §3.4 が閉状態でも `display:block`、`pointer-events` 未指定）。現行 27 面に影響 |
+> | **R-03** | P1 | Garage M の sticky 64px Nav が defer 領域（RECENT ACTIVITY / LATEST LOGS）へ重なる。Chrome では grid item の sticky 拘束が grid area ではなく grid container まで伸びる | 093 の M 契約「Nav sticky」そのもの。W で案A（sticky）を落とした理由と同系統 |
+> | **R-04** | P1 | Public Garage の PC Narrow Fallback（≤720）で aside（Profile＋Nav 約 520px）が sticky のまま本文と LATEST LOGS を覆う | 093 の「Public は従来挙動を維持」例外 |
+>
+> **4,089 PASS では hit-test（操作できるか）を検査していなかった。** 「見える」「DOM にある」「位置が正しい」を
+> 「操作できる」と誤認したのが今回最大の失敗。M 帯を assert していたのは 14 本中 WM7（550）だけで、それも幾何だけだった。
+>
+> ### 是正（Recovery Batch 1 / `17f4210`）
+> | 対象 | 内容 |
+> |---|---|
+> | R-01 | `SoT_app-shell.css` §3.2: 閉状態 `pointer-events:none` / 開状態（`.is-open`）`auto` を契約化。open/close の opacity transition と backdrop click は維持 |
+> | R-08 | Home / `preview.html` の drawer-overlay・home-dir drawer・Shell responsive の page-local 複製を撤去（宣言単位で `SoT_app-shell.css` §3.2〜3.4 と完全同義だったことを実体比較で確認）。共有側 §3.4 の drawer 規則は `body` 前置で特異度を 1 段上げ、page-local の `.home-dir.home-dir--framed{position:sticky!important}`（同特異度・後勝ち）に負けないようにした |
+> | R-03 | `SoT_garage-page.css` §5: M の Nav を **sticky → static**（GPT 裁定: sticky は利便性であって主要機能ではない。wrapper で守るより static が単純・予測可能・回帰リスク低） |
+> | R-04 | 同 §5: Public も PC Narrow Fallback で `static`。**static・1 列を Own / Public 共通契約**に。Public だけ従来 sticky を維持する例外は廃止 |
+> | 付随 | `hit_test_check` が拾った既存の page-local 欠陥を最小修正: `myrig-settings-pc-v0.2.5.html` の `.cover-change-btn` が後続 `.profile-lower` に下 2/3 を覆われていた → `z-index:1` |
+>
+> ### 新契約（Region Behavior Matrix v1.2 / L2）
+> | | |
+> |---|---|
+> | **W / M / PC Narrow Fallback** | Context Rail / Nav は **すべて static**（**M nav sticky 契約は失効**） |
+> | **M（721〜1024）** | Profile 横長 ＋ Nav 約 64px（件数はバッジ・ラベル可視）＋ Main 横 ＋ Activity / LATEST LOGS defer。DOM: Profile → Nav → Main → defer。Own / Public shared source — すべて維持 |
+> | **PC Narrow Fallback（≤720）** | **static・1 列（Own / Public 共通）**。Main はレールの下、defer は Main の後 |
+> | **Overlay 層（Global Shell）** | **閉状態は content の pointer 操作を遮らない**（hit-test で検査）。z-index 等の具体値は正典化しない |
+> | **Global Shell M** | 🔴 「hamburger 実装済み」は誤り → **共通 Drawer 未実装**（2026-08-30 残タスク #1）。hamburger が drawer を開くのは Home / Browse 4 面だけ。他の面は `.app-nav`（Browse / Feed / Library）が M で消え、代替導線が無い（R-02・裁定なしの drop 状態） |
+>
+> ### Gate（新設・更新）
+> | 検査 | 内容 | 結果（cloud Chromium） |
+> |---|---|---|
+> | **`_state/hit_test_check.py`（新設）** | PC 現行 40 面 × {900, 720, 1100} で Header 外の主要操作点（Context Nav / Main primary / filter / 代表リンク）の中心を `elementFromPoint()` が自身または子孫で返すこと。HT0 で page-local `.drawer-overlay` 規則の再発も静的検知 | **修正前ツリー 164 FAIL（R-01 を検知）→ 修正後 367 PASS / 0 FAIL**。selftest（overlay pointer-events:auto / 透明層追加）を 1 種ずつ注入して両方検知 |
+> | **`_state/web_meaning_check.py`（更新）** | WM1 static 化、WM3-b/c バッジ・ラベル可視、WM4-b 視覚順、**WM9** M scroll 中の Nav × defer / footer / Header（scroll: 0 / Main 中盤 / defer 先頭 / 末尾）、**WM10** PNF 720 / 640 / 540（static・1 列・defer 後・overflow 0・Own / Public）、**WM11** hit-test | **1290 PASS / 0 FAIL**。selftest は故障 **12 種を 1 種ずつ**注入し全種検知（対応表出力） |
+>
+> 故障 → 検知 assert（対応表）:
+> overlay pointer-events:auto → WM11 ／ M nav sticky → WM1・WM9 ／ Public PNF sticky → WM10・WM11 ／
+> M nav が Header 帯へ潜る → WM9・WM2-b ／ defer を Main の前へ視覚移動 → WM4-b ／ PNF 2 列 → WM10・WM6 ／
+> W/M nav display:none → WM1・2・3・6・7・8・9・10・11 ／ badge / label drop → WM3-b・WM3-c ／
+> rail 幅 → WM1・WM2-a ／ defer drop → WM4 ／ Main 全積み → WM2-b ／ W sticky → WM8・WM6
+>
+> ### 既存 regression（cloud 再実行・変更前 baseline と同一）
+> garage_check 513 / garage_top_check 291 / garage_list_check 734 / garage_integrity_check 610 /
+> mobile_garage_list_check 804 / launcher_link_check 177 / detail_contract_check 51 / entity_actions_check 36 /
+> footer_single_source_check 4 — すべて 0 FAIL。image_integrity / mobile_feed / mobile_detail /
+> mobile_garage_detail は cloud 環境依存（外部画像・ローカル server の接続 reset・M9 baseline）の FAIL 集合が
+> **変更前後で同一**。⚠️ **Mac 実機での 14 本＋新 Gate の再走は未実施**（下記コマンド）。
+> pixel: W（1440 / 1280 / 1100 × light / dark）Garage 10 面 **完全一致**。M / PNF は全要素の小数 px rect が
+> 変更前後で 0 差、pixel 差は sticky 層解除に伴うラスタライズ差のみ。
+>
+> ### NOW / PENDING
+> 🔴 **Garage M / Web Fundamentals は Recovery Batch 1 が PASS しても再 CLOSE しない**（Global Shell が M で閉じていない）。
+>
+> | 項目 | 状態 |
+> |---|---|
+> | **Recovery Batch 2 — Global Shell M / Common Drawer（R-02）** | **次**。hamburger 死ボタン・`.app-nav`（Browse / Feed / Library）の M drop を共通 Drawer で閉じる。Feed M の「発見 Drawer」と同じ器 |
+> | Mac 実機で 14 本 ＋ `hit_test_check` を再走 | 未実施（cloud は font 差あり） |
+> | Library 一覧 3 面の 721〜980 未所有帯（R-05） | 未着手（Search filter と同じ部品。Feed M より先が安い） |
+> | Detail M（Garage Detail を含めるか裁定要）／ Feed M（1121〜1200 の右レーン非単調 drop = R-07 を含む）／ Garage filter M | 裁定済み・未実装（093 のまま） |
+> | Header ≤538px overflow（R-09）／ page-role-matrix の Breakpoint 行（R-10・本 094 で参照先だけ整合） | 未着手 |
+>
+> ⛔ 093 の GT13 / G20 / P1（DOM 順）/ P2（現在地色）の裁定は生きている。失効したのは **CLOSE 判定と M nav sticky 契約**だけ。
+
+> ## 🟡 093: Garage M / Web Fundamentals batch CLOSE（2026-09-12 / イタヤ裁定）— **🔴 094 で CLOSE 失効・REOPEN**（R-01 / R-03 / R-04。M nav sticky 契約は失効。GT13 / G20 / P1 / P2 は有効）
 >
 > モック: `myrig-mockup` **`b78a2f4`（push 済み・`origin/main` と同期）**。正典: この 093。
 >
