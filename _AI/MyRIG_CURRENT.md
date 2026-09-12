@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260911-092
-updated: 2026-09-11 15:21 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260912-093
+updated: 2026-09-12 19:51 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,85 @@ updated: 2026-09-11 15:21 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-11 / revision 092（**🟢 Garage制作レーン全体CLOSE。Launcherも card--done へ同期**（My Garage 6 / Owner Manage 2 / Public Garage 4 の計12面を card--review → card--done）。通常Detail 3面は既存の card--done のまま。モック `e71a700` / 正典 `092` は**push待ち（GitHubへのegressがこの環境で403）**。**次は Web Fundamentals Audit**）**
+**最終更新: 2026-09-12 / revision 093（**🟢 Garage M / Web Fundamentals batch CLOSE**。モック `b78a2f4`（push 済み・origin/main と同期）。Mac 実機 regression 14本 **4,089 PASS / 0 FAIL**。Region Behavior Matrix v1.1 を **L2 として `docs/ui/` へ昇格**。**次は Region Behavior Matrix の残り（Feed M / Detail M / Garage filter M）を別 batch で**）**
+
+> ## 🟢 093: Garage M / Web Fundamentals batch CLOSE（2026-09-12 / イタヤ裁定）
+>
+> モック: `myrig-mockup` **`b78a2f4`（push 済み・`origin/main` と同期）**。正典: この 093。
+>
+> 721〜1024px（M 帯）に**持ち主がいなかった**問題への対応。Web Fundamentals Audit Phase 1 で
+> 見つけた「PC / Mobile の 2 点でしか QA しておらず、連続 viewport を Gate に持っていない」
+> という根本原因のうち、Garage 系を最初のレーンとして閉じた。
+>
+> ### commit
+> | SHA | 内容 |
+> |---|---|
+> | `786777e` | responsive 本体（共有 CSS 3 ＋ HTML 10 ＋ `garage_check.py` G20 ＋ `web_meaning_check.py` 新設） |
+> | `6e1d83c` | cleanup（`Claude outputs/` を active tree から除去・`.gitignore` へ追加） |
+> | `b78a2f4` | GT13 を P1 契約へ追従 ＋ 検査結果 JSON を実測値へ |
+>
+> ### 確定契約（Region Behavior Matrix v1.1 / **L2 = `docs/ui/region-behavior-matrix-v1.md`**）
+> | | |
+> |---|---|
+> | **W** | Context Rail / Nav は **`static`** |
+> | **M（721〜1024）** | Nav は **約 64px のアイコンレール・`sticky`**。Profile は横長カード。Activity / LATEST LOGS は本文の下へ **defer** |
+> | **PC Narrow Fallback（PC HTML ≤720）** | **`static`**・1 列 |
+> | **DOM / keyboard order** | **Profile → Nav → Main → defer** |
+> | **Activity / LATEST LOGS** | ⛔ **drop しない。defer**（消さずに位置だけ後ろへ送る） |
+> | **W の defer** | CSS Grid で**左列の Nav の下へ視覚復帰**させる |
+> | **C** | **専用 Mobile 面だけの契約。幅だけで C にしない** |
+>
+> 🔴 **PC HTML を 720px 以下へ縮めた状態は C ではない**（= PC Narrow Fallback）。
+> BottomNav にもならず、C の契約を実装する帯でもない。1 列に積むだけの保険。
+> ⛔ 「PC の HTML も 720px で BottomNav になるはず」と読まない。
+>
+> ### 🔴 GT13 の旧契約は失効
+> 旧: 「左レーン内が **Profile → Nav → RECENT ACTIVITY**」（2026-09-09 裁定）。
+>
+> **失効の理由 — CSS Grid の視覚並び替えだけでは keyboard / DOM 順は変わらない。**
+> RECENT ACTIVITY を aside の中に置いたまま `grid-row` で本文の下へ送っても、Tab は
+> **Nav → Activity → Main** と回り、視覚順と操作順が逆転する（WCAG 2.4.3 / 1.3.2）。
+> 外部独立監査（GPT Work / Astra・Mac 実機 160 条件）が検出し、Cowork 側でも再現した。
+>
+> 現契約: Context Rail の中は Profile → Nav。Activity は消えず **main の後方の defer**。
+> W では CSS Grid で左列の Nav の下へ視覚復帰。
+> ⛔ **緩めた置き換えではない**: P1 以前の DOM へ戻すと GT13 は 8 FAIL する（新設 3 件が落ちる）。
+>
+> ### 検査（Mac 実機）
+> | | |
+> |---|---|
+> | 全 14 regression | **4,089 PASS / 0 FAIL** |
+> | `garage_check` | **513 PASS / 0 FAIL**（G20 を 3 → 11 へ是正後） |
+> | `garage_top_check` | **291 PASS / 0 FAIL**（GT13 追従後） |
+> | `web_meaning_check`（**新設 / WM7 Viewport Continuum**） | **550 PASS / 0 FAIL**・故障注入 5 種で 290 FAIL |
+>
+> `_state/web_meaning_check.py` は「作ったものが変わっていないか」ではなく
+> **「Web として成立しているか」**を見る初の検査。既存 13 本は W と PC Narrow Fallback しか
+> assert しておらず、M 帯の @media を戻されても検知できなかった。
+>
+> ### G20 の是正（3 → 11）
+> 091 で Launcher へ足した Public Garage の確認導線が検査へ反映されておらず、
+> **`e71a700` でも FAIL していた**（本 batch の回帰ではない）。実体から内訳を列挙して突合:
+> Top 5 本（ライト / ダーク ＝ 091、未ログイン閲覧 / 公開0件 / 検索のユーザー結果 ＝ 086）
+> ＋ 一覧 3 面 × 2 本（091）＝ **11 本**。⛔ 数字だけ合わせず、内訳ごと検査へ書いた。
+>
+> ### Shared Source
+> W / M / PC Narrow Fallback の**物理正本は `SoT_garage-page.css` §5 の 1 本だけ**。
+> `SoT_garage-sidebar.css` の Responsive 節は撤去、`SoT_public-garage-sidebar.css` へ複製しない。
+> Own / Public の差は data・variant のみ（数 = `.g-stats` / `.gs-profile-stats`、
+> 操作 = `.gs-profile-actions` / `.gs-visitor-actions` の 2 か所）。
+>
+> ### NOW
+> 🟢 **Garage M / Web Fundamentals batch は CLOSE。** 見た目の再設計として再オープンしない。
+> 次は **Region Behavior Matrix の残り**を別 batch で:
+>
+> | 領域 | 状態 |
+> |---|---|
+> | **Feed M** | 裁定済み・未実装。左 = Header 投稿導線と `.feed-type-chips` へ merge／右 = 「発見」Drawer・Feed 内広告・Global Footer へ merge。⛔ 3 タブへ周辺情報を混ぜない |
+> | **Detail M** | 裁定済み・未実装。Gallery → Builder＋Actions の compact deck → Main。残りは Main の該当節へ merge |
+> | **Garage filter M** | 裁定済み・未実装。Toolbar の Filter から一覧本文の**直前**に折りたたみ panel（初期 closed） |
+>
+> ⛔ これらの実装のついでに Garage 行（CLOSE 済み）を開け直さない。
 
 > ## 🟢 092: Garage制作レーン全体CLOSE — Launcherを card--done へ同期（2026-09-11 / イタヤ裁定）
 >
@@ -3089,7 +3167,8 @@ docs/           ACTIVE正典（Knowledge接続対象）
                   v1_6はApp所有（rigs/parts/logs/profiles/images等）のみを定義する
   design/       デザイン: color-token-v8 / design-nogo-list
   ui/           UI: page-role-matrix / auth-guard / mobile-contract-v0.5 /
-                pc-mobile-inheritance-v1.1
+                pc-mobile-inheritance-v1.1 / region-behavior-matrix-v1
+                （領域×モードの変身規約 L2。W / M / PC Narrow Fallback と C の分離）
   search/       検索: search-page-plan-v2（現行確定）
   support/      補助: App_Ready_Design_Rules / implementation_checklist
 _state/         生きた台帳: mobile-feedback-ledger（Knowledge接続対象）/

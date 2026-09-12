@@ -364,4 +364,8 @@ Feed が独立したトップレベル体験であるなら、Feed 内に3つの
 
 ※ Breakpoint正典: desktop=1025px↑ / tablet=721-1024px / mobile=720px↓（詳細: `docs/design-rules.md` Breakpoint正典セクション参照）
 
+※ **幅ごとに各領域が何へ変身するか**は `docs/ui/region-behavior-matrix-v1.md`（L2 / 2026-09-12）が持つ。
+　 PC 面の **W / M / PC Narrow Fallback** と、専用 Mobile 面の **C** は別契約。
+　 ⛔ PC HTML を 720px 以下へ縮めた状態は C ではない（= PC Narrow Fallback）。
+
 *Page Role Matrix v1.5 — 作成: 2026-05-03 / 最終更新: 2026-08-22*
