@@ -1,4 +1,4 @@
-# Region Behavior Matrix v1.5 — 領域 × モードの変身規約
+# Region Behavior Matrix v1.6 — 領域 × モードの変身規約
 
 **拘束力: L2（現在の確定仕様）。** CORE「正典化判断基準」の
 「2人（2つのAI）が独立に判断して食い違ったとき何か壊れるか」に該当するため正典化した
@@ -11,6 +11,7 @@ L2 なので、**より良い案があれば差分を明示して提案してよ
 - v1.3: 2026-09-13 JST / Recovery Batch 2（Global Shell M の共通 Drawer 実装・Overlay / temporary UI の横断契約）
 - v1.4: 2026-09-13 JST / Feed W Gap Recovery（R-07。Feed W の実態反映・原則 C「変身は幅に対して単調」）
 - v1.5: 2026-09-13 JST / Filter Transform Batch（Garage filter M 実装・Library filter R-05 を Search filter と Shared Source で統一・Toolbar / Context Rail の filter は狭幅で trigger → temporary panel）
+- v1.6: 2026-09-13 JST / Feed M Transform Batch（Feed M 実装・Feed の Global Footer drop の PENDING を裁定 B で決着・法務導線を Shared Source 化）
 - 参照元: `docs/ui/page-role-matrix-v1.md` 末尾の Breakpoint 注記
 - 経緯の原本: CURRENT 093 → **094**（失効と新契約）／`_decisions/2026-09-12_web-fundamentals-recovery-batch1-v1.md`
 
@@ -21,7 +22,8 @@ L2 なので、**より良い案があれば差分を明示して提案してよ
 | Garage / Public Garage の Context Rail | 🔴 **093 の CLOSE は失効 → REOPEN**（R-01 / R-03 / R-04）。**Recovery Batch 1（`myrig-mockup` `17f4210`）で是正済み**。再 CLOSE は Global Shell M（Recovery Batch 2）の後 |
 | **Global Shell の M（hamburger / 共通 Drawer）** | ✅ **実装済み**（Recovery Batch 2 / `myrig-mockup` `9a45d50`）。v1.1 の「実装済み」は誤記で、v1.2 で未実装へ訂正、v1.3 で実体が追いついた |
 | **Toolbar: Garage filter（1 列帯）／ Context Rail: Library filter** | ✅ **実装済み**（v1.5 / Filter Transform Batch）。Garage 8 面は Toolbar → inline panel、Library 3 面 ＋ Search は「フィルター」ボタン → Drawer を Shared Source（`SoT_filter-sidebar.js`）で共有 |
-| Feed M / Detail M | 🟡 **裁定済み・未実装**（別 batch。§3 に契約だけ記載） |
+| **Aside Rail: Feed の M** | ✅ **実装済み**（v1.6 / Feed M Transform Batch）。左は Header 投稿導線と `.feed-type-chips` へ、右は「発見」Drawer / Feed 内広告 / Global Footer へ。Feed の Footer PENDING も同時に決着（裁定 B） |
+| Detail M | 🟡 **裁定済み・未実装**（別 batch。§3 に契約だけ記載） |
 | その他の領域 | 現状の実装をそのまま記載（新規の変身は宣言していない） |
 
 **根拠の分離**: MyRIG の現状＝正典 ＋ モック実体 `17f4210`（v1.1 時点は `b78a2f4`）／実測＝Mac 実機 Chrome（実フォント）と cloud Chromium／外部標準＝W3C WCAG 2.2
@@ -59,7 +61,7 @@ L2 なので、**より良い案があれば差分を明示して提案してよ
 | **Main** | 一覧グリッド・Detail 本文・Feed | `SoT_garage-list.css` / `SoT_detail.css` / `SoT_feed-card.css` |
 | **Aside Rail（右）** | Detail の builder / actions / 関連 / 広告、Feed の右レーン | `SoT_detail-rail.css` |
 | **Toolbar** | filter / sort / tabs / chips | `SoT_garage-list.css` §3b（狭幅の Filter trigger）＋ `SoT_garage-list.js`（開閉・focus・active 要約）／ `mobile-garage-list.css` |
-| **Overlay 層 / temporary UI**（Global Shell に付随・v1.2 で追加、v1.3 で契約を拡張） | drawer overlay・Drawer・modal・bottom-sheet・filter panel・toast・FAB など、content の上に載る一時的な層 | PC: `SoT_app-shell.css` §3.2〜3.4 ＋ `SoT_app-shell.js initDrawer()`／Garage Detail: `SoT_garage-drawer.js`／Mobile: contract v0.5 の Dialog Controller。**横断契約（v1.3）**: ① closed は content の pointer 操作を遮らない ② closed の内部へ focus しない（transform で画面外に送るだけでは closed とみなさない。`aria-hidden` だけで focusable を残すのは禁止。inert / hidden / tabindex 制御など既存構造に最も安全な方法を選ぶ）③ open → Escape / backdrop で close → trigger へ focus 復帰。open 中の focus は層の中に留まる ④ trigger（hamburger 等）が見えるなら必ず受け皿を持つ（「button があるが何も開かない」は FAIL）。z-index の具体値・実装方式は正典化しない |
+| **Overlay 層 / temporary UI**（Global Shell に付随・v1.2 で追加、v1.3 で契約を拡張） | drawer overlay・Drawer・modal・bottom-sheet・filter panel・toast・FAB など、content の上に載る一時的な層 | PC: `SoT_app-shell.css` §3.2〜3.4 ＋ `SoT_app-shell.js initDrawer()`／filter: `SoT_filter-sidebar.js`（v1.5）／Feed の発見 Drawer: `SoT_feed-rails.js`（v1.6）／Garage Detail: `SoT_garage-drawer.js`／Mobile: contract v0.5 の Dialog Controller。**横断契約（v1.3）**: ① closed は content の pointer 操作を遮らない ② closed の内部へ focus しない（transform で画面外に送るだけでは closed とみなさない。`aria-hidden` だけで focusable を残すのは禁止。inert / hidden / tabindex 制御など既存構造に最も安全な方法を選ぶ）③ open → Escape / backdrop で close → trigger へ focus 復帰。open 中の focus は層の中に留まる ④ trigger（hamburger 等）が見えるなら必ず受け皿を持つ（「button があるが何も開かない」は FAIL）。z-index の具体値・実装方式は正典化しない |
 
 ## 2. モード（Mode）
 
@@ -90,15 +92,33 @@ PC Narrow Fallback** であって、PC 面がそのまま C（専用 Mobile 契�
 | Main: 一覧 | `auto-fill minmax(カード最小幅)` | 同左（幅で列数を固定しない） | 1〜2 列 |
 | Main: Detail | 本文 7fr | 1 列 | 1 列 |
 | **Aside Rail: Detail** | 右 3fr（≥1280）／ 350px（961〜1279） | 🆕 **Gallery → Builder＋Actions の compact deck → Main。** 残りは Main へ merge：base-model→ベースモデル／entity-feed→LOG／used-parts→使用パーツ。external-links・builder-rigs・ads は Main 後方または RELATED へ adapt。⛔「Gallery → Aside 全体 → Main」は不採用 | 同左 |
-| **Aside Rail: Feed** | 左右 264px（≥1201）→ 170px（≤1200・compact）。**v1.4: 1121〜1200 で右レールが消えて 1120 以下で再出現する旧規則の競合を撤去**（R-07）。W 内で右レールは消えない | 🆕 **一括でタブ／Drawer へ移さない。** 左: LOG投稿→既存 Header 投稿導線へ merge／LOG種別→既存 `.feed-type-chips` を M で表示。右: 注目RIG・おすすめユーザー→**「発見」Drawer**／広告→Feed 内広告へ merge／法務導線→Global Footer・menu へ merge。⛔ おすすめ/新着/フォロー中の3タブへ周辺情報を混ぜない | 1 列 |
+| **Aside Rail: Feed** | 左右 264px（≥1201）→ 170px（≤1200・compact）。**v1.4: 1121〜1200 で右レールが消えて 1120 以下で再出現する旧規則の競合を撤去**（R-07）。W 内で右レールは消えない。**v1.6: 法務導線は Rail に `<site-legal>`（Shared Source）**。Global Footer 本体は出さない（§3-F） | **実装済み（v1.6）**。**一括でタブ／Drawer へ移さない。** 左: LOG投稿→既存 Header 投稿導線へ merge（Header 側の行き先を Rail と揃える）／LOG種別→既存 `.feed-type-chips`（**Rail の chips を DOM ごと移す**。手書きで複製しない）。右: 注目RIG・おすすめユーザー→**「発見」Drawer**（Rail 自体が変身するので中身は W と同一 DOM）／広告→Feed 内広告（全 timeline パネル）へ merge／法務導線→**Global Footer** へ merge。⛔ おすすめ/新着/フォロー中の3タブへ周辺情報を混ぜない。⛔ 畳んだ Rail の空 grid 列を残さない | 1 列（M の変身先を PC Narrow Fallback まで維持） |
 | **Toolbar: Garage filter** | 右レーン（`.main-2col` の 2 列が立つ幅） | **実装済み（v1.5）**。`.main-2col` が 1 列に落ちる幅（W の 1 列帯を含む）では Toolbar の「絞り込み」から、**一覧本文の直前**に inline 折りたたみ panel を開く。**初期 closed**（hidden＋inert）。active 条件数（badge）と要約を Toolbar 側に出す。panel は DOM ごと Toolbar 直後へ移す（Tab 順）。⛔ 一覧の下へ置かない。⛔ modal / backdrop にしない | 横スクロール＋ボトムシート |
 | Toolbar: その他 | 1 行 | 1 行（横スクロール可） | 横スクロール |
 
 禁止:
+- **法務導線を面が手書きする**（v1.6。文言・並び・行き先の真源は `SoT_footer.js` の `LEGAL` 1本。
+  Footer 本体を出せない面は `<site-legal>` を置く。⛔ `href="#"` だけの偽リンク／面だけが持つ法務項目）
 - **狭幅で filter を常時展開 Region として積む**（Main の前でも後ろでも。v1.5: filter は trigger → temporary panel へ変身し、閉じていても active 条件が分かること）
 - **無断の drop**（裁定なしに M で領域を消す）
 - page-local で `.page` / レール幅 / ヘッダーの M 挙動を書く
 - UA・端末名での分岐
+
+
+### 3-F. Footer / 法務導線（v1.6 / Feed の PENDING を決着）
+
+裁定原本: `_decisions/2026-09-13_feed-m-transform-and-footer-v1.md`。
+
+| | 契約 |
+|---|---|
+| **法務導線の真源** | `pc/assets/js/SoT_footer.js` の `LEGAL` **1本**。Global Footer 本体も `<site-legal>` も同じ配列を描く |
+| **通常の面** | ページ末尾に Global Footer 本体（`<site-footer>`）。法務導線はその中 |
+| **内部 scroll を持つ面（現在 PC Feed の W だけ）** | **Footer 本体を出さなくてよい。** 理由: 追加ロードが無限スクロール（page-role-matrix §6 / #25）なので scroll container の末尾に置いた Footer は構造上到達できず、外側 scroll へ戻すと面の骨格ごと作り替えになる。**代わりに `<site-legal>` を到達できる場所（Feed は右 Rail）へ置く** |
+| **M** | Global Footer 本体が出る帯では、法務導線は Footer へ merge する（面側の `<site-legal>` は出さない） |
+| **検査** | どの帯でも法務導線は**ちょうど1か所**にあり、**実 scroll で到達でき hit-test が通る**こと（`feed_m_transform_check` FM7） |
+
+⛔ 「Feed だけ Footer を消す」を既定仕様として一般化しない。**内部 scroll を持つ面に限った例外**で、
+その面は代わりに `<site-legal>` を持つ義務がある。⛔ 面固有の法務項目を足さない（足すなら `LEGAL` へ）。
 
 ## 4. 実測
 
@@ -282,6 +302,15 @@ W では CSS Grid で左列の Nav の下へ視覚復帰」。
 | 既存 17 本 | 0 FAIL（`garage_list_check` は GL13 を「カードを DOM 再接続しない」の本来の不変条件へ精密化し 749 PASS。cloud 環境依存 4 本は同一 FAIL 集合） |
 | pixel / DOM | W（1440 / 1280 / 1101）は 12 面とも全要素 rect 0 差。Feed は不変 |
 
+### 6.8 Feed M Transform Batch（2026-09-13 / cloud Chromium）
+
+| | |
+|---|---|
+| `feed_m_transform_check`（**新設**） | 18 幅（`--feed-mode` 宣言を CSS から抽出した境界 ±1 ＋ 720/721・899/900/901・1024/1025・1119/1120/1121・1199/1200/1201・1280・1440）＋ 700→1280 スイープ = **525 PASS / 0 FAIL**。修正前ツリーは **123 FAIL**（発見 trigger 不在・偽法務リンク・LOG種別の二重定義・M で Rail が受け皿なしに消える）。故障 18 種を 1 種ずつ注入し全種単独 FAIL |
+| `feed_w_gap_check` | **108 PASS / 0 FAIL 維持**（R-07 の W 連続性を壊していない） |
+| 既存 18 本 | 0 FAIL（`mobile_feed_check` の「PC: グループ名 ×3」は**重複定義の個数**を固定していたので「ちょうど1組・可視」へ精密化。cloud 環境依存 4 本は同一 FAIL 集合） |
+| pixel / DOM | W（1440〜901 の 9 幅）は、撤去した領域（死に markup の旧 filter サイドバー / 差し替えた法務行 / 空スロット / M 専用 trigger）を除いて**全要素 rect 0 差**。非表示パネルへ足した Feed 内広告 2 枚以外に追加要素なし |
+
 ## 7. WM7（Viewport Continuum / Garage M）— 恒久検査
 
 `_state/web_meaning_check.py`。既存 13 本は W と PC Narrow Fallback しか assert しておらず、
@@ -309,8 +338,10 @@ v1.1: 550 PASS / 0 FAIL（10 面 × 9 幅）。`--selftest` は 5 種を**同時
 
 | 領域 | 状態 |
 |---|---|
-| **Feed の Global Footer drop（≥901・page-local の閲覧アプリ型 scroll）** | PENDING（裁定原本なし）。Feed M batch で法務導線の受け皿と一緒に裁定。「Feed だけ Global Footer を消す」を既定仕様として固定しない |
-| **Aside Rail: Feed の M**（**次**） | 裁定済み・未実装。左は Header 投稿導線と `.feed-type-chips` へ merge、右は「発見」Drawer ／ Feed 内広告 ／ Global Footer へ merge |
-| **Aside Rail: Detail の M** | 裁定済み・未実装。Gallery → Builder＋Actions の compact deck → Main。残りは Main の該当節へ merge |
+| **Aside Rail: Detail の M**（**次**） | 裁定済み・未実装。Gallery → Builder＋Actions の compact deck → Main。残りは Main の該当節へ merge |
+| **Header の ≤538 overflow（R-09）** | 未着手 |
+| **Home 棚の clip 外カードへの focus（Phase 1 F-4）** | WARN のまま（`shell_interaction_check` が WARN として出す）。裁定待ち |
+| **Overlay / temporary UI 契約の実装が3本ある**（`SoT_app-shell.js` / `SoT_filter-sidebar.js` / `SoT_feed-rails.js`） | v1.6 で記録。契約は §1 が1つだけ持つが実装は3か所。共通ヘルパへの抽出は別 batch |
+| **法務項目「広告について」** | PENDING。Feed だけが page-local で持っていたが Shared Source の `LEGAL` に無いので採用しなかった。サイト全体で要るなら `LEGAL` へ足す（＝全面に出る）。⛔ 面だけで持ち直さない |
 
 ⛔ 本書の Garage 行の**見た目**を、これらの実装のついでに再設計しない（Recovery Batch 1 は挙動の是正であって見た目の再設計ではない）。

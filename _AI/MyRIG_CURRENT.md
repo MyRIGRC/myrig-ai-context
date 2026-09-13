@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260913-097
-updated: 2026-09-13 18:51 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260913-098
+updated: 2026-09-13 22:14 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,11 +14,94 @@ updated: 2026-09-13 18:51 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-13 / revision 097（**🟢 Filter Transform Batch 完了**: Garage filter M（8 面・Toolbar → inline panel）と Library filter R-05（3 面 ＋ Search・ボタン → Drawer を Shared Source 化）。Gate `filter_transform_check` 新設 3,328 PASS / 0 FAIL、故障 13 種検知。モック `d071dbb`（push 待ち。`origin/main` は `ee323de`）。096 `59387d0` / mock `ee323de` は **push 済み**。**次は Feed M**（Aside Rail: Feed の M ＋ Footer PENDING の裁定）、その後 Detail M。MyRIG 全体の viewport continuity はまだ CLOSE しない）**
+**最終更新: 2026-09-13 / revision 098（**🟢 Feed M Transform Batch 完了**: Feed の左右 Rail を M で受け皿へ変身（LOG投稿→Header 投稿導線／LOG種別→`.feed-type-chips` へ DOM 移動／注目RIG・おすすめユーザー→「発見」Drawer／広告→Feed 内広告／法務→Global Footer）。**Feed の Footer PENDING を裁定 B で決着**し、法務導線を `SoT_footer.js` の `LEGAL` 1本＋`<site-legal>` へ Single Source 化。Gate `feed_m_transform_check` 新設 525 PASS / 0 FAIL、故障 18 種検知。モック `ff8855b`（push 待ち。`origin/main` は `d071dbb`）。097 `039ee89` / mock `d071dbb` は **push 済み**。**次は Detail M**。MyRIG 全体の viewport continuity はまだ CLOSE しない）**
 
-> ## 🟢 097: Web Fundamentals Filter Transform Batch — Garage filter M ＋ Library filter R-05（2026-09-13 / Cowork 実装）
+> ## 🟢 098: Web Fundamentals Feed M Transform Batch ＋ Footer PENDING 決着（2026-09-13 / Cowork 実装）
 >
-> モック: `myrig-mockup` **`d071dbb`**（push 待ち。`origin/main` は `ee323de`）。正典: この 097。
+> モック: `myrig-mockup` **`ff8855b`**（push 待ち。`origin/main` は `d071dbb`）。正典: この 098。
+> 開始時: GitHub main は canon `039ee89`（097）／mock `d071dbb` で一致確認済み（両 repo tree clean）。
+> 裁定原本: `_decisions/2026-09-13_feed-m-transform-and-footer-v1.md`。Matrix v1.6。
+>
+> ### 097 の実績補正
+> - mock `d071dbb` / canon 097 `039ee89` は **push 済み**（097 本文の「push 待ち」は失効）。
+> - Filter Transform Batch の **Mac 実機 acceptance**（イタヤ報告）: filter_transform 3,328/0・selftest 13 種すべて狙った FAIL を検知・
+>   garage_list 749/0・mobile_garage_list 804/0・garage_check 513/0・garage_top 291/0・garage_integrity 610/0・launcher 177/0・
+>   image_integrity 63/0・mobile_feed 63/0・mobile_detail 59/0・detail_contract 51/0/0 WARN・**entity_actions 合計 36 / PASS 36 / FAIL 0**・
+>   footer_single_source 4/0・mobile_garage_detail 134/0・web_meaning 1290/0・hit_test 373/0・shell_interaction 418/0・feed_w_gap 108/0。
+> - Mac の `_state/garage_list_check_result.json` は 734→749 へ変わっただけの実行結果だったため commit せず restore 済み。
+>
+> ### Feed 実体の棚卸し（裁定の前提・実測）
+> | 領域 | 実体 |
+> |---|---|
+> | `aside.feed-left.myrig-filter-sidebar` | **base に `display:none`。どの幅でも一度も表示されない死に markup**。`data-feed-panel="all\|following\|trending"` / `data-feed-type="maintenance\|run\|custom\|memo"` を持ち、実際に動く `.feed-main-tabs`（all/latest/following）・`.feed-rail-types`（all/整備/走行/カスタム/メモ）と**語彙が食い違う第2定義**だった |
+> | `aside.feed-left-modern` | 実際の左 Rail。LOG投稿 ＋ `.feed-rail-types` ＋ 紹介コピー |
+> | `main.feed-center` | 3タブ／`.feed-type-chips`（**`display:none !important` で全幅非表示**・Rail と同じ5値を手書き複製）／`.pc-feed-ad`（**おすすめタブのみ**） |
+> | `aside.feed-right` | 注目RIG(3)／おすすめユーザー(3)／広告枠(2)／page-local mini footer（`利用規約 / プライバシー / 広告について` を**すべて `href="#"`**。Global Footer の法務3本と語彙も本数も違う第2定義） |
+>
+> **M（≤900）で起きていたこと**: 左右 Rail がまとめて `display:none` になり、**LOG投稿・LOG種別・注目RIG・おすすめユーザー・右レーン広告が受け皿なしに全部消えていた**。
+> `.feed-type-chips` は M でも `!important` で隠れたままで、Matrix が「M の受け皿」と書いた region が機能していなかった。
+>
+> ### 是正（責務ごとに受け皿へ。挙動は `SoT_feed-rails.js`・面は属性だけ）
+> | 責務 | M の受け皿 | 単一情報源の守り方 |
+> |---|---|---|
+> | LOG投稿 | 既存 Header の投稿導線（`#cxBtn` →「ログを投稿」） | Header 側が `href="#"` の死にリンクだったので Rail と同じ composer へ（Home / Garage v7 6面 / Public Garage 4面と同じ既存の行き先） |
+> | LOG種別 | 既存 `.feed-type-chips` | 手書きの5個を撤去して**空スロット**にし、Rail の `.feed-rail-types` を **DOM ごと移す**（定義は1組だけ。Tab 順も Main 直前） |
+> | 注目RIG / おすすめユーザー | Feed-local「発見」Drawer | **右 Rail 自体が Drawer へ変身**するので中身は W と同一 DOM。⛔ Global hamburger にも timeline タブにも混ぜない |
+> | 広告 | Feed 内広告 `.pc-feed-ad` | 受け皿がおすすめタブにしか無く、新着 / フォロー中では M で広告責務ごと消えていた → **全パネル**に配置。Drawer では広告枠を出さない |
+> | 法務導線 | Global Footer（M で出る） | `SoT_footer.js` に `<site-legal>` を追加。**真源は `LEGAL` 配列 1 本**で Footer 本体と共用。Drawer では法務行を出さない |
+>
+> 死に markup（`aside.feed-left` ＋ page-local script ＋ 補完 CSS ＋ 不要になった `SoT_filter-sidebar.css` の読み込み）を撤去した。
+> PC Narrow Fallback（≤720）まで M の変身先をそのまま維持する（専用 Mobile 面 C とは別物）。
+>
+> ### 🔴 Footer PENDING の決着 — **裁定 B ＋ 法務導線の Single Source 化**
+> | | 裁定 |
+> |---|---|
+> | W（内部 scroll 帯） | **Global Footer 本体は出さない。** 代わりに Shared Source 由来の `<site-legal>` を右 Rail に置く |
+> | M | Matrix どおり **Global Footer へ merge**（Rail 側の法務行は出さない） |
+> | 真源 | `SoT_footer.js` の `LEGAL` **1本**。⛔ Feed だけが別の法務リンクを持つことを禁止 |
+>
+> **なぜ A（W でも Footer 本体）を採らなかったか**: ① Feed の追加ロードは**無限スクロール**（page-role-matrix §6 / #25）なので、
+> `.feed-center` の末尾に置いた Footer は**構造上いつまでも到達できない**（「出したが辿り着けない」は今より悪い）。
+> ② 内部 scroll を捨てると `html,body{overflow:hidden}` ＋ Rail の `height:100%` という W の骨格ごと作り替えになり、R-07 で確立した W の連続性も巻き込む。
+> 🔴 「以前そうだったから」ではなく、**W / M 両方で実 scroll 到達性を測ったうえで**の判断（下表）。
+>
+> | 幅 | 法務導線の場所 | 到達 |
+> |---|---|---|
+> | 1440 / 1200 / 901 | 右 Rail の `<site-legal>` | Rail を末尾まで scroll（可視 840 / 内容 1051〜965）→ `elementFromPoint` が当該リンクを返す ✅ |
+> | 900 / 720 | Global Footer の法務3本 | ページ末尾まで scroll（doc 900 / 6703〜6885）→ 同 ✅ |
+>
+> **page-local mini footer をやめた理由**: `href="#"` だけで行き先の宣言すら無く、文言・本数が Global Footer と食い違っていた（表示事故）。
+> **「広告について」は採用しない**（Shared `LEGAL` に無い項目を Feed だけが持つのは禁止事項）。サイト全体で要るなら `LEGAL` へ足す話なので **PENDING として残す**（黙って落としていない）。
+>
+> ### Gate（新設 `_state/feed_m_transform_check.py`）
+> 18 幅（`--feed-mode` 宣言を **CSS から抽出**した境界 ±1 ＋ 720/721・899/900/901・1024/1025・1119/1120/1121・1199/1200/1201・1280・1440）＋ 700→1280 スイープ。
+> FM0 must-exist（必須欠落を SKIP にしない）／FM1 transform completeness（意味集合に drop 無し）／FM2 no duplicate（discovery を timeline タブへ混ぜない）／
+> FM3 closed（inert・aria・実 Tab 45 回で leak 無し・backdrop 非表示）／FM4 実 click → open → focus in → 実 Tab → Escape → backdrop → focus 復帰／
+> FM5 posting・chips（Header 投稿導線へ実 click・chip の実 click で絞り込みが効く）／FM6 ad（全パネルに受け皿・Main を遮らない）／
+> FM7 legal・Footer（`#` だけの偽リンク禁止・Shared Source 一致・**実 scroll 到達 ＋ hit-test**）／FM8 scroll（container・double scroll trap 無し・close で復帰・畳んだ Rail へ focus しない）／
+> FM9 geometry（overflow 0・Main overlap 0・**空 grid 列 = 列数 vs in-flow の子**）／FM10 monotonic（`w-rail → compact-rail → m` の一方向）。
+> **525 PASS / 0 FAIL。修正前ツリー 123 FAIL。** 故障 18 種を 1 種ずつ注入し**全種単独 FAIL**。
+>
+> ### regression（cloud・変更前 baseline `d071dbb` と比較）
+> feed_w_gap **108/0 維持**（R-07 非回帰）／filter_transform 3,328/0／garage_list 749/0／mobile_garage_list 804/0／garage_check 513/0／garage_top 291/0／
+> garage_integrity 610/0／launcher 177/0／detail_contract 51/0/0 WARN／**entity_actions 合計 36 項目 / PASS 36 / FAIL 0**／footer_single_source 4/0／
+> web_meaning 1290/0／hit_test 373/0／shell_interaction 418/0。
+> `mobile_feed_check` は **60/3**（cloud 依存のみ・baseline と同一集合）。同検査の「PC: グループ名 ×3」は**重複定義の個数**を固定していたので
+> 「role=group がちょうど1組・可視・重複定義なし」へ**精密化**（緩和ではない。修正前ツリーではこの assert が FAIL する）。
+> image_integrity 44/19・mobile_detail・mobile_garage_detail 132/2 は cloud 環境依存の FAIL 集合が baseline と**同一**。
+> pixel / DOM: W（1440〜901 の 9 幅）は撤去・差し替えた領域を除いて**全要素 rect 0 差**。
+>
+> ### 触っていない（PENDING）
+> Detail M（R-06・次）／Header ≤538 overflow（R-09）／Home 棚 clip 外 focus（F-4）／Feed カード自体の再デザイン／`css/sot/SoT_app-shell.css` 旧コピー／
+> 法務項目「広告について」／**Overlay 契約の実装が3本になった**（`SoT_app-shell.js` / `SoT_filter-sidebar.js` / `SoT_feed-rails.js`）。共通ヘルパへの抽出は別 batch。
+>
+> ### 次
+> **Detail M**（Aside Rail: Detail — Gallery → Builder＋Actions の compact deck → Main、残りは Main の該当節へ merge。R-06 の 1025〜1050 混在帯と Matrix §3 の旧値 350px/961 の訂正も同時に）→ Header ≤538。
+> ⛔ MyRIG 全体の viewport continuity はまだ CLOSE しない。Mac 実機での `feed_m_transform_check`（＋ selftest）と 19 本の再走は未実施。
+
+> ## 🟢 097: Web Fundamentals Filter Transform Batch — Garage filter M ＋ Library filter R-05（2026-09-13 / Cowork 実装）— **push 済み（098 で補正）**
+>
+> モック: `myrig-mockup` **`d071dbb`**（push 済み）。正典: この 097（`039ee89`・push 済み）。Mac 実機 acceptance は 098 の「097 の実績補正」。
 > 開始時: GitHub main は canon `59387d0`（096）／mock `ee323de` で一致確認済み（両 repo tree clean）。
 > 裁定原本: `_decisions/2026-09-13_web-fundamentals-filter-transform-v1.md`。Matrix v1.5。
 >
