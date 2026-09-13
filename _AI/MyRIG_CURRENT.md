@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260912-094
-updated: 2026-09-12 22:35 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260913-095
+updated: 2026-09-13 16:06 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,57 @@ updated: 2026-09-12 22:35 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-12 / revision 094（**🔴 093 の「Garage M / Web Fundamentals batch CLOSE」は新しい独立反証により失効 → REOPEN**。**Recovery Batch 1（R-01 / R-03 / R-04）を実装・検査・commit 済み**: モック `17f4210`（**push 待ち**。`origin/main` は `b78a2f4`）。契約を **W static / M static / PC Narrow Fallback static** へ改訂、hit-test Gate 新設。**Garage M はまだ再 CLOSE しない**（Global Shell M が未完）。**次は Recovery Batch 2 — Global Shell M / Common Drawer（R-02）**）**
+**最終更新: 2026-09-13 / revision 095（**🟢 Recovery Batch 2 完了 — R-02（Global Shell M / Common Drawer）解消**。モック `9a45d50`（push 待ち。`origin/main` は `17f4210`）。実操作 Gate `shell_interaction_check` 新設 418/0・故障 10 種単独検知。**Garage Context Rail 単体は Batch 1 で修正済み・Shell M は本 batch で成立。ただし MyRIG 全体の viewport continuity はまだ CLOSE しない**。**次は Feed 1121〜1200 の CSS 競合修正（R-07）**）**
+
+> ## 🟢 095: Web Fundamentals Recovery Batch 2 — Global Shell M / Common Drawer（2026-09-13 / GPT 裁定・Cowork 実装）
+>
+> モック: `myrig-mockup` **`9a45d50`**（push 待ち。`origin/main` は `17f4210`）。正典: この 095。
+> 開始時: GitHub main は canon `bd5b2d8`（094）／mock `17f4210` で一致確認済み。
+>
+> ### 原因（R-02）
+> | | |
+> |---|---|
+> | 死ボタン | `SoT_app-shell.js initDrawer()` は `.home-dir`（Home / Browse 4 面のカテゴリ directory）が無いと return。≤1024px で見えている hamburger を押しても何も開かない（現行 28 面） |
+> | 導線 drop | `.app-nav`（Browse / Feed / Library）が ≤1024px で `display:none`。代替のグローバル導線なし |
+> | focus 漏れ | Home 等の閉 Drawer は transform で画面外にあるだけで Tab 対象から外れておらず、x≈−248 の不可視リンクへ focus が入る。Search の filter panel（page-local）も同型（x=−320） |
+>
+> ### 実装（共有 Shell のみ。page-local 複製なし）
+> | | |
+> |---|---|
+> | 共通 Drawer の受け皿 | hamburger のある面は必ず Drawer を持つ。`.home-dir` 無し → `<nav class="app-drawer" id="appDrawer">` を生成、overlay 無し（Detail 等）→ 生成 |
+> | global navigation | `.app-drawer__nav`（Browse / Feed / Library）を `.app-nav` から複製（単一情報源）して Drawer 先頭へ。directory を持つ面では**同じ Drawer 内の別 region**（directory と global nav の責務分離）。≥1025 では非表示（W の見た目不変） |
+> | hamburger 契約 | closed: aria-expanded=false・Drawer は **inert**（Tab 順から除外・pointer 不可）・背景は通常操作可／open: aria-expanded=true・focus を Drawer 内へ・Tab は Drawer 内で循環・Escape / backdrop click で閉じ **trigger へ focus 復帰** |
+> | 既存 Drawer との共存 | Garage Detail 2 面は hamburger が `[data-garage-drawer]`（`SoT_garage-drawer.js`）を aria-controls で受け皿にしているので開閉を委譲し、global nav だけ注入（1 trigger に 2 Drawer を結線しない。G16 維持） |
+> | 付随 | closed Drawer の `box-shadow` を切った（translateX(-100%) でも影が画面左端 0〜28px に漏れていた artifact。Home / Browse では従来から出ていた）。Search filter panel にも closed inert / focus return |
+>
+> ### 実操作 Gate（新設 `_state/shell_interaction_check.py`）
+> 実 keyboard（Playwright `keyboard.press`）と実 click。11 面 × {900, 720, 1100}。
+> **SI0 must-exist**（hamburger / `.app-nav`。無ければ skip ではなく **FAIL**）／A open → Escape → focus 復帰／B closed Tab が Drawer 内へ入らない／
+> C open Tab が Drawer 内の可視 control だけ／D global nav 実 click で遷移先が href と一致／E closed の背景 hit-test と backdrop click／F 正の tabindex 無し。
+> **418 PASS / 0 FAIL・skip 0・WARN 2**（Home 棚の clip 外カードへの focus = Phase 1 F-4 の範囲、Shell 契約外として件数明示）。
+> Astra 指摘（`hit_test_check` の skip は PASS ではない）を受け、must / optional を分けて skip 数を出力する形にした。
+>
+> 故障 10 種を 1 種ずつ注入 → 狙った assert で単独 FAIL:
+> handler 無効化 → A／receiver 削除 → A・B／closed focusable → B／aria-expanded 停止 → A／Escape 停止 → A／
+> focus return 停止 → A・E／global nav 1 項目 drop → A／opacity:0 のみ → B／正 tabindex → F／overlay pointer 再発 → E
+>
+> ### regression（cloud・Batch 2 ツリー）
+> garage_check 513 / garage_top 291 / garage_list 734 / garage_integrity 610 / mobile_garage_list 804 / launcher 177 /
+> detail_contract 51 / entity_actions 36 / footer 4 / web_meaning 1290 / hit_test 367 / shell_interaction 418 — 0 FAIL。
+> image_integrity / mobile_feed / mobile_detail / mobile_garage_detail は cloud 環境依存の FAIL 集合が Batch 1 と同一。
+> pixel: W は run-to-run 差のみ、M は Home / Browse の閉 Drawer 影漏れが消えた差だけ。⚠️ Mac 実機再走は未実施。
+>
+> ### 状態
+> | | |
+> |---|---|
+> | Garage Context Rail | Batch 1 で修正済み（W / M / PNF static） |
+> | Global Shell M | **本 batch で成立**（共通 Drawer・global nav・focus 契約） |
+> | MyRIG 全体の viewport continuity | **まだ CLOSE しない**。Library 721〜980（R-05）・Detail M（R-06）・Feed（R-07）・Garage filter M が残る |
+> | Mac 実機 | 16 本（14 ＋ hit_test ＋ shell_interaction）の再走が未実施 |
+>
+> ### 次
+> **Feed 1121〜1200 の CSS 競合修正（R-07）**: page-local `@media(max-width:1200px){.feed-right{display:none}}` と
+> `@media(max-width:1120px){.feed-right{display:block}}` が競合し、右レーンが 1121〜1200 で消えて 1120 以下で再出現する。
 
 > ## 🔴 094: Web Fundamentals Recovery Batch 1 — 093 CLOSE 失効・REOPEN（2026-09-12 / GPT 裁定・Cowork 実装）
 >

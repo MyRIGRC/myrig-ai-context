@@ -1,4 +1,4 @@
-# Region Behavior Matrix v1.2 — 領域 × モードの変身規約
+# Region Behavior Matrix v1.3 — 領域 × モードの変身規約
 
 **拘束力: L2（現在の確定仕様）。** CORE「正典化判断基準」の
 「2人（2つのAI）が独立に判断して食い違ったとき何か壊れるか」に該当するため正典化した
@@ -8,6 +8,7 @@ L2 なので、**より良い案があれば差分を明示して提案してよ
 
 - 制定: 2026-09-12 JST / Web Fundamentals Phase 2B（Garage M batch CLOSE と同時）
 - v1.2: 2026-09-12 JST / Web Fundamentals Recovery Batch 1（093 CLOSE 失効 → REOPEN。GPT 裁定・Cowork 実装）
+- v1.3: 2026-09-13 JST / Recovery Batch 2（Global Shell M の共通 Drawer 実装・Overlay / temporary UI の横断契約）
 - 参照元: `docs/ui/page-role-matrix-v1.md` 末尾の Breakpoint 注記
 - 経緯の原本: CURRENT 093 → **094**（失効と新契約）／`_decisions/2026-09-12_web-fundamentals-recovery-batch1-v1.md`
 
@@ -16,7 +17,7 @@ L2 なので、**より良い案があれば差分を明示して提案してよ
 | | |
 |---|---|
 | Garage / Public Garage の Context Rail | 🔴 **093 の CLOSE は失効 → REOPEN**（R-01 / R-03 / R-04）。**Recovery Batch 1（`myrig-mockup` `17f4210`）で是正済み**。再 CLOSE は Global Shell M（Recovery Batch 2）の後 |
-| **Global Shell の M（hamburger / 共通 Drawer）** | 🔴 **未実装**（CURRENT 2026-08-30 残タスク #1）。v1.1 の「実装済み」は誤記だった。**Recovery Batch 2** で扱う |
+| **Global Shell の M（hamburger / 共通 Drawer）** | ✅ **実装済み**（Recovery Batch 2 / `myrig-mockup` `9a45d50`）。v1.1 の「実装済み」は誤記で、v1.2 で未実装へ訂正、v1.3 で実体が追いついた |
 | Feed M / Detail M / Garage filter M | 🟡 **裁定済み・未実装**（別 batch。§3 に契約だけ記載） |
 | その他の領域 | 現状の実装をそのまま記載（新規の変身は宣言していない） |
 
@@ -54,7 +55,7 @@ L2 なので、**より良い案があれば差分を明示して提案してよ
 | **Main** | 一覧グリッド・Detail 本文・Feed | `SoT_garage-list.css` / `SoT_detail.css` / `SoT_feed-card.css` |
 | **Aside Rail（右）** | Detail の builder / actions / 関連 / 広告、Feed の右レーン | `SoT_detail-rail.css` |
 | **Toolbar** | filter / sort / tabs / chips | `SoT_garage-list.css` / `mobile-garage-list.css` |
-| **Overlay 層**（Global Shell に付随・v1.2 で追加） | drawer overlay・modal・bottom-sheet・toast・FAB など、content の上に載る層 | PC: `SoT_app-shell.css` §3.2（drawer overlay）／Mobile: contract v0.5 の Dialog Controller。**成立条件: 閉状態は content の pointer 操作を遮らない**（見えないだけで存在する overlay を hit-test 対象に残さない）。z-index 等の具体値は正典化しない |
+| **Overlay 層 / temporary UI**（Global Shell に付随・v1.2 で追加、v1.3 で契約を拡張） | drawer overlay・Drawer・modal・bottom-sheet・filter panel・toast・FAB など、content の上に載る一時的な層 | PC: `SoT_app-shell.css` §3.2〜3.4 ＋ `SoT_app-shell.js initDrawer()`／Garage Detail: `SoT_garage-drawer.js`／Mobile: contract v0.5 の Dialog Controller。**横断契約（v1.3）**: ① closed は content の pointer 操作を遮らない ② closed の内部へ focus しない（transform で画面外に送るだけでは closed とみなさない。`aria-hidden` だけで focusable を残すのは禁止。inert / hidden / tabindex 制御など既存構造に最も安全な方法を選ぶ）③ open → Escape / backdrop で close → trigger へ focus 復帰。open 中の focus は層の中に留まる ④ trigger（hamburger 等）が見えるなら必ず受け皿を持つ（「button があるが何も開かない」は FAIL）。z-index の具体値・実装方式は正典化しない |
 
 ## 2. モード（Mode）
 
@@ -78,7 +79,7 @@ PC Narrow Fallback** であって、PC 面がそのまま C（専用 Mobile 契�
 
 | 領域 | W | **M** | C（専用 Mobile 面）／PC Narrow Fallback |
 |---|---|---|---|
-| Global Shell | PC ヘッダー（nav 展開） | PC ヘッダー（hamburger）— 🔴 **共通 Drawer 未実装 / Recovery Batch 2**。hamburger が drawer を開くのは Home / Browse 4 面（`.home-dir` を持つ面）だけ。他の面では `.app-nav`（Browse / Feed / Library）が M で消え、代替導線が無い（R-02。裁定なしの drop 状態＝原則 A 違反のまま） | C: BottomNav＋SubHeader **実装済み**／PC Narrow Fallback: PC ヘッダーのまま |
+| Global Shell | PC ヘッダー（nav 展開） | PC ヘッダー（hamburger）＋ **共通 Drawer 実装済み**（v1.3 / R-02）。hamburger のある面は必ず Drawer を持ち、Drawer は Browse / Feed / Library の global nav region を先頭に持つ（`.app-nav` を単一情報源として複製）。Home / Browse ではカテゴリ directory と同じ Drawer 内の別 region。Garage Detail は既存の Garage Drawer が受け皿（global nav を注入） | C: BottomNav＋SubHeader **実装済み**／PC Narrow Fallback: PC ヘッダー＋共通 Drawer のまま |
 | Context Rail: **Garage / Public Garage** | 展開レール 260px・**static** | **Profile → 横長カード（全幅）／ Nav → アイコンレール 64px（**static**・件数はバッジ・ラベル可視）／ Activity・LATEST LOGS → 本文の下へ defer**（Own 6 面 ＋ Public 4 面・共有正本1本）。DOM 論理順は **Profile → Nav → Main → Activity/LATEST LOGS**（P1 是正）。🔴 v1.2: **M の Nav sticky 契約は失効**（R-03: Chrome では grid item の sticky 拘束が grid container まで伸び、defer 領域に重なった）。**W / M / PC Narrow Fallback とも static** | C: 横スクロールのローカルナビ **実装済み**／**PC Narrow Fallback: static・1 列（Own / Public 共通・v1.2）**。Main はレールの下、defer は Main の後。「Public は従来 sticky」の例外は廃止（R-04） |
 | Context Rail: **Browse** | 展開レール 220px | **ドロワー**（階層があるためアイコン化しない）**実装済み** | カテゴリシート **実装済み** |
 | Context Rail: **Search filter** | 左固定 | 「フィルター」ボタン → パネル **実装済み** | ボトムシート |
@@ -251,6 +252,15 @@ W では CSS Grid で左列の Nav の下へ視覚復帰」。
 | W pixel（1440 / 1280 / 1100 × light / dark） | Garage 10 面 完全一致。M / PNF は全要素の小数 px rect が 0 差（pixel 差はラスタライズのみ） |
 | Mac 実機 | **未再走**（要: 14 本 ＋ `hit_test_check`） |
 
+### 6.5 Recovery Batch 2（2026-09-13 / `9a45d50` / cloud Chromium）
+
+| | |
+|---|---|
+| `shell_interaction_check`（**新設**・実 keyboard / 実 click） | 11 面 × 900 / 720 / 1100 = **418 PASS / 0 FAIL**、skip 0、WARN 2（Home 棚の clip 外カード = Phase 1 F-4）。故障 10 種を 1 種ずつ注入し全種が狙った assert で単独 FAIL |
+| 既存 15 本 | 0 FAIL（cloud 環境依存の 4 本は Batch 1 と同一 FAIL 集合） |
+| pixel | W は run-to-run 差のみ。M は Home / Browse の閉 Drawer 影漏れ（x 0〜28px）が消えた差だけ |
+| Mac 実機 | **未再走** |
+
 ## 7. WM7（Viewport Continuum / Garage M）— 恒久検査
 
 `_state/web_meaning_check.py`。既存 13 本は W と PC Narrow Fallback しか assert しておらず、
@@ -278,7 +288,7 @@ v1.1: 550 PASS / 0 FAIL（10 面 × 9 幅）。`--selftest` は 5 種を**同時
 
 | 領域 | 状態 |
 |---|---|
-| **Global Shell M / Common Drawer（Recovery Batch 2）** | **次**。hamburger 死ボタンと `.app-nav`（Browse / Feed / Library）の M drop を共通 Drawer で閉じる（R-02）。これが閉じるまで Garage M / Web Fundamentals は再 CLOSE しない |
+| **Feed 1121〜1200 の右レーン非単調 drop（R-07）** | **次**。page-local の `(max-width:1200px)` と `(max-width:1120px)` の競合。Feed M（下）とは別に、W 帯の欠陥として先に直す |
 | **Context Rail: Library 一覧 3 面** | 721〜980 が未所有（filter sidebar の全積みで一覧先頭 y≈1,108 = R-05）。Search filter と同じ `myrig-filter-sidebar` 部品なので「ボタン → パネル」を Shared Source で適用できる。§1 の Context Rail に Library を含める |
 | **Aside Rail: Feed の M** | 裁定済み・未実装。左は Header 投稿導線と `.feed-type-chips` へ merge、右は「発見」Drawer ／ Feed 内広告 ／ Global Footer へ merge |
 | **Aside Rail: Detail の M** | 裁定済み・未実装。Gallery → Builder＋Actions の compact deck → Main。残りは Main の該当節へ merge |
