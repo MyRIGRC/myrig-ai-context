@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260913-096
-updated: 2026-09-13 16:42 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260913-097
+updated: 2026-09-13 18:51 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,13 +14,64 @@ updated: 2026-09-13 16:42 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-13 / revision 096（**🟢 Feed W Gap Recovery（R-07）完了**: 1121〜1200px の右レール非単調 drop を撤去、境界 Gate `feed_w_gap_check` 新設。モック `ee323de`（push 待ち。`origin/main` は `9a45d50`）。Recovery Batch 2（`9a45d50` / 095 `cfb06f7`）は **push 済み**。Feed の Footer drop は PENDING（裁定原本なし）。**次は Garage filter M ＋ Library filter（721〜980）**。MyRIG 全体の viewport continuity はまだ CLOSE しない）**
+**最終更新: 2026-09-13 / revision 097（**🟢 Filter Transform Batch 完了**: Garage filter M（8 面・Toolbar → inline panel）と Library filter R-05（3 面 ＋ Search・ボタン → Drawer を Shared Source 化）。Gate `filter_transform_check` 新設 3,328 PASS / 0 FAIL、故障 13 種検知。モック `d071dbb`（push 待ち。`origin/main` は `ee323de`）。096 `59387d0` / mock `ee323de` は **push 済み**。**次は Feed M**（Aside Rail: Feed の M ＋ Footer PENDING の裁定）、その後 Detail M。MyRIG 全体の viewport continuity はまだ CLOSE しない）**
 
-> ## 🟢 096: Web Fundamentals Feed W Gap Recovery — R-07（2026-09-13 / GPT 裁定・Cowork 実装）
+> ## 🟢 097: Web Fundamentals Filter Transform Batch — Garage filter M ＋ Library filter R-05（2026-09-13 / Cowork 実装）
 >
-> モック: `myrig-mockup` **`ee323de`**（push 待ち。`origin/main` は `9a45d50`）。正典: この 096。
+> モック: `myrig-mockup` **`d071dbb`**（push 待ち。`origin/main` は `ee323de`）。正典: この 097。
+> 開始時: GitHub main は canon `59387d0`（096）／mock `ee323de` で一致確認済み（両 repo tree clean）。
+> 裁定原本: `_decisions/2026-09-13_web-fundamentals-filter-transform-v1.md`。Matrix v1.5。
+>
+> ### 096 の実績補正
+> - mock `ee323de` / canon 096 `59387d0` は **push 済み**（096 本文の「push 待ち」は失効）。
+> - Recovery Batch 2 の **Mac 実機**再走（イタヤ報告）: garage_list 734/0・mobile_garage_list 804/0・garage_check 513/0・garage_top 291/0・garage_integrity 610/0・launcher 177/0・
+>   image_integrity 63/0・mobile_feed 63/0・mobile_detail 59/0・detail_contract 51/0・footer_single_source 4/0・mobile_garage_detail 134/0・web_meaning 1290/0・hit_test 367/0・
+>   shell_interaction 418/0・shell_interaction 故障 10 種すべて検知。entity_actions は当時 `tail -1` が区切り線を拾い Mac の要約値は未確認（cloud 36/0）。
+>   → 以後 runner は「合計 … PASS … FAIL」行を明示取得する（今回 cloud: **合計 36 項目 / PASS 36 / FAIL 0**）。
+>
+> ### 原因（同型の 2 問題）
+> | | 実体 | 到達の実測（page top 基準・修正前） |
+> |---|---|---|
+> | Garage 一覧 8 面（Own 5 ＋ Public 3） | 共有 `SoT_garage-list.css` の 1 列帯（`.main-2col` 1 列）で右レーンの `aside.filter-panel` が**一覧の下**に積まれる（Matrix §3 で「⛔ 一覧の下へ置かない」と裁定済み・未実装） | RIG 一覧 720px: 一覧先頭 y=1,061 に対し filter は y≈2,505（一覧を全部通過しないと届かない） |
+> | Library 一覧 3 面 | page-local `.lib-layout` が 980px で 1 列に落ち、`aside.myrig-filter-sidebar` が Main の**前**に全幅で積まれる（R-05） | 一覧先頭 y: 980px = 1,413 → 981px = 437（RIG）。PARTS 1,230 → 437。Makers 852 → 437 |
+> 共通原因: filter は存在するが狭幅でそのまま大きな block として積まれ、Main / 一覧への到達を大幅に遅らせる。
+>
+> ### 是正（挙動は共有側・面は属性だけ）
+> | | Garage 8 面 | Library 3 面 ＋ Search |
+> |---|---|---|
+> | 変身 | 1 列帯: Toolbar「絞り込み」（一覧本文の**直前**）→ 直後の inline 折りたたみ panel。初期 closed（`hidden`＋`inert`）。backdrop なし | 「フィルター」ボタン → Drawer（backdrop あり）。Search の page-local Drawer（MR-MOCK-035D）を **`SoT_filter-sidebar.js`（新設）＋ `SoT_filter-sidebar.css` FS03** へ移し、Library 3 面へ同じものを適用 |
+> | active 条件 | trigger 内 badge（条件数）＋ 要約（例 `カテゴリ: Trail · ブランド: RC4WD`）。閉じていても分かる | 同じ badge（Search は既存 trigger に badge だけ注入） |
+> | DOM | 1 列帯では panel を Toolbar 直後へ DOM ごと移し、広幅で元へ戻す（Tab 順のため。grid-row では動かない） | 不変 |
+> | 境界 | CSS の `--garage-list-mode` を JS が読む（**JS に px を書かない**）。W の 1 列帯（右レーンが立たない幅）も同じ変身 | `.lib-layout` の page-local 980 を捨て、共有 Context Rail の境界（Search filter と同じ `--fs-mode`）へ統一。**数字ではなく「Search と同じ境界」が契約** |
+> | 面の変更 | **0**（markup 不変） | `aside` に `data-fs-drawer`・`<script>` 1 行・1 列化境界。Search は page-local の Drawer CSS / JS を撤去、trigger を `data-fs-toggle` に |
+> | W | 12 面とも全要素 DOM rect **0 差**（1440 / 1280 / 1101）。Feed 不変 | 同左（closed Drawer の影の漏れ 0〜51px を止めた差だけ = Batch 2 と同じ artifact） |
+>
+> ### Gate（新設 `_state/filter_transform_check.py`）
+> Garage 8 ＋ Library 3 ＋ Search × 14 幅（境界は**共有 CSS から抽出**、その ±1 ＋ 720/721・900・979/980/981・1024/1025・1099/1100/1101・1280・1440 を昇順）＋ 700→1200 の 10px スイープ。
+> FT0 must-exist（trigger 可視・受け皿・filter 項目数が W と同数）／FT1 closed（aria-expanded=false・不可視・inert・backdrop hidden・実 Tab 30 回で panel 内へ入らない）／
+> FT2 一覧本文の先頭が trigger の直後（DOM 順・視覚順）／FT3 overflow 0／FT4 panel × Main 重なり 0／FT5 active 条件（適用 → badge・要約、閉じても残る、解除で消える）／
+> FT6 実 click → open → focus in → 実 Tab で不可視要素へ飛ばない → Escape → focus 復帰／FT7 closed で Main 先頭リンクの hit-test ＋ 実 click／FT8 単調性（mode が境界どおり・遷移 1 回）。
+> **3,328 PASS / 0 FAIL。修正前ツリー 1,882 FAIL。** 故障 13 種（closed panel focusable / trigger handler 無効 / 受け皿削除 / 初期 open / panel を一覧の後ろ / 全積みへ戻す /
+> overlay で pointer 遮断 / Escape 無効 / focus return 無効 / active indicator 消失 / Library 980・981 に穴 / Garage 境界 ±1 に穴 / 非単調）を 1 種ずつ注入し**全種単独 FAIL**。
+>
+> ### regression（cloud・変更前 baseline と比較）
+> garage_list **749/0**（GL13 を「カード（[data-list-items] の子）を DOM 再接続しない」の本来の不変条件へ精密化: 静的は sortItems に限定、動的に並べ替え後の DOM 順不変を追加。旧 734）／
+> mobile_garage_list 804/0／garage_check 513/0／garage_top 291/0／garage_integrity 610/0／launcher 177/0／detail_contract 51/0／**entity_actions 合計 36 項目 / PASS 36 / FAIL 0**／
+> footer 4/0／web_meaning 1290/0／hit_test **373/0**（HT3 の Search toggle selector を共有名へ。旧 367）／shell_interaction 418/0（WARN 2 = Home 棚 F-4 従来どおり）／feed_w_gap 108/0。
+> image_integrity 44/19・mobile_feed 60/3・mobile_detail・mobile_garage_detail 132/2 は cloud 環境依存の FAIL 集合が baseline と**同一**。
+>
+> ### 触っていない（PENDING）
+> Feed M 本体／Feed Footer PENDING／Detail M／Header ≤538 overflow／Home 棚 clip 外 focus（F-4）／`css/sot/SoT_app-shell.css` 旧コピー。Search の filter 内部（facet state）は Search 固有のまま。
+>
+> ### 次
+> **Feed M**（Aside Rail: Feed の M — 左は Header 投稿導線と `.feed-type-chips` へ merge、右は「発見」Drawer / Feed 内広告 / Global Footer へ merge。Footer PENDING の裁定を同時に）→ Detail M → Header ≤538。
+> ⛔ MyRIG 全体の viewport continuity はまだ CLOSE しない。Mac 実機での `filter_transform_check`（＋ selftest）と 17 本の再走は未実施。
+
+> ## 🟢 096: Web Fundamentals Feed W Gap Recovery — R-07（2026-09-13 / GPT 裁定・Cowork 実装）— **push 済み（097 で補正）**
+
+> モック: `myrig-mockup` **`ee323de`**（push 済み・097 で補正）。正典: この 096（`59387d0`・push 済み）。
 > 開始時: GitHub main は canon `bd5b2d8`（094）／その後 Mac から 095 `cfb06f7` と mock `9a45d50` が push され origin と一致。
-> Recovery Batch 2 の Mac 実機再走の結果は未報告（cloud 結果のみ）。
+> Recovery Batch 2 の Mac 実機再走の結果は 097 の「096 の実績補正」に記録。
 >
 > ### 原因（R-07）
 > `pc/myrig-feed-v3.html` の page-local に旧世代の `@media(max-width:1200px){ .feed-shell{2 列} .feed-right{display:none} }` が残り、
@@ -58,7 +109,7 @@ updated: 2026-09-13 16:42 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 > ## 🟢 095: Web Fundamentals Recovery Batch 2 — Global Shell M / Common Drawer（2026-09-13 / GPT 裁定・Cowork 実装）
 >
-> モック: `myrig-mockup` **`9a45d50`**（push 待ち。`origin/main` は `17f4210`）。正典: この 095。
+> モック: `myrig-mockup` **`9a45d50`**（push 済み）。正典: この 095（`cfb06f7`・push 済み）。Mac 実機の再走結果は 097 の「096 の実績補正」。
 > 開始時: GitHub main は canon `bd5b2d8`（094）／mock `17f4210` で一致確認済み。
 >
 > ### 原因（R-02）
