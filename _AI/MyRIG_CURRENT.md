@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260913-095
-updated: 2026-09-13 16:06 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260913-096
+updated: 2026-09-13 16:42 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,47 @@ updated: 2026-09-13 16:06 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-13 / revision 095（**🟢 Recovery Batch 2 完了 — R-02（Global Shell M / Common Drawer）解消**。モック `9a45d50`（push 待ち。`origin/main` は `17f4210`）。実操作 Gate `shell_interaction_check` 新設 418/0・故障 10 種単独検知。**Garage Context Rail 単体は Batch 1 で修正済み・Shell M は本 batch で成立。ただし MyRIG 全体の viewport continuity はまだ CLOSE しない**。**次は Feed 1121〜1200 の CSS 競合修正（R-07）**）**
+**最終更新: 2026-09-13 / revision 096（**🟢 Feed W Gap Recovery（R-07）完了**: 1121〜1200px の右レール非単調 drop を撤去、境界 Gate `feed_w_gap_check` 新設。モック `ee323de`（push 待ち。`origin/main` は `9a45d50`）。Recovery Batch 2（`9a45d50` / 095 `cfb06f7`）は **push 済み**。Feed の Footer drop は PENDING（裁定原本なし）。**次は Garage filter M ＋ Library filter（721〜980）**。MyRIG 全体の viewport continuity はまだ CLOSE しない）**
+
+> ## 🟢 096: Web Fundamentals Feed W Gap Recovery — R-07（2026-09-13 / GPT 裁定・Cowork 実装）
+>
+> モック: `myrig-mockup` **`ee323de`**（push 待ち。`origin/main` は `9a45d50`）。正典: この 096。
+> 開始時: GitHub main は canon `bd5b2d8`（094）／その後 Mac から 095 `cfb06f7` と mock `9a45d50` が push され origin と一致。
+> Recovery Batch 2 の Mac 実機再走の結果は未報告（cloud 結果のみ）。
+>
+> ### 原因（R-07）
+> `pc/myrig-feed-v3.html` の page-local に旧世代の `@media(max-width:1200px){ .feed-shell{2 列} .feed-right{display:none} }` が残り、
+> FEED STREAM R2 の 3 列化（264 / 640 / 264、≤1120 で 170 / 640 / 170）のあとも生き残っていた。1121〜1200px で
+> 右レール（注目RIG / おすすめユーザー / 広告）が受け皿なしに消え（空の 264px 列だけ残る）、1120px 以下で再出現する非単調状態。
+>
+> ### 是正（最小）
+> 旧 ≤1200 の drop 規則を撤去（理由コメント付き・書き戻し禁止）。compact 3 列の境界を 1120 → 1200 にし、1121〜1200 も
+> 同じ compact 3 列で連続させる。変身は **レール 264（≥1201）→ 170（≤1200）→ 消える（≤900・Matrix §3 の裁定済み M）** の単調な一方向。
+> 1100 以下と ≥1201 の見た目は不変（pixel 一致）。Feed M の最終変身（Header 投稿導線 / feed-type-chips / 発見 Drawer / Feed 内広告 / Global Footer）は別 batch のまま。
+>
+> ### Footer / overflow の実体調査（今回は触らない → PENDING）
+> | | |
+> |---|---|
+> | 発動幅 | `@media(min-width:901px)` — `html,body{overflow:hidden}`・`.feed-shell{height:calc(100vh−60px)}`・`.feed-center{overflow-y:auto}`・`.site-footer{display:none}`。≤900 では Global Footer が出る |
+> | 意図 | page-local コメント「PC Feed は閲覧アプリ型。左右の文脈は残し、中央のタイムラインだけを送る」。右レール下部の mini footer（利用規約 / プライバシー / 広告について、href は `#`）が Global Footer の代替 |
+> | 裁定根拠 | **なし**（feed-continuity / feed-tabs の裁定原本・CURRENT に記載なし）。Matrix §3 Feed M 行の「法務導線 → Global Footer・menu へ merge」は M 側の裁定で、W 側で Footer を消す根拠ではない |
+> | 判断 | Global Footer を復旧するには feed-center を scroll container にしている構造（Footer を scroll 内へ入れるか shell の高さを変える）に手を入れる必要があり、R-07 の W gap 修正と分離。**「Feed だけ Global Footer を消す」を既定仕様として固定しない。** Feed M batch で法務導線の受け皿と一緒に裁定する |
+>
+> ### Gate（新設 `_state/feed_w_gap_check.py`）
+> 14 幅（900 / 901 / 1024 / 1025 / 1100 / 1119 / **1120 / 1121** / 1150 / 1199 / **1200 / 1201** / 1280 / 1440）＋ 880→1440 の 10px 連続スイープ。
+> FW1 存在／FW2 可視／FW3 Main 非重なり／FW4 overflow 0／FW5 Header・Footer 非衝突／FW6 右レール代表 control の `elementFromPoint` ＋ **実 click 到達**／
+> FW7 「表示 → 消失 → 再表示」なし／FW0 ≤900 は非表示（裁定済み M）。**108 PASS / 0 FAIL。修正前ツリーでは 17 FAIL（1121〜1200）。**
+> 故障 6 種を 1 種ずつ注入 → 旧 drop 復活: FW1・2・5・6・7／旧 1120 競合復活: FW0・1・2・5・6・7／opacity:0: FW2・7／pointer-events:none: FW6／Main 上へ重ねる: FW3／1121 だけ穴: FW1・2・5・6。全種単独 FAIL。
+>
+> ### regression（cloud）
+> shell_interaction 418 / hit_test 367 / web_meaning 1290 / footer 4 / launcher 177 / garage_check 513 / garage_top 291 / garage_list 734 /
+> garage_integrity 610 / detail_contract 51 / entity_actions 36 / mobile_garage_list 804 — 0 FAIL。image_integrity / mobile_feed / mobile_detail /
+> mobile_garage_detail は cloud 環境依存の FAIL 集合が baseline と同一。共通 Drawer（Batch 2）は非回帰。
+>
+> ### 次
+> **Garage filter M ＋ Library filter（721〜980）**: Garage 一覧の filter panel（Toolbar の Filter → 一覧本文の直前に折りたたみ panel・初期 closed、Matrix §3 裁定済み）と、
+> Library 一覧 3 面の 721〜980 未所有帯（filter sidebar 全積みで一覧先頭 y≈1,108 = R-05。Search filter と同じ `myrig-filter-sidebar` 部品）。
+> ⛔ MyRIG 全体の viewport continuity はまだ CLOSE しない（Detail M・Feed M・Header ≤538 が残る）。
 
 > ## 🟢 095: Web Fundamentals Recovery Batch 2 — Global Shell M / Common Drawer（2026-09-13 / GPT 裁定・Cowork 実装）
 >

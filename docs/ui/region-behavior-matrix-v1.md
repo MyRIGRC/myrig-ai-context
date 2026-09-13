@@ -1,4 +1,4 @@
-# Region Behavior Matrix v1.3 — 領域 × モードの変身規約
+# Region Behavior Matrix v1.4 — 領域 × モードの変身規約
 
 **拘束力: L2（現在の確定仕様）。** CORE「正典化判断基準」の
 「2人（2つのAI）が独立に判断して食い違ったとき何か壊れるか」に該当するため正典化した
@@ -9,6 +9,7 @@ L2 なので、**より良い案があれば差分を明示して提案してよ
 - 制定: 2026-09-12 JST / Web Fundamentals Phase 2B（Garage M batch CLOSE と同時）
 - v1.2: 2026-09-12 JST / Web Fundamentals Recovery Batch 1（093 CLOSE 失効 → REOPEN。GPT 裁定・Cowork 実装）
 - v1.3: 2026-09-13 JST / Recovery Batch 2（Global Shell M の共通 Drawer 実装・Overlay / temporary UI の横断契約）
+- v1.4: 2026-09-13 JST / Feed W Gap Recovery（R-07。Feed W の実態反映・原則 C「変身は幅に対して単調」）
 - 参照元: `docs/ui/page-role-matrix-v1.md` 末尾の Breakpoint 注記
 - 経緯の原本: CURRENT 093 → **094**（失効と新契約）／`_decisions/2026-09-12_web-fundamentals-recovery-batch1-v1.md`
 
@@ -38,6 +39,7 @@ L2 なので、**より良い案があれば差分を明示して提案してよ
 
 原則（v1.1 で文言確定）:
 - **A. 無断で消さない。** M で領域を**無断で**非表示にしない。**明示的に merge / defer / drop が裁定済みの場合は例外**とし、裁定の所在を表に併記する
+- **C. 変身は幅に対して単調。** 幅を広げたときに領域が「表示 → 消失 → 再表示」する非単調状態を許容しない（v1.4 / R-07。旧世代の breakpoint 規則が新世代の下に生き残ると起きる。2 つの AI が独立に規則を足すと黙って壊れる典型なので成立条件として固定する。具体 px は固定しない）
 - **B. UA / 端末名では分岐しない。** 利用可能幅と **Region の成立条件**（レールを並べられるか／本文の最小幅を確保できるか）で W / M / PC Narrow Fallback を切り替える（C は幅ではなく専用 Mobile 面が持つ契約）。**DOM 構成・React 部品構成・実装方式は固定しない**
 
 決めない（Mac 実測後・実装時）:
@@ -86,7 +88,7 @@ PC Narrow Fallback** であって、PC 面がそのまま C（専用 Mobile 契�
 | Main: 一覧 | `auto-fill minmax(カード最小幅)` | 同左（幅で列数を固定しない） | 1〜2 列 |
 | Main: Detail | 本文 7fr | 1 列 | 1 列 |
 | **Aside Rail: Detail** | 右 3fr（≥1280）／ 350px（961〜1279） | 🆕 **Gallery → Builder＋Actions の compact deck → Main。** 残りは Main へ merge：base-model→ベースモデル／entity-feed→LOG／used-parts→使用パーツ。external-links・builder-rigs・ads は Main 後方または RELATED へ adapt。⛔「Gallery → Aside 全体 → Main」は不採用 | 同左 |
-| **Aside Rail: Feed** | 左右 170px | 🆕 **一括でタブ／Drawer へ移さない。** 左: LOG投稿→既存 Header 投稿導線へ merge／LOG種別→既存 `.feed-type-chips` を M で表示。右: 注目RIG・おすすめユーザー→**「発見」Drawer**／広告→Feed 内広告へ merge／法務導線→Global Footer・menu へ merge。⛔ おすすめ/新着/フォロー中の3タブへ周辺情報を混ぜない | 1 列 |
+| **Aside Rail: Feed** | 左右 264px（≥1201）→ 170px（≤1200・compact）。**v1.4: 1121〜1200 で右レールが消えて 1120 以下で再出現する旧規則の競合を撤去**（R-07）。W 内で右レールは消えない | 🆕 **一括でタブ／Drawer へ移さない。** 左: LOG投稿→既存 Header 投稿導線へ merge／LOG種別→既存 `.feed-type-chips` を M で表示。右: 注目RIG・おすすめユーザー→**「発見」Drawer**／広告→Feed 内広告へ merge／法務導線→Global Footer・menu へ merge。⛔ おすすめ/新着/フォロー中の3タブへ周辺情報を混ぜない | 1 列 |
 | **Toolbar: Garage filter** | 左レーン内 | 🆕 **現状維持しない。** Toolbar の Filter 操作から、**一覧本文の直前**に折りたたみ panel を開く。**初期 closed**。active 条件は Toolbar 側から分かるようにする。⛔ 一覧の下へ置かない | 横スクロール＋ボトムシート |
 | Toolbar: その他 | 1 行 | 1 行（横スクロール可） | 横スクロール |
 
@@ -261,6 +263,14 @@ W では CSS Grid で左列の Nav の下へ視覚復帰」。
 | pixel | W は run-to-run 差のみ。M は Home / Browse の閉 Drawer 影漏れ（x 0〜28px）が消えた差だけ |
 | Mac 実機 | **未再走** |
 
+### 6.6 Feed W Gap Recovery（2026-09-13 / `ee323de` / cloud Chromium）
+
+| | |
+|---|---|
+| `feed_w_gap_check`（**新設**） | 14 幅（±1 境界含む）＋ 880→1440 連続スイープ = **108 PASS / 0 FAIL**。修正前ツリーは 17 FAIL（1121〜1200）。故障 6 種を 1 種ずつ注入し全種単独 FAIL |
+| 既存 16 本 | 0 FAIL（cloud 環境依存 4 本は同一 FAIL 集合）。共通 Drawer 非回帰 |
+| pixel | Feed は 1100 以下・≥1201 で不変（run-to-run 差のみ） |
+
 ## 7. WM7（Viewport Continuum / Garage M）— 恒久検査
 
 `_state/web_meaning_check.py`。既存 13 本は W と PC Narrow Fallback しか assert しておらず、
@@ -288,7 +298,8 @@ v1.1: 550 PASS / 0 FAIL（10 面 × 9 幅）。`--selftest` は 5 種を**同時
 
 | 領域 | 状態 |
 |---|---|
-| **Feed 1121〜1200 の右レーン非単調 drop（R-07）** | **次**。page-local の `(max-width:1200px)` と `(max-width:1120px)` の競合。Feed M（下）とは別に、W 帯の欠陥として先に直す |
+| **Toolbar: Garage filter の M ＋ Context Rail: Library filter（721〜980）** | **次**。Garage は §3 裁定済み（Toolbar の Filter → 一覧本文の直前に折りたたみ panel・初期 closed）。Library は Search filter と同じ `myrig-filter-sidebar` 部品で「ボタン → パネル」を Shared Source で適用 |
+| **Feed の Global Footer drop（≥901・page-local の閲覧アプリ型 scroll）** | PENDING（裁定原本なし）。Feed M batch で法務導線の受け皿と一緒に裁定。「Feed だけ Global Footer を消す」を既定仕様として固定しない |
 | **Context Rail: Library 一覧 3 面** | 721〜980 が未所有（filter sidebar の全積みで一覧先頭 y≈1,108 = R-05）。Search filter と同じ `myrig-filter-sidebar` 部品なので「ボタン → パネル」を Shared Source で適用できる。§1 の Context Rail に Library を含める |
 | **Aside Rail: Feed の M** | 裁定済み・未実装。左は Header 投稿導線と `.feed-type-chips` へ merge、右は「発見」Drawer ／ Feed 内広告 ／ Global Footer へ merge |
 | **Aside Rail: Detail の M** | 裁定済み・未実装。Gallery → Builder＋Actions の compact deck → Main。残りは Main の該当節へ merge |
