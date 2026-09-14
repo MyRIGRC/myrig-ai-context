@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260914-101
+revision: MYRIG-20260914-102
 updated: 2026-09-14 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -14,20 +14,65 @@ updated: 2026-09-14 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-14 / revision 101（**🟢 Detail M / LOG Builder を drop から defer へ是正**:
-100 の「LOG M で Builder full card / stats / 大型 actions を明示 drop」は **Mac 実機確認で過剰と判明・失効**。
-元の意図は「Builder カードを LOG タイトルと本文の間に挟まない」であって「カード自体を M から消す」ではない。
-→ **LOG M = Identity → Main → Builder card → RELATED → Footer**。
-Builder card は M で drop せず、W の右 Rail から **Main 読了後・RELATED 直前へ defer**（`adapt-main`。同一 DOM の移動・clone 禁止）。
-avatar / name / 公開RIG・パーツ・LOG stats / Follow / ガレージを見る を**すべて維持**。
-Identity 上部の author row と Public Garage リンクも維持し、**人物 identity の一部重複は許容**（同定 と 回遊 で責務が違う）。
-受け皿に Aside の variant クラス（`.dt-rail--quiet` 等）を引き継ぐようにした（子孫セレクタが切れて見た目が変わるため）。
-Gate 更新して **3,152 PASS / 0 FAIL**、故障 **17 種**すべて単独検知。既存 19 本 **0 FAIL**。
-VISUAL LOCK は Detail 5 面の W 各幅で pixel 差 0（変化は LOG の M だけ）。
-モック `f02239a`（**push 待ち**）。100（canon `dcbdecd` / mock `06b582c`）は **push 済み・amend / force push なし**。
-⛔ R-06 は再 OPEN しない。⛔ RIG / PARTS の M と W の右 Rail は不変。
-🔴 **未了: 今回分の Mac 実機 acceptance と Vercel 再デプロイ**（push 後）。
-**次は Header ≤538 overflow（R-09）**）**
+**最終更新: 2026-09-14 / revision 102（**🟢 Web Fundamentals Phase 2 / viewport continuity CLOSE**:
+Final Consolidation Batch で残件 A〜G を一括処理。**R-09**（Header narrow: 320〜538 の横 overflow 218→0）／
+**F-4**（棚 focus: focus したカードを snap 位置へ即時に入れる。`shell_interaction` の WARN 2→0）／
+**Garage Owner Detail 境界**（>=1025 W / <=1024 M へ統一。Detail 5 面が Global Shell と 1 本）／
+**`css/sot/SoT_app-shell.css` / `SoT_footer.css` 旧コピー削除**（42 Mobile 面で実利用 0 を実測）／
+**Overlay 契約の 1 本化**（`SoT_app-shell.js` §0 `MyRIG.overlay`。排他も契約へ）／
+**「広告について」= 法務コンテンツ制作待ちの非 blocker PENDING**（遷移先・本文が存在しない）／
+**Final Gate `web_fundamentals_final_check` 新設 2,050 PASS / 0 FAIL・故障 11 種検知**。
+既存 19 本 ＋ detail_m 3,152 すべて 0 FAIL。W VISUAL LOCK 14 面 × 幅で pixel 差 0。42 Mobile 面 pixel 差 0。
+モック `579af22`（**push 待ち**）。101 の stale 記述は本 revision で補正済み（`f02239a` push 済み・Vercel READY・
+Mac acceptance 3,152/0・selftest 17/17）。
+🔴 **基盤修正レーンはここで終了。次は通常のモック制作・デザイン探索レーンへ戻る**（Feed カードの再デザインは DESIGN レーン）。
+🔴 未了: 本 revision の push（イタヤの `mockup` コマンド）→ Vercel READY → Final Gate の Mac 実行）**
+
+> ## 🟢 102: Web Fundamentals Final Consolidation — Phase 2 / viewport continuity CLOSE（2026-09-14 / Cowork 実装）
+>
+> モック: `myrig-mockup` **`579af22`**（**push 待ち**）。開始時 HEAD / `origin/main` とも `f02239a`。
+> 正典: この 102。裁定原本: `_decisions/2026-09-14_web-fundamentals-final-consolidation-v1.md`。Matrix **v1.10**。
+> 開始時 canon: GitHub main `4036fa4` / revision.txt・CURRENT 冒頭とも `MYRIG-20260914-101` で一致確認済み。
+>
+> ### 101 の stale 記述の補正
+> 101 本文の「push 待ち / Vercel 未了 / Mac acceptance 未実施」は失効。`f02239a` / `4036fa4` は push 済み・Vercel READY・
+> Mac 実機（Mac Studio / Chrome）で `detail_m_transform_check` 3,152 PASS / 0 FAIL・selftest 17 種全検知 ＝ **Detail M 最終 acceptance 完了**。
+>
+> ### 残件の結論（A〜G）
+> | | 結論 | 実装 |
+> |---|---|---|
+> | **A. Header ≤538 overflow（R-09）** | **解決**。320〜538 の横 overflow 218 → 0。責務は落とさない（検索ピルが縮む・投稿ボタンはラベル文字だけ畳む。button と accessible name は残る）。px は implementation value | `SoT_app-shell.css` §3.5 ＋ `SoT_app-shell.js`（`#cxBtn` に aria-label）。同伴: Search / Library 3 面 / Garage PNF の `1fr` → `minmax(0,1fr)` |
+> | **B. Home 棚 clip 外 focus（F-4）** | **解決**。focus したカードを snap 位置へ**即時**に入れる。⛔ outline:none / Tab 順除外は不採用 | `SoT_shelf.js`（Home / Browse / Detail 共通）。`shell_interaction` の WARN 2 → 0 |
+> | **C. Garage Owner Detail 1025〜1050** | **>=1025 W / <=1024 M へ統一**（1025 で 2 カラム成立を実測: 主列 610 / rail 365 / overflow 0 / Context Bar・owner controls の hit-test 正常）。Detail 5 面が Global Shell と 1 本 | `SoT_detail.css` / `SoT_detail-rail.css` の W 下限 1051 → 1025、`SoT_detail-m.css` の隔離ブロックを <=1024 へ。1024 以下・1051 以上は pixel 差 0 |
+> | **D. `css/sot/SoT_app-shell.css` 旧コピー** | **削除**（`css/sot/SoT_footer.css` も）。42 Mobile 面で runtime にマッチする規則は `:root` の変数 2 つだけ・消費元なし・`site-footer` 0 ＝ 実利用 0 | 42 面の `<link>` 撤去。42 面 ＋ launcher で pixel 差 0。参照 0・404 0。archive しない |
+> | **E. Overlay 契約の重複** | **1 本化**。closed inert / open focus / Tab 循環 / Escape / backdrop / focus 復帰 / scroll lock / mode 退出 / **排他**を `MyRIG.overlay.create()` が持ち、4 消費側は面固有だけ | `SoT_app-shell.js` §0。`SoT_filter-sidebar.js` 192→153 行 / `SoT_feed-rails.js` 164→98 / `SoT_garage-drawer.js` 165→99 |
+> | **F. 法務「広告について」** | **非 blocker PENDING（法務コンテンツ制作待ち）**。遷移先も本文も存在しない（`LEGAL` は 3 本・support-legal 面に節なし）。架空ページ / `#` は作らない | — |
+> | **G. Final Gate** | `_state/web_fundamentals_final_check.py` **新設**。横断契約だけを 20 幅で見る（Header narrow / overflow / visible focus / 棚 / Overlay 排他 / Detail 境界 / Garage 境界 / stale source / 404 / resize 復元） | **2,050 PASS / 0 FAIL**。故障 **11 種**すべて単独検知 |
+>
+> ### 検証（cloud Chromium 相当＝デスクトップ Cowork の Linux VM）
+> 既存 19 本 **0 FAIL**: detail_contract 51/0/0・entity_actions 36/0・footer 4/0・image 63/0・launcher 177/0・hit_test 367/0・
+> shell_interaction 418/0（**WARN 0**）・web_meaning 1290/0・garage_check 513/0・garage_top 291/0・garage_list 749/0・
+> garage_integrity 610/0・mobile_garage_list 804/0・mobile_garage_detail 134/0・mobile_detail 59/0・mobile_feed 63/0・
+> feed_w_gap 108/0・feed_m 525/0・filter_transform 3,328/0。＋ `detail_m_transform_check` **3,152 / 0**。
+> Final Gate **2,050 / 0**（WF1 1520 / WF2 260 / WF3 24 / WF4 7 / WF5 109 / WF6 75 / WF7 30 / WF8 6 / WF9 14 / WF10 5）。
+> VISUAL LOCK: Home / Feed / Library / Search / Browse / Garage Top / Public Garage / Detail 3 面 / Garage Owner Detail 2 面 の
+> W 幅で **揺れで説明できない画素 0**。42 Mobile 面 ＋ launcher（390px）で 0。
+>
+> ### 🔴 踏んだ罠（裁定原本 §1〜§7）
+> `behavior:'auto'` は CSS の `scroll-behavior:smooth` に従ってアニメーションする／scroll-snap のレールは「はみ出た分だけ」動かすと
+> snap に引き戻される／`1fr` = `minmax(auto,1fr)` で min-content が下限になり狭幅で document を押し広げる／
+> grid item に `grid-column:2` があると template を 1 列にしても implicit column が残る。
+>
+> ### CLOSE 判定
+> §11 の条件をすべて満たした。**Web Fundamentals Phase 2 / viewport continuity: CLOSE。**
+> 残る技術的負債は「広告について」（非 blocker）だけ。Feed カードの再デザインは DESIGN レーン。
+>
+> ### 🔴 未了
+> - push: mock `579af22` / canon（この 102）とも **local commit のみ**。イタヤの `mockup` コマンドで canon push → mock push → Vercel deploy。
+> - Final Gate の Mac 実行: `LD_LIBRARY_PATH=$HOME/.local/lib python3 _state/web_fundamentals_final_check.py`（＋ `--selftest`）。
+>
+> ### 次
+> **通常のモック制作・デザイン探索レーンへ戻る。** 基盤修正レーンは終了。
 
 > ## 🟢 101: Detail M / LOG の Builder card を drop から defer へ（2026-09-14 / 100 の裁定修正 / Cowork 実装）
 >
@@ -87,10 +132,10 @@ VISUAL LOCK は Detail 5 面の W 各幅で pixel 差 0（変化は LOG の M �
 > Builder は document 内 1 つ（clone 0）・stats 1・Follow 可視・「ガレージを見る」の href は author row と一致。横 overflow 0。
 > resize 1024⇄1025 × 3 往復で DOM 完全復元・受け皿の増殖 0・deck が湧かない。
 >
-> ### 🔴 未了
-> - **push**: mock `f02239a` / canon（この 101）とも **local commit のみ**。Cowork の実行シェルから GitHub 認証不可。
-> - **Vercel**: push 後に READY 確認が要る。
-> - **今回分の Mac 実機 acceptance**: 未実施。
+> ### 🔴 未了 → **102 で補正: すべて解消**
+> - push: mock `f02239a` / canon `4036fa4` とも **push 済み**。**Vercel production READY**。
+> - Mac 実機 acceptance（Mac Studio / Chrome）: `detail_m_transform_check` **3,152 PASS / 0 FAIL**、selftest **17 種全検知**。
+>   **Detail M の最終 acceptance 完了。**
 >
 > ### 次
 > **Header ≤538 overflow（R-09）**。⛔ R-06 は再 OPEN しない。⛔ viewport continuity はまだ CLOSE しない。
@@ -462,7 +507,7 @@ VISUAL LOCK は Detail 5 面の W 各幅で pixel 差 0（変化は LOG の M �
 > |---|---|
 > | Garage Context Rail | Batch 1 で修正済み（W / M / PNF static） |
 > | Global Shell M | **本 batch で成立**（共通 Drawer・global nav・focus 契約） |
-> | MyRIG 全体の viewport continuity | **まだ CLOSE しない**。Library 721〜980（R-05）・Detail M（R-06）・Feed（R-07）・Garage filter M が残る（🔴 099 で補正: R-05 / R-06 / R-07 / Garage filter M はすべて解消済み。残るのは Header R-09 と Garage Owner Detail の境界＝別裁定） |
+> | MyRIG 全体の viewport continuity | 🟢 **102 で CLOSE**（R-05 / R-06 / R-07 / Garage filter M / R-09 / F-4 / Garage Owner Detail 境界 すべて解消。残る「広告について」は非 blocker PENDING） |
 > | Mac 実機 | 16 本（14 ＋ hit_test ＋ shell_interaction）の再走が未実施 |
 >
 > ### 次

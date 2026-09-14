@@ -1,4 +1,4 @@
-# Region Behavior Matrix v1.9 — 領域 × モードの変身規約
+# Region Behavior Matrix v1.10 — 領域 × モードの変身規約
 
 **拘束力: L2（現在の確定仕様）。** CORE「正典化判断基準」の
 「2人（2つのAI）が独立に判断して食い違ったとき何か壊れるか」に該当するため正典化した
@@ -15,6 +15,7 @@ L2 なので、**より良い案があれば差分を明示して提案してよ
 - v1.7: 2026-09-14 JST / Detail M Transform Batch（**Detail M 実装・R-06 CLOSE**。Detail の変身境界を Global Shell と同じ 1024/1025 の1本へ統一。§3 の旧値「350px / 961〜1279」を訂正）
 - v1.8: 2026-09-14 JST / **Mac 実機 acceptance の是正**（LOG M の Builder compact deck を廃止。v1.7 の「LOG: Identity → Builder compact deck → Main」は**失効**）
 - v1.9: 2026-09-14 JST / **v1.8 の drop 裁定を撤回**（過剰だった）。**LOG M = Identity → Main → Builder card → RELATED → Footer**。Builder card は M で drop せず、W の右 Rail から**読了後・RELATED 直前へ defer**する。stats / Follow / ガレージを見る はすべて維持。Identity 上部の author row も維持（同定 と 回遊 で責務が違うので重複は許容）。R-06 は再 OPEN しない
+- v1.10: 2026-09-14 JST / **Web Fundamentals Final Consolidation**（R-09 Header narrow・F-4 棚 focus・Garage Owner Detail 境界の統一・旧 `css/sot` コピー撤去・Overlay 契約の実装 1 本化・Final Gate 新設。**Phase 2 / viewport continuity を CLOSE**）
 - 参照元: `docs/ui/page-role-matrix-v1.md` 末尾の Breakpoint 注記
 - 経緯の原本: CURRENT 093 → **094**（失効と新契約）／`_decisions/2026-09-12_web-fundamentals-recovery-batch1-v1.md`
 
@@ -27,6 +28,10 @@ L2 なので、**より良い案があれば差分を明示して提案してよ
 | **Toolbar: Garage filter（1 列帯）／ Context Rail: Library filter** | ✅ **実装済み**（v1.5 / Filter Transform Batch）。Garage 8 面は Toolbar → inline panel、Library 3 面 ＋ Search は「フィルター」ボタン → Drawer を Shared Source（`SoT_filter-sidebar.js`）で共有 |
 | **Aside Rail: Feed の M** | ✅ **実装済み**（v1.6 / Feed M Transform Batch）。左は Header 投稿導線と `.feed-type-chips` へ、右は「発見」Drawer / Feed 内広告 / Global Footer へ。Feed の Footer PENDING も同時に決着（裁定 B） |
 | **Aside Rail: Detail の M** | ✅ **実装済み**（v1.7 / LOG は v1.9 が現行）。Public Detail 3 面（RIG / PARTS / LOG）。**RIG / PARTS** は Builder＋Actions を compact deck へ**同一 DOM のまま移動**、**LOG は deck を作らず Builder card を読了後（Main → Builder → RELATED）へ defer**。残りは責務ごとに merge / adapt。**R-06（1025〜1050 の混在帯）も CLOSE 済み**。Garage Owner Detail は対象外（現状保存・§8 に残り） |
+| **Global Shell の narrow（R-09）** | ✅ **実装済み**（v1.10）。320〜538 の横 overflow 218 → 0。VISUAL LOCK は不変 |
+| **横スクロール棚の focus（F-4）** | ✅ **実装済み**（v1.10 / `SoT_shelf.js`）。focus したカードを snap 位置へ即時に入れる。Home / Browse / Detail 共通 |
+| **Aside Rail: Garage Owner Detail の境界** | ✅ **>=1025 W / <=1024 M へ統一**（v1.10）。Detail 5 面すべて Global Shell と 1 本 |
+| **Overlay / temporary UI の実装** | ✅ **1 本**（v1.10 / `SoT_app-shell.js` §0）。排他も契約に入れた |
 | その他の領域 | 現状の実装をそのまま記載（新規の変身は宣言していない） |
 
 **根拠の分離**: MyRIG の現状＝正典 ＋ モック実体 `17f4210`（v1.1 時点は `b78a2f4`）／実測＝Mac 実機 Chrome（実フォント）と cloud Chromium／外部標準＝W3C WCAG 2.2
@@ -64,7 +69,7 @@ L2 なので、**より良い案があれば差分を明示して提案してよ
 | **Main** | 一覧グリッド・Detail 本文・Feed | `SoT_garage-list.css` / `SoT_detail.css` / `SoT_feed-card.css` |
 | **Aside Rail（右）** | Detail の builder / actions / 関連 / 広告、Feed の右レーン | W: `SoT_detail-rail.css`／**Detail の M: `SoT_detail-m.css` ＋ `SoT_detail-m.js`（v1.7・3 面で 1 本）**／Feed の M: `SoT_feed-rails.js` |
 | **Toolbar** | filter / sort / tabs / chips | `SoT_garage-list.css` §3b（狭幅の Filter trigger）＋ `SoT_garage-list.js`（開閉・focus・active 要約）／ `mobile-garage-list.css` |
-| **Overlay 層 / temporary UI**（Global Shell に付随・v1.2 で追加、v1.3 で契約を拡張） | drawer overlay・Drawer・modal・bottom-sheet・filter panel・toast・FAB など、content の上に載る一時的な層 | PC: `SoT_app-shell.css` §3.2〜3.4 ＋ `SoT_app-shell.js initDrawer()`／filter: `SoT_filter-sidebar.js`（v1.5）／Feed の発見 Drawer: `SoT_feed-rails.js`（v1.6）／Garage Detail: `SoT_garage-drawer.js`／Mobile: contract v0.5 の Dialog Controller。**横断契約（v1.3）**: ① closed は content の pointer 操作を遮らない ② closed の内部へ focus しない（transform で画面外に送るだけでは closed とみなさない。`aria-hidden` だけで focusable を残すのは禁止。inert / hidden / tabindex 制御など既存構造に最も安全な方法を選ぶ）③ open → Escape / backdrop で close → trigger へ focus 復帰。open 中の focus は層の中に留まる ④ trigger（hamburger 等）が見えるなら必ず受け皿を持つ（「button があるが何も開かない」は FAIL）。z-index の具体値・実装方式は正典化しない |
+| **Overlay 層 / temporary UI**（Global Shell に付随・v1.2 で追加、v1.3 で契約を拡張） | drawer overlay・Drawer・modal・bottom-sheet・filter panel・toast・FAB など、content の上に載る一時的な層 | PC: **`SoT_app-shell.js` §0 `MyRIG.overlay.create()` の 1 本**（v1.10。global Drawer / filter Drawer / Feed の発見 Drawer / Garage Drawer の 4 消費側は面固有の中身だけを持つ）＋ style は `SoT_app-shell.css` §3.2〜3.4 / `SoT_filter-sidebar.css` / 各面／Mobile: contract v0.5 の Dialog Controller。**横断契約（v1.3）**: ① closed は content の pointer 操作を遮らない ② closed の内部へ focus しない（transform で画面外に送るだけでは closed とみなさない。`aria-hidden` だけで focusable を残すのは禁止。inert / hidden / tabindex 制御など既存構造に最も安全な方法を選ぶ）③ open → Escape / backdrop で close → trigger へ focus 復帰。open 中の focus は層の中に留まる ④ trigger（hamburger 等）が見えるなら必ず受け皿を持つ（「button があるが何も開かない」は FAIL）⑤ **排他**（v1.10）: overlay A が開いている間に B を開いたら A を閉じる（同時に可視な backdrop は 1 つ・scroll lock が食い違わない）。z-index の具体値・実装方式は正典化しない |
 
 ## 2. モード（Mode）
 
@@ -88,7 +93,7 @@ PC Narrow Fallback** であって、PC 面がそのまま C（専用 Mobile 契�
 
 | 領域 | W | **M** | C（専用 Mobile 面）／PC Narrow Fallback |
 |---|---|---|---|
-| Global Shell | PC ヘッダー（nav 展開） | PC ヘッダー（hamburger）＋ **共通 Drawer 実装済み**（v1.3 / R-02）。hamburger のある面は必ず Drawer を持ち、Drawer は Browse / Feed / Library の global nav region を先頭に持つ（`.app-nav` を単一情報源として複製）。Home / Browse ではカテゴリ directory と同じ Drawer 内の別 region。Garage Detail は既存の Garage Drawer が受け皿（global nav を注入） | C: BottomNav＋SubHeader **実装済み**／PC Narrow Fallback: PC ヘッダー＋共通 Drawer のまま |
+| Global Shell | PC ヘッダー（nav 展開） | PC ヘッダー（hamburger）＋ **共通 Drawer 実装済み**（v1.3 / R-02）。hamburger のある面は必ず Drawer を持ち、Drawer は Browse / Feed / Library の global nav region を先頭に持つ（`.app-nav` を単一情報源として複製）。Home / Browse ではカテゴリ directory と同じ Drawer 内の別 region。Garage Detail は既存の Garage Drawer が受け皿（global nav を注入）。**v1.10 / narrow（R-09）**: Header はどの幅でも document を横に押し広げない。責務（hamburger / logo / 検索 / 投稿 / 通知 / アバター）は落とさず、狭幅では検索ピルが縮み、投稿ボタンはラベル文字だけ畳んでアイコンになる（button・accessible name は残る）。隠した要素は `display:none`（透明のまま hit-test を奪わない）。**px は implementation value**（`SoT_app-shell.css` §3.5） | C: BottomNav＋SubHeader **実装済み**／PC Narrow Fallback: PC ヘッダー＋共通 Drawer のまま |
 | Context Rail: **Garage / Public Garage** | 展開レール 260px・**static** | **Profile → 横長カード（全幅）／ Nav → アイコンレール 64px（**static**・件数はバッジ・ラベル可視）／ Activity・LATEST LOGS → 本文の下へ defer**（Own 6 面 ＋ Public 4 面・共有正本1本）。DOM 論理順は **Profile → Nav → Main → Activity/LATEST LOGS**（P1 是正）。🔴 v1.2: **M の Nav sticky 契約は失効**（R-03: Chrome では grid item の sticky 拘束が grid container まで伸び、defer 領域に重なった）。**W / M / PC Narrow Fallback とも static** | C: 横スクロールのローカルナビ **実装済み**／**PC Narrow Fallback: static・1 列（Own / Public 共通・v1.2）**。Main はレールの下、defer は Main の後。「Public は従来 sticky」の例外は廃止（R-04） |
 | Context Rail: **Browse** | 展開レール 220px | **ドロワー**（階層があるためアイコン化しない）**実装済み** | カテゴリシート **実装済み** |
 | Context Rail: **Search filter ＋ Library filter（一覧 3 面）** | 左固定（sticky sidebar） | 「フィルター」ボタン → Drawer **実装済み**（v1.5 で Search の page-local を共有化し Library 3 面へ適用。R-05 解消）。trigger は一覧本文の直前（Library）／srch-head（Search）。closed は inert・backdrop hidden。trigger に active 条件数の badge、Library は要約テキストも | ボトムシート |
@@ -372,6 +377,25 @@ Gate は 2,808 PASS / 0 FAIL で通っていた。**「契約どおりに動い�
 実機所見から契約を書くときは、**遮断の是正**と**責務の削除**を取り違えない。
 ⛔ 位置の問題を drop で解こうとしない。⛔ R-06（1024/1025 境界）は再 OPEN しない。
 
+### 6.12 Web Fundamentals Final Consolidation（2026-09-14 / cloud Chromium）— **Phase 2 CLOSE**
+
+| 項目 | 結論 | 実測 |
+|---|---|---|
+| A. Header narrow（R-09） | `SoT_app-shell.css` §3.5。`.app-search{min-width:0}`（<=1024）＋ <=559 で `.cx__label / .cx__caret` を畳む。同伴で Search / Library 3 面 / Garage PNF の `1fr` → `minmax(0,1fr)`（min-content 由来の overflow） | 13 面 × 20 幅（1440→320）で document / Header の横 overflow 0・重なり 0・ghost 0。改修前は 320px で 218px |
+| B. 棚 focus（F-4） | `SoT_shelf.js`: focusin でカードを **snap 位置へ即時**（`behavior:'instant'`）に入れる。⛔ `outline:none` / Tab 順除外は不採用 | Home 1440/900/720/390・Browse・Detail の棚で Tab / Shift+Tab とも不可視 focus 0。`shell_interaction_check` の WARN 2 → **0** |
+| C. Garage Owner Detail 境界 | **>=1025 W / <=1024 M へ統一**（1025 で主列 610 / rail 365 / 横 overflow 0 / 内側 overflow 0 / Context Bar・owner controls の hit-test 正常を実測） | 1024 以下・1051 以上は pixel 差 0。1025〜1050 だけ 1 列 → 2 カラム |
+| D. `css/sot/SoT_app-shell.css` / `SoT_footer.css` | 42 Mobile 面で**実利用 0**（runtime でマッチする規則は `:root` の変数 2 つだけ、消費元なし。`site-footer` を持つ面 0）→ **削除**（archive しない） | 42 面 ＋ launcher で pixel 差 0。参照 0・404 0 |
+| E. Overlay 契約 | `SoT_app-shell.js` §0 `MyRIG.overlay.create()` に **1 本化**。4 消費側は面固有の中身だけ | Home / Detail / Library / Search / Feed / Garage Detail の 7 条件で closed inert・open focus・backdrop hit・Tab 循環・Escape → 復帰・scroll lock 解除・**排他** PASS |
+| F. 法務「広告について」 | 遷移先・本文とも**存在しない**（`LEGAL` は privacy / terms / tokushoho のみ、support-legal 面にも節なし）→ **「法務コンテンツ制作待ち」の非 blocker PENDING** へ分類。⛔ 架空ページ / `#` リンクを作らない | — |
+| G. Final Gate | `_state/web_fundamentals_final_check.py` 新設（横断契約だけ・20 幅） | **2,050 PASS / 0 FAIL**。故障 **11 種**すべて単独検知 |
+| 既存 19 本 ＋ `detail_m_transform_check` | **0 FAIL**（filter_transform 3,328 / web_meaning 1,290 / garage_list 749 / detail_m 3,152 …） | — |
+| VISUAL LOCK | Home / Feed / Library / Search / Browse / Garage Top / Public Garage / Detail 3 面 / Garage Owner Detail 2 面 × W 幅で **揺れで説明できない画素 0** | — |
+
+🔴 **踏んだ罠（`_decisions` に原本）**: `behavior:'auto'` は CSS の `scroll-behavior:smooth` に従ってアニメーションする／
+scroll-snap のレールは「はみ出た分だけ」動かすと snap に引き戻される／`1fr` は `minmax(auto,1fr)` なので
+min-content が下限になり狭幅で document を押し広げる／grid item に `grid-column:2` があると template を 1 列にしても
+implicit column が残る。
+
 ## 7. WM7（Viewport Continuum / Garage M）— 恒久検査
 
 `_state/web_meaning_check.py`。既存 13 本は W と PC Narrow Fallback しか assert しておらず、
@@ -397,12 +421,11 @@ v1.1: 550 PASS / 0 FAIL（10 面 × 9 幅）。`--selftest` は 5 種を**同時
 
 ## 8. 残り（別 batch）
 
+v1.10 で Web Fundamentals Phase 2 の残件は閉じた。**基盤修正レーンは終了**し、通常のモック制作・デザイン探索レーンへ戻す。
+
 | 領域 | 状態 |
 |---|---|
-| **Header の ≤538 overflow（R-09）**（**次**） | 未着手 |
-| **Garage Owner Detail の変身境界**（v1.7 で顕在化） | 🟡 **別裁定**。`.dt-grid` / `.dt-rail` は Public Detail と共有だが、Garage Owner Detail は 092 で CLOSE 済みのため**今回は現状保存**した（旧 `<=1050` stack / `961` の rail 規則を `SoT_detail-m.css` で `:not([data-dt-transform])` に隔離）。結果としてこの 2 面だけ 1025〜1050 の混在帯が残る。`SoT_garage-detail.css` の Context Bar → Global Hamburger は既に 1024 なので、揃える余地はある。⛔ 裁定なしに動かさない |
-| **Home 棚の clip 外カードへの focus（Phase 1 F-4）** | WARN のまま（`shell_interaction_check` が WARN として出す）。裁定待ち |
-| **Overlay / temporary UI 契約の実装が3本ある**（`SoT_app-shell.js` / `SoT_filter-sidebar.js` / `SoT_feed-rails.js`） | v1.6 で記録。契約は §1 が1つだけ持つが実装は3か所。共通ヘルパへの抽出は別 batch |
-| **法務項目「広告について」** | PENDING。Feed だけが page-local で持っていたが Shared Source の `LEGAL` に無いので採用しなかった。サイト全体で要るなら `LEGAL` へ足す（＝全面に出る）。⛔ 面だけで持ち直さない |
+| **法務項目「広告について」** | 🟡 **非 blocker PENDING（法務コンテンツ制作待ち）**。遷移先・本文が存在しない。サイト全体で要ると決まり、本文ができたら `SoT_footer.js` の `LEGAL` へ足す（＝全面に出る）。⛔ 面だけで持ち直さない。⛔ 架空ページ / `#` リンクを作らない |
+| Feed カード自体の再デザイン | DESIGN レーン。Web Fundamentals の blocker ではない |
 
 ⛔ 本書の Garage 行の**見た目**を、これらの実装のついでに再設計しない（Recovery Batch 1 は挙動の是正であって見た目の再設計ではない）。
