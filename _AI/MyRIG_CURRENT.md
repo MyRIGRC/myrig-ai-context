@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260914-099
+revision: MYRIG-20260914-100
 updated: 2026-09-14 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -14,22 +14,79 @@ updated: 2026-09-14 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-14 / revision 099（**🟢 Detail M Transform Batch 完了・R-06 CLOSE**:
-Public Detail 3 面（RIG / PARTS / LOG）の Aside を M で解体し、責務ごとの受け皿へ変身。
-Builder＋Actions は compact deck へ**同一 DOM のまま移動**（clone しない）、Main / Identity / RELATED に
-同責務がある widget は merge（M では出さない・W へ戻せば完全復元）、外部リンク・広告・ビルダーの他RIG は
-Main 後方 / RELATED へ adapt。**Detail の変身境界を Global Shell と同じ 1024/1025 の1本へ統一**し、
-旧 `350px/961`・`<=960`・`<=1050` を撤去（R-06 の 1025〜1050 混在帯が消えた）。
-Gate `detail_m_transform_check` 新設 **2,808 PASS / 0 FAIL**、故障 **13 種**すべて単独検知。モック `8bafbcb`（push 待ち）。
-既存 19 本 **0 FAIL**。VISUAL LOCK は Detail 5 面の W 各幅で pixel 差 0。
-🔴 **Garage Owner Detail 2 面は現状保存**（092 CLOSE 済みのため対象外。旧規則を `:not([data-dt-transform])` へ隔離。
-全 13 幅で pixel 差 0 を実測）。この 2 面だけ 1025〜1050 の混在帯が残る＝**別裁定**。
-🔴 **未了: mock / canon とも local commit のみで push できていない**（Cowork の実行シェルから GitHub 認証できない。
-`myrig-mockup` は private のため fetch も不可）。**Vercel 再デプロイも未実施**。
-🔴 **未了: Mac 実機 Chrome（実フォント・DPR2）での acceptance は未実施**。今回の全数値は
-**デスクトップ Cowork の Linux VM 上の Chromium**（cloud Chromium と同クラス）での実測。
-098 の Feed M は Mac 実機 acceptance 完了済み（イタヤ報告: feed_m 525/0・selftest 18 種検知・既存 19 本 0 FAIL）。
-**次は Header ≤538 overflow（R-09）**。MyRIG 全体の viewport continuity はまだ CLOSE しない）**
+**最終更新: 2026-09-14 / revision 100（**🟢 Detail M / LOG Builder deck 廃止**:
+099（`8bafbcb`・push 済み・Vercel READY）の **Mac 実機 acceptance で LOG M の情報優先順位を不採用と裁定**。
+LOG の M で Builder compact deck が LOG タイトルと本文の間に入り、読む流れを断っていた。
+→ **LOG M = Identity → Main → RELATED → Footer**。Builder identity は Identity の author row へ merge
+（author row を `<a>` 化し、行き先は W の Builder「ガレージを見る」と同一）、
+stats と大型 actions は M で**明示 drop**（`data-m-drop`）。
+共有 JS は **deck 対象の widget が無い面では compact deck 自体を作らない**（面名で分岐しない）。
+⛔ RIG / PARTS の deck 契約・W の右レーン Builder カード・LOG 本文 `<dt-actions>` は不変。
+Gate 更新して **3,020 PASS / 0 FAIL**、故障 **15 種**すべて単独検知。既存 19 本 **0 FAIL**。
+VISUAL LOCK は Detail 5 面の W 各幅で pixel 差 0（変化は LOG の M だけ）。
+モック `06b582c`（**push 待ち**）。🔴 **R-06 は再 OPEN しない**。
+🔴 **未了: 今回分の Mac 実機 acceptance と Vercel 再デプロイ**（push 後）。
+**次は Header ≤538 overflow（R-09）**）**
+
+> ## 🟢 100: Detail M / LOG の Builder compact deck 廃止（2026-09-14 / Mac 実機 acceptance の是正 / Cowork 実装）
+>
+> モック: `myrig-mockup` **`06b582c`**（**push 待ち**）。099 の `8bafbcb` は **push 済み・Vercel READY**。
+> 正典: この 100。裁定原本: `_decisions/2026-09-14_detail-m-log-builder-v1.md`。Matrix **v1.8**。
+> 開始時 canon: GitHub main `14df2b2` / revision.txt・CURRENT 冒頭とも `MYRIG-20260914-099` で一致確認済み。
+>
+> ### きっかけ（Gate が緑でも設計が正しいとは限らない）
+> 099 は Gate 上は完全だった（`detail_m_transform_check` 2,808 PASS / 0 FAIL・故障 13 種検知・既存 19 本 0 FAIL・
+> VISUAL LOCK 0）。そのうえで **Mac 実機の目視**で、LOG Detail の M（1024px）において
+> **Builder の compact deck が LOG タイトルと本文の間に入り、読む流れを強く遮断**していた。
+> 🔴 **「契約どおり動く」ことと「読める」ことは別。** 情報の優先順位は assert では判定できない。
+> ⛔ Gate が緑だから設計が正しい、と読まない。⛔ 実機所見を「Gate が通っているから」で退けない。
+>
+> ### 裁定
+> | | 旧（099 / Matrix v1.7）| 新（100 / Matrix v1.8）|
+> |---|---|---|
+> | LOG M の骨格 | Identity → **Builder compact deck** → Main → RELATED → Footer | **Identity → Main → RELATED → Footer** |
+>
+> **なぜ LOG だけか**: LOG の Identity は avatar / 投稿者名 / handle / 対象RIG を持ち、**本文前に人物同定が済んでいる**。
+> RIG / PARTS の Identity は車両 / 製品の同定であって人物ではないので deck が要る。⛔ RIG / PARTS の契約は変えない。
+>
+> | 責務 | LOG M での扱い |
+> |---|---|
+> | Builder identity（avatar / name） | **Identity の author row へ merge**（`data-dt-section="builder-identity"`） |
+> | Public Garage 導線 | 実体確認の結果 author row は `<div>` でリンクではなかったので `<a>` 化。⛔ 新しい大型 UI は作らない。**行き先は W の Builder「ガレージを見る」と同一値** |
+> | 公開RIG / パーツ / LOG の stats | **M で明示 drop**（`data-m-drop="stats,actions"`） |
+> | 大型 Follow / ガレージを見る | **M で明示 drop**（同上） |
+> | W（>=1025）の右レーン Builder カード | **現状維持**（VISUAL LOCK を動かさない） |
+> | LOG 本文 `<dt-actions>` / linked-rig / entity-feed / AD | **現行 Detail M 裁定を維持** |
+>
+> ### 実装（宣言の変更だけ。共有 JS に面名分岐を入れない）
+> - `data-m="deck"` → `data-m="merge:builder-identity"` ＋ `data-m-drop="stats,actions"`。
+> - 共有 JS は **deck 対象の widget が 1 つも無い面では compact deck 自体を作らない**（`needs('deck')`）。
+>   ⛔ 「カードを `display:none` にするだけ」にしない。⛔ 使わない受け皿を DOM に置かない（099 の罠と同じ原則）。
+> - `a.dt-identity__author{color:inherit;text-decoration:none}` ＋ hover で名前だけ下線 ＋ `:focus-visible` の outline。
+>   **既定状態の見た目は不変**（`.dt-identity__author` は LOG Detail だけが使うクラス＝他面への波及なし）。
+> - `data-m-drop` は「黙って消えたのか裁定して落としたのか」を実体から区別するための宣言。Gate が両方見る。
+>
+> ### 検証（cloud Chromium 相当＝デスクトップ Cowork の Linux VM）
+> `detail_m_transform_check` **3,020 PASS / 0 FAIL**（DM0 312 / DM1 350 / DM2 840 / DM3 396 / DM4 108 /
+> DM5 72 / DM6 678 / DM7 30 / DM8 24 / DM9 60 / DM10 150）。
+> 故障 **15 種**すべて単独検知（`log-builder-deck-reinserted` / `log-author-link-removed` を追加）。
+>
+> 既存 19 本 **0 FAIL**: detail_contract 51/0/0・entity_actions 36/0・footer_single_source 4/0・image_integrity 63/0・
+> launcher 177/0・hit_test 367/0・shell_interaction 418/0・web_meaning 1290/0・garage_check 513/0・garage_top 291/0・
+> garage_list 749/0・garage_integrity 610/0・mobile_garage_list 804/0・mobile_garage_detail 134/0・mobile_detail 59/0・
+> mobile_feed 63/0・feed_w_gap 108/0・feed_m_transform 525/0・filter_transform 3,328/0。
+>
+> VISUAL LOCK: LOG 1440 / 1280 / 1051、RIG 1440 / 1051、PARTS 1440、Garage Owner Detail 1440 / 1040 / 1024 で
+> **揺れで説明できない画素 0**。変化は **LOG の M だけ**。
+> resize 1024⇄1025 × 3 往復で DOM 完全復元・受け皿の増殖 0・LOG に deck が湧かない。
+>
+> ### 🔴 未了
+> - **push**: mock `06b582c` / canon（この 100）とも **local commit のみ**。Cowork の実行シェルから GitHub 認証不可。
+> - **Vercel**: push 後に READY 確認が要る。
+> - **今回分の Mac 実機 acceptance**: 未実施。
+>
+> ### 次
+> **Header ≤538 overflow（R-09）**。⛔ R-06 は再 OPEN しない。⛔ viewport continuity はまだ CLOSE しない。
 
 > ## 🟢 099: Web Fundamentals Detail M Transform Batch（R-06 CLOSE）（2026-09-14 / Cowork 実装）
 >
@@ -43,7 +100,7 @@ Gate `detail_m_transform_check` 新設 **2,808 PASS / 0 FAIL**、故障 **13 種
 >
 > | | RIG / PARTS | LOG |
 > |---|---|---|
-> | 骨格 | Identity → Gallery → **Builder＋Actions の compact deck** → Main → RELATED → Footer | Identity → **Builder の compact deck** → Main → RELATED → Footer |
+> | 骨格 | Identity → Gallery → **Builder＋Actions の compact deck** → Main → RELATED → Footer | 🔴 **失効（100 で是正）**: Identity → **Builder の compact deck** → Main → RELATED → Footer。現行は **Identity → Main → RELATED → Footer**（Mac 実機 acceptance の裁定。理由は 100 と `_decisions/2026-09-14_detail-m-log-builder-v1.md`） |
 > | merge（M で出さない・W へ戻すと復元） | base-model→ベースモデル / entity-feed→LOG / used-parts→使用パーツ（RIG）、parts-master→製品情報 / used-by-rigs→このパーツを使っているRIG（PARTS） | linked-rig→Identity の RIG chip / entity-feed→RELATED「このRIGの他のLOG」 |
 > | adapt | external-links・AD → Main 後方／builder-rigs・builder-parts・小AD → RELATED／**PARTS の entity-feed は「登録情報」の直後**（登録/装着/取り外しの履歴であって LOG ではない） | rail AD → Main 後方（＝ RELATED の直前） |
 > | Actions | rail Actions を deck へ移動 | **本文 `<dt-actions>` のみ。Rail Actions を新設しない** |
@@ -109,12 +166,10 @@ Gate `detail_m_transform_check` 新設 **2,808 PASS / 0 FAIL**、故障 **13 種
 > Header ≤538 overflow（R-09・次）／Home 棚 clip 外 focus（F-4）／法務項目「広告について」／
 > Overlay 契約の実装 3 本の共通化／**Garage Owner Detail の変身境界**（別裁定）。
 >
-> ### 🔴 未了（この revision では達成していない）
-> - **push**: mock / canon とも **local commit のみ**。Cowork の実行シェルから GitHub へ認証できない
->   （canon は匿名 fetch 可・push 不可。`myrig-mockup` は private で fetch も不可）。**イタヤの手元で push が要る。**
-> - **Vercel**: push していないので**再デプロイされていない**。READY 確認は push 後。
-> - **Mac 実機 Chrome（実フォント・DPR2）での acceptance**: 未実施。
->   今回の全数値はデスクトップ Cowork の **Linux VM 上の Chromium**（cloud Chromium と同クラス）での実測。
+> ### 🔴 未了（この revision では達成していない）→ **100 で解消**
+> - **push**: 🔴 **100 で補正**: mock `8bafbcb` / canon `14df2b2` とも **push 済み**（イタヤの手元で実行）。Vercel READY。
+> - **Mac 実機 Chrome（実フォント・DPR2）での acceptance**: 🔴 **100 で補正**: 実施済み。
+>   **その結果 LOG M の Builder deck が不採用と裁定された**（100 を参照）。数値自体は旧契約の PASS として扱う。
 >
 > ### 次
 > **Header ≤538 overflow（R-09）**。⛔ MyRIG 全体の viewport continuity はまだ CLOSE しない。
