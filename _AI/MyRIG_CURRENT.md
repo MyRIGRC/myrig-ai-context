@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260913-098
-updated: 2026-09-13 22:14 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260914-099
+updated: 2026-09-14 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,11 +14,114 @@ updated: 2026-09-13 22:14 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-13 / revision 098（**🟢 Feed M Transform Batch 完了**: Feed の左右 Rail を M で受け皿へ変身（LOG投稿→Header 投稿導線／LOG種別→`.feed-type-chips` へ DOM 移動／注目RIG・おすすめユーザー→「発見」Drawer／広告→Feed 内広告／法務→Global Footer）。**Feed の Footer PENDING を裁定 B で決着**し、法務導線を `SoT_footer.js` の `LEGAL` 1本＋`<site-legal>` へ Single Source 化。Gate `feed_m_transform_check` 新設 525 PASS / 0 FAIL、故障 18 種検知。モック `ff8855b`（push 待ち。`origin/main` は `d071dbb`）。097 `039ee89` / mock `d071dbb` は **push 済み**。**次は Detail M**。MyRIG 全体の viewport continuity はまだ CLOSE しない）**
+**最終更新: 2026-09-14 / revision 099（**🟢 Detail M Transform Batch 完了・R-06 CLOSE**:
+Public Detail 3 面（RIG / PARTS / LOG）の Aside を M で解体し、責務ごとの受け皿へ変身。
+Builder＋Actions は compact deck へ**同一 DOM のまま移動**（clone しない）、Main / Identity / RELATED に
+同責務がある widget は merge（M では出さない・W へ戻せば完全復元）、外部リンク・広告・ビルダーの他RIG は
+Main 後方 / RELATED へ adapt。**Detail の変身境界を Global Shell と同じ 1024/1025 の1本へ統一**し、
+旧 `350px/961`・`<=960`・`<=1050` を撤去（R-06 の 1025〜1050 混在帯が消えた）。
+Gate `detail_m_transform_check` 新設 **2,808 PASS / 0 FAIL**、故障 **13 種**すべて単独検知。モック `8bafbcb`（push 待ち）。
+既存 19 本 **0 FAIL**。VISUAL LOCK は Detail 5 面の W 各幅で pixel 差 0。
+🔴 **Garage Owner Detail 2 面は現状保存**（092 CLOSE 済みのため対象外。旧規則を `:not([data-dt-transform])` へ隔離。
+全 13 幅で pixel 差 0 を実測）。この 2 面だけ 1025〜1050 の混在帯が残る＝**別裁定**。
+🔴 **未了: mock / canon とも local commit のみで push できていない**（Cowork の実行シェルから GitHub 認証できない。
+`myrig-mockup` は private のため fetch も不可）。**Vercel 再デプロイも未実施**。
+🔴 **未了: Mac 実機 Chrome（実フォント・DPR2）での acceptance は未実施**。今回の全数値は
+**デスクトップ Cowork の Linux VM 上の Chromium**（cloud Chromium と同クラス）での実測。
+098 の Feed M は Mac 実機 acceptance 完了済み（イタヤ報告: feed_m 525/0・selftest 18 種検知・既存 19 本 0 FAIL）。
+**次は Header ≤538 overflow（R-09）**。MyRIG 全体の viewport continuity はまだ CLOSE しない）**
+
+> ## 🟢 099: Web Fundamentals Detail M Transform Batch（R-06 CLOSE）（2026-09-14 / Cowork 実装）
+>
+> モック: `myrig-mockup` **`8bafbcb`**（**local commit のみ・push 未了**）。開始時 HEAD / `origin/main`（ローカル ref）とも `ff8855b`。
+> 正典: この 099。裁定原本: `_decisions/2026-09-14_detail-m-transform-v1.md`。Matrix **v1.7**。
+> 開始時 canon: GitHub main `ced4be6` / revision.txt・CURRENT 冒頭とも `MYRIG-20260913-098` で一致確認済み。
+>
+> ### 何をしたか
+> **Public Detail 3 面（`myrig-rig-detail-v15` / `myrig-parts-detail-v1-open` / `myrig-log-detail-v1`）** の
+> Aside Rail を M（`<=1024`）で解体し、責務ごとに受け皿を変えた。⛔「Gallery → Aside 全部 → Main」は不採用。
+>
+> | | RIG / PARTS | LOG |
+> |---|---|---|
+> | 骨格 | Identity → Gallery → **Builder＋Actions の compact deck** → Main → RELATED → Footer | Identity → **Builder の compact deck** → Main → RELATED → Footer |
+> | merge（M で出さない・W へ戻すと復元） | base-model→ベースモデル / entity-feed→LOG / used-parts→使用パーツ（RIG）、parts-master→製品情報 / used-by-rigs→このパーツを使っているRIG（PARTS） | linked-rig→Identity の RIG chip / entity-feed→RELATED「このRIGの他のLOG」 |
+> | adapt | external-links・AD → Main 後方／builder-rigs・builder-parts・小AD → RELATED／**PARTS の entity-feed は「登録情報」の直後**（登録/装着/取り外しの履歴であって LOG ではない） | rail AD → Main 後方（＝ RELATED の直前） |
+> | Actions | rail Actions を deck へ移動 | **本文 `<dt-actions>` のみ。Rail Actions を新設しない** |
+>
+> - **clone しない。** 既存 DOM を移動するだけなので `SoT_entity-actions.js` の listener / `__eaKey` /
+>   pressed / count / `aria-pressed` / LoginRequired / 楽観更新 / rollback / toast / share がそのまま移る（二重 state が作れない）。
+> - M で空になった Aside は `hidden` + `inert` + `aria-hidden`。layout・hit-test・Tab 順から消える。
+> - **W では受け皿を DOM から外す**（`display:none` では隣接セレクタが切れて W の見た目が変わる。§ 罠を参照）。
+> - **明示 grid-row を捨てて DOM 順の auto-placement** にしたので、Gallery を持たない LOG に空 row / 空 gap が出ない。
+>
+> ### R-06（1025〜1050 の混在帯）を閉じた
+> **>=1025 は Detail W / <=1024 は Detail M。** Global Shell（`<=1024` で hamburger）と 1 本に揃えた。
+> `SoT_detail.css` / `SoT_detail-rail.css` から旧 `350px/961`・`<=960`・`<=1050` を撤去。
+> 1025 でも 2 カラムが成立することを実測（主列 610px / rail 365px / 横 overflow 0 / 内側 overflow 0）したので、
+> **帯ごとの rail 幅調整は入れていない**（入れると 1051〜1279 の VISUAL LOCK が動く）。
+> ⛔ Shell の breakpoint を 1050 へ広げない。⛔ 961 / 960 / 1050 を書き戻さない。
+>
+> ### 🔴 Garage Owner Detail 2 面は現状保存（別裁定）
+> `.dt-grid` / `.dt-rail` は Public Detail 3 面と Garage Owner Detail 2 面の**計 5 面**が共有している。
+> Garage Owner Detail は **092 で CLOSE 済み**なので今回は触らず、旧 `<=1050` stack / `961` の rail 規則を
+> `SoT_detail-m.css` の `:not([data-dt-transform])` へ**隔離して持ち越した**。全 13 幅で pixel 差 0 を実測。
+> → この 2 面だけ 1025〜1050 の混在帯が残る。揃えるかは **別裁定**（Matrix §8）。
+>
+> ### 追加・変更したファイル
+> | ファイル | 変更 |
+> |---|---|
+> | `pc/assets/css/SoT_detail-m.css` | **新設**。`--dt-mode` の宣言（JS に px を持たせないための唯一の入口）・M の 1 列・compact deck・adapt 受け皿・非対象面の現状保存 |
+> | `pc/assets/js/SoT_detail-m.js` | **新設**。責務の移動と復元。`--dt-mode` を読むだけで px を持たない。listener は `resize` 1 本 |
+> | `pc/assets/css/SoT_detail.css` / `SoT_detail-rail.css` | 旧帯規則を撤去し、W の下限を 1051 → 1025 へ（rail 幅 365px は据え置き） |
+> | Detail 3 面 | `.dt-grid` に `data-dt-transform`、rail widget に `data-m="deck\|merge:<key>\|adapt-main\|adapt-after:<key>\|adapt-related"`、merge 先の節に `data-dt-section` を**宣言するだけ**。⛔ page-local の JS / CSS は 1 行も足していない |
+> | Garage Owner Detail 2 面 | `SoT_detail-m.css` の `<link>` のみ追加（`data-dt-transform` は付けない＝変身しない） |
+> | `_state/detail_m_transform_check.py` | **新設** Gate |
+>
+> ### 検証（cloud Chromium 相当＝デスクトップ Cowork の Linux VM）
+> `detail_m_transform_check` **2,808 PASS / 0 FAIL**（3 面 × fixture 12 × 11 幅 ＋ 1024⇄1025 往復 3 回 ＋ 700→1300 スイープ）。
+> 故障 **13 種**すべて単独検知（breakpoint を 1050 へ戻す / Builder clone / Actions clone / LOG へ Rail Actions 追加 /
+> 空 Aside を focusable のまま / W 復元失敗 / **W で受け皿を DOM に残す** / M で Aside 全体 stack /
+> PARTS entity-feed を LOG 扱い / LOG linked-rig 二重 / merge 先欠落 / deck を Main の後ろ / adapt 受け皿ごと drop）。
+>
+> 既存 19 本 **0 FAIL**: detail_contract 51/0/0・entity_actions 36/0・footer_single_source 4/0・image_integrity 63/0・
+> launcher 177/0・**hit_test 367/0**・shell_interaction 418/0・web_meaning 1290/0・garage_check 513/0・garage_top 291/0・
+> garage_list 749/0・garage_integrity 610/0・mobile_garage_list 804/0・mobile_garage_detail 134/0・mobile_detail 59/0・
+> mobile_feed 63/0・feed_w_gap 108/0・feed_m_transform 525/0・filter_transform 3,328/0。
+> `hit_test` は 373 → **367 PASS**。差の 6 は 3 面 × 900/720 の `.dt-rail` 分類が M で skip になったぶんで、
+> 責務の hit-test は新 Gate の DM7 が compact deck 側で見る（**空振りではない**）。
+>
+> VISUAL LOCK: Public Detail 3 面の 1440 / 1280 / 1279 / 1051 と Garage Owner Detail 2 面の
+> 1440 / 1280 / 1100 / 1051 / 1040 / 1025 / 1024 / 961 / 900 / 834 / 720 / 640 / 540 で
+> **揺れで説明できない画素 0**。意図した変化は **1025〜1050 の Public Detail 3 面だけ**。
+>
+> ### 🔴 この batch で踏んだ罠（裁定原本 §4 に全文）
+> 1. **M の受け皿を W にも置いたままにすると W が壊れる。** `display:none` では隣接セレクタは切れたまま。
+>    `.dt-identity + .dt-main`（LOG の行詰め）と `.section--flat + .section--flat`（PARTS の節間 44px）が失効し、
+>    PARTS 1,024,554px / LOG 193,627px の pixel 差が出た。**W では DOM から外す。**
+> 2. **共有 CSS の @media を一律に広げると、共有している別の面が動く。** `.dt-grid` を持つのは 5 面。
+>    Garage Owner Detail が 1024 / 1040 / 1051〜1100 / 720 の 4 か所で動いた。
+>    広げるときは `[data-dt-transform]` のように**対象を名指しして**広げる。
+> 3. 検査側: fixture で Aside の中身が変わる面があるので **W の基準は fixture ごとに取る**。
+>    縮約走査の幅リストを昇順にしないと単調性 assert が常に FAIL する。
+>    pixel proof は **native `<select>` の描画揺れ**を拾う（444px の偽陽性を実測・分離）。
+>
+> ### 触っていない（PENDING）
+> Header ≤538 overflow（R-09・次）／Home 棚 clip 外 focus（F-4）／法務項目「広告について」／
+> Overlay 契約の実装 3 本の共通化／**Garage Owner Detail の変身境界**（別裁定）。
+>
+> ### 🔴 未了（この revision では達成していない）
+> - **push**: mock / canon とも **local commit のみ**。Cowork の実行シェルから GitHub へ認証できない
+>   （canon は匿名 fetch 可・push 不可。`myrig-mockup` は private で fetch も不可）。**イタヤの手元で push が要る。**
+> - **Vercel**: push していないので**再デプロイされていない**。READY 確認は push 後。
+> - **Mac 実機 Chrome（実フォント・DPR2）での acceptance**: 未実施。
+>   今回の全数値はデスクトップ Cowork の **Linux VM 上の Chromium**（cloud Chromium と同クラス）での実測。
+>
+> ### 次
+> **Header ≤538 overflow（R-09）**。⛔ MyRIG 全体の viewport continuity はまだ CLOSE しない。
 
 > ## 🟢 098: Web Fundamentals Feed M Transform Batch ＋ Footer PENDING 決着（2026-09-13 / Cowork 実装）
 >
-> モック: `myrig-mockup` **`ff8855b`**（push 待ち。`origin/main` は `d071dbb`）。正典: この 098。
+> モック: `myrig-mockup` **`ff8855b`**。🔴 **099 で補正**: 本文の「push 待ち」は失効（`ff8855b` は push 済みで Vercel READY、Mac 実機 acceptance も完了済み＝ feed_m 525/0・selftest 18 種検知・既存 19 本 0 FAIL）。正典: この 098。
 > 開始時: GitHub main は canon `039ee89`（097）／mock `d071dbb` で一致確認済み（両 repo tree clean）。
 > 裁定原本: `_decisions/2026-09-13_feed-m-transform-and-footer-v1.md`。Matrix v1.6。
 >
@@ -97,7 +200,8 @@ updated: 2026-09-13 22:14 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 >
 > ### 次
 > **Detail M**（Aside Rail: Detail — Gallery → Builder＋Actions の compact deck → Main、残りは Main の該当節へ merge。R-06 の 1025〜1050 混在帯と Matrix §3 の旧値 350px/961 の訂正も同時に）→ Header ≤538。
-> ⛔ MyRIG 全体の viewport continuity はまだ CLOSE しない。Mac 実機での `feed_m_transform_check`（＋ selftest）と 19 本の再走は未実施。
+> ⛔ MyRIG 全体の viewport continuity はまだ CLOSE しない。
+> 🔴 **099 で補正**: 「Mac 実機での `feed_m_transform_check`（＋ selftest）と 19 本の再走は未実施」は**失効**。実施済み。
 
 > ## 🟢 097: Web Fundamentals Filter Transform Batch — Garage filter M ＋ Library filter R-05（2026-09-13 / Cowork 実装）— **push 済み（098 で補正）**
 >
@@ -233,7 +337,7 @@ updated: 2026-09-13 22:14 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > |---|---|
 > | Garage Context Rail | Batch 1 で修正済み（W / M / PNF static） |
 > | Global Shell M | **本 batch で成立**（共通 Drawer・global nav・focus 契約） |
-> | MyRIG 全体の viewport continuity | **まだ CLOSE しない**。Library 721〜980（R-05）・Detail M（R-06）・Feed（R-07）・Garage filter M が残る |
+> | MyRIG 全体の viewport continuity | **まだ CLOSE しない**。Library 721〜980（R-05）・Detail M（R-06）・Feed（R-07）・Garage filter M が残る（🔴 099 で補正: R-05 / R-06 / R-07 / Garage filter M はすべて解消済み。残るのは Header R-09 と Garage Owner Detail の境界＝別裁定） |
 > | Mac 実機 | 16 本（14 ＋ hit_test ＋ shell_interaction）の再走が未実施 |
 >
 > ### 次
