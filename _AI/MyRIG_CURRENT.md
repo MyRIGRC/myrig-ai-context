@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260914-100
+revision: MYRIG-20260914-101
 updated: 2026-09-14 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -14,21 +14,91 @@ updated: 2026-09-14 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-14 / revision 100（**🟢 Detail M / LOG Builder deck 廃止**:
-099（`8bafbcb`・push 済み・Vercel READY）の **Mac 実機 acceptance で LOG M の情報優先順位を不採用と裁定**。
-LOG の M で Builder compact deck が LOG タイトルと本文の間に入り、読む流れを断っていた。
-→ **LOG M = Identity → Main → RELATED → Footer**。Builder identity は Identity の author row へ merge
-（author row を `<a>` 化し、行き先は W の Builder「ガレージを見る」と同一）、
-stats と大型 actions は M で**明示 drop**（`data-m-drop`）。
-共有 JS は **deck 対象の widget が無い面では compact deck 自体を作らない**（面名で分岐しない）。
-⛔ RIG / PARTS の deck 契約・W の右レーン Builder カード・LOG 本文 `<dt-actions>` は不変。
-Gate 更新して **3,020 PASS / 0 FAIL**、故障 **15 種**すべて単独検知。既存 19 本 **0 FAIL**。
+**最終更新: 2026-09-14 / revision 101（**🟢 Detail M / LOG Builder を drop から defer へ是正**:
+100 の「LOG M で Builder full card / stats / 大型 actions を明示 drop」は **Mac 実機確認で過剰と判明・失効**。
+元の意図は「Builder カードを LOG タイトルと本文の間に挟まない」であって「カード自体を M から消す」ではない。
+→ **LOG M = Identity → Main → Builder card → RELATED → Footer**。
+Builder card は M で drop せず、W の右 Rail から **Main 読了後・RELATED 直前へ defer**（`adapt-main`。同一 DOM の移動・clone 禁止）。
+avatar / name / 公開RIG・パーツ・LOG stats / Follow / ガレージを見る を**すべて維持**。
+Identity 上部の author row と Public Garage リンクも維持し、**人物 identity の一部重複は許容**（同定 と 回遊 で責務が違う）。
+受け皿に Aside の variant クラス（`.dt-rail--quiet` 等）を引き継ぐようにした（子孫セレクタが切れて見た目が変わるため）。
+Gate 更新して **3,152 PASS / 0 FAIL**、故障 **17 種**すべて単独検知。既存 19 本 **0 FAIL**。
 VISUAL LOCK は Detail 5 面の W 各幅で pixel 差 0（変化は LOG の M だけ）。
-モック `06b582c`（**push 待ち**）。🔴 **R-06 は再 OPEN しない**。
+モック `f02239a`（**push 待ち**）。100（canon `dcbdecd` / mock `06b582c`）は **push 済み・amend / force push なし**。
+⛔ R-06 は再 OPEN しない。⛔ RIG / PARTS の M と W の右 Rail は不変。
 🔴 **未了: 今回分の Mac 実機 acceptance と Vercel 再デプロイ**（push 後）。
 **次は Header ≤538 overflow（R-09）**）**
 
-> ## 🟢 100: Detail M / LOG の Builder compact deck 廃止（2026-09-14 / Mac 実機 acceptance の是正 / Cowork 実装）
+> ## 🟢 101: Detail M / LOG の Builder card を drop から defer へ（2026-09-14 / 100 の裁定修正 / Cowork 実装）
+>
+> モック: `myrig-mockup` **`f02239a`**（**push 待ち**）。100 の `06b582c` / canon `dcbdecd` は **push 済み**。
+> 正典: この 101。裁定原本: `_decisions/2026-09-14_detail-m-log-builder-v2.md`。Matrix **v1.9**。
+> 開始時 canon: GitHub main `dcbdecd` / revision.txt・CURRENT 冒頭とも `MYRIG-20260914-100` で一致確認済み。
+>
+> ### 何を撤回したか
+> 100 の「**LOG M で full Builder card / stats / 大型 actions を明示 drop**」は **Mac 実機確認で過剰**と判明した。
+> イタヤの元の意図は「Builder カードを LOG タイトルと本文の間に挟まない」であって、
+> 「Builder カード自体を M から消す」ではなかった。
+>
+> 🔴 **「本文の前に置かない」と「消す」は別の裁定である。** 実機所見から契約を書くときは、
+> **遮断の是正**と**責務の削除**を取り違えない。⛔ 位置の問題を drop で解こうとしない。
+>
+> ### 新しい LOG M
+> ```
+> Identity → Main（body / photos / tags / dt-actions / Log facts / comments）→ Builder card → RELATED → Footer
+> ```
+> - Builder card は **M で drop しない**。W の右 Rail から **Main 読了後・RELATED 直前へ defer**（`adapt-main`）。
+>   **同一 DOM のまま移動**し、clone しない。
+> - **avatar / name / 公開RIG・公開パーツ・公開LOG の stats / Follow / ガレージを見る をすべて維持。**
+> - Identity 上部の author row と Public Garage リンクも**維持**。
+>   **人物 identity の一部重複は許容**（上部＝投稿者の同定 / 読了後＝作者への回遊で責務が違う）。
+> - ⛔ 本文の前へ戻さない。⛔ RIG / PARTS の M を変更しない。⛔ W の右 Rail を変更しない。⛔ R-06 を再 OPEN しない。
+>
+> ### 実装（宣言 1 行の差し戻し。共有側に LOG 専用分岐は無い）
+> | | |
+> |---|---|
+> | 100 | `<dt-rail-builder data-m="merge:builder-identity" data-m-drop="stats,actions" …>` |
+> | 101 | `<dt-rail-builder data-m="adapt-main" …>` |
+>
+> `adapt-main` は**既存の adapt / defer 文法**（受け皿は `.dt-main` 末尾＝本文の後・RELATED の前）。
+> LOG 専用の DOM 複製も専用受け皿も作っていない。`data-m-drop` は使う面が無くなったので語彙ごと撤去した
+> （空振りする検査を残さない）。
+>
+> 🔴 **受け皿は Aside の variant クラス（`.dt-rail--quiet` 等）を引き継ぐ**ようにした。
+> `.dt-rail--quiet .rail-section{…}` のような**子孫セレクタは祖先が変わると切れる**ので、引き継がないと
+> 「同一 DOM を移動しただけ」なのに M で Widget の見た目（header の帯・border の濃さ）が変わる。
+> Builder card が M で最も目立つ要素になったことで顕在化した。⛔ 移動先ごとにスタイルを書き直さない。
+>
+> ### 検証（cloud Chromium 相当＝デスクトップ Cowork の Linux VM）
+> `detail_m_transform_check` **3,152 PASS / 0 FAIL**（DM0 312 / DM1 350 / DM2 960 / DM3 396 / DM4 108 /
+> DM5 72 / DM6 678 / DM7 42 / DM8 24 / DM9 60 / DM10 150）。
+> 故障 **17 種**すべて単独検知（`log-builder-dropped` / `log-builder-cloned` を追加。
+> 本文前へ戻す故障は `log-builder-deck-reinserted` が見る）。
+>
+> 既存 19 本 **0 FAIL**: detail_contract 51/0/0・entity_actions 36/0・footer_single_source 4/0・image_integrity 63/0・
+> launcher 177/0・hit_test 367/0・shell_interaction 418/0・web_meaning 1290/0・garage_check 513/0・garage_top 291/0・
+> garage_list 749/0・garage_integrity 610/0・mobile_garage_list 804/0・mobile_garage_detail 134/0・mobile_detail 59/0・
+> mobile_feed 63/0・feed_w_gap 108/0・feed_m_transform 525/0・filter_transform 3,328/0。
+>
+> VISUAL LOCK: LOG 1440 / 1280 / 1051、RIG 1440 / 1051、PARTS 1440 / 1280、
+> Garage Owner Detail 1440 / 1040 / 1024 で **揺れで説明できない画素 0**。変化は **LOG の M だけ**。
+>
+> 実測（LOG 1024）: title 281 → 本文 333（**直後**）／コメント 1157〜1654 → **Builder 1687〜1941** → RELATED 1990。
+> Builder は document 内 1 つ（clone 0）・stats 1・Follow 可視・「ガレージを見る」の href は author row と一致。横 overflow 0。
+> resize 1024⇄1025 × 3 往復で DOM 完全復元・受け皿の増殖 0・deck が湧かない。
+>
+> ### 🔴 未了
+> - **push**: mock `f02239a` / canon（この 101）とも **local commit のみ**。Cowork の実行シェルから GitHub 認証不可。
+> - **Vercel**: push 後に READY 確認が要る。
+> - **今回分の Mac 実機 acceptance**: 未実施。
+>
+> ### 次
+> **Header ≤538 overflow（R-09）**。⛔ R-06 は再 OPEN しない。⛔ viewport continuity はまだ CLOSE しない。
+
+> ## 🟡 100: Detail M / LOG の Builder compact deck 廃止（2026-09-14 / Mac 実機 acceptance の是正 / Cowork 実装）
+> 🔴 **101 で一部失効**: 「full Builder card / stats / 大型 actions を M で明示 drop」は**過剰な裁定**だったので撤回した。
+>    現行は **Main 読了後・RELATED 直前へ defer**（101 と `_decisions/2026-09-14_detail-m-log-builder-v2.md`）。
+>    「本文の前に置かない」「deck を作らない」「clone しない」「author row のリンク化」は**有効**。
 >
 > モック: `myrig-mockup` **`06b582c`**（**push 待ち**）。099 の `8bafbcb` は **push 済み・Vercel READY**。
 > 正典: この 100。裁定原本: `_decisions/2026-09-14_detail-m-log-builder-v1.md`。Matrix **v1.8**。

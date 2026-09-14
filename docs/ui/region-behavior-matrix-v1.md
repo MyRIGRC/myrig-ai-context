@@ -1,4 +1,4 @@
-# Region Behavior Matrix v1.8 — 領域 × モードの変身規約
+# Region Behavior Matrix v1.9 — 領域 × モードの変身規約
 
 **拘束力: L2（現在の確定仕様）。** CORE「正典化判断基準」の
 「2人（2つのAI）が独立に判断して食い違ったとき何か壊れるか」に該当するため正典化した
@@ -13,7 +13,8 @@ L2 なので、**より良い案があれば差分を明示して提案してよ
 - v1.5: 2026-09-13 JST / Filter Transform Batch（Garage filter M 実装・Library filter R-05 を Search filter と Shared Source で統一・Toolbar / Context Rail の filter は狭幅で trigger → temporary panel）
 - v1.6: 2026-09-13 JST / Feed M Transform Batch（Feed M 実装・Feed の Global Footer drop の PENDING を裁定 B で決着・法務導線を Shared Source 化）
 - v1.7: 2026-09-14 JST / Detail M Transform Batch（**Detail M 実装・R-06 CLOSE**。Detail の変身境界を Global Shell と同じ 1024/1025 の1本へ統一。§3 の旧値「350px / 961〜1279」を訂正）
-- v1.8: 2026-09-14 JST / **Mac 実機 acceptance の是正**（LOG M の Builder compact deck を廃止。v1.7 の「LOG: Identity → Builder compact deck → Main」は**失効**。identity 責務は Identity の author row へ merge、stats / 大型 actions は M で明示 drop。R-06 は再 OPEN しない）
+- v1.8: 2026-09-14 JST / **Mac 実機 acceptance の是正**（LOG M の Builder compact deck を廃止。v1.7 の「LOG: Identity → Builder compact deck → Main」は**失効**）
+- v1.9: 2026-09-14 JST / **v1.8 の drop 裁定を撤回**（過剰だった）。**LOG M = Identity → Main → Builder card → RELATED → Footer**。Builder card は M で drop せず、W の右 Rail から**読了後・RELATED 直前へ defer**する。stats / Follow / ガレージを見る はすべて維持。Identity 上部の author row も維持（同定 と 回遊 で責務が違うので重複は許容）。R-06 は再 OPEN しない
 - 参照元: `docs/ui/page-role-matrix-v1.md` 末尾の Breakpoint 注記
 - 経緯の原本: CURRENT 093 → **094**（失効と新契約）／`_decisions/2026-09-12_web-fundamentals-recovery-batch1-v1.md`
 
@@ -25,7 +26,7 @@ L2 なので、**より良い案があれば差分を明示して提案してよ
 | **Global Shell の M（hamburger / 共通 Drawer）** | ✅ **実装済み**（Recovery Batch 2 / `myrig-mockup` `9a45d50`）。v1.1 の「実装済み」は誤記で、v1.2 で未実装へ訂正、v1.3 で実体が追いついた |
 | **Toolbar: Garage filter（1 列帯）／ Context Rail: Library filter** | ✅ **実装済み**（v1.5 / Filter Transform Batch）。Garage 8 面は Toolbar → inline panel、Library 3 面 ＋ Search は「フィルター」ボタン → Drawer を Shared Source（`SoT_filter-sidebar.js`）で共有 |
 | **Aside Rail: Feed の M** | ✅ **実装済み**（v1.6 / Feed M Transform Batch）。左は Header 投稿導線と `.feed-type-chips` へ、右は「発見」Drawer / Feed 内広告 / Global Footer へ。Feed の Footer PENDING も同時に決着（裁定 B） |
-| **Aside Rail: Detail の M** | ✅ **実装済み**（v1.7 / v1.8 で LOG を是正）。Public Detail 3 面（RIG / PARTS / LOG）。**RIG / PARTS** は Builder＋Actions を compact deck へ**同一 DOM のまま移動**、**LOG は deck を作らない**（Identity が人物同定を済ませているため。v1.8）。残りは責務ごとに merge / adapt。**R-06（1025〜1050 の混在帯）も CLOSE 済み**。Garage Owner Detail は対象外（現状保存・§8 に残り） |
+| **Aside Rail: Detail の M** | ✅ **実装済み**（v1.7 / LOG は v1.9 が現行）。Public Detail 3 面（RIG / PARTS / LOG）。**RIG / PARTS** は Builder＋Actions を compact deck へ**同一 DOM のまま移動**、**LOG は deck を作らず Builder card を読了後（Main → Builder → RELATED）へ defer**。残りは責務ごとに merge / adapt。**R-06（1025〜1050 の混在帯）も CLOSE 済み**。Garage Owner Detail は対象外（現状保存・§8 に残り） |
 | その他の領域 | 現状の実装をそのまま記載（新規の変身は宣言していない） |
 
 **根拠の分離**: MyRIG の現状＝正典 ＋ モック実体 `17f4210`（v1.1 時点は `b78a2f4`）／実測＝Mac 実機 Chrome（実フォント）と cloud Chromium／外部標準＝W3C WCAG 2.2
@@ -93,7 +94,7 @@ PC Narrow Fallback** であって、PC 面がそのまま C（専用 Mobile 契�
 | Context Rail: **Search filter ＋ Library filter（一覧 3 面）** | 左固定（sticky sidebar） | 「フィルター」ボタン → Drawer **実装済み**（v1.5 で Search の page-local を共有化し Library 3 面へ適用。R-05 解消）。trigger は一覧本文の直前（Library）／srch-head（Search）。closed は inert・backdrop hidden。trigger に active 条件数の badge、Library は要約テキストも | ボトムシート |
 | Main: 一覧 | `auto-fill minmax(カード最小幅)` | 同左（幅で列数を固定しない） | 1〜2 列 |
 | Main: Detail | 本文 7fr | 1 列 | 1 列 |
-| **Aside Rail: Detail** | 右 3fr（≥1280）／ **fixed rail（1025〜1279。現行 mock は 365px）**。🔴 v1.7: 旧記述「350px（961〜1279）」は**誤り**だった（実体は 1051〜1279 が 365px、961〜1050 は 1 列 stack）。**具体 px は恒久設計判断ではない**（契約は「W は 2 カラムで本文が成立すること」） | **実装済み（v1.7、LOG は v1.8 で是正）**。RIG / PARTS: Identity → Gallery → **Builder＋Actions の compact deck** → Main → RELATED → Footer。**LOG: Identity → Main → RELATED → Footer**（deck を作らない。Gallery も無いので空 row も作らない）。🔴 v1.8 / Mac 実機 acceptance の裁定: **LOG では Builder compact deck を廃止**した。LOG は Identity で avatar / 投稿者名 / handle / 対象RIG を出しており、RIG / PARTS と違って**本文前に人物同定が済んでいる**。そこへ Builder カードを挟むと LOG タイトルと本文の間に大きな面が入り、読む流れを断つ（実機目視）。→ identity 責務は **Identity の author row へ merge**（author row が Public Garage 導線を兼ねる。行き先は W の Builder「ガレージを見る」と同一）、**stats（公開RIG / パーツ / LOG）と大型 actions（フォロー / ガレージを見る）は M で明示 drop**。⛔ 「カードを `display:none` にするだけ」にしない（責務定義として deck 対象から外し、空の deck も DOM に置かない）。⛔ RIG / PARTS の deck 契約は変えない。⛔ W（>=1025）の右レーン Builder カードは現状維持。残りは責務ごとに: **merge**（Main / Identity / RELATED に同責務がある widget は M で表示責務を譲る。RIG: base-model→ベースモデル / entity-feed→LOG / used-parts→使用パーツ、PARTS: parts-master→製品情報 / used-by-rigs→このパーツを使っているRIG、LOG: **builder→Identity の author row**（v1.8）/ linked-rig→Identity の RIG chip / entity-feed→RELATED「このRIGの他のLOG」）、**adapt**（external-links・AD → Main 後方、builder-rigs / builder-parts・小 AD → RELATED、**PARTS の entity-feed は登録/装着/取り外しの履歴なので「登録情報」の直後へ**）。⛔「Gallery → Aside 全体 → Main」は不採用。⛔ **PARTS の entity-feed を LOG 扱いしない**。⛔ **LOG に Rail Actions を新設しない**（本文 `<dt-actions>` が唯一の action 面）。clone せず DOM を移動するので Entity Actions の state / count / aria は `SoT_entity-actions.js` の 1 本のまま。W へ戻したら元の Aside 位置・DOM 順へ完全復元する | 同左 |
+| **Aside Rail: Detail** | 右 3fr（≥1280）／ **fixed rail（1025〜1279。現行 mock は 365px）**。🔴 v1.7: 旧記述「350px（961〜1279）」は**誤り**だった（実体は 1051〜1279 が 365px、961〜1050 は 1 列 stack）。**具体 px は恒久設計判断ではない**（契約は「W は 2 カラムで本文が成立すること」） | **実装済み（v1.7、LOG は v1.9 が現行）**。RIG / PARTS: Identity → Gallery → **Builder＋Actions の compact deck** → Main → RELATED → Footer。**LOG: Identity → Main → Builder card → RELATED → Footer**（deck を作らない。Gallery も無いので空 row も作らない）。🔴 v1.9（v1.8 の drop 裁定を撤回）: **Builder を本文の前に置かない。かといって M で drop もしない。** LOG は Identity で avatar / 投稿者名 / handle / 対象RIG を出しており、RIG / PARTS と違って**本文前に人物同定が済んでいる**。そこへ Builder カードを挟むと LOG タイトルと本文の間に大きな面が入り、読む流れを断つ（実機目視）。一方で **Follow / ガレージ / stats は作者への回遊責務**であり、消してはいけない。→ **W の右 Rail から「Main 読了後・RELATED 直前」へ defer**（`adapt-main`。同一 DOM のまま移動・clone 禁止）。avatar / name / 公開RIG・パーツ・LOG stats / Follow / ガレージを見る を**すべて維持**する。Identity 上部の author row（Public Garage リンクを兼ねる。行き先は Builder の「ガレージを見る」と同一）も**維持**し、**人物 identity の一部重複は許容**する（上部＝投稿者の同定 / 読了後＝作者への回遊で責務が違う）。⛔ 本文の前へ戻さない。⛔ Builder card / stats / actions を drop しない。⛔ clone しない。⛔ RIG / PARTS の deck 契約は変えない。⛔ W（>=1025）の右レーン Builder カードは現状維持。残りは責務ごとに: **merge**（Main / Identity / RELATED に同責務がある widget は M で表示責務を譲る。RIG: base-model→ベースモデル / entity-feed→LOG / used-parts→使用パーツ、PARTS: parts-master→製品情報 / used-by-rigs→このパーツを使っているRIG、LOG: linked-rig→Identity の RIG chip / entity-feed→RELATED「このRIGの他のLOG」）、**adapt / defer**（external-links・AD → Main 後方、builder-rigs / builder-parts・小 AD → RELATED、**PARTS の entity-feed は登録/装着/取り外しの履歴なので「登録情報」の直後へ**、**LOG の builder は Main 読了後（RELATED の直前）へ**）。⛔「Gallery → Aside 全体 → Main」は不採用。⛔ **PARTS の entity-feed を LOG 扱いしない**。⛔ **LOG に Rail Actions を新設しない**（本文 `<dt-actions>` が唯一の action 面）。clone せず DOM を移動するので Entity Actions の state / count / aria は `SoT_entity-actions.js` の 1 本のまま。W へ戻したら元の Aside 位置・DOM 順へ完全復元する | 同左 |
 | **Aside Rail: Feed** | 左右 264px（≥1201）→ 170px（≤1200・compact）。**v1.4: 1121〜1200 で右レールが消えて 1120 以下で再出現する旧規則の競合を撤去**（R-07）。W 内で右レールは消えない。**v1.6: 法務導線は Rail に `<site-legal>`（Shared Source）**。Global Footer 本体は出さない（§3-F） | **実装済み（v1.6）**。**一括でタブ／Drawer へ移さない。** 左: LOG投稿→既存 Header 投稿導線へ merge（Header 側の行き先を Rail と揃える）／LOG種別→既存 `.feed-type-chips`（**Rail の chips を DOM ごと移す**。手書きで複製しない）。右: 注目RIG・おすすめユーザー→**「発見」Drawer**（Rail 自体が変身するので中身は W と同一 DOM）／広告→Feed 内広告（全 timeline パネル）へ merge／法務導線→**Global Footer** へ merge。⛔ おすすめ/新着/フォロー中の3タブへ周辺情報を混ぜない。⛔ 畳んだ Rail の空 grid 列を残さない | 1 列（M の変身先を PC Narrow Fallback まで維持） |
 | **Toolbar: Garage filter** | 右レーン（`.main-2col` の 2 列が立つ幅） | **実装済み（v1.5）**。`.main-2col` が 1 列に落ちる幅（W の 1 列帯を含む）では Toolbar の「絞り込み」から、**一覧本文の直前**に inline 折りたたみ panel を開く。**初期 closed**（hidden＋inert）。active 条件数（badge）と要約を Toolbar 側に出す。panel は DOM ごと Toolbar 直後へ移す（Tab 順）。⛔ 一覧の下へ置かない。⛔ modal / backdrop にしない | 横スクロール＋ボトムシート |
 | Toolbar: その他 | 1 行 | 1 行（横スクロール可） | 横スクロール |
@@ -347,6 +348,29 @@ Gate は 2,808 PASS / 0 FAIL で通っていた。**「契約どおりに動い�
 | VISUAL LOCK | LOG 1440 / 1280 / 1051、RIG 1440 / 1051、PARTS 1440、Garage Owner Detail 1440 / 1040 / 1024 で **揺れで説明できない画素 0**。変化は **LOG の M だけ** |
 
 🔴 **R-06（1024/1025 境界）は再 OPEN しない。** 今回は LOG M の情報優先順位の是正であって、境界の話ではない。
+
+### 6.11 Detail M / LOG Builder の defer（2026-09-14 / v1.8 の drop 裁定を撤回 / cloud Chromium）
+
+**きっかけ**: v1.8（revision 100）を Mac 実機で確認したところ、**drop は過剰**だった。
+イタヤの元の意図は「Builder カードを LOG タイトルと本文の間に挟まない」であって
+「Builder カード自体を M から消す」ではない。
+
+| | |
+|---|---|
+| 裁定 | **LOG M = Identity → Main → Builder card → RELATED → Footer**。M で drop せず、W の右 Rail から**読了後へ defer**（`adapt-main`） |
+| 維持するもの | avatar / name / 公開RIG・パーツ・LOG の stats / Follow / ガレージを見る。Identity 上部の author row と Public Garage リンクも維持 |
+| 重複の扱い | 人物 identity が一部重なるのは**許容**。上部 author row＝**投稿者の同定**、読了後 Builder card＝**作者への回遊（Follow / Garage / stats）**で責務が違う |
+| 実装 | ページの宣言を `merge:builder-identity` ＋ `data-m-drop` → **`adapt-main`** に戻すだけ。⛔ LOG 専用の DOM 複製を作らない。⛔ clone しない |
+| 受け皿の variant | 受け皿（deck / adapt）に Aside の variant クラス（`.dt-rail--quiet` 等）を**引き継ぐ**ようにした。`.dt-rail--quiet .rail-section{…}` のような子孫セレクタは祖先が変わると切れるので、引き継がないと「同一 DOM を移動しただけ」なのに M で見た目が変わる |
+| `detail_m_transform_check`（更新） | **3,152 PASS / 0 FAIL**。「title 直後に Main 本文が始まる」「Builder は Main より後」「Builder は RELATED より前」「stats / Follow / ガレージを見る が存在し hit-test が通る」「Builder は document 内に 1 つだけ（clone 0）」を assert |
+| 故障注入 | **17 種**すべて単独で検知（`log-builder-dropped` / `log-builder-cloned` を追加。本文前へ戻す故障は `log-builder-deck-reinserted` が見る） |
+| 既存 19 本 | **0 FAIL** |
+| VISUAL LOCK | LOG 1440 / 1280 / 1051、RIG 1440 / 1051、PARTS 1440 / 1280、Garage Owner Detail 1440 / 1040 / 1024 で **揺れで説明できない画素 0**。変化は **LOG の M だけ** |
+| 実測（LOG 1024） | title 281 → 本文 333（直後）／コメント 1157〜1654 → **Builder 1687〜1941** → RELATED 1990。横 overflow 0 |
+
+🔴 **教訓（`_decisions` に原本）**: 「本文の前に置かない」と「消す」は別の裁定である。
+実機所見から契約を書くときは、**遮断の是正**と**責務の削除**を取り違えない。
+⛔ 位置の問題を drop で解こうとしない。⛔ R-06（1024/1025 境界）は再 OPEN しない。
 
 ## 7. WM7（Viewport Continuum / Garage M）— 恒久検査
 
