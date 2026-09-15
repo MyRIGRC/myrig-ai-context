@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260915-103
+revision: MYRIG-20260915-104
 updated: 2026-09-15 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -14,18 +14,59 @@ updated: 2026-09-15 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-15 / revision 103（**🟢 D2 / H2-a CLOSE**: カテゴリ色を文字色・線色・操作色から外した。
-NG-1 の色帯を撤去（実際に描画されていたのは `library-v3` の `.door--rig` / `.door--parts` の **2 件だけ**）／
-NG-2 の文字色 13 要素を塗りバッジ or 中立へ／NG-7 の操作色を中立操作色へ／
-077 の entity category binding は **Owner 領域の「種別識別」に限定して維持**（hover / active / focus は中立）／
-`SoT_tokens-v6.css` に **v7 の `--cat-*-on` を新設**（値の flip ではない）。
-新設 Gate `_state/category_role_check.py` **134 PASS / 0 FAIL**・故障注入 6 種すべて検知。既存 21 本すべて 0 FAIL。
-モック `b18f74c`（**push 待ち**）。102 の未了はすべて解消済み（push / Vercel READY / Mac Final Gate 2,050 PASS・selftest 11/11）。
-🔴 **基盤修正レーンは終了。次は通常のモック制作・デザイン探索レーン。**
-🔴 **D3 を含む cross-surface の完全収束はやらない**（イタヤ方針 2026-09-15）。
-   「次のモック制作を妨げるものだけ必要時に是正」＋「全モックが揃った後の横断 Convergence で徹底監査」。
-   Feed カードの再デザインは**再 OPEN しない**。D4〜D8 / D9 / D11 / D13 は改善候補として保留。
-🔴 未了: 本 revision の push（イタヤの `mockup` コマンド）→ Vercel READY 確認。**
+**最終更新: 2026-09-15 / revision 104（**STATE 更新のみ。仕様裁定なし**）**
+
+> 🔴 **104 は「現在地を正しく引き継ぐための STATE 更新」であって、新しい仕様の採用ではない。**
+> `docs/` の ACTIVE 正典は 1 文字も変えていない。Register v3 Concept を ACTIVE 仕様へ昇格させていない。
+
+### 現在地（mock / production）
+
+| | |
+|---|---|
+| mock `origin/main` | **`4423ac7`**（local HEAD と一致・ahead 0・working tree clean） |
+| Vercel production | **READY** `dpl_7ZozFuVuffXLyJ68wdEDZHmpus2h` / 同 SHA / author `MyRIGRC <admin@myrigrc.com>` 正常 |
+| production で触れるもの | `pc/myrig-register-rig-v3-concept.html?compare=A｜B｜C`（直リンク。Launcher 未登録）<br>`pc/assets/js/vnext_resolver-dummy.js` も配信確認済み |
+
+🔴 **103 本文の「モック `b18f74c`（push 待ち）」「未了: 本 revision の push → Vercel READY 確認」は
+現在地としては失効**（`b18f74c` は push 済み）。103 の**裁定内容そのものは有効**で、D2 / H2-a は CLOSE のまま。
+
+### レーン
+
+- **基盤修正レーンは引き続き終了済み。** D3 を含む cross-surface の完全収束はやらない（イタヤ方針 2026-09-15）。
+  「次のモック制作を妨げるものだけ必要時に是正」＋「全モックが揃った後の横断 Convergence で徹底監査」。
+  Feed カードの再デザインは**再 OPEN しない**。D4〜D8 / D9 / D11 / D13 は改善候補として保留。
+- **現在のレーン＝ Register v3 Concept の実機比較・デザイン探索。**
+
+### Register v3 Concept 第一バッチ（完了。⚠️ 採用裁定は未）
+
+- 新規 3 ファイルのみ。**既存ファイルの変更は 0**。
+  `pc/myrig-register-rig-v3-concept.html` / `pc/assets/js/vnext_resolver-dummy.js` / `_state/register_v3_concept_check.py`
+- Concept Gate **95 PASS / 0 FAIL**・故障注入 **8 種すべて検知**
+- **baseline 3 本は未変更で維持**（Gate RV1 が sha256 を毎回照合する）
+  `myrig-register-rig-v2.9.5.html` / `myrig-register-parts-v0.1.10.html` / `myrig-log-composer-modal-v0.3.9.html`
+- **Launcher に v3 Concept を登録していない。既存 `/register/rig` も未切替。**
+
+### 🔴 PENDING
+
+- **PC 入口 A / B / C の採否＝イタヤ実機裁定待ち。**
+- Mobile 入口は PC 裁定後に短い比較モックを行う。
+- `private_note` の保存先は未裁定。⛔ 新 DB 列を作らない。
+- `rig_parts` の `previous` / `planned` の受け皿は未裁定。
+- 公開中 RIG 編集の「確定して反映」保存モデルは未裁定。
+- v2.9.5 の 5 状態ステータスは v3 Concept 未搭載だが、**廃止裁定ではない**（schema v1.6 に根拠列が無いため置かなかっただけ）。
+
+### NEXT
+
+**Register v3 Concept PC A/B/C 実機比較 → 入口方向を裁定 → 短い Mobile 比較 → その後に RIG Editor vNext を詰める。**
+
+> ## 🟢 104: NOW の運用状態を実態へ更新（2026-09-15 / STATE のみ）
+>
+> 103 の NOW は「`b18f74c` push 待ち」で止まっていたが、実際は `b18f74c` / `bbaab40` / `4423ac7` とも push 済み・
+> Vercel READY だった。revision は一致していたので `CURRENT_STALE` ではないが、
+> **次スレッドが「push 待ち」を見て `mockup` を打ちに行く**状態だったため、現在地だけを更新した。
+>
+> ⛔ 本 revision は仕様裁定を含まない。`docs/` は無変更。Register v3 Concept は比較モックのままで、
+> ACTIVE 仕様へ昇格していない。A/B/C の採否も未裁定。
 
 > ## 🟢 103: D2 / H2-a — カテゴリ色を文字色・線色・操作色から外す（2026-09-15 / Cowork 実装）
 >
