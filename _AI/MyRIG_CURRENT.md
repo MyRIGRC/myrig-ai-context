@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260914-102
-updated: 2026-09-14 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260915-103
+updated: 2026-09-15 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,19 +14,90 @@ updated: 2026-09-14 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-14 / revision 102（**🟢 Web Fundamentals Phase 2 / viewport continuity CLOSE**:
-Final Consolidation Batch で残件 A〜G を一括処理。**R-09**（Header narrow: 320〜538 の横 overflow 218→0）／
-**F-4**（棚 focus: focus したカードを snap 位置へ即時に入れる。`shell_interaction` の WARN 2→0）／
-**Garage Owner Detail 境界**（>=1025 W / <=1024 M へ統一。Detail 5 面が Global Shell と 1 本）／
-**`css/sot/SoT_app-shell.css` / `SoT_footer.css` 旧コピー削除**（42 Mobile 面で実利用 0 を実測）／
-**Overlay 契約の 1 本化**（`SoT_app-shell.js` §0 `MyRIG.overlay`。排他も契約へ）／
-**「広告について」= 法務コンテンツ制作待ちの非 blocker PENDING**（遷移先・本文が存在しない）／
-**Final Gate `web_fundamentals_final_check` 新設 2,050 PASS / 0 FAIL・故障 11 種検知**。
-既存 19 本 ＋ detail_m 3,152 すべて 0 FAIL。W VISUAL LOCK 14 面 × 幅で pixel 差 0。42 Mobile 面 pixel 差 0。
-モック `579af22`（**push 待ち**）。101 の stale 記述は本 revision で補正済み（`f02239a` push 済み・Vercel READY・
-Mac acceptance 3,152/0・selftest 17/17）。
-🔴 **基盤修正レーンはここで終了。次は通常のモック制作・デザイン探索レーンへ戻る**（Feed カードの再デザインは DESIGN レーン）。
-🔴 未了: 本 revision の push（イタヤの `mockup` コマンド）→ Vercel READY → Final Gate の Mac 実行）**
+**最終更新: 2026-09-15 / revision 103（**🟢 D2 / H2-a CLOSE**: カテゴリ色を文字色・線色・操作色から外した。
+NG-1 の色帯を撤去（実際に描画されていたのは `library-v3` の `.door--rig` / `.door--parts` の **2 件だけ**）／
+NG-2 の文字色 13 要素を塗りバッジ or 中立へ／NG-7 の操作色を中立操作色へ／
+077 の entity category binding は **Owner 領域の「種別識別」に限定して維持**（hover / active / focus は中立）／
+`SoT_tokens-v6.css` に **v7 の `--cat-*-on` を新設**（値の flip ではない）。
+新設 Gate `_state/category_role_check.py` **134 PASS / 0 FAIL**・故障注入 6 種すべて検知。既存 21 本すべて 0 FAIL。
+モック `b18f74c`（**push 待ち**）。102 の未了はすべて解消済み（push / Vercel READY / Mac Final Gate 2,050 PASS・selftest 11/11）。
+🔴 **基盤修正レーンは終了。次は通常のモック制作・デザイン探索レーン。**
+🔴 **D3 を含む cross-surface の完全収束はやらない**（イタヤ方針 2026-09-15）。
+   「次のモック制作を妨げるものだけ必要時に是正」＋「全モックが揃った後の横断 Convergence で徹底監査」。
+   Feed カードの再デザインは**再 OPEN しない**。D4〜D8 / D9 / D11 / D13 は改善候補として保留。
+🔴 未了: 本 revision の push（イタヤの `mockup` コマンド）→ Vercel READY 確認。**
+
+> ## 🟢 103: D2 / H2-a — カテゴリ色を文字色・線色・操作色から外す（2026-09-15 / Cowork 実装）
+>
+> モック: `myrig-mockup` **`b18f74c`**（**push 待ち**）。開始時 HEAD / `origin/main` とも `579af22`。
+> 正典: この 103。裁定原本: `_decisions/2026-09-15_d2-category-color-role-v1.md`。
+> 開始時 canon: `e0aa3e6` / revision.txt・CURRENT 冒頭とも `MYRIG-20260914-102` で一致確認済み。
+>
+> ### 102 の未了はすべて解消
+> push（canon `e0aa3e6` / mock `579af22` とも ahead 0）・**Vercel production READY**
+> （`dpl_9htzsygjme1Ub3nDvPGF2EgBFKdD` / 同 SHA / author `MyRIGRC <admin@myrigrc.com>` 正常）・
+> **Mac 実機の Final Gate 2,050 PASS / 0 FAIL ＋ selftest 11/11 検知**（イタヤ実行）。
+> 102 本文の「push 待ち / Vercel 未了 / Mac 実機未実施」は失効。
+>
+> ### 🔴 081 の棚卸しは使えなかった（grep は打ち消し・非表示・shadow DOM を区別できない）
+> 着手前に**描画された計算値だけを見る** Gate を新設した。方式は grep ではなく
+> **sentinel トークンを注入して計算値の差分を取る**（color-mix も page-local alias も自動で追える）。
+> 実測（live PC 40面 / light+dark / 1440・同型を畳んで 409 件）:
+> FILL 156 / BORDER 104 / TEXT_ON 88 / **TEXT 29（実体 13 要素）** / SHADOW 20 / **BAND 4（実体 2 要素）** /
+> OUTLINE 0 / CONTROL 0。
+> **NG-1 が「PC側に未撤去」と名指ししていたうち、実際に描画されていたのは `library-v3` の 2 件だけ。**
+>
+> 🔴 **検査自体で 3 回踏んだ罠**（裁定原本 §0。数字を信じる前に読む）
+> ① `color` の継承と currentColor 初期値を数えると 1 箇所が **25,835 件**に化ける／
+> ② sentinel を `<style>` で注入すると head に 1 ノード増えて 2 パスの index が全ずれし、
+>    `color:#fff` の要素まで誤検出する（`:root` のインライン style へ置く）／
+> ③ 地の色を DOM の backgroundColor 遡りで取ると**絶対配置のシェード/写真の上で嘘になる**
+>    （browse の `.category-stage__eyebrow` を 1.08 と誤判定 → 実画素では 2.58）。
+>    小さい要素はクロップの最頻色が**グリフ自身**になるので、地は「文字色から離れた画素の最頻値」で取る。
+>
+> ### イタヤ裁定（2026-09-15）と実装
+> | | 裁定 | 実装 |
+> |---|---|---|
+> | **① Garage Owner Control** | 077 の entity category binding は **Owner 領域の「種別識別」に限定して維持**。塗りヘッダ ＋ `--gd-control-on` はカテゴリ色のまま。hover / active / focus-visible は**操作**なので NG-7 に従い中立へ。とくに RIG 黄の focus ring はライト白地 **1.08** で見えていなかった | `SoT_garage-detail.css` / `css/mobile-garage-detail.css`。PC / Mobile の両方を同時に直した（片方だけ直る事故を作らない） |
+> | **② NG-1 の代替形** | `library-v3` の `.door--rig` / `.door--parts` の 4px 色帯を撤去し、既存 `.door__label` を **P22-B19c と同じ小型塗りバッジ**へ。NG-1 と NG-2 を同時に解消 | 線は 1 本も増やしていない。`.door--maker` の中立 4px は据え置き |
+> | **③ BORDER 104 の分類** | 「color-mix だから対象外」にしない。**役割で判定**。操作 UI の枠 / 選択・現在地の線 / 線そのものが輪郭を作るもの ＝ 中立化。別の面・背景で形が成立し識別アクセントとしてのみ働くもの ＝ 維持可 | 維持: `home` の `.dir-card--parts` 系淡色境界・`library-v3` の `.chip--*` inset ring・`.lpc__badge--*` |
+>
+> ### 主な変更
+> - **塗りバッジ化**: `category-stage__eyebrow`（browse 3面）/ `door__label` / `user-post-item__handle-badge` /
+>   `about` の `pillar__label`・`pillar__icon` / `support-us`・`welcome-tour` の線画アイコン
+> - **中立操作色へ**: `category-side__cta`（NG-7 が名指ししていた CTA 流用）/ `category-cta` /
+>   `parts-hero` の focus ring / チップの選択下線 / Feed の種別フィルタ選択 / `create-btn` の枠 /
+>   `register-rig` の選択・ドラッグ枠・`accent-color`・主操作ボタン / `log-composer` の公開範囲ピル /
+>   `lib-hd__nav` の現在地
+> - **中立境界へ**: `feed-rail-about`（地を持たない＝線が輪郭）/ `dir-subheader` / `ptb__nickname` /
+>   `dt-identity__build` / `act-item`（打ち消し済みだったものも**供給元で是正**して再発を止めた）
+> - `register-parts` の `--usage-installed` は**使用状態**なのでカテゴリ色の流用をやめ `--rig-status-active` へ
+> - 🔴 `SoT_tokens-v6.css` に **v7 の `--cat-*-on` を新設**（値の flip ではない）。これが無いと
+>   「塗り ＋ `var(--cat-*-on)`」が v7 面で `#fff` に落ち、**v7 LOG オレンジ ＋ 白 = 2.57**（実測）になる
+>
+> ### 検証
+> 新設 `_state/category_role_check.py`: **134 PASS / 0 FAIL**（CC1 BAND 0 / CC2 TEXT 0 / CC3 OUTLINE 0 /
+> CC4 CONTROL 0 / CC5 TEXT_ON 110 全件 CR>=4.5 / CC6 BORDER 24 は既知 PENDING のみ）。故障注入 **6 種**すべて検知。
+> 既存 21 本 **0 FAIL**: detail_contract 51 / entity_actions 36 / footer 4 / image 63 / launcher 177 /
+> hit_test 367 / shell_interaction 418 / web_meaning 1290 / garage_check 513 / garage_top 291 /
+> garage_list 749 / garage_integrity 610 / mobile_garage_list 804 / mobile_garage_detail 134 /
+> mobile_detail 59 / mobile_feed 63 / feed_w_gap 108 / feed_m 525 / filter_transform 3,328 /
+> detail_m 3,152 / web_fundamentals_final 2,050。
+>
+> ### 残す PENDING（⛔ 黙って増やさない）
+> - **notifications の通知タイプバッジ**（インライン SVG の `stroke`/`fill` がカテゴリ色）→ NG-7 の**通知色は HOLD**。
+>   通知 UI の設計議論とあわせて後日。Gate の `BORDER_PENDING` に登録済み
+> - **`.app-logo__accent` のブランド色** → color-token-v8 §3「ブランド色: 未裁定」。live 40 面では未使用（描画 0）
+> - **`sg-log-tag--run` の `#22c55e`** 等 → カテゴリ色ではない別系統。パレット外（NG-7）だがステータス/通知色の裁定と同時に
+> - **`home` の `!important` 層に残るカテゴリ色宣言** → 描画 0。`!important` 743 個で層が深く触る利得が無い
+>
+> ### 🔴 未了
+> - push: mock `b18f74c` / canon（この 103）とも **local commit のみ**。イタヤの `mockup` コマンドで
+>   canon push → mock push → Vercel deploy。
+>
+> ### 次
+> **通常のモック制作・デザイン探索レーンへ。** D3 を含む cross-surface の完全収束はやらない
+> （次のモック制作を妨げるものだけ必要時に是正 ＋ 全モックが揃った後の横断 Convergence）。
 
 > ## 🟢 102: Web Fundamentals Final Consolidation — Phase 2 / viewport continuity CLOSE（2026-09-14 / Cowork 実装）
 >
