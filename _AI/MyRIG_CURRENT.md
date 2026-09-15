@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260915-104
+revision: MYRIG-20260915-105
 updated: 2026-09-15 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -14,7 +14,7 @@ updated: 2026-09-15 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-15 / revision 104（**STATE 更新のみ。仕様裁定なし**）**
+**最終更新: 2026-09-15 / revision 105（**STATE 更新＋デプロイ運用の恒久対策。仕様裁定なし**）**
 
 > 🔴 **104 は「現在地を正しく引き継ぐための STATE 更新」であって、新しい仕様の採用ではない。**
 > `docs/` の ACTIVE 正典は 1 文字も変えていない。Register v3 Concept を ACTIVE 仕様へ昇格させていない。
@@ -23,8 +23,8 @@ updated: 2026-09-15 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 | | |
 |---|---|
-| mock `origin/main` | **`4423ac7`**（local HEAD と一致・ahead 0・working tree clean） |
-| Vercel production | **READY** `dpl_7ZozFuVuffXLyJ68wdEDZHmpus2h` / 同 SHA / author `MyRIGRC <admin@myrigrc.com>` 正常 |
+| mock `origin/main` | **`c28b3f8`**（local HEAD と一致・ahead 0。`.vercelignore` のみ未commit = 105 の変更） |
+| Vercel production | **READY** `dpl_GSaR7A8wtUXi8Sjyfzc7ntDr3qwu` / 同 SHA / author `MyRIGRC <admin@myrigrc.com>` 正常 |
 | production で触れるもの | `pc/myrig-register-rig-v3-concept.html?compare=A｜B｜C`（直リンク。Launcher 未登録）<br>`pc/assets/js/vnext_resolver-dummy.js` も配信確認済み |
 
 🔴 **103 本文の「モック `b18f74c`（push 待ち）」「未了: 本 revision の push → Vercel READY 確認」は
@@ -3194,6 +3194,14 @@ Browse系の見た目が面ごとにズレる問題を全面実測した結果�
 `pc/myrig-browse-parts-v3.html` / `pc/myrig-browse-category-v3.html`。
 並行編集すると、どちらの変更か判別できなくなる。
 
+### 直近で片付いたこと（2026-09-15 / 105）
+
+- **Vercel Deployment Storage 無料枠 10GB 100% 到達を解消。** 21件の古い Production Deployment を削除し、
+  `mockup` に `vercel remove --safe --yes` を追加して**常時1件運用**へ移行（下記「デプロイ運用」参照）
+- `.vercelignore` に `Claude outputs` と `_state/shots_*` を追加。アップロード量 約80MB → 約33MB
+- `mockup` の実体を `functions mockup` で確認。CURRENT の「`~/.zshrc` は未確認のため推測」を実測記述へ置換
+- `vercel` が PATH に無く `npx vercel` 経由であることを確認（CLI 59.18.0）
+
 ### 直近で片付いたこと（2026-08-25）
 
 - **Web文法 DRAFT v0 を作成**（`myrig-mockup/docs/WEB_GRAMMAR_DRAFT_v0.md`・NOT CANON）
@@ -3308,9 +3316,32 @@ GPTが読むのは自由だが、修正してpushしない。
 4. イタヤがターミナルで `mockup` → push ＋ Vercel deploy
 5. 実機／ブラウザで確認 → 裁定 → 次バッチ
 
-`mockup` はリポジトリ直下で `git push` → `npx vercel` を実行する。
-未commitの変更があれば `mock: update <YYYY-MM-DD HH:MM JST>` という
-コミットが自動生成される（`~/.zshrc` は未確認のため、この自動commit部分は推測）。
+`mockup` は `~/.zshrc` のシェル**関数**（エイリアスではない）。
+2026-09-15 に `functions mockup` で実体を確認済み。**推測ではなく実測**。
+
+```zsh
+mockup () {
+	push
+	local repo="$HOME/Desktop/MyRIG/App/MOKUP/myrig_pc_Ver3"
+	local msg="${1:-mock: update $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M JST')}"
+	cd "$repo" || return 1
+	git add -A
+	git diff --cached --quiet || { git commit -m "$msg" || return 1; }
+	git push || return 1
+	npx vercel --prod --cwd "$repo" --token="$VERCEL_TOKEN" || return 1
+	npx vercel remove myrig-mobile-mock --safe --yes --token="$VERCEL_TOKEN"
+}
+```
+
+注意点が3つある。
+
+- **`git add -A` で全件ステージする。** 手順1の「Cowork は対象ファイルのみ編集」は
+  Cowork の編集範囲を縛るルールであって `mockup` は対象外だが、
+  結果として**作業中の一時ファイルも巻き込んでcommitされる**。
+  一時ファイルを作ったら `mockup` の前に消すこと。
+- **`vercel` は PATH に入っていない。** `npx vercel` で毎回取得している（2026-09-15 時点 CLI 59.18.0）。
+  ターミナルで `vercel ...` と直打ちしても `command not found` になる。
+- 最終行の `vercel remove` が容量対策（下記）。
 
 ### 🔴 commit author を上書きしないこと（L1）
 
@@ -3341,12 +3372,53 @@ Vercel から「attempted to deploy a commit … but they're not a member of the
   中身は `.env.local` `.gitignore` `.vercel` のみで、`.vercel` は直下と同一プロジェクトを指す。
   `README_3plans.md:176` の「このフォルダごと mockup-deploy 内に置いて `mockup`」は
   3プラン比較モック時代の運用で、現在の実態と異なる
-- `.vercelignore` は `_archive` `*.zip` `.DS_Store` `_backup` `docs` のみ除外（`pc/` は除外していない）
+- `.vercelignore` は `_archive` `*.zip` `.DS_Store` `_backup` `docs`
+  ＋ `Claude outputs` `_state/shots_mobile` `_state/shots_20260909` `_state/shots_20260909_color`
+  を除外（`pc/` は除外していない = PC版は配信される）
+
+### 🔴 Deployment Storage 対策 = 常時1件運用（2026-09-15 / 105 実施済み）
+
+**事象。** 2026-09-15、Vercel から Deployment Storage 無料枠 10GB 100% 到達の警告。
+実測 10.53GB / 10GB。`myrig-mobile-mock` に **21件**の Production Deployment が
+すべて残っていた（Hobby プランに自動削除の設定は存在しない。
+Deployment Retention は Pro 以上の機能で、プロジェクト設定に項目自体が無い）。
+
+**原因。** Vercel の Deployment は仕様上すべて immutable で、上書き・置換はできない。
+`vercel --prod` を実行するたびに新しい Deployment が積まれ、消さない限り残り続ける。
+同一 SHA から複数件あったのは、同じ commit 上で `mockup` を複数回叩いたため。
+**Git 連携による自動デプロイではない**（project の `link` は `null`、
+GitHub 側の登録 Webhook も 0 件）。全件 `source: cli`。
+
+**採った対策。** `mockup` の末尾に以下を追加した。
+
+```
+npx vercel remove myrig-mobile-mock --safe --yes --token="$VERCEL_TOKEN"
+```
+
+`--safe` は本番ドメインが向いている Deployment をスキップするため、
+**配信中の1件だけが残り、他はすべて消える**。デプロイのたびに自動で走るので
+Deployment は常に1件。容量は積み上がらない。
+`--prod` の直後に `|| return 1` を置いてあるので、デプロイが失敗したら削除は走らない。
+
+**併せて `.vercelignore` を追加。** アップロード量 約80MB → 約33MB。
+`Claude outputs`（配信HTMLからの参照ゼロを確認）と
+`_state/shots_*`（検証用スクショ 37MB。HTML/CSS/JS からの `_state/` 参照は
+`.md` と `.py` へのコメント記述のみで、`shots_*` への参照は無いことを確認）を除外。
+なお `.git`（293MB）は Vercel CLI が常に自動除外するのでアップロードされていない。
+
+**トレードオフ（イタヤ裁定 2026-09-15）。** Vercel 上でのロールバックは不可能になる。
+モックアップ制作中に「1週間前の状態に戻す」運用は行わない・戻すならローカルの
+git / `_archive` から戻す、という前提で採用した。
+
+**この運用は Hobby 期間限定。** Next.js 実装に入って Pro へ上げた後は、
+Deployment Retention（Pro 以上）で自動化できるため、その時点で再検討する。
 
 ### 恒久対策の候補（未着手）
 
 Vercel プロジェクトを `MyRIGRC/myrig-mockup` に Git連携させれば `git push` だけで
 自動デプロイになり、CLI認証と author 判定に依存する経路を減らせる。要検討。
+ただし Git 連携にすると Preview Deployment が自動生成されて件数が増えるため、
+上記の常時1件運用とは併用できない。Pro 移行時にまとめて判断する。
 
 ---
 
