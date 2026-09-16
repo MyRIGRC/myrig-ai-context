@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260916-107
+revision: MYRIG-20260916-108
 updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -14,18 +14,21 @@ updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-16 / revision 107（**Register PC 2 本の採用裁定を記録。`docs/` は無変更**）**
+**最終更新: 2026-09-16 / revision 108（**RIG / PARTS Field Contract 統合裁定。App schema を v1.6-r3 へ**）**
 
-> 🔴 **107 は「イタヤが実機で裁定した結果」と現在地の記録。** `docs/` の ACTIVE 正典は 1 文字も変えていない。
-> Register の中身（保存先列・rig_parts の受け皿など）は下の PENDING のとおり**まだ裁定していない**。
+> 🔴 **108 で「データ契約」を閉じた。** 107 までは画面の採用記録で `docs/` は無変更だったが、
+> 108 は **Register ↔ Public Detail ↔ Owner Detail ↔ App DB を同じ契約へ収束**させ、
+> `docs/schema/myrig_db_schema_v1_6.md` を **v1.6-r3** へ更新した。
+> 裁定原本: **`_decisions/2026-09-16_field-contract-rig-parts-v1.md`**（4 層モデル・全 12 項目 ＋ HOLD 7 件）。
+> ⛔ Production DB への migration は行っていない。既存値の意味推定変換もしていない。
 
 ### 現在地（mock）
 
 | | |
 |---|---|
-| mock local HEAD | `76ff143`（**push 待ち**。106 時点の `origin/main` から 6 commit ahead） |
-| PC の RIG 登録 | **`pc/myrig-register-rig-v3.0.html`（採用版・CLOSE）** |
-| PC の PARTS 登録 | **`pc/myrig-register-parts-v1.0.html`（採用版）** |
+| mock local HEAD | **push 待ち**（`mockup` で canon push → mock push） |
+| PC の RIG 登録 | **`pc/myrig-register-rig-v3.0.html`（採用版・CLOSE。108 の Field Contract 反映済み）** |
+| PC の PARTS 登録 | **`pc/myrig-register-parts-v1.0.html`（採用版。108 の Field Contract 反映済み）**<br>比較版 `pc/myrig-register-parts-v1.1-compare.html`（Hero 2 カラム / 二重幅 / 顔。**採用判断は未了**） |
 | PC の LOG 投稿 | `pc/myrig-log-composer-modal-v0.3.9.html`（**未着手**。次のレーン候補） |
 | Launcher / 各面 | `compare.html` と各面の「＋投稿する」は上記 2 本を指すよう差し替え済み |
 
@@ -57,30 +60,57 @@ updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 - 採用版 **`pc/myrig-register-parts-v1.0.html`**。RIG v3.0 と**同じ画面文法を継承**。
 - PARTS 固有: 01 は 製品（パーツ Master）/ **型番**（Detail の MODEL 行）/ 表示名 / 紹介文。
-  02 は **搭載RIG**（rig_parts / M:N）。03 は コンディション / 保有状況（搭載中・予備・売却・処分）/
-  入手時期 / 購入価格 / 購入店 / メモ。04 は RIG と同一。
+  02 は **搭載RIG**（rig_parts / M:N）。03 は 所有状態 / 入手時期 / 入手価格 / 入手先 / メモ。04 は RIG と同一。
+  ⚠️ 採用時点の 03 は「コンディション / 保有状況 4 値」だったが **108 の裁定で置き換え済み**。
 - **写真上限 5 枚は PARTS Detail 実体と照合済み**（2026-09-16）。公開 `myrig-parts-detail-v1-open.html` /
   ガレージ `myrig-garage-parts-detail-v7.html` とも ギャラリー **1 / 5**・フォトノート **4 枚**
   ＝ カバー 1 ＋ サブ 4。RIG は 1 / 7・フォトノート 6 枚で 7 枚。「Detail のギャラリーと同数」は共通、枚数だけ違う。
 - **PARTS 識別色を是正**: カバーバッジと選択済みチェックが RIG の黄（`--cat-rig`）のままだった。
   `--cat-parts` `#D92D20` / `--cat-parts-on` `#fff` へ。PARTS Detail の PARTS バッジと同値。
-- **搭載RIG の関係意味論を整理**: `rig_parts` は「実際に付いた／付いていた」関係だけを持つ。
-  装着中 → `rig_id` あり / `removed_at` なし。取り外し済み → `rig_id` あり / `removed_at` あり。
-  取り付け予定と、ガレージに無い RIG 名は `rig_parts` に載せず `pending` へ分離（下の PENDING）。
+- **搭載RIG の関係意味論**: ⚠️ **108 で再裁定済み**。`rig_parts.status`（active / removed）で事実状態を持ち、
+  日付は分かるときだけ入れる。取り付け予定とガレージに無い RIG 名は**入力導線ごと外した**。
 - ⛔ `compatible_platforms` はこの画面で**一切さわらない**（Master 継承のみ。Research が上流）。
 - 旧 baseline `myrig-register-parts-v0.1.10.html` は `_archive/20260916_register-parts-close/` へ mv。
 
-### 🔴 PENDING
+### ✅ 108: RIG / PARTS Field Contract 統合裁定（2026-09-16 / イタヤ裁定）
 
-- **`rig_parts` の「取り付け予定」の受け皿は未裁定。** 装着の事実がないため `rig_parts` に載せていない。
-  別列 / 別テーブル / 保持しない のどれかを決める。
-- **ガレージに無い RIG を名前だけで記録したものの受け皿は未裁定。** `rig_id` が無く FK を張れない。
-  `rig_name_cache` 列 / 後から RIG 作成へ誘導 / 保持しない のどれかを決める。
-- `private_note` / 購入価格 / 購入店 / キャッチコピー / ビルドタグ / 写真の説明（フォトノート）の
-  保存先は未裁定。⛔ 新 DB 列を勝手に作らない。
-- RIG の 5 状態（ビルド中〜アーカイブ）と PARTS の 4 状態（搭載中〜処分済み）は
-  **Detail の MANAGE に実在するため入力欄を持つ**が、保存先列は未裁定。⛔ 廃止裁定ではない。
-- 外部リンクの「個人サイトは運営確認後に公開」— フラグ（`review: true`）を持つだけで**承認フローは未設計**。
+裁定原本 **`_decisions/2026-09-16_field-contract-rig-parts-v1.md`** / schema **v1.6-r3**。要点だけ:
+
+| # | 確定したこと |
+|---|---|
+| 基本モデル | **Master / User Entity / Relation・History / Public・Owner data** の 4 層 |
+| PARTS の定義 | 「製品」ではなく**ユーザーの管理単位**。同じ Master を参照する複数 PARTS を作れる。物理 1 個 = 1 レコードとは限らない |
+| 管理名 | `parts.nickname`（UI「管理名」）を新設。**Owner-only**。Public の主タイトルは `product_name` のまま |
+| `condition` | **意味論を廃止**（3 つの軸が 1 列に混ざっていた）。Register の入力も Public Detail の「状態」行も撤去。`DEFAULT 'new'` 撤廃。⛔ 列は DROP しない・既存値は変換しない |
+| 所有と装着 | 別の事実。`parts.ownership_state`（owned / released）を新設。⛔ active relation が無いことを「予備」と自動判定しない（正しい表示は「装着記録なし」まで） |
+| `rig_parts` | **実際に装着した／していた事実だけの SoT**。`status`（active / removed）を新設し**事実状態と日付を分離**（「外したが日付は不明」を偽値なしで表現）。再装着は上書きせず新しい行。active 一意を `(rig_id,part_id)` と `(part_id)` の 2 本で保証 |
+| `build_details` | **設定値・加工・自由項目だけ**（Drag Brake / Shock Oil / Body Paint）。装着製品は `rig_parts` のみ。旧 mechanics 系キー廃止 |
+| RIG の状態 | **2 軸**。`ownership_status`（current / past / wishlist）＋ `usage_status`（building / active / stored / NULL、current のときだけ意味を持つ）。⛔「整備中」は LOG、⛔「アーカイブ」は混ぜない。Public Detail は「所有」「利用状況」の 2 行 |
+| 購入 / 入手 | RIG / PARTS とも任意で持つ。RIG の価格は**ベース車両・キットの入手価格**（総製作費ではない）。価格・入手先は **Owner-only** |
+| 日付精度 | `purchased_period TEXT`（`YYYY` / `YYYY-MM` / `YYYY-MM-DD`）を新設。⛔ 年月入力に**架空の 1 日を補完しない**。`purchased_at DATE` は非推奨（DROP しない） |
+| `rig_type` | MVP の Register では **rc-car 固定・Selector を出さない**。schema の将来 5 タイプ対応は維持。⛔ パーツ互換性とは無関係 |
+| 公開文 / Owner-only | `images.caption`（公開フォトノート）/ `rigs.tagline` / `rigs.build_tags` / `rigs.private_note` / `parts.private_note` を列として新設。⛔ `build_details` へ押し込まない。`images.alt` は**今回の対象外** |
+| 公開範囲 | 非公開 entity の情報を **relation 経由で公開面へ漏らさない**（名前・画像・リンク・推測できる件数表示を含む）。RLS 節に追記 |
+| `entity_links` | **新設**。RIG / PARTS / LOG 共通のユーザーリンク。`moderation_status`（not_required / pending / approved / rejected）。個人サイトの **URL 変更で `approved` を引き継がず `pending` へ戻す**。Master 公式リンクは Research `master_external_links` が正本で ⛔ コピーしない。表示は 1 ブロックへ合成してよい。`rigs.external_links` は移行対象（恒久二重管理禁止） |
+| `planned` | MVP では**構造化保存しない**。購入予定 / 取り付け予定 / ガレージに無い RIG 名だけの relation は**入力導線ごと撤去**。「以前使用」は実際の履歴なので `rig_parts` に残す |
+
+### 🔴 HOLD（108 では決めなかった）
+
+- **H-1 PARTS の Master ID を App FK へ接続すること。** CORE 上 Research = `part_masters`（単数）/
+  App = `parts_masters`（複数）で**同名別義**、cross_ref 写像表が未作成。実体を確認したところ
+  Register が持っているのは Resolver の `kind:'part_master'`（Research 側の語彙）の **mock slug** であり、
+  App の `parts_masters.id`（UUID）ではない。⛔ **名前だけ schema に合わせて ID を刺さない。**
+  Register は `parts_master_id` を出さず `pending.master_ref`（出所付き）として保持する。
+  → **F-3「`part_master_id` → `parts_master_id`」は HOLD のまま。**
+- **H-2 複数 RIG で共有して使う機材**（送信機・バッテリー等）の受け皿。
+  `idx_rig_parts_active_part` と衝突するため `rig_parts` へ混ぜられない。
+- **H-3 `rigs.external_links` → `entity_links` のデータ移行手順。** Production DB migration は未着手。
+- **H-4 `build_details` 旧キーの新キーへの寄せ方。** ⛔ 意味推定での自動変換は禁止。
+- **H-5 `images.alt` の追加要否。** `caption` とは別概念。
+- **H-6 `condition` の将来設計。** 意味論は廃止済み。再設計の余地は残す。
+- **H-7 Owner Detail「まとめて編集」の実体。** `data-g-edit` は現在モックの器のみで、
+  Register を開くのか独自フォームかが未定義。UI 契約であってデータ契約ではない。
+- **H-8 RIG の設定値・加工メモ（`build_details`）の入力導線。** 受け皿は確定したが Register に UI が無い。
 - 公開中 RIG / PARTS 編集の「確定して反映」保存モデルは未裁定（`data-save-mode` で切替できる構造のみ）。
 - Mobile の Register 3 本は未着手。PC が揃ってから。
 
@@ -89,6 +119,23 @@ updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 **LOG 投稿 PC（`myrig-log-composer-modal-v0.3.9.html`）を次のレーンにする。**
 ただし LOG は「写真＋種別＋本文」が主役で 01〜04 の構成がそのままは合わないため、
 着手時に構成案から出す。その後 Mobile 3 本 → 全モック揃ってからの横断 Convergence。
+
+> ## 🟢 108: RIG / PARTS Field Contract 統合裁定（2026-09-16 / 裁定 ＋ docs 変更あり）
+>
+> 107 までは「画面の採用」の記録で `docs/` を変更していなかった。108 は Register / Public Detail /
+> Owner Detail / App schema を**同じデータ契約**へ収束させた最初の revision。
+>
+> **変更した正典**: `docs/schema/myrig_db_schema_v1_6.md`（**v1.6-r2 → v1.6-r3**）、
+> 新規 `_decisions/2026-09-16_field-contract-rig-parts-v1.md`。
+>
+> **106 / 107 の PENDING のうち解消したもの**: 取り付け予定の受け皿（→ 構造化保存しない）/
+> ガレージに無い RIG 名の受け皿（→ relation を作らない）/ `private_note`・購入価格・購入店・
+> キャッチコピー・ビルドタグ・写真の説明の保存先（→ **実列として確定**）/ RIG 5 状態・PARTS 4 状態
+> （→ 2 軸へ再設計）/ 個人サイトの承認フロー（→ `entity_links.moderation_status`）。
+> **`condition` は「不整合を直す」ではなく「意味論を廃止する」**という結論になった。
+>
+> ⛔ Production DB へは接触していない。migration も実行していない。Research 所有 schema も変更していない。
+> ⛔ cross_ref 未解決の `parts_master_id` は推測で埋めず HOLD H-1 として残した。
 
 > ## 🟢 107: Register PC 2 本の採用を記録（2026-09-16 / 裁定の記録 ＋ STATE）
 >

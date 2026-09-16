@@ -1,4 +1,4 @@
-# MyRIG RC — Database Schema Design v1.6-r2（App所有領域）
+# MyRIG RC — Database Schema Design v1.6-r3（App所有領域）
 
 > **拘束力: L2（現在の確定仕様・より良い案の提案歓迎）**
 >
@@ -92,15 +92,20 @@ Supabase Auth (`auth.users`) と1:1。認証情報以外の全プロフィール
 | base_model | TEXT | | ベース車種（載せ替え時） |
 | category_id | UUID | FK → **`rig_categories`.id**, NULLABLE | サブカテゴリ（単一 `categories` 表ではない） |
 | nickname | TEXT | | ユーザーがつけた愛称 |
-| description | TEXT | | 説明文 |
-| ownership_status | TEXT | NOT NULL, DEFAULT 'current' | CHECK (ownership_status IN ('current','past','wishlist')) |
+| description | TEXT | | **公開**紹介文 |
+| tagline | TEXT | NULLABLE | **公開**キャッチコピー（RIG Detail の H1 下 1 行）。⛔ build_details へ入れない |
+| build_tags | TEXT[] | DEFAULT '{}' | **公開**ビルドタグ（RIG Detail「ビルドタグ」）。⛔ build_details へ入れない |
+| private_note | TEXT | NULLABLE | **Owner-only** メモ（garage QUICK NOTE）。⛔ 公開面へ出さない |
+| ownership_status | TEXT | NOT NULL, DEFAULT 'current' | 所有の軸。CHECK (ownership_status IN ('current','past','wishlist')) |
+| usage_status | TEXT | NULLABLE | 利用状況の軸。CHECK (usage_status IS NULL OR usage_status IN ('building','active','stored'))。**`ownership_status='current'` のときだけ意味を持つ**。NULL＝未設定。⛔「整備中」は一時イベントなので状態にしない（LOG で扱う）。⛔「アーカイブ」もここへ混ぜない |
 | is_public | BOOLEAN | DEFAULT true | 公開設定 |
-| purchased_at | DATE | NULLABLE | 購入日 |
-| purchase_price | INTEGER | NULLABLE | 最小通貨単位（円/セント） |
+| purchased_period | TEXT | NULLABLE | **入手時期。日付精度を落とさず、偽の日を作らない**。`YYYY` / `YYYY-MM` / `YYYY-MM-DD` のいずれか。CHECK (purchased_period ~ '^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$')。辞書順＝時系列順 |
+| purchased_at | DATE | NULLABLE | ⚠️ **非推奨（v1.6-r3）**。年月しか分からない入力に架空の 1 日を補完してしまうため、正は `purchased_period`。**DROP しない**（既存値の意味推定変換も行わない） |
+| purchase_price | INTEGER | NULLABLE | **Owner-only**。最小通貨単位（円/セント）。RIG では「ベース車両／キットの入手価格」であり総製作費ではない |
 | currency_code | CHAR(3) | DEFAULT 'JPY' | ISO 4217 通貨コード |
-| purchase_store | TEXT | NULLABLE | 購入店名 |
-| build_details | JSONB | DEFAULT '{}' | register-rigの詳細データ全格納 |
-| external_links | JSONB | DEFAULT '[]' | [{label, url}] |
+| purchase_store | TEXT | NULLABLE | **Owner-only**。入手先（店名 / 通販サイト名） |
+| build_details | JSONB | DEFAULT '{}' | **設定値・加工・自由項目だけ**を持つ。⛔ 装着している製品個体は入れない（唯一の SoT は `rig_parts`）。⛔ tagline / build_tags / private_note もここへ入れない |
+| external_links | JSONB | DEFAULT '[]' | ⚠️ **`entity_links` テーブルへの移行対象（v1.6-r3）**。恒久二重管理は禁止。移行完了までの暫定 |
 | product_line | TEXT | NULLABLE | **マスターからの継承のみ**。ユーザー自由入力は不可 |
 | platform | TEXT | NULLABLE | **自由テキスト廃止・マスターからの継承のみ。**未紐付けは NULL。照合は `rig_masters.platform_slug` |
 | sort_order | INTEGER | DEFAULT 0 | ガレージ内表示順 |
@@ -109,24 +114,33 @@ Supabase Auth (`auth.users`) と1:1。認証情報以外の全プロフィール
 | updated_at | TIMESTAMPTZ | DEFAULT now() | |
 | deleted_at | TIMESTAMPTZ | NULLABLE | |
 
-**`build_details` JSONB構造:**
+**`build_details` JSONB構造（v1.6-r3 で責務を限定）:**
+
+`build_details` と `rig_parts` の責務を分ける。判定基準は「**登録済み PARTS として存在する製品個体か否か**」。
+
+| 入るもの | 例 | 保存先 |
+|---|---|---|
+| 製品個体と装着履歴 | Servo = Reefs 422HD / ESC = Hobbywing Fusion | **`rig_parts`**（唯一の SoT） |
+| 設定値・加工・自由項目 | Drag Brake 80% / Shock Oil 35wt / Body Paint PS-5 | **`build_details`** |
+
 ```json
 {
-  "mechanics": [
-    {"label": "ESC", "value": "Hobbywing Fusion SE2", "note": ""},
-    {"label": "Motor", "value": "Built-in 1800kv", "note": ""},
-    {"label": "Servo", "value": "Reefs RC 299", "note": "交換候補"}
+  "settings": [
+    {"label": "Drag Brake", "value": "80%", "note": ""},
+    {"label": "Shock Oil", "value": "35wt / 30wt", "note": "前後で変えている"}
   ],
-  "suspension": [...],
-  "exterior": [...],
-  "electronics": [...],
-  "battery": [...],
-  "other": [...],
+  "finish": [
+    {"label": "Body Paint", "value": "タミヤ PS-5", "note": ""}
+  ],
   "raw_custom_fields": [
-    {"label": "塗料", "value": "タミヤ TS-14"}
+    {"label": "リンク長", "value": "フロント 92mm"}
   ]
 }
 ```
+
+⛔ **旧 `mechanics` / `suspension` / `exterior` / `electronics` / `battery` キーは廃止**（装着製品を
+`rig_parts` と二重に持っていた）。既存データの意味推定変換は行わない。
+⛔ Register で手入力された製品名（Master 未紐付け）を `build_details` へ逃がさない。
 
 ---
 
@@ -142,15 +156,19 @@ Supabase Auth (`auth.users`) と1:1。認証情報以外の全プロフィール
 | compatible_types | TEXT[] | DEFAULT '{rc-car}' | 対応する大大カテゴリ配列（rig_typeと同一値セット） |
 | manufacturer_id | UUID | FK → manufacturers.id, NULLABLE | |
 | manufacturer_name_cache | TEXT | | |
-| product_name | TEXT | NOT NULL | 製品名 |
+| product_name | TEXT | NOT NULL | 製品名（Master 由来 or ユーザー入力）。**Public Detail の主タイトルはこれ** |
+| nickname | TEXT | NULLABLE | **Owner-only 管理名**（UI 表記「管理名」）。同一 Master を参照する複数 PARTS を区別するため（例: フロント用 / TF2用 / スペア）。⛔ Public の製品名代わりにしない |
 | category_id | UUID | FK → **`part_categories`.id**, NULLABLE | パーツカテゴリ（⚠️実DBでは `part_categories` は0行＝未構築） |
-| description | TEXT | | ユーザーメモ |
-| part_number | TEXT | | メーカー型番 |
-| purchased_at | DATE | NULLABLE | |
-| purchase_price | INTEGER | NULLABLE | |
+| description | TEXT | | **公開**パーツ紹介文（用途・加工内容もここで表現する）。※ v1.6-r2 まで Notes が「ユーザーメモ」だったが、Owner-only メモは `private_note` が正 |
+| private_note | TEXT | NULLABLE | **Owner-only** メモ（garage QUICK NOTE）。⛔ 公開面へ出さない |
+| part_number | TEXT | | メーカー型番（Register の UI 表記は「型番」） |
+| purchased_period | TEXT | NULLABLE | **入手時期**。`rigs.purchased_period` と同一契約（`YYYY` / `YYYY-MM` / `YYYY-MM-DD`、同 CHECK） |
+| purchased_at | DATE | NULLABLE | ⚠️ **非推奨（v1.6-r3）**。正は `purchased_period`。DROP しない |
+| purchase_price | INTEGER | NULLABLE | **Owner-only**。最小通貨単位 |
 | currency_code | CHAR(3) | DEFAULT 'JPY' | ISO 4217 |
-| purchase_store | TEXT | NULLABLE | |
-| condition | TEXT | DEFAULT 'new' | CHECK (condition IN ('new','used','modded')) |
+| purchase_store | TEXT | NULLABLE | **Owner-only**。入手先 |
+| ownership_state | TEXT | NOT NULL, DEFAULT 'owned' | **所有の軸**。CHECK (ownership_state IN ('owned','released'))。UI は「所有中 / 手放した」。⛔ 売却 / 譲渡 / 処分の理由分類は MVP では持たない。⛔ 装着の軸（`rig_parts`）とは別 |
+| condition | TEXT | NULLABLE | ⚠️ **MVP では使用しない（v1.6-r3）**。`new/used/modded` が「入手時の状態 / 現在の状態 / 加工の有無」という異なる軸を 1 列に混ぜていたため意味論を廃止した。**DEFAULT 'new' を撤廃**し、新規作成時に自動設定しない。列は DROP せず、既存値の意味推定変換も行わない。加工内容は `description` / `images.caption` / LOG で表現する |
 | is_public | BOOLEAN | DEFAULT true | |
 | view_count | INTEGER | DEFAULT 0 | |
 | created_at | TIMESTAMPTZ | DEFAULT now() | |
@@ -160,7 +178,7 @@ Supabase Auth (`auth.users`) と1:1。認証情報以外の全プロフィール
 ---
 
 ### `rig_parts`
-パーツとRIGの多対多リレーション。
+パーツとRIGの多対多リレーション。**「実際に装着した／していた事実」だけの Single Source of Truth。**
 
 | Column | Type | Constraints | Notes |
 |---|---|---|---|
@@ -168,17 +186,44 @@ Supabase Auth (`auth.users`) と1:1。認証情報以外の全プロフィール
 | user_id | UUID | FK → profiles.id, NOT NULL | 所有者（RLS用） |
 | rig_id | UUID | FK → rigs.id, NOT NULL | |
 | part_id | UUID | FK → parts.id, NOT NULL | |
-| installed_at | DATE | NULLABLE | 装着日 |
-| removed_at | DATE | NULLABLE | 取り外し日（NULLなら現在装着中） |
+| status | TEXT | NOT NULL, DEFAULT 'active' | **関係の事実状態**。CHECK (status IN ('active','removed')) |
+| installed_at | DATE | NULLABLE | 装着日。**不明なら NULL**（偽の日付を入れない） |
+| removed_at | DATE | NULLABLE | 取り外し日。**不明なら NULL** |
 | note | TEXT | | メモ |
 | created_at | TIMESTAMPTZ | DEFAULT now() | |
 
+**v1.6-r3 の変更点 — 事実状態と日付を分離した。**
+旧版は `removed_at IS NULL` を「現在装着中」の意味に使っていたため、
+**「昔付けていたが外した日付は不明」** を表現できず、偽の日付を入れるしかなかった。
+`status` を独立させ、日付は分かるときだけ入れる。
+
+| 意味 | status | installed_at | removed_at |
+|---|---|---|---|
+| 現在装着中 | `active` | 分かれば | NULL |
+| 取り外し済み・日付も分かる | `removed` | 分かれば | 日付 |
+| **取り外し済み・日付は不明** | `removed` | 分かれば | **NULL** |
+
+再装着しても過去 relation を上書きしない。**新しい行を足して履歴として残す。**
+
 **制約:**
 ```sql
-CREATE UNIQUE INDEX idx_rig_parts_active
+-- 同じ RIG に同じ PARTS が二重に active で付かない
+CREATE UNIQUE INDEX idx_rig_parts_active_pair
 ON rig_parts(rig_id, part_id)
-WHERE removed_at IS NULL;
+WHERE status = 'active';
+
+-- PARTS は「ユーザーが管理する個体・管理単位」なので、
+-- 1 つの PARTS が同時に複数 RIG へ active で装着されることはない
+CREATE UNIQUE INDEX idx_rig_parts_active_part
+ON rig_parts(part_id)
+WHERE status = 'active';
 ```
+
+⛔ **`planned`（購入予定 / 取り付け予定）は入れない。** 装着の事実がないため。
+⛔ **Garage に存在しない RIG 名だけの relation は作らない。** `rig_id` の FK を張れないため。
+   必要なら最小 RIG 登録へ誘導するか、`parts.private_note` に書く。
+⚠️ **送信機・バッテリー等の「複数 RIG で共有して使う機材」は装着 relation とは別概念。**
+   `idx_rig_parts_active_part` と衝突するため、`rig_parts` へ混ぜない。受け皿は **HOLD（未裁定）**。
 
 ---
 
@@ -249,15 +294,57 @@ RIG・パーツ・ログの画像統合管理。**プロフィール画像は含
 | entity_id | UUID | NOT NULL | 対象のID |
 | url | TEXT | NOT NULL | Cloudflare Images URL |
 | thumbnail_url | TEXT | | サムネイルURL |
+| caption | TEXT | NULLABLE | **公開**フォトノート。ユーザーが画像に付ける説明（Detail の「フォトノート」）。⛔ `alt` とは別概念 |
 | sort_order | INTEGER | DEFAULT 0 | 表示順 |
-| is_primary | BOOLEAN | DEFAULT false | メイン画像フラグ |
+| is_primary | BOOLEAN | DEFAULT false | メイン画像フラグ（＝カバー） |
 | width | INTEGER | | 元画像幅 |
 | height | INTEGER | | 元画像高さ |
 | file_size | INTEGER | | バイト数 |
 | created_at | TIMESTAMPTZ | DEFAULT now() | |
 | deleted_at | TIMESTAMPTZ | NULLABLE | 論理削除 |
 
-⚠️ `images.alt`（画像代替テキスト）の追加要否は未裁定（App_Ready_Design_Rules からの申し送り）。
+⚠️ `images.alt`（画像代替テキスト）の追加要否は **未裁定のまま**。`caption`（ユーザーが書く公開フォトノート）と
+`alt`（アクセシビリティ用の代替テキスト）は別概念であり、**v1.6-r3 の裁定対象は `caption` だけ**。
+
+---
+
+### `entity_links`
+**ユーザーが自分で登録する外部リンクの Single Source。** RIG / PARTS / LOG で共有する。
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| id | UUID | PK, DEFAULT gen_random_uuid() | |
+| user_id | UUID | FK → profiles.id, NOT NULL | 登録者（RLS用） |
+| entity_type | TEXT | NOT NULL | CHECK (entity_type IN ('rig','part','log')) |
+| entity_id | UUID | NOT NULL | 対象のID |
+| service | TEXT | NOT NULL | youtube / instagram / x / facebook / tiktok / vimeo / site |
+| label | TEXT | | 表示名。SNS はサービス名、個人サイトはユーザー入力 |
+| url | TEXT | NOT NULL | https:// のみ。アフィリエイトURLは拒否 |
+| moderation_status | TEXT | NOT NULL, DEFAULT 'not_required' | CHECK (moderation_status IN ('not_required','pending','approved','rejected')) |
+| sort_order | INTEGER | DEFAULT 0 | 表示順 |
+| created_at | TIMESTAMPTZ | DEFAULT now() | |
+| updated_at | TIMESTAMPTZ | DEFAULT now() | |
+| deleted_at | TIMESTAMPTZ | NULLABLE | 論理削除 |
+
+**`moderation_status` の運用**
+
+| service | 初期値 | 遷移 |
+|---|---|---|
+| SNS 6種（ドメイン照合で本人性が担保できる） | `not_required` | なし |
+| `site`（個人サイト・任意ドメイン） | `pending` | 運営確認 → `approved` / `rejected` |
+
+⚠️ **個人サイトの URL を変更したら `approved` を引き継がず `pending` へ戻す。**
+（承認済みの殻だけ残して中身を差し替えられるのを防ぐ）
+
+**Master 公式リンクとの関係**
+- Master 公式リンク（メーカー製品ページ等）の正本は **Research 側 `master_external_links`**。
+  ⛔ `entity_links` へコピーしない。
+- Public Detail では **ユーザーリンクと Master 公式リンクを同じ視覚ブロックへ合成してよい。**
+  データ源を分離していれば、表示を1ブロックにまとめることは矛盾しない。
+- アフィリエイトリンクは `affiliate_links`（Domain 6）が正本。これも `entity_links` とは別物。
+
+⚠️ **`rigs.external_links` JSONB は本テーブルへの移行対象。恒久二重管理は禁止。**
+移行 DDL / データ移行は本書では定義しない（Production DB への migration は別裁定）。
 
 ---
 
@@ -579,7 +666,11 @@ notifications
 ### 共通原則
 - ✅ **2026-08-22 イタヤ裁定・HOLD解除**: `likes` / `favorites` / `pins` / `follows` にも
   `deleted_at` を追加した（GPT監査B解消）。**ただし `rig_parts` は例外で、この4テーブルとは別に
-  `removed_at` で同じ役割（現在有効かどうか）を表す。「全テーブルがdeleted_atを持つ」わけではない。**
+  `status`（v1.6-r3。旧 `removed_at IS NULL`）で同じ役割（現在有効かどうか）を表す。
+  「全テーブルがdeleted_atを持つ」わけではない。**
+- ✅ **v1.6-r3 追記**: `rig_parts` の取り外しは `status='removed'` への UPDATE。
+  **`removed_at` は日付が分かるときだけ入れる**（不明なら NULL のまま。偽の日付を作らない）。
+  再装着は過去行を書き換えず新しい行を足す。
 - **`deleted_at`（または`rig_parts`の`removed_at`）を持つ全テーブルの**全SELECTポリシーに
   対応する列の `IS NULL` 条件を含める
 - 公開データ: `is_public = true AND deleted_at IS NULL`
@@ -594,6 +685,19 @@ notifications
   CORE(L1)「物理DELETEは禁止」の例外化にあたるため削除した。**例外経路は設けない。**
 
 ### テーブル別の特記事項
+
+✅ **v1.6-r3 追記 — `entity_links` / 非公開 entity の relation 経由漏洩**
+- `entity_links` の SELECT は**親 entity の `is_public` を JOIN 判定**する（images / comments と同じ方式）。
+  加えて公開面では `moderation_status IN ('not_required','approved')` かつ `deleted_at IS NULL` のものだけ出す。
+  `pending` / `rejected` は所有者本人にだけ見せる。
+- **非公開 entity の情報を relation 経由で公開面へ漏らさない。**
+  公開 PARTS が非公開 RIG と `rig_parts` を持っていても、公開面に
+  **非公開 RIG の名前 / 画像 / リンク、および非公開 RIG を推測できる表示**を出さない。
+  件数表示も、非公開分を含めた実数を出すと存在を推測させるため公開分だけで数える。
+- **Owner-only 列は公開面のクエリに含めない**:
+  `parts.nickname`（管理名） / `parts.private_note` / `rigs.private_note` /
+  両テーブルの `purchase_price` / `purchase_store` / `purchased_period` の扱いは
+  「価格・入手先は Owner-only、入手時期は公開可」とする。
 
 ✅ **2026-08-22 イタヤ裁定・HOLD解除。** 旧「SELECT全公開」方針（pinsの「非公開」定義と矛盾、
 親が非公開でも images/comments が読めた問題）を、親の`is_public`をJOIN判定する方式へ変更する。
@@ -769,7 +873,7 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 > ⚠️ **5番 `parts_masters` は所有区分が未確定**（Research の `part_masters` と同一かが決まっていない）。
 > **App↔Research 写像表（cross_ref）が無い状態でマイグレーションを流さないこと。**
 
-### MVP実行分（20テーブル）
+### MVP実行分（20テーブル ＋ entity_links）
 1. `manufacturers` ※Research所有
 2. `rig_categories` / `part_categories` ※Research所有
 3. `profiles`（auth.users依存）
@@ -780,6 +884,7 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 8. `rig_parts`
 9. `maintenance_logs`
 10. `images`
+10-b. `entity_links`（rigs / parts / maintenance_logs 依存。**v1.6-r3 で新設**）
 11. `likes`
 12. `favorites`
 13. `pins`
@@ -802,7 +907,14 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
   （`size_class` は値集合が HOLD 中）
 - **App↔Research 写像表（cross_ref）が未作成。**本文中の `parts_masters` が
   App側 / Research側どちらを指すか曖昧な箇所が残る（機械的な一括置換をしないこと）
-- `images.alt`（画像代替テキスト）の追加要否
+- `images.alt`（画像代替テキスト）の追加要否（**`caption` は v1.6-r3 で確定。`alt` は別概念として未裁定のまま**）
+- **複数 RIG で共有して使う機材**（送信機・バッテリー等）の受け皿。
+  `rig_parts` は `idx_rig_parts_active_part` により 1 PARTS = 同時 1 RIG なので、そこへは混ぜられない
+- **`rigs.external_links` → `entity_links` のデータ移行手順**（Production DB への migration は未着手）
+- **`condition` の将来設計。** v1.6-r3 で意味論を廃止したが、
+  「入手時の状態」「加工の有無」を別軸として再設計する余地は残す
+- **`build_details` 旧キー（mechanics / suspension / …）の扱い。** 新キー（settings / finish）へ
+  どう寄せるかは未裁定。**意味推定での自動変換は禁止**
 - ~~関係テーブル（likes / favorites / pins / follows）の解除手段と物理DELETE禁止の両立~~
   ✅ 2026-08-22 イタヤ裁定・解消済み（4テーブルへdeleted_at追加。上記ソーシャル節参照）
 - ~~RLS のセキュリティモデル~~ ✅ 2026-08-22 イタヤ裁定・解消済み（上記 RLS 節参照）
@@ -821,4 +933,5 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 | v1.4 | `comments` を MVP へ昇格 / `comment_reports` 追加 / コメント受付ON/OFF 2系統 |
 | v1.5 | `page_blocks`（ウィジェット型CMS）追加。block_type 5種・sort_logic 6種 |
 | v1.6 | `content_reports` 追加。reason_code 6種 |
+| **v1.6-r3** | **Register ↔ Detail ↔ DB データ契約の統合裁定（2026-09-16）。** `rigs` に `tagline` / `build_tags` / `private_note` / `usage_status` / `purchased_period` 追加・`purchased_at` を非推奨化・`build_details` を「設定値・加工・自由項目だけ」に限定（旧 mechanics 系キー廃止）・`external_links` を移行対象化 / `parts` に `nickname` / `private_note` / `ownership_state` / `purchased_period` 追加・`condition` の意味論廃止（DEFAULT 'new' 撤廃）・`description` を公開紹介文と明記 / `rig_parts` に `status` 追加（事実状態と日付を分離、日付不明を表現可能に）・active 一意制約を `rig_id,part_id` と `part_id` の2本に / `images` に `caption` 追加 / **`entity_links` 新設**（RIG・PARTS・LOG 共通のユーザーリンク） / RLS に非公開 entity の relation 経由漏洩防止を追記 |
 | v1.6-r2 | **Research 所有領域の列定義を削除し参照へ降格** / App側 `rig_type` を5値へ / `category_id` の FK 参照先を `rig_categories`・`part_categories` に明記 / `rigs.platform` `product_line` をマスター継承のみに / RLS の `deleted_at` 条件をテーブル限定へ / `page_blocks.page_type` に parts 系2種を追加 / `log_type` 4値で決着 |
