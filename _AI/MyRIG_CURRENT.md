@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260915-105
+revision: MYRIG-20260916-106
 updated: 2026-09-15 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -14,7 +14,7 @@ updated: 2026-09-15 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-15 / revision 105（**STATE 更新＋デプロイ運用の恒久対策。仕様裁定なし**）**
+**最終更新: 2026-09-16 / revision 106（**デプロイ運用の記述訂正のみ。仕様裁定なし**）**
 
 > 🔴 **104 は「現在地を正しく引き継ぐための STATE 更新」であって、新しい仕様の採用ではない。**
 > `docs/` の ACTIVE 正典は 1 文字も変えていない。Register v3 Concept を ACTIVE 仕様へ昇格させていない。
@@ -3194,6 +3194,15 @@ Browse系の見た目が面ごとにズレる問題を全面実測した結果�
 `pc/myrig-browse-parts-v3.html` / `pc/myrig-browse-category-v3.html`。
 並行編集すると、どちらの変更か判別できなくなる。
 
+### 直近で片付いたこと（2026-09-16 / 106）
+
+- **「`mockup` は正典をpushしない」（2026-08-24 記述）が現在は誤りであることを実測で確認し訂正。**
+  `~/.zshrc` の `push` 関数が `mockup` の1行目から正典を push している。
+  ただし commit 済みのものだけが対象で、`push` が失敗しても `mockup` は止まらない
+- 2026-09-15 の常時1件運用を実運用で検証。`mockup` 1回で
+  正典push → モックcommit/push → deploy → 旧deployment削除 まで通ることを確認
+  （`c52e506` / `dpl_8Wj8EHZfxq7HwyVeMP8e67Q66mVc` / 残1件）
+
 ### 直近で片付いたこと（2026-09-15 / 105）
 
 - **Vercel Deployment Storage 無料枠 10GB 100% 到達を解消。** 21件の古い Production Deployment を削除し、
@@ -3296,13 +3305,36 @@ Browse系の見た目が面ごとにズレる問題を全面実測した結果�
 **`myrig-ai-context` への書き込みはCowork（Claude）だけが行う。GPTはREAD専用。**
 GPTが読むのは自由だが、修正してpushしない。
 
-### 🔴 `mockup` は正典をpushしない（2026-08-24 実測）
+### 🔴 `mockup` は正典も push する（2026-09-16 実測。2026-08-24 の記述を訂正）
 
-`mockup` が push するのは **`myrig-mockup`（モック）だけ**。
-`myrig-ai-context`（正典）は**別リポジトリ**なので手動pushが要る。
-2026-08-24、モック側が同期済みの状態で `mockup` を実行して
-`Everything up-to-date` と出たが、正典側は未push4本のまま残っていた。
-**正典を更新したら、モックとは別に push すること。**
+**旧記述「`mockup` が push するのは `myrig-mockup`（モック）だけ。正典は手動pushが要る」は現在は誤り。**
+どこかの時点で `~/.zshrc` に `push` 関数が追加され、`mockup` の1行目がこれを呼んでいる。
+
+```zsh
+push () {
+	(
+		cd ~/Desktop/MyRIG/myrig-ai-context || exit 1
+		git fetch -q || exit 1
+		local n=$(git rev-list --count origin/main..HEAD)
+		if [ "$n" -eq 0 ]; then echo "正典: push するものはありません"; exit 0; fi
+		echo "--- 正典を push します ($n件) ---"
+		git log --oneline origin/main..HEAD
+		git push && echo "--- 正典 push 完了 ---"
+	)
+}
+```
+
+つまり `mockup` は「正典を push → モックを commit＋push → deploy → 古い deployment 削除」を
+一度に行う。**正典のためだけに別コマンドを打つ必要はない。**
+
+ただし2点、依然として自分で担保すること。
+
+- **push するのは commit 済みのものだけ。** Cowork が正典を編集しても commit していなければ
+  `push` は「push するものはありません」と言う。正典を直したら commit まで済ませること。
+- **`push` が失敗しても `mockup` は止まらない。** `push` の後ろに `|| return 1` が無く、
+  サブシェルの `exit 1` も呼び出し元へ伝播しない。正典の push が失敗したまま
+  モックだけがデプロイされる経路が残っている。`mockup` 実行時は冒頭の
+  `正典: push するものはありません` / `--- 正典 push 完了 ---` のどちらかが出たことを目で確認する。
 
 ---
 
