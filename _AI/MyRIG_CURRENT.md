@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260916-106
-updated: 2026-09-15 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260916-107
+updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,50 +14,95 @@ updated: 2026-09-15 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-16 / revision 106（**デプロイ運用の記述訂正のみ。仕様裁定なし**）**
+**最終更新: 2026-09-16 / revision 107（**Register PC 2 本の採用裁定を記録。`docs/` は無変更**）**
 
-> 🔴 **104 は「現在地を正しく引き継ぐための STATE 更新」であって、新しい仕様の採用ではない。**
-> `docs/` の ACTIVE 正典は 1 文字も変えていない。Register v3 Concept を ACTIVE 仕様へ昇格させていない。
+> 🔴 **107 は「イタヤが実機で裁定した結果」と現在地の記録。** `docs/` の ACTIVE 正典は 1 文字も変えていない。
+> Register の中身（保存先列・rig_parts の受け皿など）は下の PENDING のとおり**まだ裁定していない**。
 
-### 現在地（mock / production）
+### 現在地（mock）
 
 | | |
 |---|---|
-| mock `origin/main` | **`c28b3f8`**（local HEAD と一致・ahead 0。`.vercelignore` のみ未commit = 105 の変更） |
-| Vercel production | **READY** `dpl_GSaR7A8wtUXi8Sjyfzc7ntDr3qwu` / 同 SHA / author `MyRIGRC <admin@myrigrc.com>` 正常 |
-| production で触れるもの | `pc/myrig-register-rig-v3-concept.html?compare=A｜B｜C`（直リンク。Launcher 未登録）<br>`pc/assets/js/vnext_resolver-dummy.js` も配信確認済み |
-
-🔴 **103 本文の「モック `b18f74c`（push 待ち）」「未了: 本 revision の push → Vercel READY 確認」は
-現在地としては失効**（`b18f74c` は push 済み）。103 の**裁定内容そのものは有効**で、D2 / H2-a は CLOSE のまま。
+| mock local HEAD | `76ff143`（**push 待ち**。106 時点の `origin/main` から 6 commit ahead） |
+| PC の RIG 登録 | **`pc/myrig-register-rig-v3.0.html`（採用版・CLOSE）** |
+| PC の PARTS 登録 | **`pc/myrig-register-parts-v1.0.html`（採用版）** |
+| PC の LOG 投稿 | `pc/myrig-log-composer-modal-v0.3.9.html`（**未着手**。次のレーン候補） |
+| Launcher / 各面 | `compare.html` と各面の「＋投稿する」は上記 2 本を指すよう差し替え済み |
 
 ### レーン
 
-- **基盤修正レーンは引き続き終了済み。** D3 を含む cross-surface の完全収束はやらない（イタヤ方針 2026-09-15）。
-  「次のモック制作を妨げるものだけ必要時に是正」＋「全モックが揃った後の横断 Convergence で徹底監査」。
-  Feed カードの再デザインは**再 OPEN しない**。D4〜D8 / D9 / D11 / D13 は改善候補として保留。
-- **現在のレーン＝ Register v3 Concept の実機比較・デザイン探索。**
+- 基盤修正レーンは終了済み。D3 を含む cross-surface の完全収束はやらない（イタヤ方針 2026-09-15）。
+  Feed カードの再デザインは再 OPEN しない。D4〜D8 / D9 / D11 / D13 は改善候補として保留。
+- **106 の交通整理**（イタヤ）: MVP 本線は「Smart Assist なしでも完成した登録画面」。
+  自然文の整理台は Register へマージしない。Exploration として保存のみ。
+- **現在のレーン＝ Register の PC 版を 1 本ずつ CLOSE していく。** RIG → PARTS 済み。次は LOG。
 
-### Register v3 Concept 第一バッチ（完了。⚠️ 採用裁定は未）
+### ✅ RIG Register PC 採用（2026-09-16 / イタヤ裁定）
 
-- 新規 3 ファイルのみ。**既存ファイルの変更は 0**。
-  `pc/myrig-register-rig-v3-concept.html` / `pc/assets/js/vnext_resolver-dummy.js` / `_state/register_v3_concept_check.py`
-- Concept Gate **95 PASS / 0 FAIL**・故障注入 **8 種すべて検知**
-- **baseline 3 本は未変更で維持**（Gate RV1 が sha256 を毎回照合する）
-  `myrig-register-rig-v2.9.5.html` / `myrig-register-parts-v0.1.10.html` / `myrig-log-composer-modal-v0.3.9.html`
-- **Launcher に v3 Concept を登録していない。既存 `/register/rig` も未切替。**
+- 採用版 **`pc/myrig-register-rig-v3.0.html`**（制作中の呼び名は v3 Concept R2 / -fixed）。
+  旧 baseline v2.9.5 の後継として v3.0 とした。
+- 画面文法: 写真 → 01 基本情報 → 青帯「さらに詳しく記録する」→ 02 メカ・パーツ / 03 所有情報 /
+  04 公開・リンク → 下端固定帯。**手動入力だけで完成する**（Smart Assist を持たない）。
+- 主要な意味論: 作成＝**非公開で実体作成** → autosave → 明示的に公開（作成前に公開状態を作らない）。
+  写真は Cover を **id** で保持（削除・並び替えで動かない）。候補は**入力してから**出す。
+  Master 紐付きは Master 側の分類が正。「変更」のキャンセルは完全に無変更。
+- 旧版は `_archive/20260916_register-rig-close/` へ **mv**（⛔ 削除していない。`_archive` は
+  `.gitignore` / `.vercelignore` 対象なのでディスク上のみ保全）:
+  v2.9.5 / v3-concept（第一バッチ）/ v3-concept-r2 / **v3-smart-explore（Smart Assist Exploration）** /
+  当時の Gate 2 本。
+- ⛔ **入口 A / B / C の比較は行わないまま終了した。** 第一バッチの入口比較は採用されていない
+  （R2 で共通 Editor 1 本に寄せたため、A/B/C の裁定自体が不要になった）。
+
+### ✅ PARTS Register PC 採用（2026-09-16 / イタヤ裁定）
+
+- 採用版 **`pc/myrig-register-parts-v1.0.html`**。RIG v3.0 と**同じ画面文法を継承**。
+- PARTS 固有: 01 は 製品（パーツ Master）/ **型番**（Detail の MODEL 行）/ 表示名 / 紹介文。
+  02 は **搭載RIG**（rig_parts / M:N）。03 は コンディション / 保有状況（搭載中・予備・売却・処分）/
+  入手時期 / 購入価格 / 購入店 / メモ。04 は RIG と同一。
+- **写真上限 5 枚は PARTS Detail 実体と照合済み**（2026-09-16）。公開 `myrig-parts-detail-v1-open.html` /
+  ガレージ `myrig-garage-parts-detail-v7.html` とも ギャラリー **1 / 5**・フォトノート **4 枚**
+  ＝ カバー 1 ＋ サブ 4。RIG は 1 / 7・フォトノート 6 枚で 7 枚。「Detail のギャラリーと同数」は共通、枚数だけ違う。
+- **PARTS 識別色を是正**: カバーバッジと選択済みチェックが RIG の黄（`--cat-rig`）のままだった。
+  `--cat-parts` `#D92D20` / `--cat-parts-on` `#fff` へ。PARTS Detail の PARTS バッジと同値。
+- **搭載RIG の関係意味論を整理**: `rig_parts` は「実際に付いた／付いていた」関係だけを持つ。
+  装着中 → `rig_id` あり / `removed_at` なし。取り外し済み → `rig_id` あり / `removed_at` あり。
+  取り付け予定と、ガレージに無い RIG 名は `rig_parts` に載せず `pending` へ分離（下の PENDING）。
+- ⛔ `compatible_platforms` はこの画面で**一切さわらない**（Master 継承のみ。Research が上流）。
+- 旧 baseline `myrig-register-parts-v0.1.10.html` は `_archive/20260916_register-parts-close/` へ mv。
 
 ### 🔴 PENDING
 
-- **PC 入口 A / B / C の採否＝イタヤ実機裁定待ち。**
-- Mobile 入口は PC 裁定後に短い比較モックを行う。
-- `private_note` の保存先は未裁定。⛔ 新 DB 列を作らない。
-- `rig_parts` の `previous` / `planned` の受け皿は未裁定。
-- 公開中 RIG 編集の「確定して反映」保存モデルは未裁定。
-- v2.9.5 の 5 状態ステータスは v3 Concept 未搭載だが、**廃止裁定ではない**（schema v1.6 に根拠列が無いため置かなかっただけ）。
+- **`rig_parts` の「取り付け予定」の受け皿は未裁定。** 装着の事実がないため `rig_parts` に載せていない。
+  別列 / 別テーブル / 保持しない のどれかを決める。
+- **ガレージに無い RIG を名前だけで記録したものの受け皿は未裁定。** `rig_id` が無く FK を張れない。
+  `rig_name_cache` 列 / 後から RIG 作成へ誘導 / 保持しない のどれかを決める。
+- `private_note` / 購入価格 / 購入店 / キャッチコピー / ビルドタグ / 写真の説明（フォトノート）の
+  保存先は未裁定。⛔ 新 DB 列を勝手に作らない。
+- RIG の 5 状態（ビルド中〜アーカイブ）と PARTS の 4 状態（搭載中〜処分済み）は
+  **Detail の MANAGE に実在するため入力欄を持つ**が、保存先列は未裁定。⛔ 廃止裁定ではない。
+- 外部リンクの「個人サイトは運営確認後に公開」— フラグ（`review: true`）を持つだけで**承認フローは未設計**。
+- 公開中 RIG / PARTS 編集の「確定して反映」保存モデルは未裁定（`data-save-mode` で切替できる構造のみ）。
+- Mobile の Register 3 本は未着手。PC が揃ってから。
 
 ### NEXT
 
-**Register v3 Concept PC A/B/C 実機比較 → 入口方向を裁定 → 短い Mobile 比較 → その後に RIG Editor vNext を詰める。**
+**LOG 投稿 PC（`myrig-log-composer-modal-v0.3.9.html`）を次のレーンにする。**
+ただし LOG は「写真＋種別＋本文」が主役で 01〜04 の構成がそのままは合わないため、
+着手時に構成案から出す。その後 Mobile 3 本 → 全モック揃ってからの横断 Convergence。
+
+> ## 🟢 107: Register PC 2 本の採用を記録（2026-09-16 / 裁定の記録 ＋ STATE）
+>
+> 106 の NOW は「Register v3 Concept の実機比較・A/B/C 裁定待ち」で止まっていたが、実際には
+> R2 / UX Reset → MVP 本線（Smart Assist なし）→ 実用修正 → **イタヤが 2 本とも採用裁定**、
+> まで進んでいた。モックの HTML 冒頭に「採用版」と書いてある一方 CURRENT が未採用のままで
+> **正典と実体がズレていた**ため、現在地と裁定結果をここへ入れた。
+>
+> ⛔ 本 revision は `docs/` を変更しない。採用したのは**画面**であって、保存先列や
+> `rig_parts` の受け皿といった**データ側の裁定は含まない**（NOW の PENDING のとおり）。
+>
+> 106 本文の「PC 入口 A / B / C の採否＝イタヤ実機裁定待ち」「Launcher に v3 Concept を登録していない」
+> 「baseline 3 本は未変更で維持」は**現在地としては失効**（入口比較は不要になり、Launcher は差し替え済み、
+> baseline は archive へ退避）。106 の**裁定内容そのものは有効**。
 
 > ## 🟢 104: NOW の運用状態を実態へ更新（2026-09-15 / STATE のみ）
 >
