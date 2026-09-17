@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260917-111
+revision: MYRIG-20260917-112
 updated: 2026-09-17 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -14,7 +14,60 @@ updated: 2026-09-17 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-17 / revision 111（**LOG Composer PC を採用・LOG データ契約を収束**）**
+**最終更新: 2026-09-17 / revision 112（**LOG Detail Compatibility Gate ＋ LOG Register PC CLOSE**）**
+
+> 🟢 **112 で LOG レーンの PC が閉じた。**
+> **⛔ これは Detail の再設計ではない。111 契約への整合修正。** 067 の LOG Detail CLOSE と
+> 既存デザイン骨格はそのまま維持している（骨格・情報階層・写真文法は変更なし）。
+>
+> **① LOG Register PC = CLOSE**
+> 採用版 `pc/myrig-log-composer-v1.html`。canon **8cb8389** / mock **a1a6820** とも **push 済み・
+> Vercel production READY 済み**（イタヤ確認）。111 作成時点の「push 未実行 / Vercel 未確認 /
+> CLOSE ではない」という記述は**当時の状態**であり、**112 で解消**した。
+>
+> **② LOG Detail Compatibility Gate = 実施・整合済み**
+> 111 の Composer / データ契約と既存 LOG Detail を E2E で突き合わせた。
+> 対応表 12 フィールド × nullable matrix 11 状態を実測し、**PASS 9 / MINOR_FIX 2 / DECISION_REQUIRED 2**。
+> DECISION_REQUIRED 2 件はイタヤ裁定を得て実装済み（下の C-1 / C-2）。
+> ⚠️ **Gate で見つけた事実の訂正**: 111 バッチで「?title=none → h1 0」と報告したのは**計測ミス**だった。
+> 合成 sr-only h1 は実在していた（`.dt-log-title` だけを数えていた）。C-1 はその是正でもある。
+>
+> **③ C-1 裁定: title=NULL 時の H1**
+> `log_type + logged_at + author` から見出しを組み立てる**合成 sr-only h1 を廃止**
+> （例「LOG 整備 · 2026.03.18 — crawler junkie」）。111 の「⛔ ユーザーが入力していない title を
+> 偽生成しない」を優先する。**ページ構造上の h1 は維持**し、title=NULL のときだけ
+> `<h1 class="sr-only">ログ詳細</h1>` を置く。**ユーザー投稿の title ではなく、ページ種別を示す
+> 固定の構造見出し。** ⛔ 文言を状態から組み立てない（固定文字列 1 つ）。
+> title あり → visible `.dt-log-title` が h1、sr-only は足さない。
+>
+> **④ C-2 裁定: location-only の Log facts**
+> 111 以降、新規 LOG が structured facts として持てるのは `location` だけになる。
+> - `location` だけ（`surface` / `weather` / `duration_minutes` 全 NULL）＝**新規 LOG の通常形**
+>   → 「ログ情報」section を作らず **compact metadata row 1 本**（見出しなし・フル幅）
+> - legacy が 1 つでも非 NULL → **従来の「ログ情報」section を維持**。`location` もその中へ入れる
+> - 全 NULL → 何も出さない（既存どおり）
+> ⛔ `location` を上部 context へ移す再設計はしない（位置は actions の下・comments の上のまま）。
+> ⛔ map icon / link 化 / GPS / 地図 / place entity を作らない。`location TEXT` をそのまま出す。
+> ⛔ LOG 専用の新 component を作らない。既存の中立語彙 ＋ 1 列化 modifier `.spec-grid--single` だけ。
+> ⛔ 既定の `.spec-grid` / `.spec-grid--quiet` は触っていない（consumer は RIG v15 / PARTS v1-open ほか）。
+> ⛔ **既存 DB 値は捨てない。** legacy 3 項目は Composer v1 で入力させないだけで、値があれば表示する。
+>
+> **⑤ Gate の実測（Chromium headless）**
+> LOG Detail 33 状態（nullable matrix A〜K ＋ 写真 0/1/2/3 ＋ 16:9 / 4:3 / 縦 / mix ＋ light / dark /
+> 1280・820・420px）と RIG / PARTS / garage RIG Detail × 3 幅で
+> **console error / pageerror / 非画像 404 = 0**。孤立 separator・空 heading・空 shelf・横溢 = 0。
+> 写真は全パターンで**元比率と表示比率が一致**（crop なし・歪みなし）。
+> Composer → toast「見る」→ Detail の E2E も、title / type / rig / date / photo なしで通る。
+> ⛔ **Production DB 非接触。migration 未実行。** `maintenance_logs` は App 所有で 109 の境界契約に未接触。
+>
+> ⚠️ **残り 1 手（112 時点で未了）**: C-1 / C-2 を入れた mock の
+> **`b14590c` と `77b2614` が未 push**（Cowork のデバイス VM に GitHub 認証情報が無い）。
+> イタヤが Mac ターミナルで push → **Vercel production READY と production 上での
+> 通常 / 最小 / location-only の再確認**が必要。それが済めば LOG レーン PC は完全に閉じる。
+>
+> **次のレーン: Mobile Register 3 本（RIG / PARTS / LOG）。**
+
+> 🟢 **111 で LOG Composer PC の正式採用版が決まった。**
 
 > 🟢 **111 で LOG Composer PC の正式採用版が決まった。** `pc/myrig-log-composer-v1.html`
 > （探索 A → A/D/E → **A2** を採用。比較モック `pc/myrig-log-composer-v1-compare.html` は Exploration として
@@ -92,7 +145,8 @@ updated: 2026-09-17 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | PC の PARTS 登録 | **`pc/myrig-register-parts-v1.1.html`（正式採用版・CLOSE）** |
 | 旧版 | `myrig-register-rig-v3.0.html` / `myrig-register-parts-v1.0.html` は **active tree から削除**（履歴は Git。⛔ `_archive` へ複製していない） |
 | 共有 UI | `pc/assets/css/SoT_register-family.css`（Advanced / 章見出し / 下端バー / form chrome / 操作の中立語彙）<br>`pc/assets/js/SoT_register-family.js`（写真枚数の Single Source。`photoMax('rig')=7 / photoMax('part')=5`） |
-| PC の LOG 投稿 | **`pc/myrig-log-composer-v1.html`（正式採用版・111）** |
+| PC の LOG 投稿 | **`pc/myrig-log-composer-v1.html`（正式採用版・111 / 112 で CLOSE）** |
+| PC の LOG 詳細 | **`pc/myrig-log-detail-v1.html`（067 CLOSE 維持。112 で 111 契約への整合修正のみ）** |
 | LOG の探索履歴 | `pc/myrig-log-composer-v1-compare.html`（A / A2 / B / C / D / E。**Exploration。通常導線からは外した**。⛔ 再オープンしない） |
 | LOG の旧版 | `myrig-log-composer-modal-v0.3.9.html` は `_archive/20260917_log-composer-close/` へ **mv**（⛔ 削除していない） |
 | Launcher / 各面 | `compare.html` と各面の「＋投稿する」導線 **18 ファイル**を新正式版へ更新済み。旧名の参照は 0 件 |
@@ -104,8 +158,9 @@ updated: 2026-09-17 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 - **106 の交通整理**（イタヤ）: MVP 本線は「Smart Assist なしでも完成した登録画面」。
   自然文の整理台は Register へマージしない。Exploration として保存のみ。
 - **Register PC は RIG / PARTS とも CLOSE（110）。**
-- **LOG Composer PC は 111 で正式採用版が決定。ただし push 未実行のため CLOSE ではない**（下記 PENDING）。
-- **次のレーン: LOG の push / Vercel 反映確認 → その後 Mobile Register 3 本**（RIG / PARTS / LOG）。
+- **LOG Register PC は CLOSE（112）。** LOG Detail Compatibility Gate も整合済み。
+- ⚠️ mock `b14590c` / `77b2614` は **未 push**。イタヤが push → Vercel 確認で完全に閉じる。
+- **次のレーン: Mobile Register 3 本**（RIG / PARTS / LOG）。
 
 ### ✅ RIG Register PC 採用（2026-09-16 / イタヤ裁定）
 

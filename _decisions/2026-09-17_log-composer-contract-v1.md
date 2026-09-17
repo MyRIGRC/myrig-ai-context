@@ -384,3 +384,90 @@ LOG は「下書き保存済み」が適切。しかし **RIG / PARTS は公開�
 | 「種別の選択済みを LOG 青にする」 | **不採用。** §11 の理由（NG-7） |
 | 「走行を選んだときだけ走行情報を出す」 | **不採用。** §7 の理由（種別任意化と噛み合わない / `rig_type` 依存にできない） |
 | 「`log_type` に 5 値目『その他』を足す」 | **不採用。** §6 の理由（`other` は廃止済み slug） |
+
+
+---
+
+## 16. 追記: LOG Detail Compatibility Gate と C-1 / C-2 裁定（2026-09-17 / 正典 112）
+
+111 の Composer / データ契約と既存 LOG Detail（067 CLOSE）を E2E で突き合わせた。
+**⛔ Detail の再設計ではない。111 契約への整合修正。** デザイン骨格・情報階層・写真文法は変更していない。
+
+判定: **PASS 9 / MINOR_FIX 2 / DECISION_REQUIRED 2**。DECISION_REQUIRED はイタヤ裁定を得て実装した。
+
+### C-1: title=NULL のときの H1
+
+**背景（自己訂正）**: 111 バッチで「`?title=none` → h1 0」と報告したのは**計測ミス**だった。
+`.dt-log-title` だけを数えており、合成 h1 は `class="sr-only"` なのでカウント外だった。
+**合成 sr-only h1 は実在していた。**
+
+- 実装は `js/detail-state-demo.js`（宣言と生成が 120 行離れていたため見落とした）
+- 生成元は `.dt-log-meta` のテキスト ＋ `.dt-identity__author-name`
+- 入ったのは `dbe37c7`（2026-09-07）＝ **111 より前**
+- **canon 根拠 0 件。** `_AI` / `_decisions` / `docs` を全文 grep しても sr-only / h1 / 見出しレベルの
+  裁定は存在せず、根拠はコードコメント「a11y / SEO のため必要」だけだった
+
+**裁定（イタヤ）**: 合成を**廃止**する。111 の「⛔ ユーザーが入力していない title を偽生成しない」を優先。
+ただし**ページ構造上の h1 は維持**し、title=NULL のときだけ固定の構造見出しを置く。
+
+| 状態 | h1 |
+|---|---|
+| title あり | visible `.dt-log-title` が h1。**sr-only は足さない** |
+| title NULL | visible title なし。`<h1 class="sr-only">ログ詳細</h1>` **のみ** |
+
+⛔ body からも、`log_type` / `logged_at` / `author` からも title を作らない。
+⛔ 文言を状態から組み立てない（固定文字列 1 つ）。これは**ユーザー投稿の title ではなく、
+ページ種別を示す構造見出し**である。
+
+### C-2: location だけの Log facts
+
+**背景**: 111 以降、新規 LOG が structured facts として持てるのは `location` だけになる（§7）。
+その状態を実測すると、2 カラムの `spec-grid` に 1 項目だけが入り、
+**右半分が空いて下罫線も半分で途切れる**（見出し「ログ情報」＋ 1 行で高さ 90px）。
+壊れてはいないが、**111 以降の新規 LOG の通常形**としては採用しない、というのが裁定。
+
+**裁定（イタヤ）**: 表示位置は変えず（actions の下・comments の上のまま）、形だけ 2 つに分ける。
+
+| 条件 | 表示 |
+|---|---|
+| `location` だけ（`surface` / `weather` / `duration_minutes` 全 NULL） | 「ログ情報」section を作らず **compact metadata row 1 本**（見出しなし・フル幅） |
+| legacy が 1 つでも非 NULL | **従来の「ログ情報」section を維持**。`location` もその中へ入れる |
+| 全 NULL | 何も出さない（既存どおり） |
+
+- ⛔ `location` を上部 context へ移す再設計はしない
+- ⛔ map icon / link 化 / GPS / 地図 / place entity を作らない。`location TEXT` をそのまま出す
+- ⛔ LOG 専用の新 component を作らない。既存の中立語彙
+  （`.section--flat` / `.spec-grid--quiet` / `.spec-item` / `.spec-key` / `.spec-value`）＋
+  1 列化 modifier **`.spec-grid--single`** だけで組む
+- ⛔ 既定の `.spec-grid` / `.spec-grid--quiet` は触らない（consumer は RIG v15 / PARTS v1-open ほか。両面 VISUAL LOCK）
+- ⛔ **既存 DB 値は捨てない。** legacy 3 項目は Composer v1 で入力させないだけ
+
+実測: 見出しなし・1 列フル幅 850px・**右空白 0**・高さ 128 → **55px**。
+
+### MINOR_FIX（新裁定不要・111 で既決だった追随漏れ）
+
+`pc/myrig-log-detail-v1.html` 冒頭の失効説明を是正した。⛔ 削除せず「**旧裁定 / 111 で失効**」と明示して残した。
+
+| 失効していた記述 | 現行契約 |
+|---|---|
+| 「WIP。まだ VISUAL LOCK していない」 | 067 で CLOSE 済み |
+| 「`title` を将来 optional にするかは別途検討」 | 111 で `title NULLABLE` 確定 |
+| 「`surface` / `weather` は composer 側で入力できない**既知の問題**」 | 111 で**意図的な非搭載**が確定。⛔ "問題" ではない |
+| 旧 composer の入力順（本文 → 画像 → タイトル） | 111 の正式版の順序へ |
+| 「CURRENT 063 のモック追随は別バッチ」 | 111 で共有 JS 追随済み |
+
+### Gate で確認した対応表（Composer → schema → Detail）
+
+`rig_id` / `logged_at` / `log_type` / `title` / `body` / `photos` / `location` /
+`duration_minutes` / `surface` / `weather` / `tags` / `is_public` の 12 フィールドについて
+「Composer で入力できるか / DB に存在するか / Detail でどう表示するか / NULL 時 / legacy」を実測した。
+
+**「Composer に無い＝Detail から消す」はしていない。**
+`duration_minutes` / `surface` / `weather` は表示ロジックを一切触っておらず、既存値があれば従来どおり出る。
+
+### 反証確認で潰した誤検出
+
+820px / 420px で LOG Detail だけ横溢すると測れたが、**検証環境に `img/` を置いていなかったため**
+`naturalWidth=0` になり `SoT_detail-components.js` の縮小計算が効かなかっただけだった。
+実画像を入れて再測すると 3 面 × 3 幅すべて横溢なし。**報告前に取り下げた。**
+同様に dark の横溢も 280ms 時点の計測タイミングによる flake で、650ms 待つと 4/4 で解消した。
