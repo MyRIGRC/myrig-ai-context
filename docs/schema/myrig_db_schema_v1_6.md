@@ -1,4 +1,4 @@
-# MyRIG RC — Database Schema Design v1.6-r3（App所有領域）
+# MyRIG RC — Database Schema Design v1.6-r4（App所有領域）
 
 > **拘束力: L2（現在の確定仕様・より良い案の提案歓迎）**
 >
@@ -84,17 +84,18 @@ Supabase Auth (`auth.users`) と1:1。認証情報以外の全プロフィール
 |---|---|---|---|
 | id | UUID | PK, DEFAULT gen_random_uuid() | |
 | user_id | UUID | FK → profiles.id, NOT NULL | オーナー |
-| rig_master_id | UUID | FK → rig_masters.id, NULLABLE | 公式マスターとの紐付け |
+| rig_master_id | UUID | FK → **`rig_masters.rig_master_id`**, NULLABLE | 公式マスターとの紐付け。⚠️ 参照先の PK 名は `.id` ではない（v1.6-r4 で是正）。**server-derived**（client が候補から選んだ master identity をサーバーが解決して入れる） |
+| rig_master_variant_id | UUID | FK → **`rig_master_variants.variant_id`**, NULLABLE | 選んだ SKU / バリエーション。**Master だけ選んだ場合と Custom RIG は NULL**。⛔ `base_model TEXT` は載せ替え用の別概念であり代用しない。Public RIG Detail の「バリエーション」はここから取る |
 | rig_type | TEXT | NOT NULL, DEFAULT 'rc-car' | CHECK (rig_type IN ('rc-car','mini4wd','drone-fpv','rc-airplane','rc-boat')) |
-| manufacturer_id | UUID | FK → manufacturers.id, NULLABLE | メーカー |
-| manufacturer_name_cache | TEXT | | 非正規化。表示高速化用 |
+| manufacturer_id | UUID | FK → **`manufacturers.manufacturer_id`**, NULLABLE | メーカー。⚠️ 参照先の PK 名は `.id` ではない（v1.6-r4 で是正）。**server-derived**（Master 紐付きなら master から解決。⛔ client payload で権威値として送らない） |
+| manufacturer_name_cache | TEXT | | 非正規化。表示高速化用。**server-derived**（再同期で上書き） |
 | model_name | TEXT | NOT NULL | モデル名 |
 | base_model | TEXT | | ベース車種（載せ替え時） |
-| category_id | UUID | FK → **`rig_categories`.id**, NULLABLE | サブカテゴリ（単一 `categories` 表ではない） |
+| rig_category_slug | TEXT | FK → **`rig_categories.slug`**, NULLABLE | RIG カテゴリ。⚠️ **v1.6-r4 で `category_id UUID` を廃止**。Research 物理の PK は `slug` であり UUID ではない。⛔ slug を偽 UUID へ変換しない。親カテゴリは `rig_categories.parent_slug` から導出し、ここへ重複保存しない。Master 紐付きは **server-derived**、Custom RIG のみ App 側入力 |
 | nickname | TEXT | | ユーザーがつけた愛称 |
 | description | TEXT | | **公開**紹介文 |
 | tagline | TEXT | NULLABLE | **公開**キャッチコピー（RIG Detail の H1 下 1 行）。⛔ build_details へ入れない |
-| build_tags | TEXT[] | DEFAULT '{}' | **公開**ビルドタグ（RIG Detail「ビルドタグ」）。⛔ build_details へ入れない |
+| user_build_tags | TEXT[] | DEFAULT '{}' | **ユーザーが自分の RIG に付ける公開タグ**（UI 表記は「ビルドタグ」のまま）。⚠️ **v1.6-r4 で `build_tags` から改名**。Research `rig_masters.build_tags`（Master 固定の分類・ユーザー編集不可）と**同名別義だった**ため。⛔ Master の `build_tags` をここへ自動コピーしない（別 provenance）。⛔ build_details へ入れない |
 | private_note | TEXT | NULLABLE | **Owner-only** メモ（garage QUICK NOTE）。⛔ 公開面へ出さない |
 | ownership_status | TEXT | NOT NULL, DEFAULT 'current' | 所有の軸。CHECK (ownership_status IN ('current','past','wishlist')) |
 | usage_status | TEXT | NULLABLE | 利用状況の軸。CHECK (usage_status IS NULL OR usage_status IN ('building','active','stored'))。**`ownership_status='current'` のときだけ意味を持つ**。NULL＝未設定。⛔「整備中」は一時イベントなので状態にしない（LOG で扱う）。⛔「アーカイブ」もここへ混ぜない |
@@ -104,10 +105,10 @@ Supabase Auth (`auth.users`) と1:1。認証情報以外の全プロフィール
 | purchase_price | INTEGER | NULLABLE | **Owner-only**。最小通貨単位（円/セント）。RIG では「ベース車両／キットの入手価格」であり総製作費ではない |
 | currency_code | CHAR(3) | DEFAULT 'JPY' | ISO 4217 通貨コード |
 | purchase_store | TEXT | NULLABLE | **Owner-only**。入手先（店名 / 通販サイト名） |
-| build_details | JSONB | DEFAULT '{}' | **設定値・加工・自由項目だけ**を持つ。⛔ 装着している製品個体は入れない（唯一の SoT は `rig_parts`）。⛔ tagline / build_tags / private_note もここへ入れない |
+| build_details | JSONB | DEFAULT '{}' | **設定値・加工・自由項目だけ**を持つ。⛔ 装着している製品個体は入れない（唯一の SoT は `rig_parts`）。⛔ tagline / user_build_tags / private_note もここへ入れない |
 | external_links | JSONB | DEFAULT '[]' | ⚠️ **`entity_links` テーブルへの移行対象（v1.6-r3）**。恒久二重管理は禁止。移行完了までの暫定 |
-| product_line | TEXT | NULLABLE | **マスターからの継承のみ**。ユーザー自由入力は不可 |
-| platform | TEXT | NULLABLE | **自由テキスト廃止・マスターからの継承のみ。**未紐付けは NULL。照合は `rig_masters.platform_slug` |
+| product_line | TEXT | NULLABLE | **マスターからの継承のみ・server-derived**。ユーザー自由入力は不可。⛔ Register の client payload に載せない |
+| platform | TEXT | NULLABLE | **自由テキスト廃止・マスターからの継承のみ・server-derived。**未紐付けは NULL。照合は `rig_masters.platform_slug`。⛔ Register の client payload に載せない |
 | sort_order | INTEGER | DEFAULT 0 | ガレージ内表示順 |
 | view_count | INTEGER | DEFAULT 0 | 閲覧数 |
 | created_at | TIMESTAMPTZ | DEFAULT now() | |
@@ -151,17 +152,18 @@ Supabase Auth (`auth.users`) と1:1。認証情報以外の全プロフィール
 |---|---|---|---|
 | id | UUID | PK, DEFAULT gen_random_uuid() | |
 | user_id | UUID | FK → profiles.id, NOT NULL | オーナー |
-| parts_master_id | UUID | FK → parts_masters.id, NULLABLE | 公式マスターとの紐付け |
+| parts_master_id | UUID | FK → 同期 Master の **`part_id`**, NULLABLE | ⛔ **接続は HOLD H-1（cross_ref 未作成）。現時点で値を入れない。** Research 側の唯一の source ID は `part_masters.part_id`（`.id` ではない） |
 | rig_type | TEXT | NOT NULL, DEFAULT 'rc-car' | CHECK (同上・5値) |
-| compatible_types | TEXT[] | DEFAULT '{rc-car}' | 対応する大大カテゴリ配列（rig_typeと同一値セット） |
-| manufacturer_id | UUID | FK → manufacturers.id, NULLABLE | |
-| manufacturer_name_cache | TEXT | | |
+| compatible_types | TEXT[] | DEFAULT '{rc-car}' | 対応する大大カテゴリ配列（rig_type と同一値セット）。⚠️ **これは App 所有列であり Research 継承値ではない**。Research `part_masters` に同名列は**存在しない**（CONTRACT-EXPORT-20260917）。⛔ Research 値として同期しない。所有の裁定（Research 新設 or App 所有）が出るまで、MVP では `rig_type` rc-car 固定と整合する既定値のまま触らない |
+| manufacturer_id | UUID | FK → **`manufacturers.manufacturer_id`**, NULLABLE | **server-derived**（Master 紐付き時）。Custom PARTS は NULL |
+| manufacturer_name_cache | TEXT | | **server-derived**（再同期で上書き） |
 | product_name | TEXT | NOT NULL | 製品名（Master 由来 or ユーザー入力）。**Public Detail の主タイトルはこれ** |
 | nickname | TEXT | NULLABLE | **Owner-only 管理名**（UI 表記「管理名」）。同一 Master を参照する複数 PARTS を区別するため（例: フロント用 / TF2用 / スペア）。⛔ Public の製品名代わりにしない |
-| category_id | UUID | FK → **`part_categories`.id**, NULLABLE | パーツカテゴリ（⚠️実DBでは `part_categories` は0行＝未構築） |
+| part_category_slug | TEXT | FK → **`part_categories.slug`**, NULLABLE | 親カテゴリ。⚠️ **v1.6-r4 で `category_id UUID` を廃止**（Research 物理の PK は `slug`）。Master 紐付きは **server-derived**、Custom PARTS のみ App 側入力。⚠️ 実 DB では `part_categories` が 0 行＝未構築 |
+| part_subcategory_slug | TEXT | FK → **`part_categories.slug`**, NULLABLE | 子カテゴリ。同上 |
 | description | TEXT | | **公開**パーツ紹介文（用途・加工内容もここで表現する）。※ v1.6-r2 まで Notes が「ユーザーメモ」だったが、Owner-only メモは `private_note` が正 |
 | private_note | TEXT | NULLABLE | **Owner-only** メモ（garage QUICK NOTE）。⛔ 公開面へ出さない |
-| part_number | TEXT | | メーカー型番（Register の UI 表記は「型番」） |
+| part_number | TEXT | | メーカー型番（UI 表記「型番」）。**write authority が経路で分かれる**: Master / Variant 紐付き時は Research `primary_sku`（variant があれば `part_master_variants.primary_sku` 優先）が権威で **server-derived・ユーザー上書き不可**。**Custom PARTS のときだけ**ユーザー入力を許可する |
 | purchased_period | TEXT | NULLABLE | **入手時期**。`rigs.purchased_period` と同一契約（`YYYY` / `YYYY-MM` / `YYYY-MM-DD`、同 CHECK） |
 | purchased_at | DATE | NULLABLE | ⚠️ **非推奨（v1.6-r3）**。正は `purchased_period`。DROP しない |
 | purchase_price | INTEGER | NULLABLE | **Owner-only**。最小通貨単位 |
@@ -278,6 +280,76 @@ WHERE status = 'active';
 - **`aliases`**: `master_aliases` が正本であることは確定。既存の `parts_masters.aliases`（＋GIN索引
   `idx_parts_masters_aliases`）を削除するか併存移行するかは未裁定。
   **移行方針が出るまで新規参照を増やさないこと。**
+
+---
+
+## Domain 3-B: Research ↔ App 境界契約（v1.6-r4 / 2026-09-17）
+
+正本: Research 主査 `RIG_PARTS_CONTRACT_EXPORT_20260917`（Research 所有領域。⛔ App レーンは本文を編集しない）。
+裁定: `_decisions/2026-09-17_research-app-boundary-contract-v1.md`。
+
+### B-1. 境界キー — これ以外を接続に使わない
+
+| 対象 | 唯一の境界キー |
+|---|---|
+| メーカー | `manufacturers.manufacturer_id`（UUID PK）。⛔ `.id` 表記は誤り |
+| RIG マスター | `rig_masters.rig_master_id` |
+| RIG バリアント | `rig_master_variants.variant_id` |
+| **PARTS マスター** | **`part_masters.part_id`（UUID PK）のみ。⛔ `.id` ではない** |
+| PARTS バリアント | `part_master_variants.variant_id`（親は `part_master_id` → `part_masters.part_id`） |
+| カテゴリ | `rig_categories.slug` / `part_categories.slug`（**PK は slug**。親子は `parent_slug` 自己参照） |
+
+**⛔ 境界キー禁止（Research 主査裁定）**
+`part_slug`（UNIQUE なし・台帳と 51.5% 不一致）/ `primary_sku`（NULL・`-`・`N/A`・他社 SKU 接頭辞・JAN 混在）/
+`part_name` / `evidence_url` / `canonical_url` / `scraped_from`（同一 URL 共有 913 件）/
+`master_aliases.alias_value` / `alias_sku` / `manufacturers.slug` / `platform_slug` / `variant_slug` /
+これらの組合せハッシュ / App 側で生成した UUID。
+
+**Research 同期 Master への 3 要求（Research 側の条件）**
+(1) PK UUID を再採番しない (2) 列名を改名しない (3) Research 行を App 側で物理 DELETE しない。
+
+### B-2. write authority — 誰がその値を書くか
+
+「UI に入力欄が無い＝不整合」ではない。**書き込み主体**で分ける。
+
+| 区分 | 誰が書くか | 例 |
+|---|---|---|
+| **user-input** | ユーザーが Register で入力 | `nickname` / `description` / `tagline` / `user_build_tags` / `private_note` / `ownership_status` / `usage_status` / `ownership_state` / `purchased_period` / `purchase_price` / `purchase_store` / `is_public` / 写真と `images.caption` / `entity_links` |
+| **server-derived** | client は **master identity だけ**を送り、サーバーが同期 Master を引いて解決・cache 生成 | `rig_master_id` / `rig_master_variant_id` / `manufacturer_id` / `manufacturer_name_cache` / `rig_category_slug` / `part_category_slug` / `part_subcategory_slug` / `platform` / `product_line` / Master 紐付き時の `part_number` |
+| **custom-only** | Master 未紐付けのときだけユーザー入力 | Custom RIG / Custom PARTS の カテゴリ・型番・メーカー名 |
+| **relation導出** | 保存しない。`rig_parts` から都度導出 | PARTS の「装着状況」 |
+
+⛔ **Register の client payload に Master 継承値を hidden field として大量に詰めない。**
+client → master identity を送る / server → 同期 Master を参照して FK と cache を作る。
+
+### B-3. Resolver / Picker の候補契約
+
+- **`db_register = false` → 候補から除外（確定）。** Research の物理 DELETE 代替。App 側で物理 DELETE しない。
+- **Picker に publication gate はかけない（v1.6-r4 の裁定）。** 理由: `master_publication` 行が無い part が
+  **64%**（2026-08-10）あり、公開判定をそのまま候補条件にすると Register が機能しない。
+  `master_publication_effective` は **公開表示の契約**であって**登録内部検索の契約ではない**。
+  → **picker eligibility** と **public display gate** を別契約として扱う。
+
+### B-4. 公開面の publication gate（確定）
+
+Public Detail / Library / Search / 公式画像 / 公式説明 / 公式外部リンクは
+**VIEW `master_publication_effective` を唯一の公開判定源**とする。
+⛔ App 側で `effective_display_mode` / `effective_logo_mode` を再計算・固定化しない。
+公式画像は `display_status='approved_image'` **かつ** `effective_display_mode='image_enabled'` のときだけ。
+公式リンクは `master_external_links`（`display_status='active'`）が正本で、
+⛔ Domain 4 の `entity_links`（**ユーザー投稿リンク**）とは別物。混ぜない・コピーしない。
+
+### B-5. compatibility
+
+- `compatible_platforms` — **Research 正本**。⛔ App ユーザー入力禁止・推測展開禁止・
+  **部分文字列照合禁止**（`trx4m ⊃ trx-4` で 318 件の誤接続事故）。1 対多 token は据置。XREF まで **HOLD**。
+- `compatible_types` — Research に同名列が**存在しない**。App 所有列として扱い、⛔ Research 継承値として同期しない。
+
+### B-6. App 側が前提にしてはいけない Research 未確定事項
+
+`part_categories.rig_type`（物理実在未確認 → PARTS の `rig_type` は MVP で `rc-car` 固定）/
+`part_categories.spec_schema`（未確定 → spec facet は当面 App 実装対象外）/
+`manufacturers.is_active`（正典間で矛盾）/ `size_class` 13 値（Category v1.4 未反映）。
 
 ---
 
@@ -554,8 +626,8 @@ RIG・パーツ・LOG自体の通報。comment_reportsとは別管理。
   "entity_type": "rig",
   "card_style": "hero",
   "filter": {
-    "category_id": "uuid-here",
-    "subcategory_id": "uuid-here",
+    "category_slug": "rock-crawler",
+    "subcategory_slug": "comp-crawler",
     "manufacturer_id": "uuid-here",
     "rig_type": "rc-car"
   },
@@ -765,9 +837,9 @@ CREATE UNIQUE INDEX idx_favorites_active_unique ON favorites(user_id, entity_typ
 CREATE UNIQUE INDEX idx_pins_active_unique ON pins(user_id, entity_type, entity_id) WHERE deleted_at IS NULL;
 
 -- カテゴリ検索
-CREATE INDEX idx_rigs_category ON rigs(category_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_rigs_category ON rigs(rig_category_slug) WHERE deleted_at IS NULL;
 CREATE INDEX idx_rigs_rig_type ON rigs(rig_type) WHERE deleted_at IS NULL;
-CREATE INDEX idx_parts_category ON parts(category_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_parts_category ON parts(part_category_slug) WHERE deleted_at IS NULL;
 
 -- フォロー
 CREATE INDEX idx_follows_follower ON follows(follower_id) WHERE deleted_at IS NULL;
@@ -906,7 +978,9 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 - `size_class` / `power_source` / `platform_slug` の **App側への実列追加DDL**が未設計
   （`size_class` は値集合が HOLD 中）
 - **App↔Research 写像表（cross_ref）が未作成。**本文中の `parts_masters` が
-  App側 / Research側どちらを指すか曖昧な箇所が残る（機械的な一括置換をしないこと）
+  App側 / Research側どちらを指すか曖昧な箇所が残る（機械的な一括置換をしないこと）。
+  **PARTS Master ID の接続は HOLD H-1 継続**（Domain 3-B / `_decisions/2026-09-17_…`）。
+  RIG 側の cross_ref も PARTS と同時に作る（Research 主査要請）
 - `images.alt`（画像代替テキスト）の追加要否（**`caption` は v1.6-r3 で確定。`alt` は別概念として未裁定のまま**）
 - **複数 RIG で共有して使う機材**（送信機・バッテリー等）の受け皿。
   `rig_parts` は `idx_rig_parts_active_part` により 1 PARTS = 同時 1 RIG なので、そこへは混ぜられない
@@ -933,5 +1007,6 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 | v1.4 | `comments` を MVP へ昇格 / `comment_reports` 追加 / コメント受付ON/OFF 2系統 |
 | v1.5 | `page_blocks`（ウィジェット型CMS）追加。block_type 5種・sort_logic 6種 |
 | v1.6 | `content_reports` 追加。reason_code 6種 |
+| **v1.6-r4** | **Research ↔ App 境界契約の是正（2026-09-17）。** CONTRACT-EXPORT-20260917 との突き合わせで見つかった境界不整合を閉じた。`rigs.build_tags` → **`user_build_tags`** へ改名（Research `rig_masters.build_tags` と同名別義だった）/ FK 参照先を Research 実 PK へ是正（`rig_masters.rig_master_id` / `manufacturers.manufacturer_id`）/ **`category_id UUID` を廃止**し `rig_category_slug` / `part_category_slug` / `part_subcategory_slug`（Research PK は slug）へ / **`rigs.rig_master_variant_id` 新設**（SKU を失わない）/ `parts.part_number` の write authority を経路別に定義（Master 紐付きは `primary_sku` が権威・ユーザー上書き不可）/ `parts.compatible_types` を「App 所有・Research 継承値ではない」と明記 / **Domain 3-B 新設**（境界キー・write authority・picker eligibility・publication gate・compatibility）。⛔ Production DB migration は行っていない |
 | **v1.6-r3** | **Register ↔ Detail ↔ DB データ契約の統合裁定（2026-09-16）。** `rigs` に `tagline` / `build_tags` / `private_note` / `usage_status` / `purchased_period` 追加・`purchased_at` を非推奨化・`build_details` を「設定値・加工・自由項目だけ」に限定（旧 mechanics 系キー廃止）・`external_links` を移行対象化 / `parts` に `nickname` / `private_note` / `ownership_state` / `purchased_period` 追加・`condition` の意味論廃止（DEFAULT 'new' 撤廃）・`description` を公開紹介文と明記 / `rig_parts` に `status` 追加（事実状態と日付を分離、日付不明を表現可能に）・active 一意制約を `rig_id,part_id` と `part_id` の2本に / `images` に `caption` 追加 / **`entity_links` 新設**（RIG・PARTS・LOG 共通のユーザーリンク） / RLS に非公開 entity の relation 経由漏洩防止を追記 |
 | v1.6-r2 | **Research 所有領域の列定義を削除し参照へ降格** / App側 `rig_type` を5値へ / `category_id` の FK 参照先を `rig_categories`・`part_categories` に明記 / `rigs.platform` `product_line` をマスター継承のみに / RLS の `deleted_at` 条件をテーブル限定へ / `page_blocks.page_type` に parts 系2種を追加 / `log_type` 4値で決着 |

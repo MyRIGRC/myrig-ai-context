@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260916-108
+revision: MYRIG-20260917-109
 updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -14,7 +14,15 @@ updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-16 / revision 108（**RIG / PARTS Field Contract 統合裁定。App schema を v1.6-r3 へ**）**
+**最終更新: 2026-09-17 / revision 109（**Research ↔ App 境界契約の是正。App schema を v1.6-r4 へ**）**
+
+> 🔴 **109 で「Research Master ↔ App」の境界を閉じた。** 108 が閉じたのは App 内
+> （Register ↔ Detail ↔ App schema）で、その**一段外側**が残っていた。
+> Research 主査の `RIG_PARTS_CONTRACT_EXPORT_20260917` と App 実体を突き合わせた
+> E2E 監査（`_state/E2E_CONTRACT_AUDIT_20260917.md`）で **Next.js 前 BLOCKER 6 件**が出たため、
+> 裁定原本 **`_decisions/2026-09-17_research-app-boundary-contract-v1.md`** で確定し、
+> `docs/schema/myrig_db_schema_v1_6.md` を **v1.6-r4** へ更新した。
+> ⛔ Production DB 非接触・migration 未実行・Research schema 未変更・cross_ref 未生成。
 
 > 🔴 **108 で「データ契約」を閉じた。** 107 までは画面の採用記録で `docs/` は無変更だったが、
 > 108 は **Register ↔ Public Detail ↔ Owner Detail ↔ App DB を同じ契約へ収束**させ、
@@ -27,8 +35,9 @@ updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | | |
 |---|---|
 | mock local HEAD | **push 待ち**（`mockup` で canon push → mock push） |
-| PC の RIG 登録 | **`pc/myrig-register-rig-v3.0.html`（採用版・CLOSE。108 の Field Contract 反映済み）** |
+| PC の RIG 登録 | **`pc/myrig-register-rig-v3.0.html`（採用版。108 ＋ 109 反映済み）**<br>比較版 `pc/myrig-register-rig-v3.1-compare.html`（Register Family 収束済み） |
 | PC の PARTS 登録 | **`pc/myrig-register-parts-v1.0.html`（採用版。108 の Field Contract 反映済み）**<br>比較版 `pc/myrig-register-parts-v1.1-compare.html`（Hero 2 カラム / 二重幅 / 顔。**採用判断は未了**） |
+| 共有 UI | `pc/assets/css/SoT_register-family.css`（Advanced / 章見出し / 下端バー / form chrome / 操作の中立語彙） |
 | PC の LOG 投稿 | `pc/myrig-log-composer-modal-v0.3.9.html`（**未着手**。次のレーン候補） |
 | Launcher / 各面 | `compare.html` と各面の「＋投稿する」は上記 2 本を指すよう差し替え済み |
 
@@ -71,6 +80,33 @@ updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
   日付は分かるときだけ入れる。取り付け予定とガレージに無い RIG 名は**入力導線ごと外した**。
 - ⛔ `compatible_platforms` はこの画面で**一切さわらない**（Master 継承のみ。Research が上流）。
 - 旧 baseline `myrig-register-parts-v0.1.10.html` は `_archive/20260916_register-parts-close/` へ mv。
+
+### ✅ 109: Research ↔ App 境界契約（2026-09-17 / イタヤ裁定）
+
+裁定原本 **`_decisions/2026-09-17_research-app-boundary-contract-v1.md`** / schema **v1.6-r4**。
+入力は Research 主査 `RIG_PARTS_CONTRACT_EXPORT_20260917`。
+
+> **「UI に入力欄が無い＝不整合」ではない。誰がその値を書くのか（write authority）まで決めるのが 109。**
+
+| # | 確定したこと |
+|---|---|
+| `build_tags` 同名別義 | App 側を **`rigs.user_build_tags`** へ改名。Research `rig_masters.build_tags`（Master 固定の分類・ユーザー編集不可）とは別概念。UI 表示名「ビルドタグ」は維持。⛔ Master 値を自動コピーしない |
+| FK 境界 | 参照先を Research 実 PK へ是正。`rig_masters.rig_master_id` / `manufacturers.manufacturer_id`（⛔ `.id` は誤記）。PK の再採番・改名を禁止 |
+| Category | **`category_id UUID` を廃止**し `rigs.rig_category_slug` / `parts.part_category_slug` ＋ `part_subcategory_slug` へ。Research の PK は **slug**。⛔ 偽 UUID 変換禁止。親は `parent_slug` から導出し重複保存しない |
+| RIG Variant | **`rigs.rig_master_variant_id UUID NULL` 新設**。Master だけ選択 / Custom は NULL。⛔ `base_model` で代用しない。Public Detail の「バリエーション」はここから取る |
+| PARTS Master ID | **HOLD H-1 継続**。唯一の source ID は `part_masters.part_id`（⛔ `.id` ではない）。Register は `master_ref` まで |
+| 型番の write authority | Master / Variant 紐付き → Research `primary_sku` が権威・**server-derived・ユーザー上書き不可**（Register で read-only）。**Custom PARTS のときだけ**入力可 |
+| Master 継承値 | **client は master identity だけを送る / server が同期 Master を引いて FK と cache を作る**。⛔ hidden field を増殖させない。`manufacturer_id` / `platform` / `product_line` / category slug / Master 型番は **server-derived** |
+| `db_register` | `false` → **Resolver / Picker の候補から除外**（確定）。⛔ App 側で物理 DELETE しない |
+| publication | Public Detail / Library / Search / 公式画像・説明・リンクは **`master_publication_effective` が唯一の公開判定源**。⛔ App 側で `effective_*` を再計算しない。**Picker には publication gate をかけない**（publication 行が無い part が 64% あり Register が機能しなくなるため。公開表示の契約と登録内部検索の資格を別契約とする） |
+| compatibility | `compatible_platforms` = Research 正本・入力禁止・推測展開禁止・**部分文字列照合禁止**・XREF は HOLD。`compatible_types` = Research に同名列が**存在しない**。App 所有列として扱い⛔ Research 値として同期しない |
+
+**境界キー禁止**（Research 主査裁定）: `part_slug` / `primary_sku` / `part_name` / `canonical_url` /
+`evidence_url` / `scraped_from` / `master_aliases.alias_value` / `alias_sku` / `manufacturers.slug` /
+`platform_slug` / `variant_slug` / これらの組合せハッシュ / App 生成 UUID。
+
+**109 の追加 HOLD**: **H-9** Register の Variant 選択導線（受け皿は確定・Resolver が variant を返せてから）/
+**H-10** RIG 側の cross_ref 文書（PARTS と同時に作る）/ **H-11** Picker への publication gate（現時点では不要と裁定）。
 
 ### ✅ 108: RIG / PARTS Field Contract 統合裁定（2026-09-16 / イタヤ裁定）
 
@@ -119,6 +155,24 @@ updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 **LOG 投稿 PC（`myrig-log-composer-modal-v0.3.9.html`）を次のレーンにする。**
 ただし LOG は「写真＋種別＋本文」が主役で 01〜04 の構成がそのままは合わないため、
 着手時に構成案から出す。その後 Mobile 3 本 → 全モック揃ってからの横断 Convergence。
+
+> ## 🟢 109: Research ↔ App 境界契約（2026-09-17 / 裁定 ＋ docs 変更あり）
+>
+> 108 は App 内のデータ契約。109 はその**一段外側**（Research Master ↔ App）。
+> Research 主査から `RIG_PARTS_CONTRACT_EXPORT_20260917` が返り、App 実体と突き合わせたところ
+> **Next.js 前 BLOCKER が 6 件**出た（`build_tags` 同名別義 / FK 参照先の誤り / category が UUID vs slug /
+> RIG Variant の保存先なし / publication 制御ゼロ / `db_register` 未受領）。
+>
+> **変更した正典**: `docs/schema/myrig_db_schema_v1_6.md`（**v1.6-r3 → v1.6-r4**）、
+> 新規 `_decisions/2026-09-17_research-app-boundary-contract-v1.md`。
+>
+> **モックにも反映**: Register 4 本の `mapToSchema()` を「ユーザー値 ＋ master identity」だけに絞り、
+> Master 継承値を `server_derived` として宣言に降格。PARTS 型番は Master 選択時 read-only。
+> Resolver mock に `db_register` 除外契約を実装（除外対象を 1 件混ぜて実機で確認できるようにした）。
+> RIG Detail の「バリエーション」「ビルドタグ」に出所コメントを追加。
+>
+> ⛔ Production DB 非接触・migration 未実行・Research schema 未変更・cross_ref 未生成・
+> `compatible_platforms` の推測解決なし・SCHEMA_TRUTH 未確認値の確定なし。
 
 > ## 🟢 108: RIG / PARTS Field Contract 統合裁定（2026-09-16 / 裁定 ＋ docs 変更あり）
 >
