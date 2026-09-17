@@ -1,4 +1,4 @@
-# MyRIG RC — Database Schema Design v1.6-r4（App所有領域）
+# MyRIG RC — Database Schema Design v1.6-r5（App所有領域）
 
 > **拘束力: L2（現在の確定仕様・より良い案の提案歓迎）**
 >
@@ -237,9 +237,9 @@ WHERE status = 'active';
 | id | UUID | PK, DEFAULT gen_random_uuid() | |
 | user_id | UUID | FK → profiles.id, NOT NULL | |
 | rig_id | UUID | FK → rigs.id, NULLABLE | 紐づくRIG（任意） |
-| log_type | TEXT | NOT NULL, DEFAULT 'maintenance' | CHECK (log_type IN ('maintenance','run','custom','memo')) |
-| title | TEXT | NOT NULL | |
-| body | TEXT | | 本文（Markdown or plain） |
+| log_type | TEXT | **NULLABLE**（DEFAULT なし） | CHECK (log_type IN ('maintenance','run','custom','memo'))。**v1.6-r5 で NOT NULL / DEFAULT を撤廃**。NULL＝分類していない |
+| title | TEXT | **NULLABLE** | **v1.6-r5 で NOT NULL を撤廃。** LOG は本文が主役でタイトルは任意 |
+| body | TEXT | **NOT NULL, DEFAULT ''** | 本文（Markdown or plain）。**v1.6-r5 で NOT NULL 化。** draft 実体作成のため空文字を許す |
 | location | TEXT | | 場所 |
 | weather | TEXT | | 天候 |
 | surface | TEXT | | 路面 |
@@ -252,8 +252,46 @@ WHERE status = 'active';
 | updated_at | TIMESTAMPTZ | DEFAULT now() | |
 | deleted_at | TIMESTAMPTZ | NULLABLE | |
 
-**`log_type` は4値が正。**
-`setup` は v1.2 で廃止した値。**将来5値化する裁定が出ても `setup` は再利用せず別 slug を使う。**
+**`log_type` は4値 ＋ NULL が正（v1.6-r5）。**
+`setup` / `other` は v1.2 で廃止した値。**将来5値化する裁定が出ても `setup` / `other` は再利用せず別 slug を使う。**
+
+### 🔴 v1.6-r5: LOG Composer 契約への追随（2026-09-17 / 正典 111）
+
+裁定原本: **`_decisions/2026-09-17_log-composer-contract-v1.md`**
+⛔ **Production DB への migration は実行していない。既存行の意味推定変換もしていない。**
+
+```sql
+-- log_type: 必須分類 → 任意分類
+ALTER TABLE maintenance_logs ALTER COLUMN log_type DROP NOT NULL;
+ALTER TABLE maintenance_logs ALTER COLUMN log_type DROP DEFAULT;
+-- CHECK は 4 値のまま。PostgreSQL の CHECK は NULL を UNKNOWN として通すので NULLABLE と共存する
+--   CHECK (log_type IN ('maintenance','run','custom','memo'))
+
+-- title: 必須 → 任意
+ALTER TABLE maintenance_logs ALTER COLUMN title DROP NOT NULL;
+
+-- body: LOG の主データ。draft 実体作成のため空文字を許し、公開時だけ非空を担保する
+ALTER TABLE maintenance_logs ALTER COLUMN body SET DEFAULT '';
+UPDATE maintenance_logs SET body = '' WHERE body IS NULL;   -- NOT NULL 化の前処理
+ALTER TABLE maintenance_logs ALTER COLUMN body SET NOT NULL;
+ALTER TABLE maintenance_logs ADD CONSTRAINT chk_logs_public_body
+  CHECK (is_public = false OR char_length(btrim(body)) >= 1);
+```
+
+| 項目 | 契約 |
+|---|---|
+| `log_type` NULL | **「分類していない」**。`memo` は「ユーザーがメモとして分類した」。**別物**。⛔ 5 値目 `other` を復活させない |
+| 既存 `maintenance` 行 | **推測で NULL へ変換しない。** DEFAULT で入った値と本人が選んだ値を区別できないため、既存値はそのまま残す |
+| `title` NULL | ⛔ 本文冒頭から偽 title を生成しない。⛔ 空文字 title を見出しとして描画しない。見出しごと出さず excerpt を繰り上げる |
+| 本文の最小文字数 | **App の UX 値（現行 trim 後 10 文字）。⛔ DB 契約値として固定しない。** DB が守るのは「公開 LOG なのに本文が完全に空」を作らないことだけ（1 文字以上） |
+| draft 作成 | **`is_public=false` を明示して INSERT する。** `is_public` の DEFAULT true に draft 生成を依存させない |
+| `location` | 維持。`log_type` 非依存の任意情報。現段階は自由テキスト。⛔ 正規化 / place master / GPS / 地図 / サーキット DB を先回りして作らない |
+| `duration_minutes` / `surface` / `weather` | **列は維持（DROP しない）。既存データも変更しない。** ただし **LOG Composer v1 から新規入力させない**（`duration_minutes` は滞在/実走/作業/バッテリー単位で意味が曖昧・`surface` は自由テキスト 1 欄では比較軸として弱い・`weather` は本文の状況説明のほうが有用）。「DB にあるから UI へ出す」はしない |
+| `logged_at` | `DATE NULLABLE` 維持。`purchased_period` 方式にしない。実施日であり、⛔ `created_at`（投稿日時）を代用にしない。NULL は全件表示から除外しないが、日付期間フィルタでは実施日として扱わない |
+| 写真 | 最大 3 枚（出所は `SoT_register-family.js` の `photoMax('log')`）。**Cover なし**（`hasCover('log')=false`）。`sort_order` が表示順 SoT。新規 LOG 画像の `is_primary` は代表指定に使わない。代表が要る面は **`sort_order` 最小**。⛔「1 枚目を Cover」と意味変更しない |
+| `images.caption` | **列は禁止しない。** MVP の LOG UI で入力・表示しないだけ |
+| 関連パーツ | **`maintenance_log_parts` を作らない**（v1 非搭載）。⛔ tags から `part_id` を推定しない |
+| `entity_links` | LOG は v1 非搭載。⛔ 本文 URL を autolink / linkify しない（`moderation_status` を迂回する経路を作らない） |
 
 ---
 
@@ -1041,5 +1079,6 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 | v1.5 | `page_blocks`（ウィジェット型CMS）追加。block_type 5種・sort_logic 6種 |
 | v1.6 | `content_reports` 追加。reason_code 6種 |
 | **v1.6-r4** | **Research ↔ App 境界契約の是正（2026-09-17）。** CONTRACT-EXPORT-20260917 との突き合わせで見つかった境界不整合を閉じた。`rigs.build_tags` → **`user_build_tags`** へ改名（Research `rig_masters.build_tags` と同名別義だった）/ FK 参照先を Research 実 PK へ是正（`rig_masters.rig_master_id` / `manufacturers.manufacturer_id`）/ **`category_id UUID` を廃止**し `rig_category_slug` / `part_category_slug` / `part_subcategory_slug`（Research PK は slug）へ / **`rigs.rig_master_variant_id` 新設**（SKU を失わない）/ `parts.part_number` の write authority を経路別に定義（Master 紐付きは `primary_sku` が権威・ユーザー上書き不可）/ `parts.compatible_types` を「App 所有・Research 継承値ではない」と明記 / **Domain 3-B 新設**（境界キー・write authority・picker eligibility・publication gate・compatibility）。⛔ Production DB migration は行っていない |
+| **v1.6-r5** | **LOG Composer 契約への追随（2026-09-17 / 正典 111）。** `maintenance_logs.log_type` を **任意分類**へ（NOT NULL / DEFAULT `'maintenance'` を撤廃。NULL＝分類していない。CHECK は 4 値のまま） / `title` の NOT NULL を撤廃（LOG は本文が主役） / `body` を **NOT NULL DEFAULT `''`** 化し、公開時だけ非空を担保する CHECK を追加（draft 実体作成のため空文字を許す） / `duration_minutes` `surface` `weather` は**列を維持したまま Composer v1 から新規入力させない**契約 / 写真は最大 3・Cover なし・`sort_order` が表示順 SoT。⛔ Production DB migration は行っていない。⛔ 既存 `maintenance` 行を推測で NULL へ変換していない。裁定原本 `_decisions/2026-09-17_log-composer-contract-v1.md` |
 | **v1.6-r3** | **Register ↔ Detail ↔ DB データ契約の統合裁定（2026-09-16）。** `rigs` に `tagline` / `build_tags` / `private_note` / `usage_status` / `purchased_period` 追加・`purchased_at` を非推奨化・`build_details` を「設定値・加工・自由項目だけ」に限定（旧 mechanics 系キー廃止）・`external_links` を移行対象化 / `parts` に `nickname` / `private_note` / `ownership_state` / `purchased_period` 追加・`condition` の意味論廃止（DEFAULT 'new' 撤廃）・`description` を公開紹介文と明記 / `rig_parts` に `status` 追加（事実状態と日付を分離、日付不明を表現可能に）・active 一意制約を `rig_id,part_id` と `part_id` の2本に / `images` に `caption` 追加 / **`entity_links` 新設**（RIG・PARTS・LOG 共通のユーザーリンク） / RLS に非公開 entity の relation 経由漏洩防止を追記 |
 | v1.6-r2 | **Research 所有領域の列定義を削除し参照へ降格** / App側 `rig_type` を5値へ / `category_id` の FK 参照先を `rig_categories`・`part_categories` に明記 / `rigs.platform` `product_line` をマスター継承のみに / RLS の `deleted_at` 条件をテーブル限定へ / `page_blocks.page_type` に parts 系2種を追加 / `log_type` 4値で決着 |

@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260917-110
-updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260917-111
+updated: 2026-09-17 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,56 @@ updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-17 / revision 110（**RIG / PARTS Register PC を採用・CLOSE**）**
+**最終更新: 2026-09-17 / revision 111（**LOG Composer PC を採用・LOG データ契約を収束**）**
+
+> 🟢 **111 で LOG Composer PC の正式採用版が決まった。** `pc/myrig-log-composer-v1.html`
+> （探索 A → A/D/E → **A2** を採用。比較モック `pc/myrig-log-composer-v1-compare.html` は Exploration として
+> active tree に残すが**通常導線からは外した**。旧 `myrig-log-composer-modal-v0.3.9.html` は
+> `_archive/20260917_log-composer-close/` へ **mv**。⛔ 削除していない）。
+> 裁定原本: **`_decisions/2026-09-17_log-composer-contract-v1.md`**（理由つき・14 節）。
+> ⛔ **Production DB 非接触。migration 未実行。既存行の意味推定変換なし。Research 所有 schema 未変更。**
+>
+> **LOG 契約の主要差分（schema v1.6-r5）**
+> - `log_type` を **任意分類**へ: `NOT NULL` / `DEFAULT 'maintenance'` を撤廃。**NULL＝分類していない**。
+>   `memo`＝ユーザーがメモとして分類した。**別物**。CHECK は 4 値のまま（PostgreSQL の CHECK は NULL を通す）。
+>   ⛔ 5 値目 `other` を復活させない（`other` / `setup` は v1.2 廃止済み slug）
+> - `title` を **NULLABLE** へ（実 UI と逆転していた）。⛔ 本文冒頭から偽 title を生成しない
+> - `body` を **NOT NULL DEFAULT ''** ＋ 公開時 CHECK（`is_public=false OR btrim(body)>=1 文字`）。
+>   **投稿ゲートの 10 文字は App の UX 値。⛔ DB 契約値として固定しない**
+> - 補助入力は **title / location の 2 つだけ**。`duration_minutes` / `surface` / `weather` は
+>   **列を維持したまま Composer v1 から新規入力させない**（DROP しない・既存データ不変）
+> - 写真 **最大 3・Cover なし・caption 入力なし・crop なし**・`sort_order` が表示順 SoT。
+>   共有 `SoT_register-family.js` の `photoMax('log')` を **7 → 3** へ追随、`hasCover('log')=false` を新設
+> - 関連パーツ / 外部リンクは **v1 非搭載**。⛔ `maintenance_log_parts` を作らない。⛔ 本文 URL を linkify しない
+> - 投稿後は **LOG Detail へ自動遷移しない**。modal を閉じ scroll 維持 → toast「投稿しました　見る」
+>
+> **共有部品への昇格（⛔ LOG 専用コピーを作らない）**
+> `<myrig-register-header variant="modal">` 新設（ロゴ・戻る無し／閉じるが `myrig:register-close` を dispatch）/
+> `save-status="saved-draft"`（「下書き保存済み」）を共有語彙へ追加 / `.bar--inset`（Action Bar の container variant）。
+> ⚠️ **保存文言は RIG / PARTS へ波及させていない。** あちらは公開後も同じ画面で autosave するため
+> 「下書き」が偽になりうる。意味が同じか確認してから揃える（PENDING）。
+>
+> **横断追随（semantic guard のみ。デザインは変えていない）**
+> `SoT_card-components.js`（list / sm-meta の偽 fallback `'LOG'` 撤去・pc / list の title NULL で h3 ごと出さず
+> excerpt 繰り上げ・Feed の空 type span / 空 data 属性を出さない）/ `myrig-log-detail-v1.html` ＋
+> `js/detail-state-demo.js`（`?type=none` 追加。種別と separator を両方落とす）/
+> `docs/search/search-page-plan-v2.md`（LOG の検索対象へ **body** を追加）。
+> フィルタは **「指定なし」専用 UI を MVP で作らない**（「すべて」に NULL LOG を含む）。
+>
+> 🔴 **過去記録の是正（削除せず併記）**: 下の「✅ 完了（2026-08-22 モック是正A）」に
+> **「廃止値 setup の撤去 … これで log_type 絞り込み UI は全ページ 4 値に揃った」**とあるが、
+> **実体は揃っていなかった。** 111 の再 grep で `pc/myrig-public-garage-logs-v3.html`（フィルタチップ ＋
+> カード `data-type`）と `user-garage-logs.html`（フィルタチップ）に「セットアップ」が残存していた。
+> **111 で撤去した**（カードの `data-type` は v1.2 の移行先 `custom`＝「カスタム」へ是正）。
+> ※ 本文中の「セットアップを見直した」等の普通の日本語と `tags="セットアップ,Tires"`（ユーザー自由入力タグ）は
+> `log_type` ではないので対象外・残置。
+>
+> ⚠️ **push は Cowork から実行できない**（デバイス VM に GitHub 認証情報が無い）。
+> **canon / mock とも local commit まで。イタヤが Mac ターミナルで push → Vercel 反映確認が必要。**
+> それが済むまで **LOG Register PC は CLOSE ではない**（§CLOSE 条件の残り: canon push / mock push /
+> remote 反映確認 / Vercel production READY）。
+
+> 🟢 **110 で RIG / PARTS Register の PC 版が CLOSE。**
 
 > 🟢 **110 で RIG / PARTS Register の PC 版が CLOSE。** イタヤ実機確認により
 > `pc/myrig-register-rig-v3.1.html` / `pc/myrig-register-parts-v1.1.html` を**正式採用版**とした
@@ -43,7 +92,9 @@ updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 | PC の PARTS 登録 | **`pc/myrig-register-parts-v1.1.html`（正式採用版・CLOSE）** |
 | 旧版 | `myrig-register-rig-v3.0.html` / `myrig-register-parts-v1.0.html` は **active tree から削除**（履歴は Git。⛔ `_archive` へ複製していない） |
 | 共有 UI | `pc/assets/css/SoT_register-family.css`（Advanced / 章見出し / 下端バー / form chrome / 操作の中立語彙）<br>`pc/assets/js/SoT_register-family.js`（写真枚数の Single Source。`photoMax('rig')=7 / photoMax('part')=5`） |
-| PC の LOG 投稿 | `pc/myrig-log-composer-modal-v0.3.9.html`（**未着手**。次のレーン） |
+| PC の LOG 投稿 | **`pc/myrig-log-composer-v1.html`（正式採用版・111）** |
+| LOG の探索履歴 | `pc/myrig-log-composer-v1-compare.html`（A / A2 / B / C / D / E。**Exploration。通常導線からは外した**。⛔ 再オープンしない） |
+| LOG の旧版 | `myrig-log-composer-modal-v0.3.9.html` は `_archive/20260917_log-composer-close/` へ **mv**（⛔ 削除していない） |
 | Launcher / 各面 | `compare.html` と各面の「＋投稿する」導線 **18 ファイル**を新正式版へ更新済み。旧名の参照は 0 件 |
 
 ### レーン
@@ -52,7 +103,9 @@ updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
   Feed カードの再デザインは再 OPEN しない。D4〜D8 / D9 / D11 / D13 は改善候補として保留。
 - **106 の交通整理**（イタヤ）: MVP 本線は「Smart Assist なしでも完成した登録画面」。
   自然文の整理台は Register へマージしない。Exploration として保存のみ。
-- **Register PC は RIG / PARTS とも CLOSE（110）。次のレーンは LOG 投稿 PC。**
+- **Register PC は RIG / PARTS とも CLOSE（110）。**
+- **LOG Composer PC は 111 で正式採用版が決定。ただし push 未実行のため CLOSE ではない**（下記 PENDING）。
+- **次のレーン: LOG の push / Vercel 反映確認 → その後 Mobile Register 3 本**（RIG / PARTS / LOG）。
 
 ### ✅ RIG Register PC 採用（2026-09-16 / イタヤ裁定）
 

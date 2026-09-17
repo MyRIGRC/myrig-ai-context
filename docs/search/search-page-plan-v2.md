@@ -218,7 +218,14 @@ Searchの状態はURLが正本。同じ生URLをPC/Mobileへ与えたら**同じ
   |---|---|
   | RIG | rig名 + model + maker |
   | PARTS | パーツ名 + brand |
-  | LOG | title + 紐づくRIG + 紐づくRIG由来のmaker |
+  | LOG | **body** + title + 紐づくRIG + 紐づくRIG由来のmaker |
+
+  > 🔴 **2026-09-17 / 正典 111**: LOG の `title` は **任意（NULL 可）** になった（LOG Composer 契約 v1）。
+  > title だけを対象にすると、タイトルを付けない LOG が**本文で検索できなくなる**ため `body` を追加した。
+  > ⛔ ただし **body を title として表示しない**。見出しが無い LOG は見出しを出さず excerpt を繰り上げる
+  > （`SoT_card-components.js` の nullable 追随と同じ規則）。
+  > 裁定原本: `_decisions/2026-09-17_log-composer-contract-v1.md`
+
 - **ユーザー名 / `@handle` は検索対象に含めない**
 - 関連度ランキングはモックでは持たない（後続 Search Service の責務）
 - 検索トップの Enter と固定CTA（「この条件で検索」）は**同一の Search State serializer** を通す
