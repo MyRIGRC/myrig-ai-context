@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260917-109
+revision: MYRIG-20260917-110
 updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -14,7 +14,12 @@ updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-17 / revision 109（**Research ↔ App 境界契約の是正。App schema を v1.6-r4 へ**）**
+**最終更新: 2026-09-17 / revision 110（**RIG / PARTS Register PC を採用・CLOSE**）**
+
+> 🟢 **110 で RIG / PARTS Register の PC 版が CLOSE。** イタヤ実機確認により
+> `pc/myrig-register-rig-v3.1.html` / `pc/myrig-register-parts-v1.1.html` を**正式採用版**とした
+> （`-compare` を外して昇格。旧 v3.0 / v1.0 は active tree から削除。履歴は Git に残る）。
+> ⛔ schema v1.6-r4 / 109 のデータ契約は変更していない。Production DB 非接触。LOG は未着手。
 
 > 🔴 **109 で「Research Master ↔ App」の境界を閉じた。** 108 が閉じたのは App 内
 > （Register ↔ Detail ↔ App schema）で、その**一段外側**が残っていた。
@@ -34,12 +39,12 @@ updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 | | |
 |---|---|
-| mock local HEAD | **push 待ち**（`mockup` で canon push → mock push） |
-| PC の RIG 登録 | **`pc/myrig-register-rig-v3.0.html`（採用版。108 ＋ 109 反映済み）**<br>比較版 `pc/myrig-register-rig-v3.1-compare.html`（Register Family 収束済み） |
-| PC の PARTS 登録 | **`pc/myrig-register-parts-v1.0.html`（採用版。108 の Field Contract 反映済み）**<br>比較版 `pc/myrig-register-parts-v1.1-compare.html`（Hero 2 カラム / 二重幅 / 顔。**採用判断は未了**） |
-| 共有 UI | `pc/assets/css/SoT_register-family.css`（Advanced / 章見出し / 下端バー / form chrome / 操作の中立語彙） |
-| PC の LOG 投稿 | `pc/myrig-log-composer-modal-v0.3.9.html`（**未着手**。次のレーン候補） |
-| Launcher / 各面 | `compare.html` と各面の「＋投稿する」は上記 2 本を指すよう差し替え済み |
+| PC の RIG 登録 | **`pc/myrig-register-rig-v3.1.html`（正式採用版・CLOSE）** |
+| PC の PARTS 登録 | **`pc/myrig-register-parts-v1.1.html`（正式採用版・CLOSE）** |
+| 旧版 | `myrig-register-rig-v3.0.html` / `myrig-register-parts-v1.0.html` は **active tree から削除**（履歴は Git。⛔ `_archive` へ複製していない） |
+| 共有 UI | `pc/assets/css/SoT_register-family.css`（Advanced / 章見出し / 下端バー / form chrome / 操作の中立語彙）<br>`pc/assets/js/SoT_register-family.js`（写真枚数の Single Source。`photoMax('rig')=7 / photoMax('part')=5`） |
+| PC の LOG 投稿 | `pc/myrig-log-composer-modal-v0.3.9.html`（**未着手**。次のレーン） |
+| Launcher / 各面 | `compare.html` と各面の「＋投稿する」導線 **18 ファイル**を新正式版へ更新済み。旧名の参照は 0 件 |
 
 ### レーン
 
@@ -47,9 +52,12 @@ updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
   Feed カードの再デザインは再 OPEN しない。D4〜D8 / D9 / D11 / D13 は改善候補として保留。
 - **106 の交通整理**（イタヤ）: MVP 本線は「Smart Assist なしでも完成した登録画面」。
   自然文の整理台は Register へマージしない。Exploration として保存のみ。
-- **現在のレーン＝ Register の PC 版を 1 本ずつ CLOSE していく。** RIG → PARTS 済み。次は LOG。
+- **Register PC は RIG / PARTS とも CLOSE（110）。次のレーンは LOG 投稿 PC。**
 
 ### ✅ RIG Register PC 採用（2026-09-16 / イタヤ裁定）
+
+> ⚠️ **107 時点の記録。採用版は 110 で `pc/myrig-register-rig-v3.1.html` に置き換わっている**（上の 110 節が現在地）。
+> 以下の画面文法・意味論そのものは v3.1 に継承されている。
 
 - 採用版 **`pc/myrig-register-rig-v3.0.html`**（制作中の呼び名は v3 Concept R2 / -fixed）。
   旧 baseline v2.9.5 の後継として v3.0 とした。
@@ -67,6 +75,9 @@ updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 ### ✅ PARTS Register PC 採用（2026-09-16 / イタヤ裁定）
 
+> ⚠️ **107 時点の記録。採用版は 110 で `pc/myrig-register-parts-v1.1.html` に置き換わっている**（上の 110 節が現在地）。
+> 以下の画面文法・意味論そのものは v1.1 に継承されている。
+
 - 採用版 **`pc/myrig-register-parts-v1.0.html`**。RIG v3.0 と**同じ画面文法を継承**。
 - PARTS 固有: 01 は 製品（パーツ Master）/ **型番**（Detail の MODEL 行）/ 表示名 / 紹介文。
   02 は **搭載RIG**（rig_parts / M:N）。03 は 所有状態 / 入手時期 / 入手価格 / 入手先 / メモ。04 は RIG と同一。
@@ -80,6 +91,27 @@ updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
   日付は分かるときだけ入れる。取り付け予定とガレージに無い RIG 名は**入力導線ごと外した**。
 - ⛔ `compatible_platforms` はこの画面で**一切さわらない**（Master 継承のみ。Research が上流）。
 - 旧 baseline `myrig-register-parts-v0.1.10.html` は `_archive/20260916_register-parts-close/` へ mv。
+
+### ✅ 110: RIG / PARTS Register PC 採用・CLOSE（2026-09-17 / イタヤ実機確認）
+
+**採用版**: `pc/myrig-register-rig-v3.1.html` / `pc/myrig-register-parts-v1.1.html`
+
+| 項目 | 確定した状態 |
+|---|---|
+| 共通 shell | **900px 一本**（`--col:900px`）。RIG / PARTS で同じ箱。⛔ 二重幅は廃止 |
+| カテゴリ色 | **Identity だけ**。Header の RIG / PARTS チップ ・ 01〜04 の章番号 ・ Cover の種別バッジ ・ Master 選択済みアイコン。⛔ 操作・focus・hover・装飾には使わない（NG-7） |
+| Advanced「さらに詳しく記録する」 | **RIG / PARTS 共通の中立**（`--color-bg-subtle` ＋ 1px 罫線）。⛔ カテゴリ色にしない |
+| 写真枚数 | **RIG 最大 7 枚 / PARTS 最大 5 枚**（カバー 1 ＋ 追加 6 / 4）。出所は `SoT_register-family.js` の `photoMax()` **1 箇所**。Detail 4 面の実体（ギャラリー 1/7・1/5、フォトノート 6・4）と一致 |
+| 空状態 | 「最大 N 枚（カバー 1 枚 ＋ 追加 N-1 枚）」を明記 ＋ **空スロットを最初から表示** ＋ カウンタ「写真 0 / N」 |
+| 実写真 preview | **3:2**（cover / thumb）。Detail 4 面の実測（cover img `3/2`・thumb 1.52・フォトノート img `3/2`）に一致。⛔ 空の Drop Zone は操作領域なので 3:2 に固定しない |
+| 追加写真 | **RIG 6 枚横 1 列 / PARTS 4 枚横 1 列**。列数を落とさず縮め、セルが最小幅を割る幅だけ横スクロール。⛔ 狭めて大きくなる挙動は作らない |
+| caption | **1 枚ずつ展開**（写真を押した 1 枚だけ編集欄を開く。別写真で切替）。**placeholder なし**（用途を限定しないため）。ラベル「写真の説明 任意 ・ 公開ページのフォトノートに出ます ・ 90 字まで」は維持 |
+| responsive | 狭くなったら PARTS も RIG と同じ縦文法へ収束（カバー → 写真一覧 → 01 基本情報）。⛔ `order` による特殊な並べ替えはしない |
+| Register Family | 共有 CSS `SoT_register-family.css` ＋ 共有 JS `SoT_register-family.js` を**共有実装として維持**。「片方だけ直ってもう片方が古い」を構造で止める |
+| データ契約 | **Research ↔ App E2E 契約は 109 を維持**（schema v1.6-r4 無変更） |
+
+**旧版の扱い**: `myrig-register-rig-v3.0.html` / `myrig-register-parts-v1.0.html` は
+active tree から**削除**（履歴は Git）。⛔ `_archive` へ新たに複製していない。
 
 ### ✅ 109: Research ↔ App 境界契約（2026-09-17 / イタヤ裁定）
 
@@ -155,6 +187,17 @@ updated: 2026-09-16 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 **LOG 投稿 PC（`myrig-log-composer-modal-v0.3.9.html`）を次のレーンにする。**
 ただし LOG は「写真＋種別＋本文」が主役で 01〜04 の構成がそのままは合わないため、
 着手時に構成案から出す。その後 Mobile 3 本 → 全モック揃ってからの横断 Convergence。
+
+> ## 🟢 110: RIG / PARTS Register PC 採用・CLOSE（2026-09-17 / 現在地・採用状態の変更）
+>
+> イタヤ実機確認により `-compare` の 2 本をそのまま**正式採用版**へ昇格した。
+> ファイル名から `-compare` を外し、旧 v3.0 / v1.0 を active tree から削除。
+> Launcher（`compare.html`）と各面の「＋投稿する」導線 **18 ファイル**を新名へ更新（旧名の参照 0 件）。
+>
+> ⛔ `docs/` は無変更。schema は **v1.6-r4 のまま**、109 のデータ契約も動かしていない。
+> 本 revision が変えたのは**現在地と採用状態**だけ。
+>
+> 109 までの「PARTS v1.1 採用判断未了」「mock push 待ち」の記述は現在状態へ更新済み。
 
 > ## 🟢 109: Research ↔ App 境界契約（2026-09-17 / 裁定 ＋ docs 変更あり）
 >
