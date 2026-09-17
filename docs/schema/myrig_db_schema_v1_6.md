@@ -288,6 +288,39 @@ WHERE status = 'active';
 正本: Research 主査 `RIG_PARTS_CONTRACT_EXPORT_20260917`（Research 所有領域。⛔ App レーンは本文を編集しない）。
 裁定: `_decisions/2026-09-17_research-app-boundary-contract-v1.md`。
 
+### B-0. 参照の意味 — **本書の「FK → Research Master」は App 内の同期 Master への参照**
+
+⚠️ **Research DB（`ualrrrsmhlnpwfqrrsjc`）と App / Production は別 project。**
+物理 FK も JOIN も **project を跨げない**。
+
+したがって本書および Domain 2 の
+
+```
+rigs.rig_master_id          FK → rig_masters.rig_master_id
+rigs.rig_master_variant_id  FK → rig_master_variants.variant_id
+rigs.manufacturer_id        FK → manufacturers.manufacturer_id
+rigs.rig_category_slug      FK → rig_categories.slug
+parts.part_category_slug    FK → part_categories.slug
+parts.parts_master_id       FK → （同期 Master の）part_id
+```
+
+は **Research DB へ直接 FK を張る意味ではない。**
+**Research の master テーブルを PK(UUID) 不変・列名不変のまま App 側へ同期複製したあと、
+App project 内のその同期 Master を参照する**という契約である。
+
+- **同期方式そのもの（複製 / レプリケーション / ETL / 頻度）は App 側の決定事項。** 本書では定義しない。
+- **Research 側の要求は 3 点のみ**（これを満たす限り方式は問わない）:
+  1. **PK UUID を再採番しない**
+  2. **列名を改名しない**
+  3. **Research 行を App 側で物理 DELETE しない**（`db_register=false` / publication で非表示化する）
+- 本書の語彙: **FK** = 同期 Master の PK をそのまま外部キーとして参照 /
+  **JOIN** = 表示時に同期 Master 側を読む（App 列へ複製しない） /
+  **CACHE可** = App 所有テーブルへ表示用に複製してよい（**再同期で上書きされる前提**） /
+  **コピー禁止** = App 所有テーブルへ複製しない /
+  **XREF** = 境界表（cross_ref）が無いと接続できない。
+- ⚠️ **`parts_masters` だけは同期の前段（cross_ref）が未作成**なので、上の同期が成立していても
+  接続できない（HOLD H-1）。
+
 ### B-1. 境界キー — これ以外を接続に使わない
 
 | 対象 | 唯一の境界キー |
