@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260917-112
-updated: 2026-09-17 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260918-113
+updated: 2026-09-18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -13,6 +13,67 @@ updated: 2026-09-17 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > **スレッドをまたぐとき最初に読む節。** イタヤは環境（デスクトップCowork / ブラウザCowork /
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
+
+**最終更新: 2026-09-18 / revision 113（**Mobile RIG Register 採用 — progressive × focus × inset**）**
+
+> 🟢 **113 で Mobile RIG Register の UI が決まった。** 実体 `register-rig-v2.html` ＋ `js/register-rig-v2.js`（mock）。
+> 処遇表 `myrig_pc_Ver3/_state/MOBILE_RIG_REGISTER_TREATMENT.md`（v3）、検査 `_state/mobile_register_check.py`。
+> ⛔ **Production DB 非接触。migration 未実行。PC Register 3 本は触っていない。**
+>
+> **DECISION（実モック比較 ＋ イタヤ実機裁定 2026-09-18）**
+> - **D-A** P22-B17「登録フロー最小化」を根拠に 02〜04 を登録後へ送ることは **しない**。
+>   02 メカ・パーツ / 03 所有情報 / 04 公開・リンクは **Advanced「さらに詳しく記録する」の中に残す**。
+>   実機判定の理由は「登録後へ送る必要性より、**トリガーが目立たず展開できると気づけない**ことの方が問題だった」。
+>   → **defer 0 行**。PC の入力 14 種はすべて Mobile に実在する（gate C3 で実測）。
+> - **D-B** **progressive 採用**（1 ページ段階開示）。**steps（4 面ウィザード）は不採用**。
+>   理由: 02〜04 が任意であることを形で言えるのは progressive だけ／作成後の編集は連続 Editor なので
+>   「登録だけウィザード」の二重文法を作らない。
+> - **D-C** **focus 採用**。**登録中は BottomNav を出さない**（markup ごと撤去）。契約 §3.2 の Register 例外として明文化した。
+> - **D-D** 写真の並び替えは **写真 Sheet 内の「前へ移動 / 後ろへ移動」**。**drag を必須にしない**。
+>   Cover は `is_primary` ではなく **選んだ 1 枚を id で追う**／表示順 SoT は `sort_order`（契約不変）。
+> - **D-E** **`window.beforeunload` は採用しない**。**未作成 ＋ dirty のときだけ**、SubHeader の戻る と
+>   ブラウザ / PWA Back を route-leave guard に通して確認（「入力内容を破棄しますか？／まだ RIG は作成されていません。」
+>   ［編集を続ける］［破棄して戻る］）。**作成後は autosave を信頼して出さない。**
+>   履歴 marker は **常に高々 1 つ**（clean → dirty で 1 回積む。Back に消費されたら「編集を続ける」で 1 つだけ積み直す）。
+> - **D-F** Advanced トリガーは **RIG 黄 `--cat-rig` の inset 角丸ヘッダー**
+>   （左右 `--ms-gutter` / `border-radius 13px` / 全面塗り ＋ `--cat-rig-on`。⛔ border / shadow / gradient / 片側色線なし。
+>   open / closed で地色は変えず Chevron だけ回す）。02 / 03 / 04 は番号バッジ文法のまま、操作色は中立のまま。
+>   ⚠️ **PC v3.1 は 2026-09-16 に同形（全面帯）を採用し 09-17 に「強すぎる」として中立へ戻した前例がある。**
+>   113 の inset は**横いっぱいの帯ではなく独立した角丸コントロール**で役割が違う。**PC への横展開は未裁定**。
+>
+> **単一化（比較分岐の撤去）**
+> 裁定後、`?flow` / `?chrome` / `?adv` を本体から撤去し **progressive × focus × inset の 1 本**にした。
+> 比較版の実体は `myrig_pc_Ver3/_archive/20260918_mobile-register-compare/`（README に checkout 手順つき）。⛔ 削除していない。
+> 残すオプションは `?debug=1` と `?theme=dark` のみ。
+>
+> **契約への追随（113 で canon を更新した箇所）**
+> - `docs/ui/page-role-matrix-v1.md` — `/register/rig` の「ステップ式」を **連続 Editor / progressive** へ（D-B）
+> - `docs/ui/mobile-component-contract-v0.5.md` §3.2 — **Register 例外**（登録・編集系は BottomNav 非表示。
+>   Register は Utility 面なので現在地も持たない）を追記（D-C）
+> - `docs/ui/pc-mobile-spec-inheritance-v1.1.md` #28 / #29 / #30 — ファイル名を現行へ。
+>   #28 特記の「離脱警告はモバイル再利用要件」を **実体と不一致**として D-E の設計へ差し替え。
+>   #30 の 111 前のモーダル構成を失効として明示
+> - `docs/design/design-nogo-list.md` NG-7 職域表 — **「セクション見出し・展開コントロールの種別識別」行を追加**（D-F）
+>
+> **実測（Chromium headless / `_state/mobile_register_check.py`）— 4 gate すべて FAIL 0**
+> `static`（処遇表 ↔ `data-treat` 43 行の機械突合 / 裁定なき merge・defer・drop 0 / 禁止語 0 / 失効色 0 /
+> 枚数直書き 0 / nested interactive 0 / 比較分岐 0 / 退避先の実在）・`render`（360・390・430px × light / dark）・
+> `behave`（28 項目）・`counter`（反証確認 ＋ inset 形状 ＋ D-E 11 項目）。
+> **実 hit 48×48 未満の control 0**（`getBoundingClientRect` ＋ 絶対配置 `::after` の合成で判定。CSS の grep ではない）。
+> ⚠️ **R49 キーボード退避（`visualViewport` で Dock を持ち上げる）だけは headless で再現できない。iPhone 実機で確認する。**
+>
+> **PENDING / 未裁定**
+> - PC Register 側の同型不具合 3 件（本レーンでは直していない）:
+>   ① `pc/myrig-register-rig-v3.1.html` の `#fOwn` が **「欲しい / 計画中」**のまま（108 契約では `wishlist` = 欲しい。
+>      `planned` は MVP 非構造化）② 同ファイルの `button#phEmpty > span#phSample[role=button]` が **interactive の入れ子**
+>   ③ D-F の inset を PC Register Family へ横展開するかどうか
+> - `<myrig-register-header save-status="saved-draft">` を RIG / PARTS へ揃えるか（111 からの PENDING）
+> - Shell の `toast(msg)` は action を取れない。R9「取り消す」は page-local 実装のまま（契約 §7-1 のクロスチェック対象）
+>
+> **次のレーン: Mobile PARTS Register → Mobile LOG Register。**
+> Mobile LOG は 111 の契約差分（種別任意 / location のみ / 写真 3 枚 / Cover なし）が全部乗るので最後に回す。
+
+---
 
 **最終更新: 2026-09-17 / revision 112（**LOG Detail Compatibility Gate ＋ LOG Register PC CLOSE**）**
 
@@ -64,6 +125,10 @@ updated: 2026-09-17 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > **`b14590c` と `77b2614` が未 push**（Cowork のデバイス VM に GitHub 認証情報が無い）。
 > イタヤが Mac ターミナルで push → **Vercel production READY と production 上での
 > 通常 / 最小 / location-only の再確認**が必要。それが済めば LOG レーン PC は完全に閉じる。
+>
+> 🟢 **STATE（113 で解消・上の記述は 112 作成時点のもの。⛔ 履歴として残す）**:
+> mock `77b2614` は **push 済み**、Vercel production **READY 確認済み**（2026-09-17 イタヤ）。
+> **PC LOG レーン（Composer / Detail / Compatibility Gate）は完全 CLOSE。**
 >
 > **次のレーン: Mobile Register 3 本（RIG / PARTS / LOG）。**
 

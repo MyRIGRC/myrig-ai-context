@@ -137,7 +137,7 @@ Admin
 | Parts Master Detail | `/library/parts/[masterSlug]` | Library | パーツの公式スペック・購入先導線（Lite方針）| このパーツの基本情報を確認 / 購入先へ進む | Must | B | ✅ 実装済み（PC `myrig-library-parts-master-detail-v3.html` / モバイル `library-parts-master-detail.html`） |
 | Maker Detail | `/library/makers/[makerSlug]` | Library | メーカー情報・製品ライン・公式サイト導線 | このメーカーの製品を見る | Later | Later | ✅ 実装済み（PC `myrig-library-maker-detail-v3.html` / モバイル `library-maker-detail.html`） |
 | Notifications | `/notifications` | Relationship | いいね・コメント・フォロー通知 | 通知を確認する | Should | Later | MVP後半で整備 |
-| RIG 登録 | `/register/rig` | Utility | RIG登録フォーム（ステップ式） | RIGを登録する | Must | B | フォーム系は別まとめ |
+| RIG 登録 | `/register/rig` | Utility | RIG登録フォーム（**連続 Editor / progressive**。段階開示） | RIGを登録する | Must | B | フォーム系は別まとめ。🔴 **2026-09-18 改訂（113）**: 旧記述「ステップ式」は失効。PC v3.1（110）も Mobile（113）も強制ウィザードではない。裁定 **D-B** |
 | PARTS 登録 | `/register/part` | Utility | PARTS登録フォーム | パーツを登録する | Must | B | |
 | LOG 登録 | `/register/log` | Utility | LOG登録フォーム | ログを記録する | Must | B | |
 | Settings | `/settings` | Utility | アカウント・プロフィール・通知・テーマ設定 | 設定を変更する | Should | Later | |

@@ -234,16 +234,26 @@
 
 ### Utility / Account / Info
 
-**#28 myrig-register-rig-v2.9.5.html — `/register/rig`**（full mock・Phase 3-1）
+**#28 `pc/myrig-register-rig-v3.1.html` — `/register/rig`**（full mock・Phase 3-1）
+🔴 **2026-09-18 改訂（113）**: ファイル名を現行（v3.1 / 110 CLOSE）へ。旧 `myrig-register-rig-v2.9.5.html` は `_archive/20260916_register-rig-close/` にある。下の設計図は v2.9.5 当時の記述を残すが、**食い違いは PC 現物（v3.1）が正**（§3-2）。v3.1 に **「表示位置調整」は無い**（写真は Cover ＋ strip ＋ 説明欄）。
 - 主列: 写真ブロック（カバー＋ドロップ＋写真グリッド＋表示位置調整）→ 基本情報（ベース車種選択→chassisモーダル［メーカー→シリーズ→候補 / あいまい候補 / カスタムfallback］＋基本項目＋表示名ヒント）→ さらに詳しく記録する（advanced: Electronics & Power［ESC/Motor/Servo/Battery/Receiver・Radio］/ Drivetrain & Chassis［Shocks・Springs / Axle・Linkage / Transmission・Driveshaft］/ Wheels & Tires / Body・Exterior［Body / Bumper・Mount / Interior・Driver］/ Accessories［LED・Light / Winch / Scale Accessories］/ その他［カテゴリからパーツを追加］）→ 所有情報 → 公開・リンク（公開設定＋外部リンク）→ FAB（sticky保存）
 - 付随: modal--chassis / modal--part-picker / 外部リンク追加 / 表示位置調整 / pub-toast
 - 特記: 下書き・離脱警告・キーボード対応はモバイル再利用要件（matrix #28）。
+  🔴 **2026-09-18 改訂（113・裁定 D-E）**: 「離脱警告」は**実体と不一致だった**。PC v3.1 に `beforeunload` は **0 件**（実測）。
+  Mobile は `window.beforeunload` を**継承しない**。代わりに **entity 未作成 かつ dirty のときだけ**、
+  SubHeader の戻る と ブラウザ / PWA Back を route-leave guard に通して確認を出す。**作成後は autosave を信頼して出さない**。
+  履歴 marker は clean → dirty の 1 回だけ積み、Back に消費されたら「編集を続ける」で 1 つだけ積み直す（**常に高々 1 つ**）。
+  「下書き」は **未作成のあいだサーバー保存しない / 作成後は節ごと autosave** という意味論のことで、独立した下書き実体ではない。
+  ⛔ LOG の `saved-draft`「下書き保存済み」を RIG / PARTS へ横展開しない（111 の PENDING）。
 
-**#29 myrig-register-parts-v0.1.10.html — `/register/part`**（full mock・Phase 3-2）
+**#29 `pc/myrig-register-parts-v1.1.html` — `/register/part`**（full mock・Phase 3-2）
+🔴 **2026-09-18 改訂（113）**: ファイル名を現行（v1.1 / 110 CLOSE）へ。旧版は `_archive/20260916_register-parts-close/`。
 - 主列: 写真ブロック（Cover＋サブ最大4枚＋Photo Notes＋表示位置調整）→ 基本情報（製品選択＋表示名＋説明・メモ）→ さらに詳しく記録する（02 使用先・使用メモ［使用中RIG＋使用状況］→ 03 所有情報 → 04 公開・リンク）→ FAB（保存状態＋公開）
 - 付随: 「パーツの製品を選ぶ」（modal--part-master）/「使用中のRIGを選択」（modal--rig-link）/ 外部リンク追加 / 表示位置調整 / pub-toast
 
-**#30 myrig-log-composer-modal-v0.3.9.html — `/register/log`**（full mock・Phase 3-3）
+**#30 `pc/myrig-log-composer-v1.html` — `/register/log`**（full mock・Phase 3-3）
+🔴 **2026-09-18 改訂（113）**: ファイル名を現行（v1 / 111・112 CLOSE）へ。旧 `myrig-log-composer-modal-v0.3.9.html` は `_archive/20260917_log-composer-close/` へ **mv** 済み。
+🔴 **下のモーダル構成は 111 前の記述で失効している。**現行は `_decisions/2026-09-17_log-composer-contract-v1.md` が正: 種別は**任意（NULL 可）** / **走行時間・路面は Composer v1 から外した** / **関連パーツは v1 非搭載** / 補助入力は **title と location だけ** / 写真は**最大 3・Cover なし** / 投稿後は**自動遷移せず** toast「投稿しました　見る」。
 - モーダル構成: ヘッダー（LOGを投稿＋保存状態）→ 種別タブ（整備 / カスタム / 走行 / メモ）＋日付 → 本文・メモ（必須・500字）→ 画像（最大3枚）→ タイトル（任意）→ 関連付け（場所 / 走行時間 / 路面コンディション）→ 対象RIG＋関連パーツ選択 → フッター（保存状態＋公開切替＋投稿）
 - **`log_type` は4値（maintenance / run / custom / memo）が正。**「セッティング」タブは作らない（`setup` は廃止値）。
 - 特記: モバイルはbottom-sheet化（G6）。ホスト画面（LOG一覧）は表示確認用。

@@ -96,6 +96,14 @@ Phase 1以降の全モバイルページが共有するShell・部品・tokenの
 - **禁止:** `.mobile-avatar-btn`は**使用禁止**（旧Header/UserMenu系クラス。Headerへのアバター復活誤実装を防ぐため、v0.3抽出対象からも除外）
 - **構成（確定）:** ホーム / 探す / 登録(中央) / Feed / ガレージ。`/saved`復活禁止
 - **挙動:** 下スクロールで自動非表示（threshold 10px / top buffer 24px）。**dialog/sheet開放中は自動hide/show判定を停止（明示的な非表示はしない・close時に通常判定へ復帰 — §3.7要件7）**。タップ領域53px実測維持
+- 🔴 **Register 例外（2026-09-18 / 113・裁定 D-C）:** **登録・編集系（`/register/:path*`）では BottomNav を出さない**（focus surface）。
+  Header Search Overlay（§3.1b）に次ぐ **2 つ目の明示的非表示**。理由は実モック比較の実測:
+  ①本文が 56px 広くなる ②Action Dock が画面最下端へ来る ③キーボード表示時に窮屈になりにくい
+  ④登録途中に Feed / ガレージへ誤離脱しない ⑤「いま作っている」という作業モードになる。
+  **Register は Utility 面**なので、BottomNav を出す場合でも `is-active` / `aria-current` は持たせない
+  （Home / 探す / Feed / ガレージ のどこからでも起動しうる。中央 Create は action であって現在地ではない）。
+  出口が SubHeader の戻るだけになる代わりに、**未作成 ＋ dirty のときだけアプリ内離脱確認**を出す（裁定 D-E・§3.9 参照）。
+  ⛔ この例外を Register 以外へ広げない。⛔ `window.beforeunload` は常設しない
 - **状態:** `is-active` / 未ログイン時もナビ表示（ガード発火は§3.8）
 
 ### 3.3 SafeArea
