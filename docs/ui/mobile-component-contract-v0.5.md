@@ -131,6 +131,22 @@ Phase 1以降の全モバイルページが共有するShell・部品・tokenの
 - **未ログイン:** 項目タップで**先にCreateActionSheetをclose → LoginRequiredModal（context='register'）をopen**（単一開放原則 — §3.7）
 - カテゴリシート（`.bottom-sheet--cat#catSheet`）も同一契約に従う
 
+### 3.6b Relation Picker【114・Relationship MVP】
+
+- **性質:** 自分の既存 entity を選んで **関係だけを張る** picker。⛔ 新しい entity を作る経路ではない（作る経路は同じ面の別タブ）
+- **供給元:** `pc/assets/js/SoT_relation-picker.js`（**PC / Mobile 共用の 1 本**。CORE 共有UI Single Source L1）。
+  ⛔ 面ごとに複製しない。⛔ `MY_PARTS` / `MY_RIGS` を page-local に定義しない
+- **2 種:** `openMyParts({mode})` — `mode:'attach'`（RIG へ装着 → `rig_parts`）/ `mode:'reference'`（LOG へ関連 → `maintenance_log_parts`・複数選択可）。
+  `openMyRigs()` — PARTS を RIG へ（PARTS Register / Garage PARTS Detail）
+- **使用面:** RIG Register（PC / Mobile）/ PARTS Register / Garage RIG Detail / Garage PARTS Detail / LOG Composer の **5 面**
+- **候補:** `ownership_state='owned'` のみ（裁定 114 Q5）。自分の entity のみ
+- **行の状態ラベル:** **3 値のみ** — `○○ に装着中` / `装着記録なし` / （`released` は候補に出ない）。
+  ⛔「予備」「スペア」と言わない（relation から導出できない）。色は**中立**。⛔ カテゴリ色を使わない（NG-7）
+- **`attach` で別 RIG に装着中を選んだとき:** **必ず確認**（［このRIGへ移す］［同じ製品をもう1個登録する］［キャンセル］）。
+  移す＝旧 `rig_parts` を `removed`（`removed_at` は NULL）＋ 新 `active` を 1 操作で。`idx_rig_parts_active_part` の帰結であって任意機能ではない
+- **Mobile 外装:** bottom-sheet。**`MyRIGMobileShell.registerSheet()` へ登録**し §3.7 の Dialog Controller 管理（単一開放 / Escape / focus trap / focus 復帰 / scroll lock）を受ける
+- **PC 外装:** 既存 `.mb / .modal` 文法。**中身の DOM と意味論は共通、外装だけ面ごと**
+
 ### 3.7 LoginRequiredModal（新規）＋ 共通Dialog Controller
 - **方針（裁定済み）:** 独立ページモック不要。本契約＋状態サンプル1画面（`?login-modal=1`）のみ
 - **DOM:** `.login-required-modal[role=dialog][aria-modal=true][aria-labelledby][aria-describedby]`。overlayは`.sheet-overlay`共用

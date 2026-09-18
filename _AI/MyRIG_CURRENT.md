@@ -1,6 +1,6 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260918-113
+revision: MYRIG-20260918-114
 updated: 2026-09-18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
@@ -13,6 +13,76 @@ updated: 2026-09-18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > **スレッドをまたぐとき最初に読む節。** イタヤは環境（デスクトップCowork / ブラウザCowork /
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
+
+**最終更新: 2026-09-18 / revision 114（**Relationship MVP — RIG / PARTS / LOG の関連付け**）**
+
+> 🟡 **114 は裁定と正典の起票まで。mock 実装はこれから。**
+> 裁定原本: **`_decisions/2026-09-18_relationship-mvp-v1.md`** / schema **v1.6-r6**
+> ⛔ **Production DB 非接触。migration 未実行。物理 DELETE 禁止。Research 所有領域 不変。**
+>
+> **発端**: Mobile RIG Register（113）を「実際に自分で登録するつもりで」触った結果、
+> **RIG / PARTS / LOG が互いに孤立している**箇所が見つかった。仕様書だけでは出なかった穴。
+>
+> **実測で分かった現在地**
+> - RIG Register（PC / Mobile）からパーツを足すと **必ず新しい `parts` 行を作る**。
+>   既存の自分の PARTS を選ぶ経路は **0 件**（grep 実測）
+> - 「関係だけを張る」経路は **PARTS Register の『搭載RIG』1 本だけ**だった
+> - Detail のリンク先は **すでに User Entity（PARTS Detail）が主**で、そこから Library へ降りる二層
+>   （v15 の使用パーツ 13 リンクが全て PARTS Detail 宛て）→ **Detail 側は直す必要がない**
+> - **LOG ↔ PARTS はデータも表示も両側とも無い**（111 §12 で v1 非搭載）
+>
+> **DECISION（裁定 Q1〜Q6）**
+> - **Q1** LOG は **RIG のみ / PARTS のみ / 両方 / どちらも無し の 4 状態すべて許可**
+> - **Q2** `maintenance_log_parts` に **`rig_parts_id` を持たない**。`log_id ↔ part_id` の単純 relation が SoT。
+>   🔴 将来追加しても**過去行は遡って埋められない**（推定禁止・日付からも復元不能）。**恒久的に NULL。** schema に明記
+> - **Q3** 非公開 PARTS は公開面に **出さない・数えない**。→ **Owner と第三者で「使用パーツ」件数が変わるのが正常**。
+>   `section__count` は静的値ではなく**閲覧者に見える PARTS だけ**で計算する
+> - **Q4** RIG を手放すとき、装着中 PARTS は **1 回だけ一括確認**（一緒に手放した / 手元に残した。既定は後者）
+> - **Q5** picker は **`ownership_state='owned'` のみ**。⚠️ 既に張られた relation は `released` でも消えない
+> - **Q6** 関連 PARTS は **UI 暫定 10 件。DB 制約にしない**
+>
+> **追加で確定したもの**
+> - **パーツ追加は 3 経路**: **マイパーツから選ぶ → 製品から探す → 手入力する**。
+>   ⚠️ 1 番目に置く根拠は **H-1（`parts_master_id` 未接続）で Master 一致の重複検出が構造上できない**こと。
+>   MVP で使える重複防止は**この経路そのもの**
+> - **「別 RIG に装着中」を選んだら必ず確認**（移す / もう 1 個登録する / キャンセル）。
+>   `idx_rig_parts_active_part` の帰結であって任意機能ではない。移す＝旧行 `removed`（日付 NULL）＋新行 `active`
+> - **共有 `SoT_relation-picker.js` を新設**し 5 面が同じ 1 本を読む（CORE 共有UI Single Source L1）。
+>   ⚠️ 実測で mock に `MY_PARTS` が**存在せず**、`MY_RIGS` は PARTS Register にローカル定義されていた → **共有へ引き上げる**
+> - **「装着 RIG の LOG」を「このパーツの LOG」と見せない**（111 維持）
+>
+> **schema v1.6-r6（列は 1 本も変えていない）**
+> `maintenance_log_parts` **新設 1 表のみ** / `rig_parts` に **親の状態変化の伝播規則** /
+> `parts` 説明文「複数RIGに装着可能」→ **「順次（同時は 1 台）」**（索引と食い違っていた）/
+> `parts.nickname` に「`rigs.nickname` と可視性が逆」/ RLS の `rig_parts` 行が **r3 の `status` 化を反映していなかった**のを是正。
+>
+> 🔴 **伝播規則が無いと何が起きるか**: `idx_rig_parts_active_part`（1 PARTS = 同時 1 RIG）があるため、
+> **`active` を残したまま RIG を削除・手放すと、その PARTS は二度とどの RIG にも装着できなくなる。**
+>
+> **111 §12 の再 OPEN**: 111 は「両側に表示面が無く死蔵入力になる」ことを理由に非搭載とし、
+> **「PARTS Detail 側の表示契約とセットで裁定する」**と条件を書いていた。
+> 今回は LOG Detail と PARTS Detail を**同時に**作るので、**111 が予告した経路**。113 との矛盾ではない。
+>
+> **VISUAL LOCK（裁定）**: 今回触る 5 面（Public Detail 3 / Garage Owner Detail 2）は
+> **canon 114 → mock 実装 → diff 確認 → 意図した差分だけと確認 → 新 baseline 採用 → 以後 pixel diff 0** の順。
+> ⛔ **旧 baseline は削除しない**（適用前の履歴）。
+> **触らない面（Home / Feed / Library / Search / Browse / Garage Top / Public Garage）は既存 baseline に対し pixel diff 0 を維持。**
+>
+> **⛔ 今回やらないもの**: PARTS の過去装着タイムライン / LOG 時点の装着エピソード保存 /
+> LOG シリーズ・ツリー・`parent_log` / 共有機材の複数 RIG 同時関連（**HOLD H-2 のまま**）/ 自動関連推定 / 数量列。
+>
+> **次の作業（実装レーン）**
+> 1. 共有 picker（`SoT_relation-picker.js`）→ Mobile RIG Register で実測
+> 2. PC RIG Register / PC PARTS Register
+> 3. Garage RIG / PARTS Detail の stub 結線 ＋ Q4 確認
+> 4. LOG Composer ＋ LOG Detail ＋ PARTS Detail
+> 5. Mobile 4 面追随 → 新規 gate `_state/relation_check.py` ＋ 既存 gate 全回し ＋ 反証確認
+> 6. VISUAL LOCK baseline 更新（上の順序）
+>
+> **⛔ 再 OPEN しないもの**: PC RIG / PARTS Register の章立て・写真・保存意味論 /
+> LOG Composer の種別・本文・写真・投稿後動線 / Mobile RIG Register の flow・chrome・Advanced トリガー（113 の裁定）。
+
+---
 
 **最終更新: 2026-09-18 / revision 113（**Mobile RIG Register 採用 — progressive × focus × inset**）**
 

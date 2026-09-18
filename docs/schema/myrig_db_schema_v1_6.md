@@ -1,4 +1,4 @@
-# MyRIG RC — Database Schema Design v1.6-r5（App所有領域）
+# MyRIG RC — Database Schema Design v1.6-r6（App所有領域）
 
 > **拘束力: L2（現在の確定仕様・より良い案の提案歓迎）**
 >
@@ -13,7 +13,7 @@
 > - **RLS 方針**（セキュリティ）
 > - **HOLD 項目を確定として扱わないこと**
 
-**最終更新:** 2026-08-22
+**最終更新:** 2026-09-18（v1.6-r6 / 正典 114）
 ※ファイル名は `myrig_db_schema_v1_6.md` のまま（CURRENT.md の索引と一致させるため）
 
 ## 適用範囲 — L1
@@ -146,7 +146,10 @@ Supabase Auth (`auth.users`) と1:1。認証情報以外の全プロフィール
 ---
 
 ### `parts`
-ユーザーが登録するパーツ。1パーツ＝複数RIGに装着可能（中間テーブルで管理）。
+ユーザーが登録するパーツ。1パーツ＝複数RIGへ **順次** 装着できる（中間テーブル `rig_parts` で管理）。
+⚠️ **同時に装着できるのは 1 台だけ**（`idx_rig_parts_active_part`）。過去の装着は行として残る。
+🔴 **v1.6-r6 で是正**: 旧文「1パーツ＝複数RIGに装着可能」は `idx_rig_parts_active_part` と読み方が食い違っていた
+（同時装着できると読めた）。列・索引は変えていない。文言だけの是正。
 
 | Column | Type | Constraints | Notes |
 |---|---|---|---|
@@ -158,7 +161,7 @@ Supabase Auth (`auth.users`) と1:1。認証情報以外の全プロフィール
 | manufacturer_id | UUID | FK → **`manufacturers.manufacturer_id`**, NULLABLE | **server-derived**（Master 紐付き時）。Custom PARTS は NULL |
 | manufacturer_name_cache | TEXT | | **server-derived**（再同期で上書き） |
 | product_name | TEXT | NOT NULL | 製品名（Master 由来 or ユーザー入力）。**Public Detail の主タイトルはこれ** |
-| nickname | TEXT | NULLABLE | **Owner-only 管理名**（UI 表記「管理名」）。同一 Master を参照する複数 PARTS を区別するため（例: フロント用 / TF2用 / スペア）。⛔ Public の製品名代わりにしない |
+| nickname | TEXT | NULLABLE | **Owner-only 管理名**（UI 表記「管理名」）。同一 Master を参照する複数 PARTS を区別するため（例: フロント用 / TF2用 / スペア）。⛔ Public の製品名代わりにしない。⚠️ **`rigs.nickname`（公開の愛称）とは可視性が逆**。共有カード / Detail 部品は `entity_type` で分岐する（v1.6-r6 追記） |
 | part_category_slug | TEXT | FK → **`part_categories.slug`**, NULLABLE | 親カテゴリ。⚠️ **v1.6-r4 で `category_id UUID` を廃止**（Research 物理の PK は `slug`）。Master 紐付きは **server-derived**、Custom PARTS のみ App 側入力。⚠️ 実 DB では `part_categories` が 0 行＝未構築 |
 | part_subcategory_slug | TEXT | FK → **`part_categories.slug`**, NULLABLE | 子カテゴリ。同上 |
 | description | TEXT | | **公開**パーツ紹介文（用途・加工内容もここで表現する）。※ v1.6-r2 まで Notes が「ユーザーメモ」だったが、Owner-only メモは `private_note` が正 |
@@ -227,6 +230,22 @@ WHERE status = 'active';
 ⚠️ **送信機・バッテリー等の「複数 RIG で共有して使う機材」は装着 relation とは別概念。**
    `idx_rig_parts_active_part` と衝突するため、`rig_parts` へ混ぜない。受け皿は **HOLD（未裁定）**。
 
+#### 🔴 v1.6-r6: 親 entity の状態変化 → `rig_parts` の伝播規則（2026-09-18 / 正典 114）
+
+**`idx_rig_parts_active_part`（1 PARTS = 同時 1 RIG・active）があるため、
+`active` を残したまま親を削除 / 手放しすると、その PARTS は二度とどの RIG にも装着できなくなる。**
+これを防ぐ規則。**DDL 変更は無い。App の操作規則として守る。**
+
+| 操作 | `rig_parts` への作用 |
+|---|---|
+| `rigs.deleted_at` を立てる | **事前に**その RIG の `active` 行を全て `status='removed'` へ。`removed_at` は **NULL のまま**（日付を捏造しない）。⛔ 行を消さない |
+| `rigs.ownership_status` → `past` | **1 回だけ一括確認**（裁定 114 Q4）。「パーツも一緒に手放した」→ 各 `parts.ownership_state='released'` ＋ `rig_parts` を `removed` ／「パーツは手元に残した」→ `rig_parts` を `removed` のみ。**既定は後者** |
+| `parts.ownership_state` → `released` | その PARTS の `active` 行を `status='removed'` へ |
+| `parts.deleted_at` を立てる | 同上 |
+
+⛔ **`active` が無いことを「予備」と自動判定しない**（Field Contract §3 のまま）。表示は「装着記録なし」まで。
+⛔ 過去行を書き換えない。再装着は新しい行。
+
 ---
 
 ### `maintenance_logs`
@@ -292,6 +311,40 @@ ALTER TABLE maintenance_logs ADD CONSTRAINT chk_logs_public_body
 | `images.caption` | **列は禁止しない。** MVP の LOG UI で入力・表示しないだけ |
 | 関連パーツ | **`maintenance_log_parts` を作らない**（v1 非搭載）。⛔ tags から `part_id` を推定しない |
 | `entity_links` | LOG は v1 非搭載。⛔ 本文 URL を autolink / linkify しない（`moderation_status` を迂回する経路を作らない） |
+
+---
+
+### `maintenance_log_parts`
+**🔴 v1.6-r6 新設（2026-09-18 / 正典 114）。** LOG と PARTS の関連。
+裁定原本: `_decisions/2026-09-18_relationship-mvp-v1.md`
+⛔ **Production DB への migration は実行していない。**
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| id | UUID | PK, DEFAULT gen_random_uuid() | |
+| user_id | UUID | FK → profiles.id, NOT NULL | RLS 用。**App が `log.user_id = part.user_id = user_id` を保証する** |
+| log_id | UUID | FK → maintenance_logs.id, NOT NULL | |
+| part_id | UUID | FK → parts.id, NOT NULL | **関係の SoT はこの 2 列** |
+| sort_order | INTEGER | DEFAULT 0 | 表示順 |
+| created_at | TIMESTAMPTZ | DEFAULT now() | |
+| deleted_at | TIMESTAMPTZ | NULLABLE | 論理削除。**物理 DELETE 禁止** |
+
+```sql
+CREATE UNIQUE INDEX idx_log_parts_pair ON maintenance_log_parts(log_id, part_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_log_parts_part ON maintenance_log_parts(part_id) WHERE deleted_at IS NULL;  -- PARTS Detail の逆引き
+CREATE INDEX idx_log_parts_log  ON maintenance_log_parts(log_id)  WHERE deleted_at IS NULL;  -- LOG Detail の順引き
+```
+
+| 項目 | 契約 |
+|---|---|
+| SoT | **`log_id ↔ part_id` の関係そのもの**。「この LOG がどの PARTS に関連するか」だけを持つ |
+| RIG 非依存 | `maintenance_logs.rig_id` が **NULL でも張れる**。RIG のみ / PARTS のみ / 両方 / どちらも無し の **4 状態すべて許可**（裁定 114 Q1） |
+| ⛔ **`rig_parts_id` を持たない** | **裁定 114 Q2。** 「その LOG 当時どの RIG に付いていたか」は MVP で追跡しない。<br>🔴 **将来 `rig_parts_id UUID NULL` を追加する場合、既存行を遡って埋めることはできない。** 自動推定は禁止で、`rig_parts.installed_at` / `removed_at` は NULL 可のため日付からも復元できない。**過去分は恒久的に NULL のままとする。**「後から埋められる」と誤解しないこと |
+| 関連数の上限 | **DB 制約にしない。** UI の MVP 値として Composer で暫定 10 件（裁定 114 Q6） |
+| 候補 | picker は `parts.ownership_state='owned'` のみを出す（裁定 114 Q5）。⚠️ **既に張られた relation は `released` になっても消えない**（表示は続く。picker に出ないだけ） |
+| ⛔ tags | **`maintenance_logs.tags` から `part_id` を機械的に同定しない**（111 のまま） |
+| ⛔ 代用禁止 | **「装着 RIG の LOG」を「このパーツの LOG」として見せない**（111 / PARTS Detail v1-open の裁定を維持）。PARTS Detail の「関連するLOG」は**本表の行だけ** |
+| 表示契約 | LOG Detail「関連するパーツ」＋ PARTS Detail「このパーツに関連するLOG」を**同時に**持つ。111 §12 が再 OPEN の条件として求めた「PARTS Detail 側の表示契約とセット」を満たす |
 
 ---
 
@@ -865,7 +918,14 @@ notifications
 - **follows**: SELECTは全公開（`deleted_at IS NULL`）。INSERTは`follower_id = auth.uid()`。
   解除（UPDATE `deleted_at`）は`follower_id = auth.uid()`の行のみ許可（他人のフォロー関係は解除不可）
 - **マスターデータ**: SELECT全公開。変更は管理者ロールのみ
-- **rig_parts**: `user_id = auth.uid()`でINSERT/UPDATE。取り外しは`removed_at`のUPDATEで行う（物理DELETEなし）
+- **rig_parts**: `user_id = auth.uid()`でINSERT/UPDATE。物理DELETEなし。
+  🔴 **v1.6-r6 で是正**: 旧記述「取り外しは`removed_at`のUPDATE」は **v1.6-r3 の変更を反映していなかった**
+  （同じ本文の「共通原則」側は r3 で是正済みだったが、この行だけ旧いまま残っていた）。
+  **正: 取り外しは `status='removed'` への UPDATE。`removed_at` は日付が分かるときだけ入れる（不明なら NULL）。**
+- **maintenance_log_parts**（v1.6-r6）: `user_id = auth.uid()` で INSERT/UPDATE。物理DELETEなし（`deleted_at` の UPDATE）。
+  SELECT は「自分の行」または **`maintenance_logs.is_public = true` かつ `parts.is_public = true` かつ両者 `deleted_at IS NULL`** の場合のみ。
+  ⚠️ **非公開 PARTS は公開面の一覧にも件数にも出さない**（上の「非公開 entity の relation 経由漏洩」と同じ原則。裁定 114 Q3）。
+  **App が `log.user_id = part.user_id` を保証する**（他人の PARTS を自分の LOG へ張れない）
 - **comments**: SELECTは`status='published'`かつ親（rig/part/log）が`is_public=true AND deleted_at IS NULL`の場合のみ。
   INSERTはauth.uid()必須。自分のコメントのstatus更新のみ可能
 - **comment_reports**: INSERTはauth.uid()必須。SELECTは運営者ロールのみ
@@ -888,6 +948,11 @@ CREATE INDEX idx_logs_user_id ON maintenance_logs(user_id) WHERE deleted_at IS N
 
 -- RIGのログ一覧
 CREATE INDEX idx_logs_rig_id ON maintenance_logs(rig_id) WHERE deleted_at IS NULL;
+
+-- v1.6-r6: LOG ↔ PARTS
+CREATE UNIQUE INDEX idx_log_parts_pair ON maintenance_log_parts(log_id, part_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_log_parts_part ON maintenance_log_parts(part_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_log_parts_log  ON maintenance_log_parts(log_id)  WHERE deleted_at IS NULL;
 
 -- マスター紐付け（UGC→マスター集約用）
 CREATE INDEX idx_rigs_master ON rigs(rig_master_id) WHERE rig_master_id IS NOT NULL AND deleted_at IS NULL;
@@ -972,9 +1037,11 @@ profiles ──1:N──→ comments
 rigs ──N:1──→ rig_masters      (rig_master_id, NULLABLE)
 parts ──N:1──→ parts_masters    (parts_master_id, NULLABLE)
 
-rigs ──N:M──→ parts             (via rig_parts)
-rigs ──1:N──→ maintenance_logs
+rigs ──N:M──→ parts             (via rig_parts / 同時 active は 1 台)
+rigs ──1:N──→ maintenance_logs  (rig_id, NULLABLE)
 rigs ──1:N──→ images
+
+maintenance_logs ──N:M──→ parts (via maintenance_log_parts / v1.6-r6。rig_id が NULL でも張れる)
 
 parts ──1:N──→ images
 maintenance_logs ──1:N──→ images
@@ -1016,7 +1083,7 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 > ⚠️ **5番 `parts_masters` は所有区分が未確定**（Research の `part_masters` と同一かが決まっていない）。
 > **App↔Research 写像表（cross_ref）が無い状態でマイグレーションを流さないこと。**
 
-### MVP実行分（20テーブル ＋ entity_links）
+### MVP実行分（20テーブル ＋ entity_links ＋ maintenance_log_parts）
 1. `manufacturers` ※Research所有
 2. `rig_categories` / `part_categories` ※Research所有
 3. `profiles`（auth.users依存）
@@ -1026,6 +1093,7 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 7. `parts`（parts_masters依存）
 8. `rig_parts`
 9. `maintenance_logs`
+9-b. `maintenance_log_parts`（maintenance_logs / parts 依存。**v1.6-r6 で新設**）
 10. `images`
 10-b. `entity_links`（rigs / parts / maintenance_logs 依存。**v1.6-r3 で新設**）
 11. `likes`
@@ -1053,6 +1121,8 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
   **PARTS Master ID の接続は HOLD H-1 継続**（Domain 3-B / `_decisions/2026-09-17_…`）。
   RIG 側の cross_ref も PARTS と同時に作る（Research 主査要請）
 - `images.alt`（画像代替テキスト）の追加要否（**`caption` は v1.6-r3 で確定。`alt` は別概念として未裁定のまま**）
+- **`maintenance_log_parts.rig_parts_id`（LOG 時点の装着エピソード）の追加要否。**
+  v1.6-r6 では**意図的に持たない**（裁定 114 Q2）。追加する場合、**既存行は遡って埋められない**（推定禁止）。
 - **複数 RIG で共有して使う機材**（送信機・バッテリー等）の受け皿。
   `rig_parts` は `idx_rig_parts_active_part` により 1 PARTS = 同時 1 RIG なので、そこへは混ぜられない
 - **`rigs.external_links` → `entity_links` のデータ移行手順**（Production DB への migration は未着手）
@@ -1079,6 +1149,7 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 | v1.5 | `page_blocks`（ウィジェット型CMS）追加。block_type 5種・sort_logic 6種 |
 | v1.6 | `content_reports` 追加。reason_code 6種 |
 | **v1.6-r4** | **Research ↔ App 境界契約の是正（2026-09-17）。** CONTRACT-EXPORT-20260917 との突き合わせで見つかった境界不整合を閉じた。`rigs.build_tags` → **`user_build_tags`** へ改名（Research `rig_masters.build_tags` と同名別義だった）/ FK 参照先を Research 実 PK へ是正（`rig_masters.rig_master_id` / `manufacturers.manufacturer_id`）/ **`category_id UUID` を廃止**し `rig_category_slug` / `part_category_slug` / `part_subcategory_slug`（Research PK は slug）へ / **`rigs.rig_master_variant_id` 新設**（SKU を失わない）/ `parts.part_number` の write authority を経路別に定義（Master 紐付きは `primary_sku` が権威・ユーザー上書き不可）/ `parts.compatible_types` を「App 所有・Research 継承値ではない」と明記 / **Domain 3-B 新設**（境界キー・write authority・picker eligibility・publication gate・compatibility）。⛔ Production DB migration は行っていない |
+| **v1.6-r6** | **Relationship MVP（2026-09-18 / 正典 114）。** **`maintenance_log_parts` 新設**（`log_id ↔ part_id` のみ。⛔ `rig_parts_id` は持たない＝裁定 Q2。RIG 無し LOG でも張れる＝Q1。UI 上限 10 は DB 制約にしない＝Q6）/ `rig_parts` に **親 entity の状態変化の伝播規則**を明記（RIG 削除・`past` / PARTS `released`・削除 → `active` を `removed` へ。これを怠るとその PARTS が二度と装着できなくなる）/ `parts` の説明文「複数RIGに装着可能」を **「順次（同時は 1 台）」** へ是正（索引と読み方が食い違っていた）/ `parts.nickname` に「`rigs.nickname` と可視性が逆」を追記 / RLS の `rig_parts` 行が **v1.6-r3 の `status` 化を反映していなかった**のを是正 / 非公開 PARTS を relation 経由でも公開面に出さない・数えないことを明記（Q3）。⛔ 既存テーブルの**列は 1 本も変えていない**。⛔ Production DB migration は行っていない。裁定原本 `_decisions/2026-09-18_relationship-mvp-v1.md` |
 | **v1.6-r5** | **LOG Composer 契約への追随（2026-09-17 / 正典 111）。** `maintenance_logs.log_type` を **任意分類**へ（NOT NULL / DEFAULT `'maintenance'` を撤廃。NULL＝分類していない。CHECK は 4 値のまま） / `title` の NOT NULL を撤廃（LOG は本文が主役） / `body` を **NOT NULL DEFAULT `''`** 化し、公開時だけ非空を担保する CHECK を追加（draft 実体作成のため空文字を許す） / `duration_minutes` `surface` `weather` は**列を維持したまま Composer v1 から新規入力させない**契約 / 写真は最大 3・Cover なし・`sort_order` が表示順 SoT。⛔ Production DB migration は行っていない。⛔ 既存 `maintenance` 行を推測で NULL へ変換していない。裁定原本 `_decisions/2026-09-17_log-composer-contract-v1.md` |
 | **v1.6-r3** | **Register ↔ Detail ↔ DB データ契約の統合裁定（2026-09-16）。** `rigs` に `tagline` / `build_tags` / `private_note` / `usage_status` / `purchased_period` 追加・`purchased_at` を非推奨化・`build_details` を「設定値・加工・自由項目だけ」に限定（旧 mechanics 系キー廃止）・`external_links` を移行対象化 / `parts` に `nickname` / `private_note` / `ownership_state` / `purchased_period` 追加・`condition` の意味論廃止（DEFAULT 'new' 撤廃）・`description` を公開紹介文と明記 / `rig_parts` に `status` 追加（事実状態と日付を分離、日付不明を表現可能に）・active 一意制約を `rig_id,part_id` と `part_id` の2本に / `images` に `caption` 追加 / **`entity_links` 新設**（RIG・PARTS・LOG 共通のユーザーリンク） / RLS に非公開 entity の relation 経由漏洩防止を追記 |
 | v1.6-r2 | **Research 所有領域の列定義を削除し参照へ降格** / App側 `rig_type` を5値へ / `category_id` の FK 参照先を `rig_categories`・`part_categories` に明記 / `rigs.platform` `product_line` をマスター継承のみに / RLS の `deleted_at` 条件をテーブル限定へ / `page_blocks.page_type` に parts 系2種を追加 / `log_type` 4値で決着 |

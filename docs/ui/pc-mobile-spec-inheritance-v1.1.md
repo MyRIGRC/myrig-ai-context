@@ -238,6 +238,10 @@
 🔴 **2026-09-18 改訂（113）**: ファイル名を現行（v3.1 / 110 CLOSE）へ。旧 `myrig-register-rig-v2.9.5.html` は `_archive/20260916_register-rig-close/` にある。下の設計図は v2.9.5 当時の記述を残すが、**食い違いは PC 現物（v3.1）が正**（§3-2）。v3.1 に **「表示位置調整」は無い**（写真は Cover ＋ strip ＋ 説明欄）。
 - 主列: 写真ブロック（カバー＋ドロップ＋写真グリッド＋表示位置調整）→ 基本情報（ベース車種選択→chassisモーダル［メーカー→シリーズ→候補 / あいまい候補 / カスタムfallback］＋基本項目＋表示名ヒント）→ さらに詳しく記録する（advanced: Electronics & Power［ESC/Motor/Servo/Battery/Receiver・Radio］/ Drivetrain & Chassis［Shocks・Springs / Axle・Linkage / Transmission・Driveshaft］/ Wheels & Tires / Body・Exterior［Body / Bumper・Mount / Interior・Driver］/ Accessories［LED・Light / Winch / Scale Accessories］/ その他［カテゴリからパーツを追加］）→ 所有情報 → 公開・リンク（公開設定＋外部リンク）→ FAB（sticky保存）
 - 付随: modal--chassis / modal--part-picker / 外部リンク追加 / 表示位置調整 / pub-toast
+🔴 **2026-09-18 追記（114 / Relationship MVP）**: 02 メカ・パーツ のパーツ追加は **3 経路**になる —
+  **① マイパーツから選ぶ（既存 PARTS を `rig_parts` で関連付け。新しい `parts` 行を作らない）→ ② 製品から探す → ③ 手入力する**。
+  ①②③ は共有 `SoT_relation-picker.js`（PC / Mobile 共用）。**Garage RIG Detail の「パーツを追加」も同じ picker・同じ意味論**。
+  ①で「別 RIG に装着中」の PARTS を選んだら**必ず確認**（移す / もう1個登録する / キャンセル）。裁定 `_decisions/2026-09-18_relationship-mvp-v1.md`
 - 特記: 下書き・離脱警告・キーボード対応はモバイル再利用要件（matrix #28）。
   🔴 **2026-09-18 改訂（113・裁定 D-E）**: 「離脱警告」は**実体と不一致だった**。PC v3.1 に `beforeunload` は **0 件**（実測）。
   Mobile は `window.beforeunload` を**継承しない**。代わりに **entity 未作成 かつ dirty のときだけ**、
@@ -250,6 +254,8 @@
 🔴 **2026-09-18 改訂（113）**: ファイル名を現行（v1.1 / 110 CLOSE）へ。旧版は `_archive/20260916_register-parts-close/`。
 - 主列: 写真ブロック（Cover＋サブ最大4枚＋Photo Notes＋表示位置調整）→ 基本情報（製品選択＋表示名＋説明・メモ）→ さらに詳しく記録する（02 使用先・使用メモ［使用中RIG＋使用状況］→ 03 所有情報 → 04 公開・リンク）→ FAB（保存状態＋公開）
 - 付随: 「パーツの製品を選ぶ」（modal--part-master）/「使用中のRIGを選択」（modal--rig-link）/ 外部リンク追加 / 表示位置調整 / pub-toast
+🔴 **2026-09-18 追記（114）**: 「使用中のRIGを選択」は共有 `SoT_relation-picker.js` の `openMyRigs()` へ寄せる
+  （`MY_RIGS` のページローカル定義を撤去。共有UI Single Source L1）。ctx 語彙は `rig_parts.status` に合わせて `active` / `removed`（表示文言「装着中」は不変）。
 
 **#30 `pc/myrig-log-composer-v1.html` — `/register/log`**（full mock・Phase 3-3）
 🔴 **2026-09-18 改訂（113）**: ファイル名を現行（v1 / 111・112 CLOSE）へ。旧 `myrig-log-composer-modal-v0.3.9.html` は `_archive/20260917_log-composer-close/` へ **mv** 済み。
@@ -257,6 +263,12 @@
 - モーダル構成: ヘッダー（LOGを投稿＋保存状態）→ 種別タブ（整備 / カスタム / 走行 / メモ）＋日付 → 本文・メモ（必須・500字）→ 画像（最大3枚）→ タイトル（任意）→ 関連付け（場所 / 走行時間 / 路面コンディション）→ 対象RIG＋関連パーツ選択 → フッター（保存状態＋公開切替＋投稿）
 - **`log_type` は4値（maintenance / run / custom / memo）が正。**「セッティング」タブは作らない（`setup` は廃止値）。
 - 特記: モバイルはbottom-sheet化（G6）。ホスト画面（LOG一覧）は表示確認用。
+🔴 **2026-09-18 追記（114 / Relationship MVP）**: モーダルに **「関連するパーツを追加」（任意・複数・UI 上限 10）** が入る。
+  候補は共有 `SoT_relation-picker.js` の `openMyParts({mode:'reference'})`（`ownership_state='owned'` のみ）。
+  保存先は **`maintenance_log_parts`（schema v1.6-r6 新設）**。**対象RIG は現行の任意選択のまま**で、
+  **RIG のみ / PARTS のみ / 両方 / どちらも無し の 4 状態すべて投稿できる**。
+  ⛔ 111 §12「v1 非搭載」は **LOG Detail ＋ PARTS Detail の表示契約とセット**という条件を満たしたので再 OPEN。
+  ⛔ `tags` から `part_id` を同定しない。⛔「装着 RIG の LOG」を「このパーツの LOG」と見せない。
 
 **#31 myrig-settings-pc-v0.2.5.html — `/settings`**（direct）
 - 左列: settings-nav / 主列: 5セクション（プロフィール［プレビューframe＋フォーム］/ アカウント / 投稿設定 / 表示・言語 / データ・退会）のカード群
