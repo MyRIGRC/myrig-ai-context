@@ -140,10 +140,16 @@ Phase 1以降の全モバイルページが共有するShell・部品・tokenの
   `openMyRigs()` — PARTS を RIG へ（PARTS Register / Garage PARTS Detail）
 - **使用面:** RIG Register（PC / Mobile）/ PARTS Register / Garage RIG Detail / Garage PARTS Detail / LOG Composer の **5 面**
 - **候補:** `ownership_state='owned'` のみ（裁定 114 Q5）。自分の entity のみ
-- **行の状態ラベル:** **3 値のみ** — `○○ に装着中` / `装着記録なし` / （`released` は候補に出ない）。
+- **行の状態ラベル:** `○○ に装着中` / `○○ ほか N 台に装着中` / `装着記録なし`（`released` は候補に出ない）。
   ⛔「予備」「スペア」と言わない（relation から導出できない）。色は**中立**。⛔ カテゴリ色を使わない（NG-7）
-- **`attach` で別 RIG に装着中を選んだとき:** **必ず確認**（［このRIGへ移す］［同じ製品をもう1個登録する］［キャンセル］）。
-  移す＝旧 `rig_parts` を `removed`（`removed_at` は NULL）＋ 新 `active` を 1 操作で。`idx_rig_parts_active_part` の帰結であって任意機能ではない
+- **🔴 `attach` で別 RIG に装着中を選んだとき（2026-09-19 / 正典 115 で変更）:**
+  **確認を出さない。そのまま `rig_parts` へ `active` を 1 行足す。**
+  1 PARTS は複数 RIG と同時に関係を持ってよい（`idx_rig_parts_active_part` は撤去）。
+  ⛔［このRIGへ移す］［同じ製品をもう1個登録する］の 3 択を復活させない。
+  ⛔ ユーザーに「物理的に同じ個体か」「本当に移動したか」を判断させない。
+  裁定原本 `_decisions/2026-09-19_multi-rig-relation-v1.md`
+- **同じ RIG を 2 回足さない:** 残る一意制約は `idx_rig_parts_active_pair` だけ。
+  picker は **すでに関連付け済みの相手を候補から外す**（`exclude`）
 - **Mobile 外装:** bottom-sheet。**`MyRIGMobileShell.registerSheet()` へ登録**し §3.7 の Dialog Controller 管理（単一開放 / Escape / focus trap / focus 復帰 / scroll lock）を受ける
 - **PC 外装:** 既存 `.mb / .modal` 文法。**中身の DOM と意味論は共通、外装だけ面ごと**
 

@@ -1,4 +1,4 @@
-# MyRIG RC — Database Schema Design v1.6-r6（App所有領域）
+# MyRIG RC — Database Schema Design v1.6-r7（App所有領域）
 
 > **拘束力: L2（現在の確定仕様・より良い案の提案歓迎）**
 >
@@ -13,7 +13,7 @@
 > - **RLS 方針**（セキュリティ）
 > - **HOLD 項目を確定として扱わないこと**
 
-**最終更新:** 2026-09-18（v1.6-r6 / 正典 114）
+**最終更新:** 2026-09-19（v1.6-r7 / 正典 115）
 ※ファイル名は `myrig_db_schema_v1_6.md` のまま（CURRENT.md の索引と一致させるため）
 
 ## 適用範囲 — L1
@@ -146,10 +146,13 @@ Supabase Auth (`auth.users`) と1:1。認証情報以外の全プロフィール
 ---
 
 ### `parts`
-ユーザーが登録するパーツ。1パーツ＝複数RIGへ **順次** 装着できる（中間テーブル `rig_parts` で管理）。
-⚠️ **同時に装着できるのは 1 台だけ**（`idx_rig_parts_active_part`）。過去の装着は行として残る。
-🔴 **v1.6-r6 で是正**: 旧文「1パーツ＝複数RIGに装着可能」は `idx_rig_parts_active_part` と読み方が食い違っていた
-（同時装着できると読めた）。列・索引は変えていない。文言だけの是正。
+ユーザーが登録するパーツ。1パーツ＝複数RIGへ装着できる（中間テーブル `rig_parts` で管理）。
+🔴 **v1.6-r7（2026-09-19 / 正典 115）で方針変更**: **同時に複数 RIG へ装着してよい。**
+`idx_rig_parts_active_part`（1 PARTS = 同時 1 RIG）は **撤去した**。
+裁定原本 `_decisions/2026-09-19_multi-rig-relation-v1.md`。
+根拠は「MyRIG は厳密な物品在庫管理ではなく、どの RIG でどの PARTS を使っているかを記録できればよい」。
+⚠️ r6 は逆に「順次（同時は 1 台）」へ是正していた。**r7 はそれを取り消している。**
+⛔ 数量列は作らない。⛔ 既存データの意味推定変換は行わない。
 
 | Column | Type | Constraints | Notes |
 |---|---|---|---|
@@ -217,24 +220,34 @@ CREATE UNIQUE INDEX idx_rig_parts_active_pair
 ON rig_parts(rig_id, part_id)
 WHERE status = 'active';
 
--- PARTS は「ユーザーが管理する個体・管理単位」なので、
--- 1 つの PARTS が同時に複数 RIG へ active で装着されることはない
-CREATE UNIQUE INDEX idx_rig_parts_active_part
-ON rig_parts(part_id)
-WHERE status = 'active';
+-- ⛔ v1.6-r7（2026-09-19 / 正典 115）で **撤去**。
+--    1 つの PARTS が同時に複数 RIG へ active で装着されてよくなったため。
+--    ⛔ 復活させない。復活させると「移す確認」も同時に戻さないと INSERT が落ちる。
+-- CREATE UNIQUE INDEX idx_rig_parts_active_part
+-- ON rig_parts(part_id)
+-- WHERE status = 'active';
 ```
+
+🔴 **v1.6-r7 時点で `rig_parts` の一意制約は `idx_rig_parts_active_pair` **だけ**。**
+同じ RIG に同じ PARTS を二重に `active` で付けることだけを禁じる。
+App もそこだけ守ればよい（picker はすでに関連付け済みの相手を候補から外す）。
 
 ⛔ **`planned`（購入予定 / 取り付け予定）は入れない。** 装着の事実がないため。
 ⛔ **Garage に存在しない RIG 名だけの relation は作らない。** `rig_id` の FK を張れないため。
    必要なら最小 RIG 登録へ誘導するか、`parts.private_note` に書く。
-⚠️ **送信機・バッテリー等の「複数 RIG で共有して使う機材」は装着 relation とは別概念。**
-   `idx_rig_parts_active_part` と衝突するため、`rig_parts` へ混ぜない。受け皿は **HOLD（未裁定）**。
+🔴 **v1.6-r7: 送信機・バッテリー等の「複数 RIG で共有して使う機材」も `rig_parts` でよい。**
+   RIG ごとに `active` 行を持つだけ。衝突していた `idx_rig_parts_active_part` が無くなったため、
+   **HOLD H-2 は解消**（`_decisions/2026-09-19_multi-rig-relation-v1.md` §3-2）。
+   ⛔ ただし「共有機材」という分類や専用テーブルは作らない。ただの relation として扱う。
 
-#### 🔴 v1.6-r6: 親 entity の状態変化 → `rig_parts` の伝播規則（2026-09-18 / 正典 114）
+#### 🔴 v1.6-r6: 親 entity の状態変化 → `rig_parts` の伝播規則（2026-09-18 / 正典 114。根拠は r7 で差し替え）
 
-**`idx_rig_parts_active_part`（1 PARTS = 同時 1 RIG・active）があるため、
-`active` を残したまま親を削除 / 手放しすると、その PARTS は二度とどの RIG にも装着できなくなる。**
+🔴 **v1.6-r7 で根拠だけ差し替えた（規則そのものは不変）。**
+旧根拠は `idx_rig_parts_active_part`（撤去済み）だったが、
+**新根拠は事実の整合**: 手放した / 削除した RIG に `active` な装着が残り続けると、
+「いまこの RIG に付いている」という表示が嘘になる。
 これを防ぐ規則。**DDL 変更は無い。App の操作規則として守る。**
+⛔ 索引が無くなったことを理由にこの規則を緩めない。
 
 | 操作 | `rig_parts` への作用 |
 |---|---|
@@ -1149,6 +1162,7 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 | v1.5 | `page_blocks`（ウィジェット型CMS）追加。block_type 5種・sort_logic 6種 |
 | v1.6 | `content_reports` 追加。reason_code 6種 |
 | **v1.6-r4** | **Research ↔ App 境界契約の是正（2026-09-17）。** CONTRACT-EXPORT-20260917 との突き合わせで見つかった境界不整合を閉じた。`rigs.build_tags` → **`user_build_tags`** へ改名（Research `rig_masters.build_tags` と同名別義だった）/ FK 参照先を Research 実 PK へ是正（`rig_masters.rig_master_id` / `manufacturers.manufacturer_id`）/ **`category_id UUID` を廃止**し `rig_category_slug` / `part_category_slug` / `part_subcategory_slug`（Research PK は slug）へ / **`rigs.rig_master_variant_id` 新設**（SKU を失わない）/ `parts.part_number` の write authority を経路別に定義（Master 紐付きは `primary_sku` が権威・ユーザー上書き不可）/ `parts.compatible_types` を「App 所有・Research 継承値ではない」と明記 / **Domain 3-B 新設**（境界キー・write authority・picker eligibility・publication gate・compatibility）。⛔ Production DB migration は行っていない |
+| **v1.6-r7** | **Multi-RIG Relation（2026-09-19 / 正典 115）。** **`idx_rig_parts_active_part`（1 PARTS = 同時 1 active RIG）を撤去。** 1 PARTS は複数 RIG と同時に `active` な relation を持ってよい。残る一意制約は `idx_rig_parts_active_pair`（同じ RIG に同じ PARTS を二重に付けない）だけ / `parts` の説明文を **r6 の「順次（同時は 1 台）」から差し戻し** / **HOLD H-2（共有機材の複数 RIG 同時関連）を解消**（`rig_parts` に RIG ごとの `active` 行で持つ。⛔ 専用テーブルも「共有機材」分類も作らない）/ r6 の伝播規則は **規則を変えず根拠だけ差し替え**（索引の帰結 → 手放した RIG に `active` が残ると表示が嘘になるから）/ 「別 RIG に装着中なら移す確認」（裁定 114 §3-3）を **取り下げ**。⛔ 列は 1 本も変えていない（索引 1 本を落とすだけ）。⛔ 数量列は作らない。⛔ 既存データの意味推定変換は行わない。⛔ Production DB migration は行っていない。裁定原本 `_decisions/2026-09-19_multi-rig-relation-v1.md` |
 | **v1.6-r6** | **Relationship MVP（2026-09-18 / 正典 114）。** **`maintenance_log_parts` 新設**（`log_id ↔ part_id` のみ。⛔ `rig_parts_id` は持たない＝裁定 Q2。RIG 無し LOG でも張れる＝Q1。UI 上限 10 は DB 制約にしない＝Q6）/ `rig_parts` に **親 entity の状態変化の伝播規則**を明記（RIG 削除・`past` / PARTS `released`・削除 → `active` を `removed` へ。これを怠るとその PARTS が二度と装着できなくなる）/ `parts` の説明文「複数RIGに装着可能」を **「順次（同時は 1 台）」** へ是正（索引と読み方が食い違っていた）/ `parts.nickname` に「`rigs.nickname` と可視性が逆」を追記 / RLS の `rig_parts` 行が **v1.6-r3 の `status` 化を反映していなかった**のを是正 / 非公開 PARTS を relation 経由でも公開面に出さない・数えないことを明記（Q3）。⛔ 既存テーブルの**列は 1 本も変えていない**。⛔ Production DB migration は行っていない。裁定原本 `_decisions/2026-09-18_relationship-mvp-v1.md` |
 | **v1.6-r5** | **LOG Composer 契約への追随（2026-09-17 / 正典 111）。** `maintenance_logs.log_type` を **任意分類**へ（NOT NULL / DEFAULT `'maintenance'` を撤廃。NULL＝分類していない。CHECK は 4 値のまま） / `title` の NOT NULL を撤廃（LOG は本文が主役） / `body` を **NOT NULL DEFAULT `''`** 化し、公開時だけ非空を担保する CHECK を追加（draft 実体作成のため空文字を許す） / `duration_minutes` `surface` `weather` は**列を維持したまま Composer v1 から新規入力させない**契約 / 写真は最大 3・Cover なし・`sort_order` が表示順 SoT。⛔ Production DB migration は行っていない。⛔ 既存 `maintenance` 行を推測で NULL へ変換していない。裁定原本 `_decisions/2026-09-17_log-composer-contract-v1.md` |
 | **v1.6-r3** | **Register ↔ Detail ↔ DB データ契約の統合裁定（2026-09-16）。** `rigs` に `tagline` / `build_tags` / `private_note` / `usage_status` / `purchased_period` 追加・`purchased_at` を非推奨化・`build_details` を「設定値・加工・自由項目だけ」に限定（旧 mechanics 系キー廃止）・`external_links` を移行対象化 / `parts` に `nickname` / `private_note` / `ownership_state` / `purchased_period` 追加・`condition` の意味論廃止（DEFAULT 'new' 撤廃）・`description` を公開紹介文と明記 / `rig_parts` に `status` 追加（事実状態と日付を分離、日付不明を表現可能に）・active 一意制約を `rig_id,part_id` と `part_id` の2本に / `images` に `caption` 追加 / **`entity_links` 新設**（RIG・PARTS・LOG 共通のユーザーリンク） / RLS に非公開 entity の relation 経由漏洩防止を追記 |

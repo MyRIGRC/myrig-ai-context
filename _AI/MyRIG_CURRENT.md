@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260918-114
-updated: 2026-09-18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260919-116
+updated: 2026-09-19 19:07 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -13,6 +13,108 @@ updated: 2026-09-18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > **スレッドをまたぐとき最初に読む節。** イタヤは環境（デスクトップCowork / ブラウザCowork /
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
+
+**最終更新: 2026-09-19 / revision 116（**Register / Relationship レーン CLOSE → 次レーン = Library**）**
+
+> 🟢 **116 = 区切り。ここまで CLOSE。次は Library 系。**
+> 114 → 115 → 116 は連続する 1 レーン（Relationship MVP → Multi-RIG → Register Family 完成 → 横断監査 → Launcher 整理）。
+> ⛔ **Production DB 非接触。migration 未実行。物理 DELETE 禁止。** 116 で新しい裁定は無い（状態の締めだけ）。
+>
+> **116 で CLOSE と確定したもの**
+> - **Relationship MVP（114）/ Multi-RIG Relation（115）**: 1 PARTS が複数 RIG に関連できる。schema **v1.6-r7**（`idx_rig_parts_active_pair` のみ）。
+>   裁定原本 `_decisions/2026-09-18_relationship-mvp-v1.md` / `_decisions/2026-09-19_multi-rig-relation-v1.md`。H-2 / X-1 / X-2 / X-4 解消。
+> - **Mobile PARTS Register**（`register-parts-v2.html`。113 → 115 で採用）。
+> - **PC LOG Composer 再構成**: 本文 → 写真 → 種別 → 実施日 → 任意項目（2 列 × 2 段: タイトル｜場所 / 関連RIG｜関連パーツ）。
+>   「対象RIG」上部 UI 撤去。RIG 既定は未指定、`?rig=<id>` / `?part=<id>` 入口で初期選択。MVP は 1 RIG（`maintenance_logs.rig_id`）。
+>   本文は見出し無し・placeholder「記録しておきたいことを書く」。Modal 内スクロール無し。記録: mock `_state/LOG_COMPOSER_ORDER_TREATMENT.md`
+> - **Mobile LOG Register**: `register-log-v2.html` + `js/register-log-v2.js`。PC と同じ順序・意味論。`[LOG] ログを書く`。
+>   写真 3 / cover 無し / caption 無し / 章・Advanced 無し / 離脱ガード無し（下書き自動保存。PC と同じ）。記録: mock `_state/MOBILE_LOG_REGISTER_TREATMENT.md`
+> - **Register Family PC / Mobile 6 面 = 採用版**:
+>   PC `pc/myrig-register-rig-v3.1.html` / `pc/myrig-register-parts-v1.1.html` / `pc/myrig-log-composer-v1.html`
+>   Mobile `register-rig-v2.html` / `register-parts-v2.html` / `register-log-v2.html`
+> - **Detail / Register 横断監査（16 面）CLOSE**: MUST FIX 4 件を同日修正。記録: mock `_state/XC_AUDIT_20260920_detail-register.md`
+>   ① Create 入口（PC 29 面 `href="#"` / Mobile 28 面 `/register/*` 404）→ 採用版へ結線
+>   ② Owner Detail 4 面「…のログを記録」stub → Composer / Register の `?rig=` `?part=` 実リンク
+>   ③ PC Register「ガレージに戻る」404 → `back-href` ④ PC PARTS Register `data-field` を `entity_links` / `rig_parts` へ
+>   新 gate `_state/entry_link_check.py`。
+> - **Launcher cleanup**: `index.html` は短い現在地 + 採用版のみ。「旧 v6 を見る」導線 8 本撤去。見比べ / 幅 / テーマは維持。
+>   旧 Mobile Register B15 / LOG Composer 比較 / Detail v6 / 探索案 / preview は `_archive/20260920_pre-library-cleanup/` へ **mv**
+>   （⛔ 削除なし。`_archive/` は gitignore のため **`git add -f` で追跡**し、git 上も「退避」として残す）。
+>   garage v6（8 面）は gate 凍結 baseline として `pc/` に残置。記録: mock `_state/LAUNCHER_CLEANUP_20260920.md`
+>
+> **PENDING のまま（116 では動かさない）**
+> - **H-12** Advanced トリガー色（暫定中立。フロント主要面完成後の横断デザイン監査で裁定）
+> - **Front-wide Consistency Audit 候補**: 選択後サムネ無し / 通知色と PARTS 色の値衝突 / `entity_links` の UI 文言（外部リンク / 関連リンク）/ 件数 fixture の食い違い
+> - **H-7 系**: Owner Edit（まとめて編集 / 削除 / 節編集 stub）+ Owner LOG Detail（未設計。LOG は Composer のみ）
+> - H-1 / H-3〜H-6 / H-8 は変更なし
+> - gate の既知: mock `mobile_garage_list_check` MG16 が Public LOG 一覧に「セットアップ」チップを要求するが、`setup` は LOG 種別から**廃止済みの旧仕様**。
+>   ⛔ UI に setup を復活させない。gate 側を旧仕様として扱う（Library のブロッカーにしない）。
+>
+> **次のレーン: Library 系**（カタログトップ / 車種カタログ / パーツカタログ / メーカー / 製品情報）。
+> ⛔ Library の作業中に Register / Detail / Launcher を掘り直さない。
+
+---
+
+**最終更新: 2026-09-19 / revision 115（**イタヤ実機確認 3 点 — 中立 Advanced / Mobile 種別識別 / Multi-RIG Relation**）**
+
+> 🟢 **115 は mock 実装まで完了。Register / Relationship バッチは CLOSE。**
+> 🟡 **ただし Advanced トリガーの色だけは最終 CLOSE にしない → `HOLD H-12`。**
+> 裁定原本: **`_decisions/2026-09-19_multi-rig-relation-v1.md`** / schema **v1.6-r7**
+> ⛔ **Production DB 非接触。migration 未実行（索引 1 本の DROP も未実行）。物理 DELETE 禁止。**
+>
+> **発端**: 114 の Relationship MVP を実機で触って出た 3 点。
+>
+> **① Advanced トリガーを中立へ揃えた**
+> - Mobile Register の「さらに詳しく記録する」が **カテゴリ色の全面塗り**（113 の D-F）だった。
+>   PC v3.1 は 青ベタ → 中立 → カテゴリ色ベタ → **中立**（2026-09-17 差し戻し）と辿っており、**Mobile だけ残っていた**。
+> - → **Mobile も中立**（`--ms-bg-subtle` ＋ 1px 罫線 ＋ Chevron / inset 角丸は維持）。
+>   ⛔ `background: var(--reg-cat)` に戻さない。**同じ理由で 2 回戻している。**
+> - 🟡 **ただしこれは暫定。最終裁定ではない。**（イタヤ 2026-09-19）
+>   RIG=黄 / PARTS=赤 を PC / Mobile 共通で使った方が良い可能性は残っている。
+>   ここだけ **`HOLD H-12`（フロント主要面完成後の横断デザイン監査候補）** として残す。
+>   ⛔ 単独バッチで再修正しない。⛔ 「CLOSE 済み」として扱わない。
+> - ⚠️ **D-F（113）は実装としては CLOSE**（`?adv=cat` の比較は終了）。**色の最終裁定は H-12 へ移した。**
+> - ⚠️ イタヤの指摘文は「PC だけ強い色が残っている」だったが、**実測では逆**（PC は中立・Mobile が塗り）。
+>   どちらの読み方でも結論は同じ（強い塗りをやめて中立へ揃える）なので、そのまま進めた。
+>
+> **② Mobile Register Header に種別バッジ**
+> - RIG / PARTS は骨格がほぼ同じで、文字タイトルだけでは現在地が読めなかった。
+> - → **`[RIG] RIGを登録` / `[PARTS] PARTSを登録`**。PC Register Header の `.mr-reg-header__cat` と**同じ語彙**。
+> - 共有 `css/mobile-register.css` の `.rr-hdcat` 1 本。色は面が宣言する **`--reg-cat` / `--reg-cat-on` だけ**を見るので、
+>   **Mobile LOG Register は `--reg-cat: var(--cat-log)` を 1 行足すだけ**で同じ文法になる。
+> - バッジは `aria-hidden`（読み上げは h1 が持つ）。⛔ ページ全体をカテゴリ色で塗らない（NG-7）。
+>
+> **③ Multi-RIG Relation（114 からの方針変更）**
+> - **1 PARTS = 同時 1 RIG をやめた。**「このRIGへ移す / 同じ製品をもう1個登録する / キャンセル」の確認は **撤去**。
+> - 根拠: **MyRIG は厳密な物品在庫管理ではなく、どの RIG でどの PARTS を使っているかを記録できればよい。**
+>   ユーザーに「物理的に同じ個体か」「本当に移動したか」「もう1個所有しているのか」を判断させない。
+> - **schema v1.6-r7**: `idx_rig_parts_active_part` を **撤去**。残るのは `idx_rig_parts_active_pair` だけ。
+>   ⛔ UI だけ隠して索引を残さない（2 台目の INSERT が UNIQUE 違反で落ちる）。
+> - **取り下げたもの**: 裁定 114 §3-3（別 RIG 装着中の移す確認）/ schema r6 の `parts` 説明文「順次（同時は 1 台）」。
+> - **HOLD H-2（共有機材の複数 RIG 同時関連）は解消**。送信機・バッテリーも `rig_parts` に RIG ごとの `active` 行で持つ。
+>   ⛔ 専用テーブルも「共有機材」分類も作らない。**H-1（`parts_master_id` 未接続）は変わらない。**
+> - **X-1 も解消**: PC PARTS Register v1.1 の複数行リストが索引と食い違っていた件は、索引側が無くなって一致した。
+> - 文言: 「装着RIGを変更」→ **「装着RIGを追加」**。状態ラベルに **`○○ ほか N 台に装着中`** を追加。
+>   ⛔「移しました」と言わない（ほかの装着は外れないので嘘になる）。
+> - 伝播規則（RIG 削除 / 手放す / PARTS `released` → `active` を `removed`）と Q4 の一括確認は **残す**。
+>   根拠だけ「索引の帰結」→「手放した RIG に `active` が残ると表示が嘘になるから」へ差し替えた。
+>
+> **検査**: 新規 `_state/register_identity_check.py`（static / behave）。
+> `relation_check` B2 は「確認が出ないこと・『移しました』と言わないこと」を見る側へ反転。
+> `mobile_parts_register_check` は「2 台目が追加されること・選択済みが候補から外れること」を見る。
+>
+> **⛔ やっていないもの**: 過去装着タイムライン / 厳密な在庫・個体管理（数量・シリアル）/
+> 「同じ製品をもう1個」を表現する仕組み / 既存データの意味推定変換 / migration 実行。
+>
+> **このバッチの状態（2026-09-19 / イタヤ）**
+> - **Register / Relationship 機能バッチは CLOSE。**
+> - **例外 1 件**: Advanced トリガーの色だけ最終 CLOSE にしない → **`HOLD H-12`**。
+>   いまの中立表示は**暫定**。⛔ 今は追加修正しない。
+> - **次の本線**: Register Family の残りは **Mobile LOG Register**（RIG / PARTS は 113 / 115 で採用済み）。
+>   共有 `.rr-hdcat` は `--reg-cat: var(--cat-log)` を 1 行足すだけで使える。
+>   relation は共有 `SoT_relation-picker.js` の `openMyParts({mode:'reference'})` をそのまま読む。
+
+---
 
 **最終更新: 2026-09-18 / revision 114（**Relationship MVP — RIG / PARTS / LOG の関連付け**）**
 
@@ -45,8 +147,8 @@ updated: 2026-09-18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > - **パーツ追加は 3 経路**: **マイパーツから選ぶ → 製品から探す → 手入力する**。
 >   ⚠️ 1 番目に置く根拠は **H-1（`parts_master_id` 未接続）で Master 一致の重複検出が構造上できない**こと。
 >   MVP で使える重複防止は**この経路そのもの**
-> - **「別 RIG に装着中」を選んだら必ず確認**（移す / もう 1 個登録する / キャンセル）。
->   `idx_rig_parts_active_part` の帰結であって任意機能ではない。移す＝旧行 `removed`（日付 NULL）＋新行 `active`
+> - ~~**「別 RIG に装着中」を選んだら必ず確認**（移す / もう 1 個登録する / キャンセル）~~
+>   🔴 **115 で取り下げ**。確認は出さず、そのまま関連付ける（`_decisions/2026-09-19_multi-rig-relation-v1.md`）
 > - **共有 `SoT_relation-picker.js` を新設**し 5 面が同じ 1 本を読む（CORE 共有UI Single Source L1）。
 >   ⚠️ 実測で mock に `MY_PARTS` が**存在せず**、`MY_RIGS` は PARTS Register にローカル定義されていた → **共有へ引き上げる**
 > - **「装着 RIG の LOG」を「このパーツの LOG」と見せない**（111 維持）
@@ -56,8 +158,9 @@ updated: 2026-09-18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > `parts` 説明文「複数RIGに装着可能」→ **「順次（同時は 1 台）」**（索引と食い違っていた）/
 > `parts.nickname` に「`rigs.nickname` と可視性が逆」/ RLS の `rig_parts` 行が **r3 の `status` 化を反映していなかった**のを是正。
 >
-> 🔴 **伝播規則が無いと何が起きるか**: `idx_rig_parts_active_part`（1 PARTS = 同時 1 RIG）があるため、
-> **`active` を残したまま RIG を削除・手放すと、その PARTS は二度とどの RIG にも装着できなくなる。**
+> 🔴 **伝播規則が無いと何が起きるか**: ~~`idx_rig_parts_active_part` があるため二度と装着できなくなる~~
+> 🔴 **115 で根拠を差し替え**（索引は撤去した）。規則は残る。理由は
+> **手放した RIG に `active` な装着が残り続けると「いまこの RIG に付いている」が嘘になる**から。
 >
 > **111 §12 の再 OPEN**: 111 は「両側に表示面が無く死蔵入力になる」ことを理由に非搭載とし、
 > **「PARTS Detail 側の表示契約とセットで裁定する」**と条件を書いていた。
@@ -69,7 +172,8 @@ updated: 2026-09-18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > **触らない面（Home / Feed / Library / Search / Browse / Garage Top / Public Garage）は既存 baseline に対し pixel diff 0 を維持。**
 >
 > **⛔ 今回やらないもの**: PARTS の過去装着タイムライン / LOG 時点の装着エピソード保存 /
-> LOG シリーズ・ツリー・`parent_log` / 共有機材の複数 RIG 同時関連（**HOLD H-2 のまま**）/ 自動関連推定 / 数量列。
+> LOG シリーズ・ツリー・`parent_log` / ~~共有機材の複数 RIG 同時関連（HOLD H-2 のまま）~~（🔴 **115 で解消**）/
+> 自動関連推定 / 数量列。
 >
 > **次の作業（実装レーン）**
 > 1. 共有 picker（`SoT_relation-picker.js`）→ Mobile RIG Register で実測
@@ -105,7 +209,8 @@ updated: 2026-09-18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 >   ブラウザ / PWA Back を route-leave guard に通して確認（「入力内容を破棄しますか？／まだ RIG は作成されていません。」
 >   ［編集を続ける］［破棄して戻る］）。**作成後は autosave を信頼して出さない。**
 >   履歴 marker は **常に高々 1 つ**（clean → dirty で 1 回積む。Back に消費されたら「編集を続ける」で 1 つだけ積み直す）。
-> - **D-F** Advanced トリガーは **RIG 黄 `--cat-rig` の inset 角丸ヘッダー**
+> - **D-F** 🔴 **115 で差し戻し・CLOSE**（中立へ。⛔ カテゴリ色の全面塗りに戻さない）。旧採用内容は以下。
+>   ~~Advanced トリガーは **RIG 黄 `--cat-rig` の inset 角丸ヘッダー**~~
 >   （左右 `--ms-gutter` / `border-radius 13px` / 全面塗り ＋ `--cat-rig-on`。⛔ border / shadow / gradient / 片側色線なし。
 >   open / closed で地色は変えず Chevron だけ回す）。02 / 03 / 04 は番号バッジ文法のまま、操作色は中立のまま。
 >   ⚠️ **PC v3.1 は 2026-09-16 に同形（全面帯）を採用し 09-17 に「強すぎる」として中立へ戻した前例がある。**
@@ -295,7 +400,7 @@ updated: 2026-09-18 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 - **Register PC は RIG / PARTS とも CLOSE（110）。**
 - **LOG Register PC は CLOSE（112）。** LOG Detail Compatibility Gate も整合済み。
 - ⚠️ mock `b14590c` / `77b2614` は **未 push**。イタヤが push → Vercel 確認で完全に閉じる。
-- **次のレーン: Mobile Register 3 本**（RIG / PARTS / LOG）。
+- ~~次のレーン: Mobile Register 3 本（RIG / PARTS / LOG）~~ → 113 / 115 で 3 本とも採用済み。**次のレーン = Library 系**（116）。
 
 ### ✅ RIG Register PC 採用（2026-09-16 / イタヤ裁定）
 
@@ -413,8 +518,10 @@ active tree から**削除**（履歴は Git）。⛔ `_archive` へ新たに複
   App の `parts_masters.id`（UUID）ではない。⛔ **名前だけ schema に合わせて ID を刺さない。**
   Register は `parts_master_id` を出さず `pending.master_ref`（出所付き）として保持する。
   → **F-3「`part_master_id` → `parts_master_id`」は HOLD のまま。**
-- **H-2 複数 RIG で共有して使う機材**（送信機・バッテリー等）の受け皿。
-  `idx_rig_parts_active_part` と衝突するため `rig_parts` へ混ぜられない。
+- ~~**H-2 複数 RIG で共有して使う機材**（送信機・バッテリー等）の受け皿~~
+  → 🟢 **2026-09-19 / 115 で解消。** `idx_rig_parts_active_part` を撤去したので、
+  送信機・バッテリーも `rig_parts` に RIG ごとの `active` 行として持てる。
+  ⛔ 専用テーブルも「共有機材」分類も作らない。
 - **H-3 `rigs.external_links` → `entity_links` のデータ移行手順。** Production DB migration は未着手。
 - **H-4 `build_details` 旧キーの新キーへの寄せ方。** ⛔ 意味推定での自動変換は禁止。
 - **H-5 `images.alt` の追加要否。** `caption` とは別概念。
@@ -424,6 +531,30 @@ active tree から**削除**（履歴は Git）。⛔ `_archive` へ新たに複
 - **H-8 RIG の設定値・加工メモ（`build_details`）の入力導線。** 受け皿は確定したが Register に UI が無い。
 - 公開中 RIG / PARTS 編集の「確定して反映」保存モデルは未裁定（`data-save-mode` で切替できる構造のみ）。
 - Mobile の Register 3 本は未着手。PC が揃ってから。
+
+#### 🟡 H-12 Advanced トリガー「さらに詳しく記録する」の色 — **横断デザイン監査候補**
+
+**起票: 2026-09-19 / 115 / イタヤ裁定。⛔ このバッチの中立化を最終裁定にしない。**
+
+- **いまの状態（暫定）**: PC / Mobile とも **中立**（Mobile は `--ms-bg` ＋ 1px 罫線 ＋ Chevron、
+  PC は透明 ＋ Chevron）。115 で Mobile のカテゴリ色全面塗りをやめて PC に揃えた。
+- **残っている可能性**: **RIG=黄 / PARTS=赤 を PC / Mobile 共通で使った方が、
+  現在地・種別識別として良いかもしれない。** 115 の中立化はそれを否定していない。
+- **なぜ今やらないか**: ここを触ると Register / Detail / Garage を含む**横断修正が続く**ため。
+  主要面が揃う前に色の職域を動かすと、揃った後にもう一度全部やり直すことになる。
+- **いつ判断するか**: **フロント主要面が完成したあとの横断デザイン監査でまとめて裁定する。**
+  単独バッチで再修正しない。
+- **一緒に見るもの**（バラバラに決めない）:
+  Register Header の種別バッジ（PC `.mr-reg-header__cat` / Mobile `.rr-hdcat`）/
+  章番号バッジ（`.chap__num` `.grp__n` `.rr-chap__n` `.rr-grp__n`）/
+  写真タグ（`.rr-ph-tag`）/ color-token-v8 の NG-1・NG-2・NG-7（カテゴリ色＝種別識別・操作は中立）。
+- **裁定が「カテゴリ色にする」へ動いたとき、同時に直すもの**:
+  `css/mobile-register.css` の `.rr-adv__tg` / `pc/assets/css/SoT_register-family.css` の `.adv__tg` /
+  `_state/register_identity_check.py` の I1 / `_state/mobile_register_check.py` の D-F 断言。
+  ⛔ CSS だけ変えて gate を置き去りにしない（どちらも「中立であること」を FAIL 条件にしている）。
+- **履歴**（同じ所を何度も往復している。⛔ 経緯を消さない）:
+  PC 青ベタ → 中立 → カテゴリ色ベタ（2026-09-16）→ **中立へ差し戻し**（2026-09-17）/
+  Mobile はカテゴリ色ベタ（113 D-F）→ **中立へ差し戻し**（2026-09-19 / 115）。
 
 ### NEXT
 
