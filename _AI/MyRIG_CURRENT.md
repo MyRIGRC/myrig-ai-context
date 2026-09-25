@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260919-116
-updated: 2026-09-19 19:07 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260924-118
+updated: 2026-09-25 20:54 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -13,6 +13,124 @@ updated: 2026-09-19 19:07 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > **スレッドをまたぐとき最初に読む節。** イタヤは環境（デスクトップCowork / ブラウザCowork /
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
+
+**最終更新: 2026-09-24 / revision 118（**Library Shell ハイブリッド裁定 — Atlas 型 Shell ＋ v4 契約**）**
+
+> 🟢 **118 = Library の Shell と見た目の方向を裁定。v5（ハイブリッド）を 8 面で作る。**
+> 裁定原本: **`_decisions/2026-09-24_library-shell-hybrid-v1.md`**（イタヤ口頭 2026-09-24。Claude v4 全 8 面 × Atlas v1 の 3 面比較）
+> ⛔ **Production DB 非接触。migration 未実行。物理 DELETE 禁止。**
+>
+> - **D1 Shell = Atlas 型を 1 本の共有 Library Shell として採用**（Context Header ＋ 左 Index Rail。App Header / lib-hd は Library で使わない。⛔ 別 Shell を増殖させない）
+> - **D2 書体は MyRIG**（Barlow Condensed / Inter / Noto。serif・mono は採らない）
+> - **D3 色は Library 中立レイヤー `--lib-*`（新概念・light/dark）。カテゴリ色・チップ・ストライプ全廃**。lib-hd の緑 / 紫は旧 token（v6 `--cat-rig:#66b900`。現行 v8 は RIG 黄 / PARTS 赤）で Library にあってはならない。
+>   使用例 = **Library → Community の Bridge Preview**（独立責務。Community Card でもその無彩色 variant でもない。Library 内は中立、遷移先は Community RIG Detail。設計探索による判断更新）。
+> - **D4 一覧は簡潔に**（左 Rail 索引 ＋ select 型 filter ＋ グリッド / リスト切替。上部 chip Directory と filter sidebar は Library で使わない）。
+>   **RIG catalog に scale filter を置かない**（filter 軸 `size_class` は HOLD。scale は公称の表示用）。
+> - **D5 戻り状態保持契約**（`from=` で一覧の q / category / sub / maker / facet / sort / page / view を復元。本番 URL は個別 route）
+> - **D6 データ契約（Q8 / publication / H-1 / 「マスター」不使用）と Detail 骨格は v4 維持**。Detail に製品データ表（ゼブラ）とページ内アンカー。
+> - **D7 fluid / wide**（09-24 イタヤ裁定）: Library Shell は固定コンテンツ幅を持たない。Rail 固定 / Main は viewport 追随。製品 grid は適正カード幅を守って列数が増減（auto-fill / minmax）。
+>   **Product Detail だけ本文を読み幅（内部 max-width）に止める。** 列数・px は正典化しない（mock が仕様）。
+> - **D8 不正 ID / slug は Not Found**（先頭 entity への fallback 禁止）。**D9 Search は Variant Item No. も対象**（部分一致 ＋ 完全一致候補。自動転送なし。`?variant=` で該当 state へ）。
+> - **D10 Maker の country / region は Research 正本確認まで出さない**（名前順 / 検索 / 頭文字索引で成立）。**D11 使用例「すべて見る」は Browse の正式 route が無いので PENDING**（架空 URL なし）。
+>
+> **比較案は退避済み（2026-09-24 17:56 イタヤ指示）**: Claude v4（8 面 ＋ 専用資産）/ explore card v0・v1 / Atlas v1（page ＋ 資産 ＋ 検証記録）→ mock `_archive/20260924_library-v4-atlas-close/`（mv のみ・README 同梱）。`pc/` の Library は **v5 8 面 ＋ v3 7 面（現行・Launcher と 35 面から参照、リンク切替まで維持）**。
+> **v5 ハイブリッド 8 面（PC）完了（09-24 15:05）**: ① `pc/myrig-library-v5.html`（入口）/ ② `-search-v2` / ③ `-rigs-v5` / ④ `-rig-master-detail-v5` / ⑤ `-parts-v5` / ⑥ `-parts-master-detail-v5` / ⑦ `-makers-v5` / ⑧ `-maker-detail-v5`。
+>   Shell `SoT_library-shell.css/js`（1 本）/ `--lib-*` 中立レイヤー / `SoT_library-catalog-v5` / `SoT_library-detail-v5` / card v5 modifier。gate `library_check.py`（v5 既定 L01〜L14）FAIL 0。render 12 状態 × 4 幅 overflow 0。
+>   記録: mock `_state/LIBRARY_EXPLORATION_20260919.md` 探索 5。
+> **118 commit 前バッチ（09-24 17:14）反映済み**: scale facet 撤去 / Maker country・region 撤去 / 不正 ID → Not Found / Variant Item No. 検索 ＋ `?variant=` / 使用例リンク整理（preview → v15 実在。「すべて見る」PENDING）/
+>   fluid grid（1280:3 → 1440:4 → 1600:4 → 1920:5 → 2560:6 列。Detail 本文 max 1180）。gate `library_check.py` L01〜L20 FAIL 0（selftest 20 件全検出）。render 15 状態 × 8 幅 overflow 0。
+> **役割裁定（09-24 17:43）反映済み — D12〜D16**: **Library = MyRIG 内部導線から到達する公開製品索引。Top / Maker は薄く、Product Detail だけ濃く。購入導線は主要なマネタイズ導線として弱めない**（Official ≠ Buy、アフィリエイト明示、価格・ランキング・セール棚なし）。
+>   Editorial な自由文（メーカー紹介・沿革・レビュー・評価・特集）は原則持たない。外部流入には「MyRIG で整理した参照データ / 最新はメーカー公式で確認」の注記（Top・Detail 末尾）。
+>   実装: Maker Detail から製品ライン chips 撤去・公式サイトは最下部の参照リンクへ格下げ / Maker Index の製品ライン列・検索を撤去 / Top のメーカー扉・グリッド撤去（2 扉 ＋ 「メーカー索引を見る →」）/ ロゴ不使用。
+>   gate L21〜L23 追加（FAIL 0、selftest 23 件全検出、v4 FAIL 0）。render 4 面 × 6 幅 overflow 0。**PENDING P1**: 主導線・グローバルナビ上の Library の扱い → レーン CLOSE 後の横断ナビ監査。
+> **Launcher 反映済み（18:06）**: `index.html` Library 群 8 カード（7 面 v3 → v5 ＋ PC 専用 検索）/ `compare.html` 7 組 → v5。Mobile 面は旧版のまま。
+> **ASTRA 最終確認 OK → PC Library v5 監査 CLOSE（2026-09-25 20:54）**: 再確認で MUST / SHOULD 残件なし（57991・58691・PRO10128-03・PRO10128 の 3 入口一致、D18 記述＝実表示）。gate FAIL 0 / selftest 58/58 / 160 状態 issue 0。次 = commit / push（`mockup`・イタヤ判断）。未 commit。
+> **ASTRA 最終確認 → 対応済み（2026-09-25 20:45）**: 前回指摘は解消確認。追加 MUST 1 = Variant カードの仕様が代表のまま（`57991` で ITEM＝XB・仕様＝Kit）→ `cardSpec(p,v)` で一覧の仕様も Variant 優先（L54 拡張・selftest L54c）。SHOULD 1 = D18 の記述を実表示に合わせ明確化（720px 以下 26px / メーカー詳細はパンくず下 Y=136）。gate FAIL 0 / selftest 58/58。未 commit。
+> **D18〜D20（2026-09-25 20:28・イタヤ裁定）**: **D18** 製品 Detail の H1 は別の表示契約（製品名 = H1、表示は Identity 見出し 26px。P5 確定・gate L49）／ **D19** 購入 CTA を青（`--lib-buy` = #0969da、Community / Garage の購入色と同値。中立レイヤーの唯一の例外・gate L56）／ **D20** リフォームしやすい土台（トークン・部品 1 か所・name/id/slug 分離・gate。Next.js では版番号を名前に持ち込まない。CORE 候補）。
+>   gate FAIL 0 / selftest 57/57。回帰 80 状態 0。ASTRA 以外の残りはイタヤ「Astra と Claude に任せる」。未 commit。
+> **ASTRA 再監査 → 対応済み（2026-09-25 20:14）**: 再監査は MUST 1 / SHOULD 2（前回 M1〜M8 は解消確認）。MUST = Variant 型番検索で通常カードが代表へ着地 → `matchedVariant` でカード（検索・カタログ grid/list）も Variant へ（L54）。SHOULD = 並び・表示の操作後に Rail を更新（L45 を操作順で検査）／ HANDOFF J を失効扱い。取り残しの `p.maker` 参照も修正（L55）。
+>   gate FAIL 0 / selftest 55/55。操作順チェック 8/8・前回分 24/24・回帰 80 状態 0。P5 は「製品 Detail の H1 は別の表示契約」の文言で裁定待ち。未 commit。
+> **ASTRA 監査 → 対応済み・再監査待ち（2026-09-25 17:23）**: ASTRA は MUST FIX 8 / SHOULD 7 / 移行注意 3 を指摘（監査 CLOSE 見送り推奨）。**MUST 8・SHOULD 6・移行 2 を修正**、対応中に検出した誤マッチ 1 件（X1: 正規化で `.` を消し「1.9」が「1979」に当たる）も修正。
+>   主な修正: 購入先は URL があるものだけリンク・mock は「未接続」明示（M1）／ 検索照合を `L.productMatch` 1 か所に集約（M2）／ Variant を ITEM・仕様・購入対象・URL の single source に・既定は master と同じ SKU・無ければ未選択（M3）／ 根拠なしの「対応」を節・仕様表とも非表示（M4）／ 仕様をキー付きに（M5）／ Q8 に eol・ページャ上限 10,000 と省略表示（M6）／ 掲載を保証しない文言（M7）／ メーカー索引の q 復元（M8）／ manufacturer の id・slug・name を別値に（URL = slug・関係 = id）。
+>   gate **L36〜L53**（L49 欠番）追加 → FAIL 0 / selftest 52/52。ASTRA 再現 24 項目 PASS / 回帰 80 状態 0。回答書 = `_state/AUDIT_RESPONSE_20260925_library-astra.md`（再監査依頼文つき）。**PENDING P5**（H1 契約の適用範囲・製品 Detail）はイタヤ裁定待ち。未 commit。
+> **⑧ メーカー詳細 CLOSE → PC Library 8 面 一周完了（2026-09-25 15:09・イタヤ実機確認）**: 面別詳細レビュー ①〜⑧ すべて CLOSE。次は **ASTRA 監査**（指示文 = `_state/AUDIT_BRIEF_20260925_library-astra.md`）→ 結果を見て commit / push（`mockup`）を判断。未 commit のまま。
+> **⑦ メーカー索引 CLOSE（2026-09-25 15:07・イタヤ実機確認）**: 正式名 ＋ 根拠のある日本語副表示 / master_aliases 展開の名前検索 / `A–Z` のモード表示 / 国・地域なし。PENDING P4（A–Z / 五十音切替）。→ 次は ⑧ メーカー詳細で PC Library 一周。
+> **D17 追加確認 — identity / relation の境界（2026-09-25 14:08・イタヤ）**: `master_aliases` は**検索展開専用**。「タミヤ」→ alias から manufacturer を解決 → **`manufacturer_id`** を得る → 製品は id で取得。⛔ alias_value / name_ja / 表示文字列の一致を identity・relation に使わない。
+>   mock も同じ責務に修正: 製品 61 行を `maker_id` 参照へ（表示名フィールドを廃止）／ `makerCounts` `byMakerId` `resolveMakerIds` を id ベースに ／ カタログの `?maker=` は **maker_id**（select の value も id、ラベルだけ表示名）／ Detail の関連も id。gate **L35** 追加。**mock fixture は Research 確定値ではない**（alias_kind / locale / 日本語正式表記 / 読みキーは PENDING）。
+> **D17 メーカーの日本語表記と検索（2026-09-25 13:59・イタヤ裁定）**: 「検索」と「並び」を分離。検索対象 = `manufacturer.name` ＋ **`master_aliases`(entity_type='manufacturer')**（⛔ 専用 alias 配列を新設しない）。正規化は NFKC / casefold / 記号 / ひらがな→カタカナまで、⛔ ローマ字→カナ・発音揺れの推測吸収はしない。表示は正式名が主、**根拠のある日本語表記だけ副表示**（⛔ 海外メーカーへ推測カナを生成しない）。索引は A–Z 維持 ＋ モード表示。
+>   mock 反映: `タミヤ / たみや / ﾀﾐﾔ / tamiya / TAMIYA / 田宮` がすべて同一メーカー ＋ その製品 11 件へヒット。`トラクサス` → Traxxas 製品 6 件。gate **L34** 追加（v5 FAIL 0 / selftest 34 / 回帰 80 状態 0）。**PENDING P4**: 日本語 locale の「A–Z / 五十音」切替 → Research へ読みキーの持ち方を照会。
+> **⑥ RIG Product Detail CLOSE ＋ D3 改訂（2026-09-25 13:42・イタヤ裁定）**: RIG Detail は 5 状態で OK。あわせて **製品画像を「最大 2 枚」→「1 枚」に確定**（2 枚は選定基準が要り面ごとにブレる／許諾・差し替えの管理も倍）。代表画像 1 枚 ＋ NO IMAGE で構造を固定。mock からサムネイル切替を撤去、gate **L33** 追加。裁定原本 = 117 D3 に改訂を追記。→ 残り ⑦ メーカー索引・⑧ メーカー詳細。
+> **⑤ RIG Catalog CLOSE（2026-09-25 13:40・イタヤ実機確認）**: facet は形態 / 駆動の 2 つで確定（スケールは size_class 整備後）。Rail の 24 分類は 0 件も表示したまま（現状維持）。見出しの縦位置は PARTS と一致。→ 次は ⑥ RIG Product Detail。
+> **④ Library Search CLOSE（2026-09-25 13:26・イタヤ実機確認）**: 6 状態（製品名 / Variant 型番 / 旧型番・別名 / メーカー名 / 大量ヒット / 0 件）で OK。自動転送しない D9 の方針も実機で成立。→ 次は ⑤ RIG Catalog。
+> **D15 改訂（2026-09-25 13:21・イタヤ裁定）**: メーカーロゴは **MVP では表示しない / 将来は表示する**。画像類の使用許可を取るときに**ロゴ許諾も同時取得**し、取れたメーカーだけ表示（全社一律でない）。⛔ NO IMAGE スロットをロゴで埋めない。解禁条件 = 書面許諾（提携を示すものでない旨を明記）／ 公式アセットのみ ／ フラグ 1 つで即時撤去。**表示箇所は解禁時に別途裁定（PENDING P3）**。Research の画像許諾フローに「ロゴ許諾も同時取得」を申し送り。
+> **③ PARTS Product Detail CLOSE（2026-09-25 13:14・イタヤ実機確認）**: 6 状態（標準 / Variant 着地 / NO IMAGE / 生産終了＋画像なし＋使用例 0 / 使用例 0 / Not Found）で OK。D16「購入導線を弱めない」は実機でも成立。→ 次は ④ Library Search。
+> **② PARTS Catalog CLOSE（2026-09-25 13:08・イタヤ実機確認）**: 「探しやすさは担保されている」。確定形 = H1 ＋ lead / 検索 / メーカー select ＋ 生産終了品を除く / 左 Rail 14 分類 ＋ 子チップ / 件数は toolbar 1 箇所 / グリッド・リスト / 24 件ページング。P4・P5 もこのまま。→ 次は ③ PARTS Product Detail。
+> **① Library Top CLOSE（2026-09-25 13:04・イタヤ実機確認）**: MVP はこの簡素な形で確定（検索 ＋ 2 扉 ＋ 新着 1 行 ＋ パーツ索引 ＋ メーカー索引の補助導線）。情報量を増やす変更は MVP では行わない。運営開始後の見直しは **POST-MVP PENDING**。→ 次は ② PARTS Catalog 詳細レビュー。
+> **H1 統一 — ページ見出しの共通契約（2026-09-25 12:58・イタヤ実機指摘）**: 面ごとに H1 の Y（100 / 106 / 127 / 163）とサイズ（40 / 30 / 36px）が違い、ページ推移で縦位置が動いていた。共有 `SoT_library-shell.css` に **1 契約**を置いた: `.lib-pagehead` = H1（32px）＋ lead 1 行、固定高 68px ＋ 下マージン 24px、⛔ eyebrow・大きなページ番号を重ねない、⛔ 面ごとにサイズを変えない。
+>   Top / RIG / PARTS / メーカー索引 / 検索 は **H1 Y=100・操作部 Y=192 で一致**。メーカー詳細と製品 Detail は crumb ぶん下がる（下位面の正しい差）。メーカー索引の lead からも件数を撤去（P1 と同じ文法）。gate L30 を全面へ拡張、**L31 見出し契約 / L32 div 開閉一致**を追加（v5 FAIL 0 / selftest 32 / 回帰 80 状態 0）。
+> **Library Top CLOSE 候補 ＋ PARTS Catalog P1〜P3（2026-09-25 11:06）**: Top は T13 をもって CLOSE 候補（情報量は増やさない）。PARTS Catalog は **P1 件数責務を toolbar へ一本化**（lead から総数撤去。絞り込み後に 36 と 8 が並ぶ矛盾を解消）/ **P2 active pill は追加条件だけ**（H1 = 親カテゴリ / sub chips = 子 / pill = それ以外。「すべて解除」もカテゴリを外さない）/ **P3 本文の eyebrow・大きなページ番号を撤去**（Rail の選択状態が現在地。RIG Catalog / Maker Index は当該レビューで追従 = PENDING）。
+>   P4 page size 24 は現状維持（Catalog は端数行を許容・viewport から独立）/ P5 breadcrumb は追加しない。修正は共有 `SoT_library-catalog-v5.js` 側で実施（page-local コピーを増やさない）。gate L28〜L30 追加（v5 FAIL 0 / selftest 30）。PARTS Catalog 10 状態 ＋ 回帰 80 状態 issue 0。
+> **T13（2026-09-25 10:43・Library 専用スレッド）**: Top 新着を **常に 1 行・件数は列数連動**に（旧: 4 列以上 1 行 / 3 列以下 2 行 → 1320px 6 件 → 1330px 4 件と幅を広げて件数が減っていた）。孤立行なし ＋ 単調の唯一解。gate L27 追加（v5 FAIL 0 / selftest 27）。80 状態 render issue 0。**Top は実機確認で OK なら CLOSE → 次は PARTS Catalog**。
+> **面別詳細レビュー開始（18:00）**: 順 = Top → PARTS Catalog → PARTS Detail → Search → RIG Catalog → RIG Detail → Maker Index → Maker Detail。① Top: 第 1 回（09-24 18:00: 統計ブロック撤去 / 扉 26px / 新着は列数ぶんの整った行 / 文章ブロック読み幅 / メーカー索引は検索欄脇）→ **第 2 回（09-25・T1〜T12）反映 = CLOSE 候補（イタヤ実機確認待ち）**: 使用数リンク → Detail 使用例節（from 保持）/ dark の wash を紙と別 token に / 列数を幅に対して単調に（card-min を clamp）/ Detail の戻り文言を from 元に / Library footer に法務行（`<site-legal>` = 既存 Single Source）/ 混在 grid だけ VEHICLE・PART の中立テキスト / hero eyebrow 撤去 / aria-pressed / no-op 撤去 / 注記 12.5px。すべて共有側（fixture / shell / detail / card CSS）。gate L24〜L26 追加（FAIL 0・selftest 26）。**PENDING**: T11（≤1024 の横タブ表現）は Mobile Library 設計時の入力。記録: mock `_state/LIBRARY_EXPLORATION_20260919.md`。
+> **PENDING P2（118 では動かさない）— 後続 Front-wide Functional Repair**（イタヤ裁定 2026-09-25）: 2026-09-24 の 106 面監査（mock `_state/XC_AUDIT_20260924_frontwide-106.md`）で見つかった Library 外の問題は 118 に混ぜず、Library PC CLOSE 後に独立レーンで処理する。
+>   優先: Mobile 9 面の bottom nav「＋」createSheet 欠落 / 廃止 LOG 種別 setup・非正典種別の残存 / PC の invalid・nonexistent route / shared footer の `#` link / theme persistence 欠落（PC Register・Composer・Auth）/ PC Detail の user menu・通知無反応。
+>   ⛔ ページ個別パッチで大量修正しない。CORE L1 Shared UI Single Source に従い Header / Footer / Bottom Nav は共有部品側で解く。構造・整合性項目（AppHeader 複製 / Mobile nav 複製 / category token page-local / font・token・title・brand 表記差）は機能欠陥の後。旧比較面（Library v3 / garage v6 等）は原則対象外（active 採用面を確認してから）。
+> **次**: イタヤ実機確認（未 commit）→ OK なら `mockup`（canon 117 / 118 も push）→ 採用後に v4 / Atlas を `_archive/` へ mv・Launcher / compare 更新 → Mobile。
+
+---
+
+**最終更新: 2026-09-19 / revision 117（**Library レーン OPEN — ゼロベース再設計**）**
+
+> 🟢 **117 = Library Design Exploration OPEN。既存 14 面の修繕は後回し。**
+> 裁定原本: **`_decisions/2026-09-19_library-zero-base-v1.md`**（Claude 提案 → GPT クロスチェック → イタヤ承認。D3 はイタヤ実機所見で改訂）
+> **進行: Library レーンは Claude（Cowork）がプロデュース。** GPT は読み専・随時レビュー。
+> ⛔ **Production DB 非接触。migration 未実行。物理 DELETE 禁止。** mock 変更はまだ無い（117 は裁定の記録のみ）。
+>
+> **DECISION（5 点 ＋ D6 / D7）**
+> - **D1 ゼロベース再設計**: 既存 14 面（PC `pc/myrig-library-*-v3.html` 7 / Mobile `library*.html` 7）は
+>   情報構造・データ項目・導線の**参照資料**。見た目の継承義務なし。URL / 分類 / Master Detail の項目 / 109 データ契約は引き継ぐ。
+> - **D2 Community とは別デザイン体系**: Library 内で RIG / PARTS カテゴリ色を識別体系として使わない。「公式情報」等の強いバッジも設けない。
+>   メーカー・型番・スペック・出典・使用例の**情報構造**で Master 情報だと示す（狙いは「製品データベース感 / 資料性」）。
+> - **D3 画像ありき・画像依存にしない**: カード / Detail とも**画像スロット常設**。実画像が無ければ **`NO IMAGE`** で同一レイアウト。
+>   画像の有無で構造・高さを変えない。**Library 全体の公開可否は 109 B-4 の `master_publication_effective` に従う。画像スロットは、その画像公開条件を満たす場合のみ実画像、それ以外は NO IMAGE。Library 独自の画像公開判定は作らない**
+>   （publication 行なし master の一覧掲載可否は Research 照会）。Master Detail は最大 2 枚。
+>   旧 `IMAGE PENDING`（確認中）は廃止 — **運用状態を Public UI に出さない**（発売状態も「生産終了」のみ表示）。
+>   既存 Master Detail の「Visual Stage ＋ 製品情報」骨格は**維持候補**（ゼロベース ≠ 必ず新しくする）。
+> - **D4 PARTS から探索（PC）**: **Master Card → Master Detail → Catalog Top** の順で新規ファイルに作る。
+>   最初のカード案は**旧版を見ずに白紙で 1 案** → 完成後に旧版と比較 → イタヤ実機裁定。画像あり / なし混在 fixture。
+>   採用後: Library 共通部品化 → RIG → 残り Library（Maker 最後）→ 既存 14 面収束 → Mobile。
+>   ⛔ 既存 14 面の修繕（Mobile inline CSS 29,655B×7 の共通化 / リンク切れ 15 件 / `href="#"` 36）は**方向決定より後**。
+> - **D5 MyRIG 使用例は H-1 依存**: 「この製品を使っている RIG N 台」は本番では **HOLD H-1（`parts_master_id` 未接続）解消が前提**。
+>   mock は 0 件 / 複数件の両状態を作り、0 件でも破綻しない UI にする。⛔ fixture を見て本番算出可能と誤認しない。
+> - **D6 件数は metadata として可。Rank には使わない**: 利用・収録件数は製品やメーカーの補助情報として表示してよい。
+>   ただし件数による順位付け・ランキング・人気表現・ランキング相当の棚や並び順には使用しない（matrix §7 ランキング全廃）。
+>   ⛔「ランキング禁止＝数字も全部禁止」と誤読しない。併せて UI 文言に「マスター」不使用（mobile contract §4 禁止語。内部名は可）。
+> - **D7 Library IA = Find / Identify / Bridge の 3 層**（`_proposals/2026-09-19_library-ia_claude-v2.md`）。固定 3 点:
+>   カテゴリ着地 URL は一覧の preset state（専用 UI 複製なし）/ 一覧カードは Detail への単一入口（購入は Detail）/
+>   Platform は将来の First-Class 候補（compatibility HOLD 解消まで本線化しない）。
+>
+> **実測（116 時点の Library 現在地）**: 2026-07-27 P22-B14 の暫定確定以降 Library 専用レーンは未実施。B14 継続課題は全件未裁定
+> （①②は D2 で Library 範囲を解消。③は D2 で言い換え。④は Catalog Top 時点で裁定）。Library 専用 gate 無し。
+>
+> **PENDING（117 では動かさない）**: H-12 / Front-wide Consistency Audit / H-7 系 / H-1 / 公開範囲・SEO の扱い（画像許諾が揃うまで控えめにする案は未裁定）。
+> ⛔ Library の作業中に Register / Detail / Launcher を掘り直さない（116 継続）。
+>
+> **探索の現在地**: mock `pc/myrig-library-explore-parts-card-v0.html`（画像枠なし → 不採用方向）/ **`-v1.html`（画像スロット常設。1280px 4 列で 8 枚 394px 均一）**。
+>   記録: mock `_state/LIBRARY_EXPLORATION_20260919.md`。⛔ 117 はカード採用の revision ではない（採否はイタヤ実機）。
+> **設計図**: `_proposals/2026-09-19_library-ia_claude-v2.md`（PROPOSAL。Find / Identify / Bridge の 3 層。v1 は GPT レビューで改訂）。
+> **カード**: v1 は RIG サムネ撤去 ＋ 製品画像 `contain` で**収束候補**（イタヤ判定 2026-09-19）。
+> **⑤ PARTS Catalog v1 = mock `pc/myrig-library-parts-v4.html`**（検索 ＋ 14 カテゴリ Directory ＋ 共有 filter ＋ 全件一覧。preset state は `?category=&sub=`）。
+>   カード共有 CSS `assets/css/SoT_library-card.css`。記録: mock `_state/LIBRARY_EXPLORATION_20260919.md` 探索 3。⛔ 既存 v3 は無変更。
+> **⑤ の設計処遇（09-24 GPT レビュー → 反映済み）**: Facet 件数は Q8 に従う（初期状態だけ概数。検索語・条件が乗ったら各 Facet の件数は消す。総件数は 10,000+ で打ち切り）。
+>   検索窓は Catalog 見出し側に置く（lib-hd に 2 本目を置かない。② は同じ検索部品の scope 違い）。0 件文言「MyRIG での使用例はまだありません」。Detail リンクは TEMP（⑥ v1 後に差し替え）。
+>   Research 照会の文言: 「親14・子90 で正しいか」ではなく **「現在有効な親14・子90 の正式名称・slug 一覧」＋ 子 90 の命名基準点検の先出し**（cross-ref v4 §子カテゴリ）。
+> **Library 全 8 面（PC）通し build 完了（09-24、イタヤ指示「止めずに最後まで」）**: ① `pc/myrig-library-v4.html`（入口）/ ② `-search-v1` / ③ `-rigs-v4` / ④ `-rig-master-detail-v4` /
+>   ⑤ `-parts-v4` / ⑥ `-parts-master-detail-v4` / ⑦ `-makers-v4` / ⑧ `-maker-detail-v4`。共有 `SoT_library-{{card,catalog,detail}}.css` ＋ `SoT_library-{{fixture,catalog,detail}}.js`。
+>   gate `_state/library_check.py`（L01〜L11 ＋ selftest）FAIL 0。render 12 状態 × 4 幅 overflow 0。記録: mock `_state/LIBRARY_EXPLORATION_20260919.md` 探索 4。
+>   既存 v3 14 面 / Launcher / compare.html は無変更。⑨ Platform / Mobile は未着手。
+> **次**: `mockup` 実行 → イタヤが 8 面を通しで評価（① から辿る。状態 URL は探索記録 §探索 4）→ 採否 / 修正 → 採用後に Launcher 導線・compare ペア更新 → Mobile。
+
+---
 
 **最終更新: 2026-09-19 / revision 116（**Register / Relationship レーン CLOSE → 次レーン = Library**）**
 
@@ -400,7 +518,7 @@ updated: 2026-09-19 19:07 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 - **Register PC は RIG / PARTS とも CLOSE（110）。**
 - **LOG Register PC は CLOSE（112）。** LOG Detail Compatibility Gate も整合済み。
 - ⚠️ mock `b14590c` / `77b2614` は **未 push**。イタヤが push → Vercel 確認で完全に閉じる。
-- ~~次のレーン: Mobile Register 3 本（RIG / PARTS / LOG）~~ → 113 / 115 で 3 本とも採用済み。**次のレーン = Library 系**（116）。
+- ~~次のレーン: Mobile Register 3 本（RIG / PARTS / LOG）~~ → 113 / 115 で 3 本とも採用済み。**次のレーン = Library 系**（116）→ **117 で OPEN**（ゼロベース再設計）。
 
 ### ✅ RIG Register PC 採用（2026-09-16 / イタヤ裁定）
 
