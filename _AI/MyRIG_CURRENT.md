@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
 revision: MYRIG-20260924-118
-updated: 2026-09-25 20:54 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+updated: 2026-09-26 11:48 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -44,6 +44,20 @@ updated: 2026-09-25 20:54 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 >   実装: Maker Detail から製品ライン chips 撤去・公式サイトは最下部の参照リンクへ格下げ / Maker Index の製品ライン列・検索を撤去 / Top のメーカー扉・グリッド撤去（2 扉 ＋ 「メーカー索引を見る →」）/ ロゴ不使用。
 >   gate L21〜L23 追加（FAIL 0、selftest 23 件全検出、v4 FAIL 0）。render 4 面 × 6 幅 overflow 0。**PENDING P1**: 主導線・グローバルナビ上の Library の扱い → レーン CLOSE 後の横断ナビ監査。
 > **Launcher 反映済み（18:06）**: `index.html` Library 群 8 カード（7 面 v3 → v5 ＋ PC 専用 検索）/ `compare.html` 7 組 → v5。Mobile 面は旧版のまま。
+> **Mobile Library v5 CLOSE（2026-09-26 11:48・イタヤ実機確認「見た感じ良い」）**: 8 面を採用。PC は設計レベルの再 OPEN ではなく、Mobile 実装で見つかった共有部の不整合 4 点の限定修正（GPT 同見解）。
+>   残置: 旧 Mobile Library 7 面（`library*.html`）は他の Mobile 12 面（browse-* / search-results / rig-detail / parts-detail / garage-*-detail / index-e-roomclip / about）からリンクされているため**移動しない**（PC v3 と同じ扱い）。リンクの v5 切替と `_archive/` 退避は **Front-wide 監査**（横断 PENDING）で行う。
+>   PENDING 継続: P-M1 chip の sticky / P-M3 Top 新着の件数 / P-M6 PC のメーカー select（別バッチ）/ 横断 BottomNav 共通化。**次 = `mockup`（mock ＋ canon 118 に統合して commit / push）**。
+> **Mobile Library 監査 OK（2026-09-26 11:30）**: ASTRA 利用制限のため、イタヤ指示で **Claude の独立監査エージェント**が再確認（PC CLOSE 時点 base と 900 状態比較 ＋ 操作 37 × 2 ＋ 変異注入 14）。第 1 回再確認で MUST 1（PC 退行: テーマボタン後の遷移で dark に戻る）→ **?theme= は「その面だけ」＝リンクに入れない**（裁定 M7・L59・B6）/ SHOULD（ヘッダー ← が from= を使わない → B7、抜粋も製品行 → M8・M07）を修正 → 第 2 回で **MUST 0・監査 OK**、残 SHOULD 2 も対応済み。
+>   gate: PC L01〜L59 FAIL 0 / selftest 61/61。Mobile M01〜M17 FAIL 0 / selftest 17/17。ブラウザ B1〜B7 FAIL 0。PC の許容差分は 4 点（索引の更新順 / 自分の URL の theme / Not Found H1 / from= に theme を入れない）。**次 = イタヤ実機確認 → `mockup`（mock ＋ canon）**。未 commit。
+> **ASTRA Mobile 監査 → 対応済み（2026-09-26 10:09）**: MUST 1（メーカー索引の戻りで検索語が 1 文字前 → URL 更新を先に。**PC にも同じ不具合 → 限定再 OPEN 3 点**: 索引の更新順 / 状態 URL に theme / Not Found の H1）/ SHOULD 2（長い検索語のはみ出し / `?theme=dark` が落ちる → `L.stateUrl`）。意見: 車種も製品行で確定（M2）/ Not Found に H1 / D18 の Mobile 22px を M6 に。
+>   gate: PC L57 / L58 追加 → FAIL 0 / selftest 60/60。Mobile M15〜M17 → FAIL 0 / selftest 16/16。**ブラウザ検査 `_state/library_browser_check.py`（B1〜B5・Playwright）新設** FAIL 0。回帰 152 状態 issue 0。回答書 `_state/AUDIT_RESPONSE_20260926_mobile-library-astra.md`（再確認依頼文つき）。未 commit。
+> **Mobile カタログの操作を整理（2026-09-26 09:34・イタヤ「検索導線が多すぎ・プルダウンがしつこい・メーカー 1,000 社で破綻」）**: 一覧の常設操作は**検索欄 ＋ カテゴリ chip だけ**。メーカー select を廃止（検索欄の別名解決 ＋ メーカー索引が担う。`maker=` 到達時は解除ピル）。形態 / 駆動 / 生産終了 / 並び替えは「絞り込み」ボタン → 底シートの chip 群（catalog5 に `makerFilter:false` / `chips:true` / `onRender` を追加。PC は既定値で無変更）。裁定 M4 を改訂。
+>   ⚠️ PC の メーカー select も同じ規模で破綻する（実害）→ 別バッチで同じ形へ寄せる候補（PC 再 OPEN はイタヤ判断）。gate M06 更新。Mobile 12 URL × 3 幅 × light/dark = 72 状態 issue 0 / PC gate FAIL 0。
+> **Mobile Library v5 — 8 面を一気に実装（2026-09-25 21:51・イタヤ「PC 版をベースにまず一気に仕上げる → ASTRA 監査」）**: `library-v5 / -rigs-v5 / -parts-v5 / -makers-v5 / -maker-detail-v5 / -rig-master-detail-v5 / -parts-master-detail-v5 / -search-v5`。
+>   PC の catalog5 / detail5 / fixture / 照合 / カード をそのまま使い、器だけ Mobile（`css/mobile-library.css` / `js/mobile-library-shell.js`。`SoT_library-base.css` を PC Shell から分離 = 値は 1 か所）。
+>   裁定 `_decisions/2026-09-25_mobile-library-v1.md`: Top 骨格（検索 → パーツをカテゴリから探す → 新着 4 行 → 注記。扉・メーカー補助リンク無し）/ 一覧 = 製品行のみ / もっと見る 24 件 / 戻り位置は内部 ID / 親カテゴリ chip（sticky 無し）。
+>   gate: `_state/mobile_library_check.py` M01〜M14 FAIL 0 / selftest 12/12。PC gate FAIL 0 / selftest 58/58（PC は無変更動作: 8 面 × 5 幅 × light/dark = 80 状態 issue 0）。Mobile 14 URL × 3 幅 × light/dark = 84 状態（Not Found 2 面の H1 無しを除き issue 0）。
+>   Launcher / compare.html を Mobile v5 へ切替（旧 library*.html 7 面は採用判定まで残置）。**次 = ASTRA 監査（指示文 `_state/AUDIT_BRIEF_20260925_mobile-library-astra.md`）→ イタヤ実機確認 → mockup**。未 commit。
 > **ASTRA 最終確認 OK → PC Library v5 監査 CLOSE（2026-09-25 20:54）**: 再確認で MUST / SHOULD 残件なし（57991・58691・PRO10128-03・PRO10128 の 3 入口一致、D18 記述＝実表示）。gate FAIL 0 / selftest 58/58 / 160 状態 issue 0。次 = commit / push（`mockup`・イタヤ判断）。未 commit。
 > **ASTRA 最終確認 → 対応済み（2026-09-25 20:45）**: 前回指摘は解消確認。追加 MUST 1 = Variant カードの仕様が代表のまま（`57991` で ITEM＝XB・仕様＝Kit）→ `cardSpec(p,v)` で一覧の仕様も Variant 優先（L54 拡張・selftest L54c）。SHOULD 1 = D18 の記述を実表示に合わせ明確化（720px 以下 26px / メーカー詳細はパンくず下 Y=136）。gate FAIL 0 / selftest 58/58。未 commit。
 > **D18〜D20（2026-09-25 20:28・イタヤ裁定）**: **D18** 製品 Detail の H1 は別の表示契約（製品名 = H1、表示は Identity 見出し 26px。P5 確定・gate L49）／ **D19** 購入 CTA を青（`--lib-buy` = #0969da、Community / Garage の購入色と同値。中立レイヤーの唯一の例外・gate L56）／ **D20** リフォームしやすい土台（トークン・部品 1 か所・name/id/slug 分離・gate。Next.js では版番号を名前に持ち込まない。CORE 候補）。
