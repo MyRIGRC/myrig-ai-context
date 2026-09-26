@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
 revision: MYRIG-20260924-118
-updated: 2026-09-26 11:48 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+updated: 2026-09-26 12:53 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -44,6 +44,13 @@ updated: 2026-09-26 11:48 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 >   実装: Maker Detail から製品ライン chips 撤去・公式サイトは最下部の参照リンクへ格下げ / Maker Index の製品ライン列・検索を撤去 / Top のメーカー扉・グリッド撤去（2 扉 ＋ 「メーカー索引を見る →」）/ ロゴ不使用。
 >   gate L21〜L23 追加（FAIL 0、selftest 23 件全検出、v4 FAIL 0）。render 4 面 × 6 幅 overflow 0。**PENDING P1**: 主導線・グローバルナビ上の Library の扱い → レーン CLOSE 後の横断ナビ監査。
 > **Launcher 反映済み（18:06）**: `index.html` Library 群 8 カード（7 面 v3 → v5 ＋ PC 専用 検索）/ `compare.html` 7 組 → v5。Mobile 面は旧版のまま。
+> **Library 後片付け（2026-09-26 12:53・イタヤ「やるべきことは全部・ランチャー更新も」）**:
+>   ① Community / Garage → Library の旧リンクを v5 へ切替: Mobile 10 面 ＋ `js/parts-category-demo.js`、PC 25 面 ＋ `SoT_footer.js`（計 88 行）。製品 Detail への固定リンクは文脈の製品へ（RC4WD TF2 Mojave II = `Z-RTR0046` / Traxxas TRX-4 = `82044-4` / Vanquish F10 Portal Axle Housing = `VPS10126` を fixture 末尾に追加）。fixture に無い製品のカード（PC 検索の製品情報欄・Mobile 検索結果）は Library 検索 `?q=<製品名>` へ。
+>   ⛔ 除外: PC Garage **v6 8 面**（凍結 baseline。garage_check G1 がバイト不変を要求）→ v3 のまま。
+>   ② 旧 Mobile Library 7 面 → `_archive/20260926_mobile-library-old-close/`（README。参照 0 を確認して mv）。**PC v3 7 面は残置**: Front-wide の検査（filter_transform / shell_interaction / web_fundamentals など 7 本）が fixture として使っている。本番導線からのリンクは 0（v6 凍結面と v3 自身だけ）
+>   ③ P-M6 解消: **PC カタログもメーカー select を廃止**（`makerFilter:false`。Mobile M4 と同じ。gate L60）
+>   ④ Launcher: Library 群 8 面を 確定（group--done / card--done）・説明文を現状へ・ロードマップ「Library 系 CLOSE / 次のレーンはイタヤ裁定待ち」。Mobile Garage Detail の public baseline を同じリンク置換で更新
+>   検証: Front-wide 含む全 gate を変更前後で実行 → 変更後も同一（新規 FAIL 0。環境依存で両方動かない 4 本と、両方同じ既存 FAIL 2 本は変化なし）。PC gate FAIL 0 / selftest 62/62、Mobile FAIL 0 / 17/17、ブラウザ B1〜B7 FAIL 0。未 commit（mock = `mockup`、canon = ローカル commit → イタヤ push）。
 > **Mobile Library v5 CLOSE（2026-09-26 11:48・イタヤ実機確認「見た感じ良い」）**: 8 面を採用。PC は設計レベルの再 OPEN ではなく、Mobile 実装で見つかった共有部の不整合 4 点の限定修正（GPT 同見解）。
 >   残置: 旧 Mobile Library 7 面（`library*.html`）は他の Mobile 12 面（browse-* / search-results / rig-detail / parts-detail / garage-*-detail / index-e-roomclip / about）からリンクされているため**移動しない**（PC v3 と同じ扱い）。リンクの v5 切替と `_archive/` 退避は **Front-wide 監査**（横断 PENDING）で行う。
 >   PENDING 継続: P-M1 chip の sticky / P-M3 Top 新着の件数 / P-M6 PC のメーカー select（別バッチ）/ 横断 BottomNav 共通化。**次 = `mockup`（mock ＋ canon 118 に統合して commit / push）**。

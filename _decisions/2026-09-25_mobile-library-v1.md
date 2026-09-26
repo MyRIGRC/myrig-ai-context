@@ -63,11 +63,16 @@
 ### CLOSE（2026-09-26 11:48）
 - イタヤ実機確認で採用。旧 Mobile Library 7 面は他の Mobile 12 面から参照されているため残置（リンク切替・退避は Front-wide 監査で）
 
+### CLOSE 後の後片付け（2026-09-26 12:53）
+- 旧 Library へのリンクを v5 へ切替（Mobile 10 面 / PC 25 面 / 共有 JS 2。PC Garage v6 凍結 8 面は除外）。旧 Mobile 7 面は `_archive/20260926_mobile-library-old-close/` へ mv。PC v3 7 面は Front-wide 検査の fixture として残置（導線からのリンク 0）
+- P-M6: PC カタログのメーカー select も廃止（L60）
+
 ## PENDING
 - P-M1 親カテゴリ chip の sticky 化（実機確認後）
 - ~~P-M2 車種カタログの一覧形式~~ → 2026-09-26 製品行で確定（M2）
 - P-M3 Top 新着の件数（3〜4 で実機調整）
 - ~~P-M4 Not Found の H1~~ → 2026-09-26 notFoundHTML を h1 に（PC / Mobile）
-- P-M6 **PC のメーカー select**（同じ規模で実用にならない見込み）→ 別バッチで Mobile と同じ形（検索欄 ＋ メーカー索引）へ。PC 再 OPEN の判断はイタヤ
-- P-M5 旧 Mobile Library 7 面（`library*.html`）の退避 → **Front-wide 監査へ移管**（browse-* / search-results / rig-detail / parts-detail / garage-*-detail / index-e-roomclip / about の 12 面がリンク中。v5 へ切替後に `_archive/` へ mv）
+- ~~P-M6 PC のメーカー select~~ → 2026-09-26 廃止（イタヤ「やるべきことは全部」。L60）
+- P-M7 PC v3 7 面を Front-wide 検査の fixture から外す（検査を v5 / 他面へ付け替えた後に `_archive/` へ）→ Front-wide 監査で
+- ~~P-M5 旧 Mobile Library 7 面の退避~~ → 2026-09-26 リンク切替のうえ退避済み。（旧記述: Front-wide 監査へ移管（browse-* / search-results / rig-detail / parts-detail / garage-*-detail / index-e-roomclip / about の 12 面がリンク中。v5 へ切替後に `_archive/` へ mv）
 - 横断: Mobile 全面の BottomNav 複製を mobile-shell 側へ寄せる（Front-wide。Library Shell は同じ API で先行）
