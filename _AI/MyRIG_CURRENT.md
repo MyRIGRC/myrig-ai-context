@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
 revision: MYRIG-20260924-118
-updated: 2026-09-26 12:53 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+updated: 2026-09-27 09:32 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -44,6 +44,7 @@ updated: 2026-09-26 12:53 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 >   実装: Maker Detail から製品ライン chips 撤去・公式サイトは最下部の参照リンクへ格下げ / Maker Index の製品ライン列・検索を撤去 / Top のメーカー扉・グリッド撤去（2 扉 ＋ 「メーカー索引を見る →」）/ ロゴ不使用。
 >   gate L21〜L23 追加（FAIL 0、selftest 23 件全検出、v4 FAIL 0）。render 4 面 × 6 幅 overflow 0。**PENDING P1**: 主導線・グローバルナビ上の Library の扱い → レーン CLOSE 後の横断ナビ監査。
 > **Launcher 反映済み（18:06）**: `index.html` Library 群 8 カード（7 面 v3 → v5 ＋ PC 専用 検索）/ `compare.html` 7 組 → v5。Mobile 面は旧版のまま。
+> **次レーン = 認証・オンボーディングの作り直し（2026-09-27 09:32・イタヤ裁定）**: オレンジ（要確認）群は数か月前の旧モックのまま → **1 グループずつ作り直して CLOSE し、Front-wide は全部そろってから 1 回だけ**。順 = 認証・オンボーディング → 設定・通知 → 情報・法務・サポート → Garage 系。引き継ぎ = `_state/HANDOFF_20260927_auth-onboarding.md`。
 > **Library 後片付け（2026-09-26 12:53・イタヤ「やるべきことは全部・ランチャー更新も」）**:
 >   ① Community / Garage → Library の旧リンクを v5 へ切替: Mobile 10 面 ＋ `js/parts-category-demo.js`、PC 25 面 ＋ `SoT_footer.js`（計 88 行）。製品 Detail への固定リンクは文脈の製品へ（RC4WD TF2 Mojave II = `Z-RTR0046` / Traxxas TRX-4 = `82044-4` / Vanquish F10 Portal Axle Housing = `VPS10126` を fixture 末尾に追加）。fixture に無い製品のカード（PC 検索の製品情報欄・Mobile 検索結果）は Library 検索 `?q=<製品名>` へ。
 >   ⛔ 除外: PC Garage **v6 8 面**（凍結 baseline。garage_check G1 がバイト不変を要求）→ v3 のまま。
