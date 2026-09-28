@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260924-118
-updated: 2026-09-27 09:32 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260928-119
+updated: 2026-09-28 17:12 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -13,6 +13,27 @@ updated: 2026-09-27 09:32 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > **スレッドをまたぐとき最初に読む節。** イタヤは環境（デスクトップCowork / ブラウザCowork /
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
+
+**最終更新: 2026-09-28 / revision 119（**認証・オンボーディング CLOSE — PC 09-27 / Mobile 09-28。認証方式裁定・登録完了 = 有効な profiles**）**
+
+> 🟢 **119 = 認証・オンボーディングのレーンを CLOSE（PC v2 2026-09-27 / Mobile v2 2026-09-28・イタヤ実機 3 回 → 15:58「CLOSE で進めて」）。HOLD「認証方式」を裁定。**
+> 裁定原本: **`_decisions/2026-09-28_auth-onboarding-close-v1.md`**（D1〜D4・撤去・失効・PENDING）。正典反映: **`docs/ui/auth-guard-spec-v1.md` v1.3**（§4.3 改訂・§4.4 新設）。
+> 記録原本（mock）: `_state/AUTH_EXPLORATION_20260927.md`（PC）/ `_state/AUTH_MOBILE_V2_20260927.md`（Mobile・認証方式・登録の流れ・シミュレーション）。引き継ぎ: `_state/HANDOFF_20260927_auth-onboarding.md` / `_state/HANDOFF_20260927_auth-mobile-v2.md`（§9 = CLOSE）。
+> ⛔ **Production DB 非接触。migration 未実行。物理 DELETE 禁止。**
+>
+> - **D1 認証方式 = 「Googleで続ける」「Facebookで続ける」「メールアドレスで続ける」（6 桁の確認コード・パスワードなし）**。ログイン面と新規登録面で同じボタン・同じ文言（初回はそのまま登録・2 回目からはログイン）。⛔ パスワード・電話番号は持たない。Apple・X は MVP の外（X はアプリ取得済み。足すときは `SoT_auth-flow.js` の `AUTH_METHODS` に 1 行）。Instagram ログインは Meta が一般向けに提供していないので置かない（Meta 系は Facebook で受ける）。
+> - **D2 登録完了 = はじめの設定を終えて有効な `profiles`（行があり・`deleted_at IS NULL`）を作った時点**。認証成功だけでは登録完了としない。登録途中（auth.users あり・profiles なし）の間は profiles を作らない（schema v1.6 `username NOT NULL` と整合。「username 未設定か」で判定しない）。
+>   認証の 3 状態（未ログイン / 認証済み・登録途中 / 登録完了）× 面の表。ガード優先順位 **Maintenance > Suspended > 登録状態判定 > P1 / P2 / P3**。実装時の判定順 **① 論理削除済み profile あり → 特別扱い（PENDING）/ ② 有効 profile あり → 登録完了 / ③ profile なし → 登録途中**。`is_public` は関係させない。⛔「すでに登録されています」は出さない。
+> - **D3 救済と個人情報**: 持つ個人情報は認証に要るものだけ。認証情報（メール・provider）は Supabase Auth 側が正本で `profiles` へ写さない。**運営が公開プロフィールの情報だけでログインを戻したり移したりしない**（乗っ取りの入口）。救済は事前登録した手段だけ → 設定「ログインとセキュリティ」（設定レーン・PENDING）。
+> - **D4 画面（PC / Mobile 共通の Auth 面。Mobile 専用 Auth 面は作らない）**: **R4** = Mobile のログイン・新規登録は認証操作より前に写真を置かない（写真は同意文の後の「Open your garage.」帯 240〜420px）/ はじめの設定の先頭は確認済みアカウントの行（アイコン＋✓「Googleアカウントを確認しました」「別のアカウントを使う」）/ ボタンは **「登録を完了する」** / PC は右の列 = 見本 → 画像の設定 → 登録を完了する（sticky 1 枚）/ Mobile は 基本プロフィール → 見本 → 登録を完了する の 1 枚のシート / はじめてガイドは同じ部品・同じ 2 章に Mobile 実在 UI の段（第 1 章 6・第 2 章 11。Library は「探す」で入口を伝える）/ ErrorState 完全共有（`error-states-v2.html`）/ mobile-shell の自前 safeNext・文言を撤去し `SoT_auth-flow.js` へ一本化（L1）/ 確認コード: 全角・空白を受ける・再送 60 秒・二度押しで 2 回保存しない・コード画面に行き先の一文。
+> - **撤去**: 旧 8 面（PC `myrig-auth-v1` / `-onboarding-pc-v0.2` / `-welcome-tour-v0.1` / `-error-states-v0.1`、Mobile `auth` / `onboarding` / `welcome-tour` / `error-states`）を git rm（DECISION-4・`_archive` へ複製しない。参照 0 = `auth_check.py --close`）。
+> - **失効した旧記述**: pc-mobile-spec-inheritance #33 / #34 / #35 / #39 → 本裁定で置き換え（文書側の改訂は Front-wide 監査時）。auth-guard-spec §4.3「新規ユーザー（username 未設定）」→ v1.3「有効な profiles なし」。
+>
+> **mock 到達点（mockup 6a7e579・2026-09-28 17:00 push 済み）**: Auth 面 3（`pc/myrig-auth-login-v2` / `-signup-v2` / `-onboarding-v2`。`?platform=pc|mobile` ＋ `<html data-mock-platform>`）/ 共有 `SoT_auth-flow.js`（AUTH_METHODS・safeNext・buildAuthUrl・takeHandoff・completeOnboarding）/ `SoT_auth-shell.js/css`（showcase 7 枚回転・email/code・`.au-acct`）/ `SoT_welcome-guide.js`（PC ＋ Mobile 段）/ `SoT_error-state.js`（PC `pc/myrig-error-states-v2` / Mobile `error-states-v2`）/ `js/mobile-shell.js`（LoginRequiredModal・guide・handoff を共有 API へ委譲）。
+>   Launcher 認証グループ **確定 4**（カード = PC / Mobile の対 data-mo / data-pc。状態・流れも状態カード。「見比べ」= compare.html 18 組）。⛔ 手書きの「PC確認 / Mobile確認」リンク行を戻さない。
+>   gate: `_state/auth_check.py` A01〜A32 FAIL 0（`--close` OK / selftest 66/66）/ `auth_browser_check.py` B1〜B19 101/0（B19 = 10 シナリオ × pc / mobile）/ 回帰 17 本 base と同一（`garage_integrity_check.py` GIP3 は next の解析を修正 → 610/0）。
+> **PENDING（CLOSE を止めない）**: 設定「ログインとセキュリティ」（接続中のアカウント・ログイン方法の追加・連絡先メール・Passkey・復旧コード）/ 論理削除済み profile を持つアカウントの扱い（退会・復帰）/ 同じメールの identity 統合（Supabase linking）/ 登録途中アカウントの長期の扱い / 本番の確認コード条件（失効 10 分・試行・再送 60 秒・送信上限）と独自 SMTP / Facebook アプリの公開設定（審査・データ削除窓口）/ 本番の showcase 公式セット / Geo Master / profiles の地域コード・地域公開列 / page-role-matrix「Onboarding = RIG 登録誘導」の是正（Front-wide）。
+> **次レーン = イタヤ裁定待ち（予定: 設定・通知）。**
 
 **最終更新: 2026-09-24 / revision 118（**Library Shell ハイブリッド裁定 — Atlas 型 Shell ＋ v4 契約**）**
 
@@ -4582,7 +4603,7 @@ Category v1.4「確定値12種」も従来CURRENT記載の「8値未確定」も
 議論着手時の参考: 値の議論より先に owner（App未実装機能の先行記述か / Research管轄の未構築か）の確認が必要。
 議論再開時期: イベント機能の設計を始める時。**現段階では催促しない。**
 
-認証方式（将来議論項目・OAuthオンボーディング未着手）
+認証方式 — **裁定済み 2026-09-28（revision 119）→ `_decisions/2026-09-28_auth-onboarding-close-v1.md` D1**（Google / Facebook / メール 6 桁コード。パスワード・電話番号なし。Apple・X は MVP 外）。以下は裁定前の記録。
 プロバイダとメール認証の有無が4文書で不一致。
 App_Ready_Design_Rules（Google/GitHub＋メール）/ implementation_checklist（Google＋メール確認）/
 auth-guard-spec §7（OAuth only）/ pc-mobile-spec-inheritance #33（Google・X・Facebook・メール認証なし）。

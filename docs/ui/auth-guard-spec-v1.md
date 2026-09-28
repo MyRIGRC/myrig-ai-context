@@ -10,8 +10,8 @@
 > ただし **§4「`next` パラメータ安全性」は L1**（open redirect 対策。セキュリティ）。
 
 **作成日:** 2026-05-22 (MR-AUDIT-002 / A7)
-**最終更新:** 2026-08-22
-**ステータス:** 確定 v1.2-r3
+**最終更新:** 2026-09-28
+**ステータス:** 確定 v1.3
 **前提:** `auth-onboarding-minimum-spec-v1` / `nextjs-routing-table-v1` / `appheader-interaction-spec-v1` / `dialog-interaction-spec-v1`
 ⚠️ **上記4本＋`error-states-decomposition-MR-AUDIT-002` は本repo内に未収録。**
 参照が必要になった時点で所在を確認すること。
@@ -20,6 +20,7 @@
 > §5 skeleton を「matcher拡張＋内部分岐」方式へ修正した（Next.js公式と同じnegative-lookahead方式）。
 > Maintenance/Suspendedは全ページ対象、P1のredirectだけをパス判定で絞る。詳細は §5。
 > ガード優先順位: **Maintenance > Suspended > P1 Auth**。
+> 🔴 **2026-09-28 v1.3**: 登録状態判定を追加し **Maintenance > Suspended > 登録状態判定 > P1 / P2 / P3** とした（§4.4）。
 > ⚠️ **未確定（実装時に確定）**: (1) 対象Next.jsバージョン（16なら`middleware.ts`はdeprecated、
 > `proxy.ts`へ改称する）／(2) Maintenance/Suspendedのredirectとは別のAPI用契約
 > （現在のskeletonは全リクエストを対象にするためAPIルートもHTTP redirectになる。
@@ -200,9 +201,36 @@ export function safeNext(rawNext: string | null | undefined): string {
 
 ### 4.3 認証成功後の遷移先
 
-- 既存ユーザー（OAuth 成功）+ `next` あり → `safeNext(next)` へ遷移
-- 既存ユーザー + `next` なし → `/garage` へ遷移
-- 新規ユーザー（username 未設定）→ `/onboarding`（`next` は session に退避 / onboarding 完了後に遷移）
+🔴 **2026-09-28 v1.3 改訂（イタヤ承認）**: 判定を「username 未設定か」から「**有効な `profiles` があるか**」へ変更。
+schema v1.6 で `profiles.username` は NOT NULL のため、username の無い `profiles` 行は作れない。
+**登録途中の間は `profiles` を作らず、Onboarding 完了（「MyRIGをはじめる」の成功）時に username 込みで作成する = 登録完了。**
+認証（OAuth / メールの確認コード）が成功しただけでは MyRIG の登録完了としない。
+
+- 認証成功・**有効な `profiles` あり**（登録完了）+ `next` あり → `safeNext(next)` へ遷移
+- 認証成功・有効な `profiles` あり + `next` なし → `/garage` へ遷移
+- 認証成功・**有効な `profiles` なし**（はじめての人・Onboarding を途中でやめた人 = 登録途中）→ `/onboarding`
+  （`next` は保持し、Onboarding 完了後に遷移。Login / Signup のどちらから来ても同じ）
+- ⛔「このアカウントはすでに登録されています」は出さない（認証アカウントがあれば同じアカウントにログインするだけ）
+
+**有効な `profiles`** = `profiles` 行が存在し、論理削除されていない（`deleted_at IS NULL`）こと。`is_public` は判定に関係させない。
+⚠️ **論理削除済みの `profiles` を持つ認証アカウント**（退会済み等）は「登録途中」と扱わない（Onboarding は `profiles` の新規作成になり、
+同じ id の論理削除行と衝突するため）。扱い（退会・復帰の仕様）は PENDING。それまでは Onboarding へ送らない。
+
+**実装時の判定順（この順を崩さない）**: ① 論理削除済みの `profiles` 行あり → 特別扱い（PENDING）／ ② 有効な `profiles` あり → 登録完了 ／ ③ `profiles` 行なし → 登録途中
+
+### 4.4 認証の 3 状態と転送（2026-09-28 v1.3 新設・イタヤ承認）
+
+**ガード優先順位: Maintenance > Suspended > 登録状態判定 > P1 / P2 / P3。**
+Suspended のユーザーを「有効な profile が無いから Onboarding へ」と誤って流さないため、登録状態判定は Suspended の後に置く。
+
+| 状態 | 定義 | `/login`・`/signup` | `/onboarding` | 自分のものを扱う画面・操作（`/garage`・`/settings`・Register・いいね・フォロー等） | 公開ページ |
+|---|---|---|---|---|---|
+| 未ログイン | session なし | 表示 | `/login?next=/onboarding` | 従来どおり P1 / P2 / P3 | 閲覧可 |
+| 認証済み・登録途中 | session あり・有効な `profiles` なし | → `/onboarding`（`next` を保持） | 表示 | → `/onboarding?next=`（P2 / P3 の操作も実行しない） | 閲覧可 |
+| 登録完了 | session あり・有効な `profiles` あり | → 安全な `next`、無ければ `/garage` | → `/garage`（安全な `next` があればそこ） | 通過 | 閲覧可 |
+
+- `next` の扱いはすべて §4（L1）の safeNext を通す。Onboarding 自身を `next` の着地先にしない
+- 未確定（PENDING 継続）: 同じメールアドレスの identity の統合（Supabase の linking）/ 途中で残った登録途中アカウントの長期の扱い / 本番の確認コードの条件（失効・試行回数・再送・送信上限）
 
 ---
 
@@ -216,7 +244,7 @@ export function safeNext(rawNext: string | null | undefined): string {
 全体ガードとP1ガードを別ファイルに分離する案は、Next.js/Vercelのmiddleware/proxyが1ファイル1matcherである
 制約と相性が悪いため不採用。
 
-**ガード優先順位: Maintenance > Suspended > P1 Auth**（Maintenance ON時はSuspendedユーザーも
+**ガード優先順位: Maintenance > Suspended > 登録状態判定（§4.4・v1.3）> P1 Auth**（Maintenance ON時はSuspendedユーザーも
 `/maintenance`へ誘導される。session取得もスキップされる。障害・保守モードとして意図した挙動）。
 
 ```ts
@@ -411,5 +439,6 @@ Suspendedユーザーが `/account-suspended` を開いた場合の無限redirec
 | v1 | 2026-05-22 | 初版（MR-AUDIT-002 / A7）。P1 / P2 / P3 パターン / Login Required Modal 文言 / `next` 安全性 / `middleware.ts` skeleton + matcher を確定 |
 | v1.1 | 2026-08-21 | #14裁定（context 8種・文言5グループ）を §3.1 / §3.3 本文へ反映。matcher から `/notifications/:path*` `/register/:path*` を除外し **P2＝matcher対象外**で確定 |
 | v1.2 | 2026-08-22 | GPT監査A解消。Maintenance/Suspendedが公開ページで無効だった問題を、matcher拡張＋`isP1Protected()`によるパス内分岐へ変更して解消。P2の挙動（matcher非依存の判定）は無変更 |
+| v1.3 | 2026-09-28 | 認証・オンボーディング作り直し（イタヤ承認・GPT 同見解）。§4.3 の判定を「username 未設定」→「有効な `profiles`（存在・未論理削除）」へ。登録途中は `profiles` を作らず Onboarding 完了時に作成（`username NOT NULL` と整合）。§4.4 新設: 未ログイン / 認証済み・登録途中 / 登録完了 の 3 状態と `/login`・`/signup`・`/onboarding`・保護操作の転送。ガード優先順位を Maintenance > Suspended > 登録状態判定 > P1/P2/P3 へ。論理削除済み profile は登録途中と扱わない（PENDING） |
 | v1.2-r3 | 2026-08-22 | GPT総合監査(revision023)のHIGH2件: (1) locale正規化を追加。`/en/garage`等がP1認証を素通りしていた（page-role-matrix #24裁定の`/en/*`プレフィックス方式と未接続だった）。`stripLocale()`/`withLocale()`を導入し全判定をlocale除去後のパスで行う (2) §5.2 Admin Guard新設。page-role-matrix「`/admin/*`は認証middlewareで保護」およびimplementation_checklist L1「is_adminチェック→非管理者403」が、auth-guard側に一切記述されていなかった設計漏れを解消 |
 | v1.2-r2 | 2026-08-22 | GPT監査(revision020→021)の追加是正6件: 冒頭ヘッダーをv1.2/2026-08-22へ更新／`NEXT_PUBLIC_MAINTENANCE`→server-only `MAINTENANCE_MODE`（envインライン化問題）／matcherに`sitemap.xml``robots.txt`除外を追加してNext.js公式例に合わせる／§6 P3の「matcherに含めない」旧記述を撤回／ガード優先順位（Maintenance>Suspended>P1 Auth）を明記／Next.js 16なら`middleware.ts`→`proxy.ts`改称の注記／APIルート用に別契約(503/403 JSON)の実装時確定を注記／§6.1に`/account-suspended`直接アクセスの未決定項目を明示 |
