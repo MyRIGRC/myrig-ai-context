@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
 revision: MYRIG-20260928-119
-updated: 2026-09-28 17:12 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+updated: 2026-09-28 17:36 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -33,7 +33,7 @@ updated: 2026-09-28 17:12 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 >   Launcher 認証グループ **確定 4**（カード = PC / Mobile の対 data-mo / data-pc。状態・流れも状態カード。「見比べ」= compare.html 18 組）。⛔ 手書きの「PC確認 / Mobile確認」リンク行を戻さない。
 >   gate: `_state/auth_check.py` A01〜A32 FAIL 0（`--close` OK / selftest 66/66）/ `auth_browser_check.py` B1〜B19 101/0（B19 = 10 シナリオ × pc / mobile）/ 回帰 17 本 base と同一（`garage_integrity_check.py` GIP3 は next の解析を修正 → 610/0）。
 > **PENDING（CLOSE を止めない）**: 設定「ログインとセキュリティ」（接続中のアカウント・ログイン方法の追加・連絡先メール・Passkey・復旧コード）/ 論理削除済み profile を持つアカウントの扱い（退会・復帰）/ 同じメールの identity 統合（Supabase linking）/ 登録途中アカウントの長期の扱い / 本番の確認コード条件（失効 10 分・試行・再送 60 秒・送信上限）と独自 SMTP / Facebook アプリの公開設定（審査・データ削除窓口）/ 本番の showcase 公式セット / Geo Master / profiles の地域コード・地域公開列 / page-role-matrix「Onboarding = RIG 登録誘導」の是正（Front-wide）。
-> **次レーン = イタヤ裁定待ち（予定: 設定・通知）。**
+> **次レーン = 設定・通知（2026-09-28 17:26 イタヤ裁定）**: ① 設定全体の棚卸し → ②「ログインとセキュリティ」→ ③ 通知設定 → ④ 通知一覧。最初は実装せず、既存 PC / Mobile の Settings・Notifications 実体の監査 → 処遇表 → 新構成案。⚠️ schema Domain 9 `notifications` は「MVP では作成しない」/ Mobile Header に通知アイコンを置かない（contract §3.1・再提案禁止）。引き継ぎ: **`_state/HANDOFF_20260928_settings-notifications.md`**
 
 **最終更新: 2026-09-24 / revision 118（**Library Shell ハイブリッド裁定 — Atlas 型 Shell ＋ v4 契約**）**
 
