@@ -287,14 +287,14 @@
 **#35 myrig-welcome-tour-v0.1.html**（direct）
 - wt-modal 5ステップ（ようこそ → RIGをまとめる → 製品情報を見る → 整備・走行を残す → まずは1台）＋背景Home初回表示シミュレーション
 
-**#36 myrig-about-v0.1.html — `/about`（PROPOSED）**（direct）
+**#36 myrig-about-v0.1.html — `/about`（~~PROPOSED~~ → 🔴 2026-09-29 確定・正典 122・裁定原本 `_decisions/2026-09-29_info-legal-support-v1.md` D1。「運営者」の節を足す）**（direct）
 - 主列: about-hero → 3つの柱 → できること → 「SNSでは流れる、MyRIGでは残る」→ カタログ×ユーザーRIG連携 → 開発中告知 → final CTA
 
-**#37 myrig-support-us-v0.1.html — `/support`（PROPOSED）**（direct）
+**#37 myrig-support-us-v0.1.html — ~~`/support`（PROPOSED）~~ → 🔴 2026-09-29 `/support-us`・確定（122・裁定 D7 = 3′）。作るが MVP 公開時は非表示。金額ボタン撤去・CTA は外部サイトへ 1 本・「寄付」を使わない・バッジは public 文面から外す**（direct）
 - 主列: headline（一回だけ、無理なく応援する）＋応援カード → Why Support（受け取れる形の説明）→ お礼と使い道 → FAQ → closing
 - 特記: 「継続支援」フレーミング。機能ゲート表現の禁止（Charter）。
 
-**#38 myrig-support-legal-report-pc-v0.1.html**（direct）
+**#38 myrig-support-legal-report-pc-v0.1.html**（direct）→ 🔴 2026-09-29（122・裁定 D1 / D5）: support 面（help / contact / report・`?view=`）と legal 面（terms / privacy / tokushoho）の 2 ファイルへ分ける。Feedback タブは `/contact?kind=feedback`、Empty State タブは外す。通報の主経路は面内ダイアログ `SoT_report.js`（下の特記の「上位裁定」= 裁定原本 D5）
 - タブ7面: Help / Contact / Feedback / Report / Terms（9条）/ Privacy（8条）/ Empty State
 - 特記: PC現物ではReportはタブ内フォームであり、通報モーダルは収録されていない。別途P3仕様でモーダルを採用する場合は、上位裁定として処遇表に根拠を明記する。
 

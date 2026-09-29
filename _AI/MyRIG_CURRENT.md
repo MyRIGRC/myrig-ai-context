@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260929-121
-updated: 2026-09-29 17:25 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260929-122
+updated: 2026-09-29 19:58 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,25 @@ updated: 2026-09-29 17:25 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-29 / revision 121（**次レーン = 情報・法務・サポート（引き継ぎ HANDOFF_20260929）**）**
+**最終更新: 2026-09-29 / revision 122（**情報・法務・サポート 方向裁定 D1〜D9・schema v1.6-r11・auth-guard v1.5**）**
+
+> 🟢 **122 = 情報・法務・サポートレーンの方向を裁定（イタヤ 2026-09-29 19:51「進めましょう」「基本的に全部 OK」）。mock 未着手。**
+> 裁定原本: **`_decisions/2026-09-29_info-legal-support-v1.md`**（D1〜D9・HOLD / PENDING・罠）。Claude 主査案 v1 → GPT ＋ Gemini 監査 → v2 → 再監査 → v3 → 裁定（7 点・3 は 3′）。
+> 正典反映: schema **v1.6-r11**（`support_inquiries`・`user_reports` 新設・通報の書き込み経路 1 本・直接 INSERT の RLS 廃止・UNIQUE を開いている通報だけに）/ auth-guard-spec **v1.5**（Suspended 除外 `/contact /help /legal/*`）/ page-role-matrix v1.7（Info / Legal / Support 9 行）/ pc-mobile-spec-inheritance #36 #37 #38 / implementation_checklist 4-2。
+> ⛔ **Production DB 非接触。migration 未実行。物理 DELETE 禁止。法的な要否・文面は全部「要確認」・[DRAFT] は外さない。**
+>
+> - **D1 mock 7 面 / 公開 route 8 本 ＋ 予約 1**: `/about /help /contact /report /news /legal/terms /legal/privacy /support-us`・予約 `/legal/tokushoho`。`/feedback /guide /company` は作らない。redirect `/terms /privacy /support`。**`/news` = announcements の公開 read-only（SELECT 全公開なのに UI が無かった不整合を解く）**。PC は support / legal の 2 ファイル ＋ `?view=`
+> - **D2 導線の Single Source = `pc/assets/js/SoT_site-links.js` 新設**（INFO / LEGAL / SUPPORT・`enabled`）。footer・mobile-shell・app-shell（34 面のヘルプ）・settings・error-state・notifications・auth-shell が consumer。**09-13 裁定「LEGAL の真源 = SoT_footer.js」は置き場所だけ失効**（旧 LEGAL は DEPRECATED で移行期間だけ）
+> - **D4 `support_inquiries`**: kind 7・書き込みはサーバー 1 本・`user_id` は session から・email 必須は kind 別・**Suspended は kind=account だけ**・受付と本人確認を分離・D8 確定処理は `user_id` 切り離しだけ・**保持期間 = 🔴 HOLD（法務・Release Blocker）**
+> - **D5 通報 3 表**: `user_reports` 新設（content_reports に user を足さない）・reason は表ごとに維持（`wrong_info` 残す）・partial unique（open / reviewing だけ）・**直接 INSERT の RLS 廃止**・主経路 = 面内ダイアログ `SoT_report.js`・未ログインは inquiries kind=rights
+> - **D6 規約・プライバシーに書く事実**: ログイン = Google / Facebook / メール（**Apple を消す**）・退会 30 日・通知・ブロック・外部サービス。要確認の一覧は裁定原本
+> - **D7（3′）応援するは作るが MVP 公開時は出さない**（site-links `enabled`。出す時期はイタヤ）。金額ボタン撤去・CTA は外部サイトへ 1 本・「寄付」を使わない・バッジは public 文面から外す・特商法は予約・非公開・特典は Phase 2（MR-PLAN-002 維持）
+> - **D8 到達性**: Suspended 除外 = `/contact /help /legal/*`。**退会猶予中は例外化しない**（`/resume` に「ログアウト後に」）
+> - **罠**: news 廃止（受信トレイは要ログイン）/ reason 統一（投稿の誤情報の行き場が消える）/ user を content_reports へ（FK 不可・処置が違う）/ 保持期間を placeholder（HOLD の確定値扱い）/ 猶予中の /contact 例外（CLOSE 済み D8 を黙って変える）/ Gemini「D8 で FK 違反」は誤り（profiles は匿名化して残す）
+> - **PENDING**: 停止中アカウントの確定処理（/admin）/ 単発応援の特典・外部支援サービスの採用・特商法の要否（別レーン）/ Cookie 同意モデル（既存 HOLD）/ empty-state-spec の参照先
+> - **次**: mock 実装（site-links → footer / mobile-shell / app-shell の結線 → support / legal の 2 ファイル化 ＋ `?view=` → `/news` 面 → `SoT_report.js` → 文面の是正 → gate `info_browser_check.py`）。P6 は D4 / D5 実装後に差分監査 1 回
+
+**revision 121（次レーン = 情報・法務・サポート（引き継ぎ HANDOFF_20260929））**
 
 > 🟢 **121 = 次レーンの引き継ぎ**。設定・通知レーンは 120 で CLOSE 済み（下の節）。次は Launcher「次のレーン」どおり **情報・法務・サポート**（ヘルプ・お問い合わせ・通報 / 規約・ポリシー / MyRIG とは / 応援する）。
 > 引き継ぎ: **`_state/HANDOFF_20260929_info-legal-support.md`**（対象の面・リンクの行き先の棚卸し・必ず考えること・前のレーンで分かった進め方・作業環境のメモ）。レーンを変えるならイタヤ裁定で差し替える。

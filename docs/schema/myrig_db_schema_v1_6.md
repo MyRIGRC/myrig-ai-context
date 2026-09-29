@@ -1,4 +1,4 @@
-# MyRIG RC — Database Schema Design v1.6-r10（App所有領域）
+# MyRIG RC — Database Schema Design v1.6-r11（App所有領域）
 
 > **拘束力: L2（現在の確定仕様・より良い案の提案歓迎）**
 >
@@ -13,7 +13,8 @@
 > - **RLS 方針**（セキュリティ）
 > - **HOLD 項目を確定として扱わないこと**
 
-**最終更新:** 2026-09-29（v1.6-r10 / 正典 120 追補。ASTRA 監査 M1〜M7・D13 ガレージ非公開 = 持ち主の門・本人だけの値を `profile_private` へ）
+**最終更新:** 2026-09-29（v1.6-r11 / 正典 122・情報・法務・サポート D4 / D5。`support_inquiries`・`user_reports` 新設・通報の書き込み経路 1 本・UNIQUE を開いている通報だけに）
+（v1.6-r10 / 正典 120 追補。ASTRA 監査 M1〜M7・D13 ガレージ非公開 = 持ち主の門・本人だけの値を `profile_private` へ）
 （v1.6-r9 / 同日。興味カテゴリ = `profiles.preferred_rig_category_slugs TEXT[]`（最大 5・順序）・`preferred_subcategory` 非推奨・ブロック / ミュート一覧の段階取得）
 （v1.6-r8 / 2026-09-28: Domain 9 `notifications` を MVP 実行分へ移動・`is_read` → `read_at`・生成条件）
 ※ファイル名は `myrig_db_schema_v1_6.md` のまま（CURRENT.md の索引と一致させるため）
@@ -24,7 +25,7 @@
 
 | 区分 | テーブル | 正本 |
 |---|---|---|
-| **App 所有** | `profiles` / `rigs` / `parts` / `maintenance_logs` / `rig_parts` / `images` / `likes` / `favorites` / `pins` / `follows` / `comments` / `comment_reports` / `content_reports` / `page_blocks` / `affiliate_links` / `notifications` / `user_plans` | **本書** |
+| **App 所有** | `profiles` / `profile_private` / `rigs` / `parts` / `maintenance_logs` / `rig_parts` / `maintenance_log_parts` / `entity_links` / `images` / `likes` / `favorites` / `pins` / `follows` / `comments` / `comment_reports` / `content_reports` / `user_reports` / `support_inquiries` / `page_blocks` / `affiliate_links` / `notifications` / `notification_settings` / `announcements` / `announcement_reads` / `announcement_mute_periods` / `user_blocks` / `user_mutes` / `username_reservations` / `user_plans`（🔴 v1.6-r11: App が正本を持つ全テーブル。**MVP / 将来実行を問わない責務境界の一覧**で、`user_plans` のように MVP で作らないものも含む。「MVPマイグレーション順」は migration の順序で、FK 依存のため Research 所有表も含む。**両者は別目的・どちらも他方の正ではない**） | **本書** |
 | **Research 所有** | `manufacturers` / `rig_masters` / **`part_masters`**（※単数形） / `rig_categories` / `part_categories` / `master_aliases` / `master_relations` / `master_images` / `master_external_links` / `master_publication` / `rig_master_variants` / `part_master_variants` / `bodies` | **`db-schema-answers-v1.md`** |
 
 ⚠️ **`part_masters`（Research・単数形）と `parts_masters`（App・複数形）は同名別義。**
@@ -711,7 +712,14 @@ UNIQUE制約は再操作（一度解除して再度いいね等）に対応す�
 | resolved_at | TIMESTAMPTZ | NULLABLE | |
 | resolved_by | UUID | FK → profiles.id, NULLABLE | 対応した運営者 |
 
-**UNIQUE:** `(comment_id, reporter_user_id)`
+**UNIQUE:** ~~`(comment_id, reporter_user_id)`~~ → 🔴 **v1.6-r11: 開いている通報だけ** = `CREATE UNIQUE INDEX ... ON comment_reports(comment_id, reporter_user_id) WHERE status IN ('open','reviewing')`。resolved / rejected の後に内容が変われば再通報できる（rate limit を併用）
+
+🔴 **v1.6-r11 書き込み経路 1 本**（comment_reports / content_reports / user_reports 共通）: 通報の作成は**サーバー側の専用経路だけ**（SECURITY DEFINER RPC / Server Action は実装時）。**直接 INSERT の RLS ポリシーは作らない**（裁定原本 `_decisions/2026-09-29_info-legal-support-v1.md` D5）。専用経路の必須条件:
+- `reporter_user_id` は `auth.uid()` / session から導出し、client 値を信用しない
+- **reporter 自身の状態を関数の中で判定する**: 対応する有効な `profiles` が存在し、通報できるアカウント状態であること。**登録途中（profiles なし）・退会猶予中（`deleted_at IS NOT NULL`）・確定処理中・Suspended は拒否**。UI / middleware は通報 API のセキュリティ境界にしない（authenticated なら RPC を直接叩ける）
+- INSERT の前に検証: 対象の実在（論理削除済みを除く）・self-report の拒否・`reason_code` が CHECK の値・**開いている通報（open / reviewing）の重複**・rate limit
+- `SECURITY DEFINER` を使うなら **固定 `search_path`**。作成時に **`REVOKE EXECUTE ... FROM PUBLIC`**（PostgreSQL は新規 function の EXECUTE を PUBLIC に既定付与する）→ 必要な role（`authenticated`）だけ `GRANT EXECUTE`。**作成と権限設定は同一 transaction**。`anon` / `public` に残さない。RPC が迂回路にならないこと
+`reporter_user_id` は NOT NULL のまま。退会確定処理（Domain 11）は profiles 行を匿名化して残すので FK は壊れず、参照先に個人情報は残らない。
 
 ---
 
@@ -731,7 +739,9 @@ RIG・パーツ・LOG自体の通報。comment_reportsとは別管理。
 | resolved_at | TIMESTAMPTZ | NULLABLE | |
 | resolved_by | UUID | FK → profiles.id, NULLABLE | 対応した運営者 |
 
-**UNIQUE:** `(entity_type, entity_id, reporter_user_id)`
+**UNIQUE:** ~~`(entity_type, entity_id, reporter_user_id)`~~ → 🔴 **v1.6-r11: 開いている通報だけ**（partial unique・`WHERE status IN ('open','reviewing')`。comment_reports と同じ）
+
+🔴 **v1.6-r11**: 書き込み経路 1 本（comment_reports と同じ。直接 INSERT の RLS ポリシーは作らない）。`entity_type` に `user` を**足さない**（ユーザーの通報は `user_reports`）。`reason_code` は 6 種を**維持**（`wrong_info` = ユーザー投稿の誤情報。Library マスターの修正報告 `master-correction-report-spec-v1` とは別）。UI の「危険・違法」は `inappropriate` に畳む（ラベル「不適切・危険・違法なコンテンツ」）。
 
 **reason_code値（report.htmlのUIと対応）：**
 - `inappropriate` = 不適切なコンテンツ・画像
@@ -741,6 +751,53 @@ RIG・パーツ・LOG自体の通報。comment_reportsとは別管理。
 - `harassment` = 嫌がらせ・ハラスメント
 - `other` = その他
 
+
+---
+
+### `user_reports`（🔴 v1.6-r11 新設・情報・法務・サポート D5）
+ユーザー（アカウント）の通報。投稿の通報（`content_reports`）・コメントの通報（`comment_reports`）と**別表**。処置が違う（投稿 = 非公開化 / ユーザー = 停止）ので同じ表に混ぜない。`target_user_id` に FK を張れる。
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| id | UUID | PK, DEFAULT gen_random_uuid() | |
+| target_user_id | UUID | FK → profiles.id, NOT NULL | 通報対象のユーザー |
+| reporter_user_id | UUID | FK → profiles.id, NOT NULL | 通報者。session から |
+| reason_code | TEXT | NOT NULL, CHECK (reason_code IN ('impersonation','harassment','spam','inappropriate','other')) | impersonation = なりすまし |
+| note | TEXT | NULLABLE | 自由記述 |
+| status | TEXT | NOT NULL, DEFAULT 'open', CHECK (status IN ('open','reviewing','resolved','rejected')) | |
+| created_at | TIMESTAMPTZ | DEFAULT now() | |
+| resolved_at | TIMESTAMPTZ | NULLABLE | |
+| resolved_by | UUID | FK → profiles.id, NULLABLE | 対応した運営者 |
+
+**UNIQUE:** `(target_user_id, reporter_user_id) WHERE status IN ('open','reviewing')`（partial）
+**CHECK:** `target_user_id <> reporter_user_id`（self-report はサーバー側関数でも拒否）
+**書き込み経路 1 本**（comment_reports と同じ）。SELECT は運営者ロールのみ（`/admin` のサーバー側経路）。
+退会猶予中（`profiles.deleted_at IS NOT NULL`）の対象も通報できる。停止（suspended）> 再開（/resume）は auth-guard のガード順で成立。停止中アカウントの確定処理の扱いは **PENDING（/admin レーン）**。
+
+---
+
+### `support_inquiries`（🔴 v1.6-r11 新設・情報・法務・サポート D4）
+お問い合わせ・フィードバック・開示請求・権利者からの申し立ての受け皿。**未ログインでも送れる**。/admin のキューと運営記録。
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| id | UUID | PK, DEFAULT gen_random_uuid() | 運営メールには「新規 #ID / kind」だけを載せる |
+| kind | TEXT | NOT NULL, CHECK (kind IN ('account','content','bug','feedback','data_request','rights','other')) | account = ログイン・乗っ取り・停止の申し立て / data_request = 開示請求（D9）/ rights = 権利者・非会員からの通報 |
+| email | TEXT | NULLABLE | **必須は kind 別にサーバーで検証**: 必須 = account / rights / data_request、任意 = content / bug / feedback / other |
+| subject | TEXT | NULLABLE | |
+| body | TEXT | NOT NULL | |
+| related_url | TEXT | NULLABLE | |
+| user_id | UUID | FK → profiles.id, NULLABLE | **サーバー側 session からだけ導出**。client 値は捨てる。**session があり、かつ対応する `profiles` 行が存在するときだけ**その `profiles.id` を入れる。未ログイン・**登録途中（session あり・`profiles` なし）**は NULL（`auth.users.id` をそのまま入れると FK 違反。認証 D2「Onboarding 完了まで profiles を作らない」） |
+| status | TEXT | NOT NULL, DEFAULT 'open', CHECK (status IN ('open','replied','closed')) | |
+| created_at | TIMESTAMPTZ | DEFAULT now() | |
+| handled_by | UUID | FK → profiles.id, NULLABLE | |
+| handled_at | TIMESTAMPTZ | NULLABLE | |
+
+- **書き込み経路 1 本 = サーバー側**（Server Action / RPC は実装時）。クライアント INSERT の RLS ポリシーは作らない。匿名は rate limit ＋ bot 対策（Cloudflare Turnstile 要確認）
+- **Suspended は書き込み不可。例外は `kind='account'` だけ**（救済の申し立て。UI は `?kind=account&from=suspended` で種別を固定）
+- **受付と本人確認を分離**: data_request / account は受け付けた後に本人確認の工程へ。確認できるまで開示・移行・ログインの復旧をしない。手順は 🔴 **HOLD（法務）**
+- **client から直接 SELECT 不可**。運営者は `/admin` のサーバー側読み取り経路（service role）だけから参照（RLS はポリシー 0）
+- **退会確定処理（Domain 11）**: `user_id` を NULL に切り離すだけ。email / body は運営記録として残す。**保持期間は 🔴 HOLD（法務・Release Blocker・本番公開前に解消）**。確定まで期限列・自動 NULL 化ジョブ・仮の月数を**作らない**（HOLD を確定値として扱わない）。行は消さない
 ---
 
 ## Domain 6: マネタイズ
@@ -1131,8 +1188,8 @@ announcement_mute_periods（🔴 v1.6-r10・M5）
   🔴 v1.6-r10: 親の判定は持ち主の門（D13）を含む。コメントを書いた人の門では判定しない（非公開ガレージの人のコメントも、公開投稿の上では見える）。
   **退会したユーザーのコメント（withdrawn）は生の行では読ませず、公開のコメント一覧の読み取り経路でだけ本文・投稿者なしで返す**（Domain 11・M6）
   🔴 v1.6-r10（再監査）: **自分の entity に付いたコメントは持ち主本人が読める**（非公開にした自分の RIG でも・通知の抜粋のため）。**持ち主による他人のコメントの非表示**（Domain 5 のコメントの節）はサーバー経由の UPDATE（「自分のコメントの status だけ」と矛盾していた）。書いた人が猶予中なら出さない
-- **comment_reports**: INSERTはauth.uid()必須。SELECTは運営者ロールのみ
-- **content_reports**: INSERTはauth.uid()必須。SELECTは運営者ロールのみ。同一ユーザーから同一コンテンツへの重複通報はUNIQUE制約で防止
+- **comment_reports / content_reports / user_reports**: 🔴 v1.6-r11 **ユーザーの直接 INSERT ポリシーは作らない**（サーバー側関数 1 本。旧「INSERTはauth.uid()必須」は失効）。SELECTは運営者ロールのみ。重複防止は開いている通報だけの partial unique
+- **support_inquiries**: 🔴 v1.6-r11 **client からの直接 INSERT / SELECT / UPDATE ポリシーは一切作らない**（RLS 有効・ポリシー 0）。書き込みはサーバー側 1 本。**運営者の読み取りも `/admin` のサーバー側経路（service role）だけ**で、operator JWT を RLS で通す SELECT ポリシーは作らない。DELETEポリシーは作らない（共通原則）
 - **page_blocks**: SELECT全公開（is_active=trueのみ）。変更は管理者ロールのみ
 - 🔴 **notifications（v1.6-r8）**: SELECTは`user_id = auth.uid()`のみ。UPDATEは`user_id = auth.uid()`かつ`read_at`列のみ。
   INSERTはユーザーに許可しない（元テーブルへの書き込みを契機にサーバー側で作る）。DELETEポリシーは作らない（共通原則）。
@@ -1230,6 +1287,22 @@ CREATE INDEX idx_comment_reports_reporter ON comment_reports(reporter_user_id, c
 CREATE INDEX idx_content_reports_entity ON content_reports(entity_type, entity_id, status, created_at DESC);
 CREATE INDEX idx_content_reports_reporter ON content_reports(reporter_user_id, created_at DESC);
 
+-- 🔴 v1.6-r11: 通報 3 表の重複防止は「開いている通報だけ」の partial unique（旧 UNIQUE 制約は作らない）
+CREATE UNIQUE INDEX uq_comment_reports_active ON comment_reports(comment_id, reporter_user_id)
+  WHERE status IN ('open','reviewing');
+CREATE UNIQUE INDEX uq_content_reports_active ON content_reports(entity_type, entity_id, reporter_user_id)
+  WHERE status IN ('open','reviewing');
+CREATE UNIQUE INDEX uq_user_reports_active ON user_reports(target_user_id, reporter_user_id)
+  WHERE status IN ('open','reviewing');
+
+-- 🔴 v1.6-r11: ユーザー通報
+CREATE INDEX idx_user_reports_target ON user_reports(target_user_id, status, created_at DESC);
+CREATE INDEX idx_user_reports_reporter ON user_reports(reporter_user_id, created_at DESC);
+
+-- 🔴 v1.6-r11: お問い合わせ（/admin のキュー・本人の紐づけ）
+CREATE INDEX idx_support_inquiries_status ON support_inquiries(status, created_at DESC);
+CREATE INDEX idx_support_inquiries_user ON support_inquiries(user_id, created_at DESC) WHERE user_id IS NOT NULL;
+
 -- page_blocks（ページ別ブロック取得）
 CREATE INDEX idx_page_blocks_page ON page_blocks(page_type, page_ref_id, is_active, sort_order) WHERE is_active = true;
 ```
@@ -1278,6 +1351,10 @@ comments ──1:N──→ comment_reports
 content_reports → polymorphic (entity_type + entity_id)
     → 対象: rigs / parts / maintenance_logs
 
+user_reports ──N:1──→ profiles (target_user_id)          🔴 v1.6-r11
+user_reports ──N:1──→ profiles (reporter_user_id)
+support_inquiries ──N:1──→ profiles (user_id, NULL 可)    🔴 v1.6-r11
+
 rig_masters/parts_masters ──1:N──→ affiliate_links
 
 page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
@@ -1293,7 +1370,9 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 > ⚠️ **5番 `parts_masters` は所有区分が未確定**（Research の `part_masters` と同一かが決まっていない）。
 > **App↔Research 写像表（cross_ref）が無い状態でマイグレーションを流さないこと。**
 
-### MVP実行分（20テーブル ＋ entity_links ＋ maintenance_log_parts ＋ notifications）
+### MVP実行分
+
+> 🔴 v1.6-r11: 見出しの表数表記（旧「20テーブル ＋ …」）は r8〜r11 で増えて古くなっていたため撤去。この一覧は **migration の順序**（FK 依存のため Research 所有表も含む）。App / Research の責務境界は「適用範囲」の App 所有一覧が持つ。別目的
 1. `manufacturers` ※Research所有
 2. `rig_categories` / `part_categories` ※Research所有
 3. `profiles`（auth.users依存）
@@ -1321,6 +1400,8 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 19-e. `user_blocks` / `user_mutes`（🔴 v1.6-r8 新設・D6）
 19-f. `username_reservations`（🔴 v1.6-r8 新設・D8）
 19-g. `profile_private`（profiles 依存。🔴 v1.6-r10 新設・D10 / M3）
+19-i. `user_reports`（profiles 依存。🔴 v1.6-r11 新設・情報・法務・サポート D5）
+19-j. `support_inquiries`（profiles 依存・user_id NULL 可。🔴 v1.6-r11 新設・同 D4）
 19-h. `announcement_mute_periods`（profiles 依存。🔴 v1.6-r10 新設・M5）。`announcement_reads` は r10 の形（user × announcement）で作る
 
 ### 将来実行分（MVPでは作成しない）
@@ -1359,6 +1440,7 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 
 | 版 | 要点 |
 |---|---|
+| **v1.6-r11** | **情報・法務・サポート（2026-09-29 / 正典 122・裁定原本 `_decisions/2026-09-29_info-legal-support-v1.md` D4 / D5）。** `support_inquiries` 新設（kind 7・email 必須は kind 別・user_id は session からだけ・Suspended は account だけ・保持期間は HOLD で値を入れない）/ `user_reports` 新設（ユーザー通報を content_reports から分離）/ comment_reports・content_reports の UNIQUE を開いている通報だけの partial unique へ / 通報 3 表と inquiries の書き込みをサーバー側関数 1 本にし**直接 INSERT の RLS を廃止** / content_reports の reason 6 種・entity_type 3 種は維持（初案の reason 統一・user 追加は GPT・Gemini の監査で撤回）。⛔ Production DB migration は行っていない |
 | **v1.6-r10** | **ASTRA 監査の是正と D13（2026-09-29 / 正典 120 追補）。** 退会: `profiles.purge_started_at` / `purge_completed_at`・再開と確定処理の競合を行ロックで排除・猶予中は書けない（M1）/ 関係テーブルの UPDATE は解除だけ・やり直しは INSERT（M2 ブロックの抜け道）/ **`profile_private` 新設**（マイカテゴリ・地域・地域の公開。r9 で `profiles` に置いた `preferred_rig_category_slugs` はここへ移した = 未適用の列なので行の移行なし）（M3）/ `announcement_reads` を user × announcement へ・**`announcement_mute_periods` 新設**（M5）/ 退会コメントは published だけを withdrawn へ・公開一覧は専用の読み取り経路（M6）/ `notifications` に `event` / `meta` / `comment_id`（M7・S8）/ **持ち主の門**（ガレージ非公開 = 全部非公開・全入口で同じ関数・D13）/ **前提なし再監査の是正**: 判定と通知の生成を SECURITY DEFINER の関数へ（RLS の下で判定が素通しになる）・profiles の列の書き込み制限と公開用の読み取り経路・username の小文字一意・長さと URL の CHECK・退会の確定処理の対象を補った・猶予中の見え方と再開画面・security 通知はサーバー API から・追加直後の方法で古い方法を外せない・通知の宛先 / 索引 / ページ分け・`announcements.expires_at`。⛔ Production DB migration は行っていない。裁定原本 D13 と「再監査の扱い」 |
 | **v1.6-r9** | **マイカテゴリ（2026-09-29 / 正典 120 追補・D10 / D12）。** **`profiles.preferred_rig_category_slugs TEXT[]` 新設**（最大 5 = CHECK・配列の順 = 並び・書き込みはサーバーの原子的な add / remove だけ・slug の実在確認をサーバーで）/ `profiles.preferred_subcategory` を**非推奨**（型を変えない・DROP しない）/ 同日の別テーブル案 `user_interest_categories` は採らなかった/ `user_blocks`・`user_mutes` に一覧の段階取得と「ブロックはミュートを含む・データは別々」を明記。⛔ Production DB migration は行っていない。裁定原本 `_decisions/2026-09-28_settings-notifications-v1.md` D10〜D12 |
 | **v1.6-r8** | **設定・通知（2026-09-28 / 正典 120・D1〜D9）。** `notifications` を MVP 実行分へ・`is_read` → `read_at`・`type` に `security` / `notification_settings` / `announcements`・`announcement_reads` / `user_blocks`・`user_mutes` / 退会（Domain 11）・`username_reservations` / `comments.status` に `withdrawn`。⛔ Production DB migration は行っていない（この行は r9 で補った。r8 の時点で履歴に書き漏れていた） |

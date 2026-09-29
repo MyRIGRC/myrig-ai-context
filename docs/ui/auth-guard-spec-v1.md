@@ -10,8 +10,8 @@
 > ただし **§4「`next` パラメータ安全性」は L1**（open redirect 対策。セキュリティ）。
 
 **作成日:** 2026-05-22 (MR-AUDIT-002 / A7)
-**最終更新:** 2026-09-28
-**ステータス:** 確定 v1.3
+**最終更新:** 2026-09-29
+**ステータス:** 確定 v1.5
 **前提:** `auth-onboarding-minimum-spec-v1` / `nextjs-routing-table-v1` / `appheader-interaction-spec-v1` / `dialog-interaction-spec-v1`
 ⚠️ **上記4本＋`error-states-decomposition-MR-AUDIT-002` は本repo内に未収録。**
 参照が必要になった時点で所在を確認すること。
@@ -223,6 +223,12 @@ schema v1.6 で `profiles.username` は NOT NULL のため、username の無い 
 **ガード優先順位: Maintenance > Suspended > 登録状態判定 > P1 / P2 / P3。**
 Suspended のユーザーを「有効な profile が無いから Onboarding へ」と誤って流さないため、登録状態判定は Suspended の後に置く。
 
+🔴 **v1.5（2026-09-29・情報・法務・サポート D8）**:
+- **Suspended の redirect 除外** = `/account-suspended` ＋ `/contact` `/help` `/legal/*`。アカウント制限画面の CTA「お問い合わせ」が `/contact` へ着ける（v1.4 までは自分自身へ戻るループだった）。`/contact` からの送信は `support_inquiries(kind='account')` だけをサーバー側で許す（UI は `?kind=account&from=suspended` で種別を固定）
+- **退会猶予中（判定順 ①）は例外を作らない**。猶予中は再開の処理以外を書き込めない・出口は 再開 / ログアウトだけ（設定・通知 D8・CLOSE 済み）。`/resume` に「お問い合わせは一度ログアウトしてから」の 1 行を置き、公開の `/contact` へ匿名で送る
+- 停止 > 再開は**この順で成立する**（Suspended を 登録状態判定 ① の前に判定する）。停止中アカウントの 30 日確定処理を止めるかは PENDING（/admin レーン）
+- 情報・法務・サポートの面（`/about /help /contact /report /news /legal/* /support-us`）は P3（公開）。`/report` の面内ダイアログはログイン必須（P2 相当・Login Required Modal）
+
 | 状態 | 定義 | `/login`・`/signup` | `/onboarding` | 自分のものを扱う画面・操作（`/garage`・`/settings`・Register・いいね・フォロー等） | 公開ページ |
 |---|---|---|---|---|---|
 | 未ログイン | session なし | 表示 | `/login?next=/onboarding` | 従来どおり P1 / P2 / P3 | 閲覧可 |
@@ -312,9 +318,12 @@ export async function middleware(req: NextRequest) {
   // 2) Session 取得（実装時に具体化）
   const session = await getSession(req); // Supabase session lookup
 
-  // 3) Suspended — 全ページ対象
+  // 3) Suspended — 全ページ対象。🔴 v1.5: 除外は /account-suspended ＋ 情報・法務・サポートの 3 種だけ
+  //    （/contact = 救済の申し立て・/help・/legal/*。/about /news /report /support-us は除外しない。
+  //     /contact の書き込みは kind='account' だけをサーバー側で許す = schema v1.6-r11 support_inquiries）
+  const SUSPENDED_ALLOW = ['/account-suspended', '/contact', '/help'];
   if (session?.user?.accountStatus === 'suspended') {
-    if (path !== '/account-suspended') {
+    if (!SUSPENDED_ALLOW.includes(path) && !path.startsWith('/legal/')) {
       const url = req.nextUrl.clone();
       url.pathname = withLocale(locale, '/account-suspended');
       return NextResponse.redirect(url);
@@ -439,6 +448,7 @@ Suspendedユーザーが `/account-suspended` を開いた場合の無限redirec
 | v1 | 2026-05-22 | 初版（MR-AUDIT-002 / A7）。P1 / P2 / P3 パターン / Login Required Modal 文言 / `next` 安全性 / `middleware.ts` skeleton + matcher を確定 |
 | v1.1 | 2026-08-21 | #14裁定（context 8種・文言5グループ）を §3.1 / §3.3 本文へ反映。matcher から `/notifications/:path*` `/register/:path*` を除外し **P2＝matcher対象外**で確定 |
 | v1.2 | 2026-08-22 | GPT監査A解消。Maintenance/Suspendedが公開ページで無効だった問題を、matcher拡張＋`isP1Protected()`によるパス内分岐へ変更して解消。P2の挙動（matcher非依存の判定）は無変更 |
+| v1.5 | 2026-09-29 | 情報・法務・サポート D8（裁定原本 `_decisions/2026-09-29_info-legal-support-v1.md`）: Suspended の redirect 除外に `/contact` `/help` `/legal/*` を追加（`SUSPENDED_ALLOW`）。退会猶予中は例外化せず `/resume` に案内文。情報・法務・サポートの面は P3 と明記 |
 | v1.4 | 2026-09-29 | §4.3 判定順 ① の PENDING を解消: 論理削除済み profile = `/resume`（設定・通知 D8・mock `pc/myrig-auth-resume-v2.html`・auth_check A33）。再開後は元のページか /garage へ・「MyRIG を再開しました」を 1 回だけ |
 | v1.3 | 2026-09-28 | 認証・オンボーディング作り直し（イタヤ承認・GPT 同見解）。§4.3 の判定を「username 未設定」→「有効な `profiles`（存在・未論理削除）」へ。登録途中は `profiles` を作らず Onboarding 完了時に作成（`username NOT NULL` と整合）。§4.4 新設: 未ログイン / 認証済み・登録途中 / 登録完了 の 3 状態と `/login`・`/signup`・`/onboarding`・保護操作の転送。ガード優先順位を Maintenance > Suspended > 登録状態判定 > P1/P2/P3 へ。論理削除済み profile は登録途中と扱わない（PENDING） |
 | v1.2-r3 | 2026-08-22 | GPT総合監査(revision023)のHIGH2件: (1) locale正規化を追加。`/en/garage`等がP1認証を素通りしていた（page-role-matrix #24裁定の`/en/*`プレフィックス方式と未接続だった）。`stripLocale()`/`withLocale()`を導入し全判定をlocale除去後のパスで行う (2) §5.2 Admin Guard新設。page-role-matrix「`/admin/*`は認証middlewareで保護」およびimplementation_checklist L1「is_adminチェック→非管理者403」が、auth-guard側に一切記述されていなかった設計漏れを解消 |

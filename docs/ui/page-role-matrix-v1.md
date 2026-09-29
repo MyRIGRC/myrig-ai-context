@@ -8,16 +8,16 @@
 > 差分を明示すればイタヤ裁定で変更できる。
 
 **作成日:** 2026-05-03
-**最終更新:** 2026-09-28（Notifications / Settings 行・正典 120）
-**ステータス:** 確定ベース v1.6
+**最終更新:** 2026-09-29（Info / Legal / Support 行・正典 122）
+**ステータス:** 確定ベース v1.7
 
 **目的:** MyRIG全体のページ構成・役割・優先度を固め、V3モック制作・Next.js実装・管理画面設計で迷わない状態にする
 
 > **⚠️ 本表に未捕捉のページ**
 >
-> `/about` `/support` は pc-mobile-spec-inheritance #36 / #37 が PROPOSED として捕捉。
-> error-states / welcome-tour も同 #39 / #35 が捕捉。
-> **`compare.html` / `help.html` / `legal.html` はどの正典にも記載が無い**（要棚卸し）。
+> ~~`/about` `/support` は pc-mobile-spec-inheritance #36 / #37 が PROPOSED として捕捉。~~ → 🔴 **2026-09-29（122）**: Info / Legal / Support 8 route を §2 / §3 に追加（裁定原本 `_decisions/2026-09-29_info-legal-support-v1.md` D1）。`/support` は `/support-us`。
+> error-states / welcome-tour は同 #39 / #35 が捕捉。
+> **`compare.html` はどの正典にも記載が無い**（要棚卸し）。`help.html` / `legal.html` は 122 で捕捉済み（Mobile の Info / Legal 面）。
 > 実装側のファイル分割は本表と1対1ではない（`/search` は `search-results.html` と分割、
 > モバイルHomeの実体は `index-e-roomclip.html`）。
 >
@@ -99,6 +99,18 @@ Utility / Account
 ├─ /signup                              新規登録
 └─ /onboarding                          初期設定ウィザード
 
+Info / Legal / Support（🔴 2026-09-29・122。全部 P3 公開。サイドバー・BottomNav なしの中央本文型）
+├─ /about                               MyRIG とは（運営者の節を含む）
+├─ /help                                使い方・FAQ
+├─ /contact                             お問い合わせ（?kind= で種別。feedback / data_request もここ）
+├─ /report                              通報（URL 指定。主経路は面内ダイアログ）
+├─ /news                                お知らせ（announcements の公開 read-only）
+├─ /legal/terms                         利用規約
+├─ /legal/privacy                       プライバシーポリシー
+├─ /legal/tokushoho                     特定商取引法（予約・非公開）
+└─ /support-us                          応援する（作るが MVP 公開時は非表示・3′）
+※ redirect: /terms → /legal/terms、/privacy → /legal/privacy、/support → /support-us。/feedback /guide /company は作らない
+
 Admin
 ├─ /admin/master                        Master DB 管理（RIG Master / Parts Master）
 ├─ /admin/browse-sections               Browse Section 並び順・設定管理
@@ -146,7 +158,16 @@ Admin
 | Onboarding | `/onboarding` | Utility | 初期設定ウィザード（RIG登録誘導） | サービスを使い始める | Should | Later | |
 | Admin: Master | `/admin/master` | Admin | RIG Master / Parts Master の追加・編集 | マスターデータを管理する | Must | Later | |
 | Admin: Browse Sections | `/admin/browse-sections` | Admin | INDEX / Category Top のセクション並び順・設定管理 | ページを構成する | Should | Later | Phase 4 候補 |
-| Admin: Moderation | `/admin/moderation` | Admin | 報告されたコンテンツの確認・削除 | コンテンツを管理する | Should | Later | |
+| Admin: Moderation | `/admin/moderation` | Admin | 報告されたコンテンツ・ユーザー・問い合わせの確認と処置（通報 3 表 ＋ `support_inquiries` を VIEW / UNION で 1 queue・🔴 122）。削除は論理削除 | コンテンツを管理する | Should | Later | |
+| About | `/about` | Info | サービス紹介・運営者の節。未ログイン・初訪問者向け | MyRIG が何かを知る | Must | A | 🔴 **2026-09-29（122）** 裁定 D1。PC `pc/myrig-about-v0.1.html` / Mobile `about.html`。#36 PROPOSED → 確定 |
+| Help | `/help` | Info | 使い方・FAQ（アコーディオン）。CTA = お問い合わせ / フィードバック / 通報 | 使い方を確かめる | Must | A | 🔴 122。PC は support 面 `?view=help` / Mobile `help.html?view=help`。「使い方」「ヘルプセンター」「/guide」は全部これ |
+| Contact | `/contact` | Info | 運営への問い合わせ。kind = account / content / bug / feedback / data_request / rights / other。未ログイン可 | 運営に連絡する | Must | A | 🔴 122 裁定 D4。受け皿 `support_inquiries`（schema r11）。Suspended は kind=account だけ。/feedback 面は作らない |
+| Report | `/report` | Info | URL 指定の通報。ログイン中は面内ダイアログと同じ。未ログインは `support_inquiries(kind=rights)` | 不適切な投稿・ユーザーを知らせる | Must | A | 🔴 122 裁定 D5。主経路は ⋯ メニューの `SoT_report.js`。通報 3 表（comment / content / user） |
+| News | `/news` | Info | 全員宛てのお知らせ（`announcements`）の公開一覧。障害・規約改定・重要な変更 | 何が起きているか知る | Must | B | 🔴 122 裁定 D1。未ログインでも読める。緊急告知をキャッシュしない。通知の「重要なお知らせ」の行き先 |
+| Terms | `/legal/terms` | Legal | 利用規約 | 条件を確かめる | Must | A | 🔴 122。[DRAFT]・法務未確認。PC は legal 面 `?view=terms` / Mobile `legal.html?view=terms`。決まった事実の一覧 = 裁定原本 D6 |
+| Privacy | `/legal/privacy` | Legal | プライバシーポリシー | 個人情報の扱いを確かめる | Must | A | 🔴 122。同上 `?view=privacy`。Cookie 同意モデルは checklist 4-1 HOLD |
+| Tokushoho | `/legal/tokushoho` | Legal | 特定商取引法に基づく表記 | — | Later | Later | 🔴 122 裁定 D7。**route 予約・面は非公開**。enabled = 決済先決定 ＋ 法務確認。要否も要確認 |
+| Support Us | `/support-us` | Support | 応援する。外部サービス（未確定・第一候補 OFUSE）へ 1 本の CTA。金額ボタンなし | プロジェクトを応援する | Should | A | 🔴 122 裁定 D7（3′）。**作るが MVP 公開時は非表示**（site-links `enabled`）。出す時期はイタヤ。特典は Phase 2 `/plans`（MR-PLAN-002）。#37 の `/support` → `/support-us` |
 | Admin: Reports | `/admin/reports` | Admin | PV・登録数・カテゴリ分布の統計 | サイト状況を把握する | Later | Later | |
 
 ---
