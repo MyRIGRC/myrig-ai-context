@@ -1,5 +1,7 @@
 # HANDOFF — 次スレッド: 設定・通知の作り直し（2026-09-28 17:35 JST / Cowork）
 
+> 🟢 **2026-09-29 このレーンは CLOSE**。以降は裁定原本 `_decisions/2026-09-28_settings-notifications-v1.md`（D1〜D14・CLOSE の節）と CURRENT の NOW を正とする。この引き継ぎ書は着手時点の記録。
+
 > revision: **MYRIG-20260928-119**（GitHub main。canon `4740422` / mock `6a7e579` で push 済み・Mac と一致）
 > 前スレッド: 認証・オンボーディング（PC v2 09-27 / Mobile v2 09-28）を CLOSE。裁定原本 `_decisions/2026-09-28_auth-onboarding-close-v1.md`
 > 次レーン裁定: 2026-09-28 17:26 イタヤ（GPT 同見解）=「設定・通知」

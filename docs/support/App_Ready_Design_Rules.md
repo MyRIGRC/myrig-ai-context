@@ -292,14 +292,14 @@ Server Actions / Route Handlers / SSR を自由に使ってOKだが、以下を�
 
 ---
 
-## Rule 8: 通知テーブルの設計予約
+## Rule 8: 通知テーブル
 
-MVP時点では実装しない（マイグレーション「将来実行分」）。
+🔴 **2026-09-28 改訂（正典 120）**: **アプリ内通知を MVP に含める**（マイグレーション「MVP実行分」19-b）。旧記述「MVP時点では実装しない」は失効。裁定原本 `_decisions/2026-09-28_settings-notifications-v1.md`。
 
 **列定義の正本は `docs/schema/myrig_db_schema_v1_6.md` Domain 9 `notifications`。本書では定義しない。**
 
 - Web版: アプリ内通知（ベルアイコン）として実装
-- App版: Expo Push Notifications → APNs/FCM 連携
+- App版: Expo Push Notifications → APNs/FCM 連携（MVP の外。メール通知も MVP の外）
 
 ---
 

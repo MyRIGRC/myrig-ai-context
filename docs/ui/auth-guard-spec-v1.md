@@ -216,7 +216,7 @@ schema v1.6 で `profiles.username` は NOT NULL のため、username の無い 
 ⚠️ **論理削除済みの `profiles` を持つ認証アカウント**（退会済み等）は「登録途中」と扱わない（Onboarding は `profiles` の新規作成になり、
 同じ id の論理削除行と衝突するため）。扱い（退会・復帰の仕様）は PENDING。それまでは Onboarding へ送らない。
 
-**実装時の判定順（この順を崩さない）**: ① 論理削除済みの `profiles` 行あり → 特別扱い（PENDING）／ ② 有効な `profiles` あり → 登録完了 ／ ③ `profiles` 行なし → 登録途中
+**実装時の判定順（この順を崩さない）**: ① 論理削除済みの `profiles` 行あり → **`/resume`「MyRIG を再開しますか？」**（🔴 v1.4 2026-09-29: 設定・通知 D8 / schema v1.6-r10 Domain 11。猶予中（30 日以内）= 再開できる・30 日を過ぎた（消去の開始待ちを含む）/ 確定処理が始まった = 再開できないと伝える。はじめの設定へ送らない・自動で戻さない・出口は 再開 / ログアウトだけ・猶予中は再開の処理以外を書き込めない）／ ② 有効な `profiles` あり → 登録完了 ／ ③ `profiles` 行なし → 登録途中
 
 ### 4.4 認証の 3 状態と転送（2026-09-28 v1.3 新設・イタヤ承認）
 
@@ -439,6 +439,7 @@ Suspendedユーザーが `/account-suspended` を開いた場合の無限redirec
 | v1 | 2026-05-22 | 初版（MR-AUDIT-002 / A7）。P1 / P2 / P3 パターン / Login Required Modal 文言 / `next` 安全性 / `middleware.ts` skeleton + matcher を確定 |
 | v1.1 | 2026-08-21 | #14裁定（context 8種・文言5グループ）を §3.1 / §3.3 本文へ反映。matcher から `/notifications/:path*` `/register/:path*` を除外し **P2＝matcher対象外**で確定 |
 | v1.2 | 2026-08-22 | GPT監査A解消。Maintenance/Suspendedが公開ページで無効だった問題を、matcher拡張＋`isP1Protected()`によるパス内分岐へ変更して解消。P2の挙動（matcher非依存の判定）は無変更 |
+| v1.4 | 2026-09-29 | §4.3 判定順 ① の PENDING を解消: 論理削除済み profile = `/resume`（設定・通知 D8・mock `pc/myrig-auth-resume-v2.html`・auth_check A33）。再開後は元のページか /garage へ・「MyRIG を再開しました」を 1 回だけ |
 | v1.3 | 2026-09-28 | 認証・オンボーディング作り直し（イタヤ承認・GPT 同見解）。§4.3 の判定を「username 未設定」→「有効な `profiles`（存在・未論理削除）」へ。登録途中は `profiles` を作らず Onboarding 完了時に作成（`username NOT NULL` と整合）。§4.4 新設: 未ログイン / 認証済み・登録途中 / 登録完了 の 3 状態と `/login`・`/signup`・`/onboarding`・保護操作の転送。ガード優先順位を Maintenance > Suspended > 登録状態判定 > P1/P2/P3 へ。論理削除済み profile は登録途中と扱わない（PENDING） |
 | v1.2-r3 | 2026-08-22 | GPT総合監査(revision023)のHIGH2件: (1) locale正規化を追加。`/en/garage`等がP1認証を素通りしていた（page-role-matrix #24裁定の`/en/*`プレフィックス方式と未接続だった）。`stripLocale()`/`withLocale()`を導入し全判定をlocale除去後のパスで行う (2) §5.2 Admin Guard新設。page-role-matrix「`/admin/*`は認証middlewareで保護」およびimplementation_checklist L1「is_adminチェック→非管理者403」が、auth-guard側に一切記述されていなかった設計漏れを解消 |
 | v1.2-r2 | 2026-08-22 | GPT監査(revision020→021)の追加是正6件: 冒頭ヘッダーをv1.2/2026-08-22へ更新／`NEXT_PUBLIC_MAINTENANCE`→server-only `MAINTENANCE_MODE`（envインライン化問題）／matcherに`sitemap.xml``robots.txt`除外を追加してNext.js公式例に合わせる／§6 P3の「matcherに含めない」旧記述を撤回／ガード優先順位（Maintenance>Suspended>P1 Auth）を明記／Next.js 16なら`middleware.ts`→`proxy.ts`改称の注記／APIルート用に別契約(503/403 JSON)の実装時確定を注記／§6.1に`/account-suspended`直接アクセスの未決定項目を明示 |

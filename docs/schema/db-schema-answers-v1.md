@@ -279,6 +279,7 @@ App側は `master_aliases` を JOIN して検索対象に含める。
 - `preferred_rig_type` は**単一値のままでよい**（MVPは rc-car のみ）
 - `preferred_subcategory` は**配列化する**（クローラーとドリフト両方は多数派に近い）。
   `TEXT[]` に `rig_categories.slug` を格納
+  → 🔴 **2026-09-29 App 側で採用（裁定 D10・schema v1.6-r9）**: 新列 `profiles.preferred_rig_category_slugs TEXT[]`（最大 5・配列の順 = 並び）。旧 `preferred_subcategory TEXT` は型を変えず非推奨で残す
 
 ### Q11 集計キャッシュ
 

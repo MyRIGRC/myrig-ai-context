@@ -8,7 +8,7 @@
 > 差分を明示すればイタヤ裁定で変更できる。
 
 **作成日:** 2026-05-03
-**最終更新:** 2026-09-07
+**最終更新:** 2026-09-28（Notifications / Settings 行・正典 120）
 **ステータス:** 確定ベース v1.6
 
 **目的:** MyRIG全体のページ構成・役割・優先度を固め、V3モック制作・Next.js実装・管理画面設計で迷わない状態にする
@@ -136,11 +136,11 @@ Admin
 | RIG Master Detail | `/library/rigs/[masterSlug]` | Library | **Lite版**: 画像2枚・スペック8項目・Variants・User Examples 4件・購入先導線。詳細は公式サイト/提携ショップへ | このモデルの基本情報を確認 / 購入先へ進む | Must | A | ✅ v1.1 Lite 完成（Session 115）。Full Scope版は将来実装候補 |
 | Parts Master Detail | `/library/parts/[masterSlug]` | Library | パーツの公式スペック・購入先導線（Lite方針）| このパーツの基本情報を確認 / 購入先へ進む | Must | B | ✅ 実装済み（PC `myrig-library-parts-master-detail-v3.html` / モバイル `library-parts-master-detail.html`） |
 | Maker Detail | `/library/makers/[makerSlug]` | Library | メーカー情報・製品ライン・公式サイト導線 | このメーカーの製品を見る | Later | Later | ✅ 実装済み（PC `myrig-library-maker-detail-v3.html` / モバイル `library-maker-detail.html`） |
-| Notifications | `/notifications` | Relationship | いいね・コメント・フォロー通知 | 通知を確認する | Should | Later | MVP後半で整備 |
+| Notifications | `/notifications` | Relationship | いいね・お気に入り・コメント・返信・フォローの通知（アプリ内のみ） | 通知を確認する | Must | B | 🔴 **2026-09-28 改訂（120）**: アプリ内通知を MVP に含める（裁定 D1）。旧記述「MVP後半で整備」・Priority Should は失効。PC はベル → 本ページへ直接移動、Mobile は自分のガレージから入る |
 | RIG 登録 | `/register/rig` | Utility | RIG登録フォーム（**連続 Editor / progressive**。段階開示） | RIGを登録する | Must | B | フォーム系は別まとめ。🔴 **2026-09-18 改訂（113）**: 旧記述「ステップ式」は失効。PC v3.1（110）も Mobile（113）も強制ウィザードではない。裁定 **D-B** |
 | PARTS 登録 | `/register/part` | Utility | PARTS登録フォーム | パーツを登録する | Must | B | |
 | LOG 登録 | `/register/log` | Utility | LOG登録フォーム | ログを記録する | Must | B | |
-| Settings | `/settings` | Utility | アカウント・プロフィール・通知・テーマ設定 | 設定を変更する | Should | Later | |
+| Settings | `/settings` | Utility | プロフィール・公開とコメント・興味とおすすめ・通知・ログインとセキュリティ・アカウントの管理 | 設定を変更する | Should | B | 🔴 **2026-09-28 改訂（120）**: 通知設定は MVP に含める（裁定 D5・20:30 改訂）。興味とおすすめ = マイカテゴリ 5 つまで・順序あり（D10・2026-09-29）。テーマ・言語は設定ではなく Shell の表示操作。旧記述「通知・テーマ設定」は失効 |
 | Login | `/login` | Utility | ログイン | ログインする | Must | Later | |
 | Signup | `/signup` | Utility | 新規登録 | アカウントを作る | Must | Later | |
 | Onboarding | `/onboarding` | Utility | 初期設定ウィザード（RIG登録誘導） | サービスを使い始める | Should | Later | |
@@ -269,6 +269,7 @@ Feed が独立したトップレベル体験であるなら、Feed 内に3つの
 - ユーザーフォロー関係に関係なく全公開LOGが対象
 - 基準は**興味・発見**
 - **MVPのおすすめロジックは「新着＋人気の擬似ミックス」で可**
+- 🔴 **マイカテゴリ（2026-09-29 裁定 D10）**: ユーザーの興味カテゴリ（`profile_private.rig_category_slugs`・最大 5）は**順位を押し上げるシグナルで、フィルターではない**。ほかのカテゴリーを除かない。0 件なら上の擬似ミックスのまま。ミュートの除外はその前に効く
 - card_variant: **`log-feed`**（`myrig-log-card variant="feed"`）
   - ⚠️ `browse`（browse_md）は Browse ページ用。Feed では使用しない
   - `feed` variant は `SoT_card-components.js` に実装済み（旧 `myrig-log-feed`）

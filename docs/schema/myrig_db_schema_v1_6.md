@@ -1,4 +1,4 @@
-# MyRIG RC — Database Schema Design v1.6-r7（App所有領域）
+# MyRIG RC — Database Schema Design v1.6-r10（App所有領域）
 
 > **拘束力: L2（現在の確定仕様・より良い案の提案歓迎）**
 >
@@ -13,7 +13,9 @@
 > - **RLS 方針**（セキュリティ）
 > - **HOLD 項目を確定として扱わないこと**
 
-**最終更新:** 2026-09-19（v1.6-r7 / 正典 115）
+**最終更新:** 2026-09-29（v1.6-r10 / 正典 120 追補。ASTRA 監査 M1〜M7・D13 ガレージ非公開 = 持ち主の門・本人だけの値を `profile_private` へ）
+（v1.6-r9 / 同日。興味カテゴリ = `profiles.preferred_rig_category_slugs TEXT[]`（最大 5・順序）・`preferred_subcategory` 非推奨・ブロック / ミュート一覧の段階取得）
+（v1.6-r8 / 2026-09-28: Domain 9 `notifications` を MVP 実行分へ移動・`is_read` → `read_at`・生成条件）
 ※ファイル名は `myrig_db_schema_v1_6.md` のまま（CURRENT.md の索引と一致させるため）
 
 ## 適用範囲 — L1
@@ -54,24 +56,48 @@ Supabase Auth (`auth.users`) と1:1。認証情報以外の全プロフィール
 | Column | Type | Constraints | Notes |
 |---|---|---|---|
 | id | UUID | PK, FK → auth.users.id | Supabase Authと同一ID |
-| username | TEXT | UNIQUE, NOT NULL | @表示名。URL slug |
-| display_name | TEXT | | 表示用ニックネーム |
-| bio | TEXT | | 自己紹介文 |
+| username | TEXT | UNIQUE, NOT NULL | @表示名。URL slug。🔴 v1.6-r10: **一意は正規化（小文字）で判定**（`UNIQUE (lower(username))`）。**本人は変えられない**（サーバーだけが書く） |
+| display_name | TEXT | CHECK (char_length(display_name) <= 50) | 表示用ニックネーム（🔴 v1.6-r10: 長さを DB で縛る） |
+| bio | TEXT | CHECK (char_length(bio) <= 300) | 自己紹介文（🔴 v1.6-r10: 300 字） |
 | avatar_url | TEXT | | Cloudflare Images URL |
 | cover_image_url | TEXT | | ガレージカバー画像URL |
 | country_code | TEXT | | ISO 3166-1 alpha-2 |
 | preferred_rig_type | TEXT | | 大大カテゴリ優先表示 |
-| preferred_subcategory | TEXT | | サブカテゴリ優先表示 |
-| website_url | TEXT | | 個人サイトURL |
+| preferred_subcategory | TEXT | | ⚠️ **v1.6-r9 非推奨（D10）**: 新規に書かない・読まない。後継 = `profile_private.rig_category_slugs`。⛔ 型を変えない・DROP しない |
+| website_url | TEXT | CHECK (website_url ~* '^https?://') | 個人サイトURL（🔴 v1.6-r10: `javascript:` 等を DB で拒否。social_links の各 url も同じ検証をサーバーで） |
 | social_links | JSONB | DEFAULT '[]' | [{platform, url, label}] |
-| is_public | BOOLEAN | DEFAULT true | プロフィール公開設定 |
+| is_public | BOOLEAN | DEFAULT true | **ガレージの公開**（🔴 v1.6-r10・D13: **持ち主の門**。false なら本人以外に RIG・パーツ・LOG と、その画像・関係・件数を一切出さない。各 entity の `is_public` はこの下での公開可否。詳細は RLS「持ち主の門」） |
 | comments_enabled_rig_part | BOOLEAN | DEFAULT true | RIG＋パーツへのコメント受付ON/OFF |
 | comments_enabled_log | BOOLEAN | DEFAULT true | LOGへのコメント受付ON/OFF |
 | created_at | TIMESTAMPTZ | DEFAULT now() | |
 | updated_at | TIMESTAMPTZ | DEFAULT now() | |
-| deleted_at | TIMESTAMPTZ | NULLABLE | 論理削除 |
+| deleted_at | TIMESTAMPTZ | NULLABLE | 論理削除（= 退会の手続き。D8） |
+| purge_started_at | TIMESTAMPTZ | NULLABLE | 🔴 v1.6-r10（M1）: 退会の確定処理を始めた時刻。**入った時点で再開不可** |
+| purge_completed_at | TIMESTAMPTZ | NULLABLE | 🔴 v1.6-r10（M1）: 確定処理がすべて終わった時刻（途中で止まったら、これが NULL のものをやり直す） |
 
 **プロフィール画像はこのテーブルで完結。`images`テーブルには含めない。**
+
+### `profile_private`（🔴 v1.6-r10・MVP・D10 / ASTRA M3）
+**本人だけが読む値**の 1:1 テーブル。RLS は行単位で、列ごとに公開範囲を分けられない → 公開される `profiles` の行に本人専用の値を置かない。**行が無い = 全部既定値**（登録時に作らない）。
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| user_id | UUID | PK, FK → profiles.id | |
+| rig_category_slugs | TEXT[] | NOT NULL, DEFAULT '{}', CHECK (cardinality(rig_category_slugs) <= 5) | **マイカテゴリ**（D10）。値 = `rig_categories.slug`。**配列の順 = Home のタブの並び** |
+| region_code | TEXT | NULLABLE | 地域（都道府県など）。値の一覧は Geo Master（PENDING） |
+| region_public | BOOLEAN | NOT NULL, DEFAULT false | 地域を公開ガレージに出すか |
+| updated_at | TIMESTAMPTZ | DEFAULT now() | |
+
+- RLS: SELECT は `user_id = auth.uid()` だけ。**INSERT / UPDATE のポリシーは作らない — 書き込みはサーバー側の処理だけ**（slug・地域コードの実在確認を迂回させない）
+- マイカテゴリの書き込み = **サーバー側の原子的な add / remove**
+  - add: 5 件未満 かつ 同じ slug が入っていない かつ `rig_categories` に有効な slug として実在するときだけ末尾に足す（行が無ければ作る）
+  - remove: その slug だけを除く
+  - ⛔ クライアントで配列を組んで丸ごと保存しない（別タブの古い配列で、ほかで選んだものが黙って消える）。方式（RPC / サーバー SQL）は本番実装時（PENDING）
+- 読むとき: `rig_categories` に無くなった slug は飛ばす（行は書き換えない）。**add のときは、無効になった slug を同じ処理の中で除いてから数える**（見えない枠で 5 件が埋まらないように）
+- 地域の公開: 公開ガレージの地域表示は、サーバー側の読み取り経路が `region_public = true` のときだけ返す
+- 退会の確定処理（D8）: `rig_category_slugs = '{}'`・`region_code = NULL`
+- 別テーブル（ユーザー × カテゴリ）へ移す条件: カテゴリごとの重み・設定日時の利用・履歴・カテゴリごとの別属性が要るようになったとき
+- `profiles.preferred_rig_type` も本人専用の好みなので、使い始めるときはここへ移す（MVP は rc-car 固定で使わない）
 
 ---
 
@@ -640,12 +666,12 @@ UNIQUE制約は再操作（一度解除して再度いいね等）に対応す�
 | entity_id | UUID | NOT NULL | 対象コンテンツID |
 | parent_id | UUID | FK → comments.id, NULLABLE | 返信先（1階層のみ。アプリ層で強制） |
 | body | TEXT | NOT NULL | プレーンテキストのみ。500文字上限（アプリ層） |
-| status | TEXT | NOT NULL, DEFAULT 'published' | CHECK (status IN ('published','pending','hidden','deleted')) |
+| status | TEXT | NOT NULL, DEFAULT 'published' | CHECK (status IN ('published','pending','hidden','deleted','withdrawn')) — 🔴 v1.6-r8: `withdrawn` = 投稿者が退会確定（body は空。画面が「退会したユーザーのコメント」と描く） |
 | created_at | TIMESTAMPTZ | DEFAULT now() | |
 | updated_at | TIMESTAMPTZ | DEFAULT now() | |
 | deleted_at | TIMESTAMPTZ | NULLABLE | 削除時刻の記録専用。表示制御はstatusで行う |
 
-**status値の意味：** published=公開 / pending=保留 / hidden=オーナー・運営非表示 / deleted=削除
+**status値の意味：** published=公開 / pending=保留 / hidden=オーナー・運営非表示 / deleted=削除 / withdrawn=投稿者が退会確定（v1.6-r8）
 
 **parent_id整合性（trigger/アプリ層で実装）：**
 - 親のentity_type/entity_idが子と一致すること
@@ -842,19 +868,152 @@ user_plans
 
 ---
 
-## Domain 9: 通知（将来用・MVPでは作成しない）
+## Domain 9: 通知（🔴 v1.6-r8 で MVP 実行分へ移動）
+
+🔴 **v1.6-r8（2026-09-28 / 正典 120）**: 旧見出し「将来用・MVPでは作成しない」は**失効**。**アプリ内通知を MVP に含める**（メール・Push は MVP の外）。
+裁定原本: `_decisions/2026-09-28_settings-notifications-v1.md`（D1 / D2 / D5 = 通知設定を MVP に含める・20:30 改訂）。
 
 ```
 notifications
 ├── id (UUID, PK)
-├── user_id (UUID, FK → profiles.id) — 通知を受け取るユーザー
-├── actor_id (UUID, FK → profiles.id) — アクションしたユーザー
-├── type (TEXT) — CHECK (type IN ('like','favorite','follow','comment','comment_reply'))
+├── user_id (UUID, FK → profiles.id, NOT NULL) — 通知を受け取るユーザー
+├── actor_id (UUID, FK → profiles.id, NULLABLE) — アクションしたユーザー。⛔ type='favorite' では常に NULL
+├── type (TEXT, NOT NULL) — CHECK (type IN ('like','favorite','follow','comment','comment_reply','security'))  ← v1.6-r8: security = 個人宛ての重要なお知らせ（actor_id NULL・設定で止められない）
 ├── entity_type (TEXT, NULLABLE)
 ├── entity_id (UUID, NULLABLE)
-├── is_read (BOOLEAN, DEFAULT false)
-├── created_at (TIMESTAMPTZ)
+├── comment_id (UUID, NULLABLE, FK → comments.id) — 🔴 v1.6-r10（S8）: comment / comment_reply で、どのコメントかを指す（開いたときにそのコメントへ移る）
+├── event (TEXT, NULLABLE) — 🔴 v1.6-r10（M7）: type='security' の出来事。CHECK (event IN ('login_method_added','login_method_removed','signed_out_everywhere'))。type='security' のときだけ NOT NULL
+├── meta (JSONB, NOT NULL, DEFAULT '{}') — 🔴 v1.6-r10（M7）: 出来事の最小限の属性（例 {"provider":"facebook"}）。⛔ 文言を保存しない（表示のときに作る = 言語を変えても同じデータから描ける）
+├── read_at (TIMESTAMPTZ, NULLABLE) — 既読にした時刻。NULL = 未読（v1.6-r8 で is_read BOOLEAN を置き換え）
+├── created_at (TIMESTAMPTZ, DEFAULT now())
 ```
+
+**生成条件（L2・v1.6-r8）**
+- `like` / `favorite` / `follow` は、**その actor がその対象に初めて行った時だけ**作る
+  （元テーブル `likes` / `favorites` / `follows` に同じ actor × 対象の行が、**論理削除済みも含めて**無い場合）。
+  付けたり外したりで通知を連打させない。`favorite` はこの条件により「通知の件数 = 保存した人数」になる
+- `comment` / `comment_reply` は毎回作る
+- 自分の行為（自分の entity へのいいね等）は作らない。`pins` は通知しない。System 通知は MVP の外
+- ⛔ **`type='favorite'` の行に `actor_id` を入れない**。favorites の個別行は本人しか読めない（RLS）ため、通知に actor を持つと別経路で漏れる
+
+**既読と束ね（L2・v1.6-r8）**
+- 通知は 1 件ずつ保存し、**束ねは表示層で行う**（束ねのための列・テーブルを持たない）。束ねるのは `like` / `favorite` の同じ `type` × 同じ対象だけ
+- 既読の束 = 同じ `type` × 同じ対象 × 同じ `read_at`。1 回の既読操作で読んだ分を 1 つの束として残す（`is_read` の真偽値ではどの操作で読んだかが残らず、既読にした瞬間に束がばらける）
+- 「すべて既読」は**押した時刻より前に作られた未読**だけに `read_at` を入れる（処理中に届いた新着を巻き込まない）
+- 1 回の既読操作は**サーバーで決めた同一時刻**を入れる。**未読行だけ**を更新し、既読行の `read_at` は上書きしない
+- 生成元: `likes` / `favorites` / `follows`（初回判定あり）・`comments`（毎回。親コメントの有無で `comment` / `comment_reply`）
+- 初回判定: 成功した INSERT に対し、**論理削除済みを含む過去の履歴**から初回かを判定し、同一トランザクション（トリガー）で通知を作る。部分 UNIQUE は「今有効な行」の重複しか止めない（解除後の再 INSERT は通る）ので、保証の本体は履歴判定。再試行・同時実行・解除後の再登録で重複しないことは実装時に検証する。**物理 DELETE 禁止（L1）が前提**
+- ⛔ ユーザー側に `last_seen_at` 等の「前回見た時刻」を持って束ねの基準にしない
+
+**だれに届くか（L2・v1.6-r10・再監査）**
+- 1 つのコメントについて: entity の持ち主へ `comment`、親コメントの書き手へ `comment_reply`。**同じ人なら 1 件**。自分自身へは作らない
+- コメントへのいいねの行き先 = 親の entity ＋ そのコメントの位置
+**一覧の取り方（L2・v1.6-r10）**
+- INDEX: `(user_id, created_at DESC)` / `(user_id) WHERE read_at IS NULL`
+- 束ねた単位で返す読み取り経路（type × 対象 × read_at でまとめる）でページを分ける（1 件ずつでページを切ると、束が 2 ページに割れて人数が狂う）
+- 行は消さない（L1）。一覧に出す期間（例: 直近 90 日）は実装時に決める
+
+**開いたときの行き先（L2・v1.6-r10・S8）**
+- 行き先は `entity_type` / `entity_id`（＋ `comment_id`）から表示のときに作る。URL を保存しない
+- 対象が削除・非公開・持ち主の門で見えない（D13）ときは、行き先の画面で「見られません」と出す（通知の行は消さない）
+- `security` は ログインとセキュリティ（/settings/login）へ
+
+### `notification_settings`（🔴 v1.6-r8・MVP・D5 改訂 2026-09-28 20:30）
+MyRIG 内の通知の受け取り方。**1 ユーザー 1 行。行が無い = 全部 ON**（登録時に作らない）。
+
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| user_id | UUID | PK, FK → profiles.id | |
+| enabled | BOOLEAN | NOT NULL, DEFAULT true | 全体 ON/OFF。OFF の間は新しい通知を作らない（過去分は消さない・遡って作らない） |
+| like_on | BOOLEAN | NOT NULL, DEFAULT true | いいね |
+| favorite_on | BOOLEAN | NOT NULL, DEFAULT true | お気に入り（名前なし通知） |
+| comment_on | BOOLEAN | NOT NULL, DEFAULT true | コメントと返信（comment / comment_reply） |
+| follow_on | BOOLEAN | NOT NULL, DEFAULT true | フォロー |
+| announcement_on | BOOLEAN | NOT NULL, DEFAULT true | お知らせ（全員宛ての一般案内）。⛔ 重要なお知らせ・security はこの設定で止めない（D7） |
+| updated_at | TIMESTAMPTZ | DEFAULT now() | |
+
+- 通知の生成は `enabled AND <種類>_on`（行が無ければ true）を満たすときだけ。全体 OFF でも種類ごとの値は保つ
+- ⛔ メール / Push / 頻度の列を先に作らない（配信経路を足すときに設計する）
+- 🔴 D6: 通知を作らない条件に「受け手が送り手をブロック / ミュートしている」を足す（作って隠さない）
+- 🔴 v1.6-r10（M5）: `enabled` / `announcement_on` を変えたときは、同じトランザクションで `announcement_mute_periods` を開く / 閉じる（Domain 9）。**最初の行の INSERT も対象**（行が無い = 全部 ON から変わったとみなす）
+
+### `announcements` / `announcement_reads`（🔴 v1.6-r8・MVP・D7）
+全員宛てのお知らせ。**1 人ずつ `notifications` に行を作らない。**
+```
+announcements
+├── id (UUID, PK)
+├── level (TEXT, NOT NULL) — CHECK (level IN ('normal','critical'))  normal = お知らせ（設定で止められる）/ critical = 重要（止められない）
+├── title / body / url (TEXT)  ※ 日英は本番の i18n 方式に合わせる（ここでは決めない）
+├── published_at (TIMESTAMPTZ) / created_at / deleted_at
+├── expires_at (TIMESTAMPTZ, NULLABLE) — 🔴 v1.6-r10: 重要なお知らせの効き目が終わる時刻（過ぎたら一覧の上に固定しない）
+announcement_reads（🔴 v1.6-r10・M5: 1 人 1 行の「最後に読んだ時刻」を廃止）
+├── user_id (UUID, FK → profiles.id)
+├── announcement_id (UUID, FK → announcements.id)
+├── read_at (TIMESTAMPTZ, NOT NULL)
+├── PK (user_id, announcement_id)   ← **読んだときにだけ行を作る**（配信のための行は作らない）
+announcement_mute_periods（🔴 v1.6-r10・M5）
+├── id (UUID, PK)
+├── user_id (UUID, FK → profiles.id, NOT NULL)
+├── muted_at (TIMESTAMPTZ, NOT NULL)
+├── resumed_at (TIMESTAMPTZ, NULLABLE) — NULL = いまもオフ
+```
+- **なぜ**: 旧 `last_read_at` 1 個では、新しいお知らせを読んだ瞬間に**それより古い未読の重要なお知らせまで既読**になる。また「オフの間に出た一般のお知らせを、オンに戻しても届けない」を判定できない（ASTRA M5）
+- ⛔ 「オンに戻した時刻」1 個で判定しない: オフにする前に出て未読のままのお知らせまで消える（GPT の反例）
+- **一般のお知らせ（normal）を見せる条件**: `published_at >= profiles.created_at` かつ **どのオフ期間 [muted_at, resumed_at) にも入っていない**
+- **重要なお知らせ（critical）**: `published_at >= profiles.created_at` **または `expires_at > now()`（いま効いているもの = 登録直後の人にも見せる）** なら見せる（オフ期間を無視）。未読でも `expires_at` を過ぎたら一番上に固定しない
+- **オフ期間の開閉**: お知らせが「実際に止まっている」= `enabled = false` または `announcement_on = false`。サーバーが `notification_settings` の変更と同じトランザクションで、止まった瞬間に期間を開き、動き出した瞬間に閉じる（全体スイッチも含む）
+- 未読 = 見せる条件を満たし、`announcement_reads` に行が無い。「すべて既読」は押した時点で見えている未読の分だけ行を作る（同じ `read_at`）
+- RLS: announcements は SELECT 全公開（published_at <= now() AND deleted_at IS NULL）・変更は管理者のみ / announcement_reads は本人の SELECT・INSERT のみ / announcement_mute_periods は本人の SELECT のみ（書き込みはサーバー）
+
+## Domain 10: 安全（🔴 v1.6-r8・MVP・D6）
+
+### `user_blocks` / `user_mutes`
+| Column | Type | Constraints | Notes |
+|---|---|---|---|
+| id | UUID | PK | |
+| user_id | UUID | FK → profiles.id, NOT NULL | ブロック / ミュートした人 |
+| target_id | UUID | FK → profiles.id, NOT NULL | された人。CHECK user_id != target_id |
+| created_at | TIMESTAMPTZ | DEFAULT now() | |
+| deleted_at | TIMESTAMPTZ | NULLABLE | 解除（論理削除） |
+- UNIQUE（部分）: `(user_id, target_id) WHERE deleted_at IS NULL`
+- ブロック時: 両方向の `follows` を論理解除（解除しても戻さない）。以後、target から user の投稿への comments / likes / favorites / follows の INSERT を拒否（RLS / trigger）
+- 🔴 **v1.6-r10（ASTRA M2）: INSERT だけ止めても抜け道が残る** — 旧来の「自分の行なら UPDATE 可」のままだと、解除済みのいいね・フォローの `deleted_at` を NULL に戻す、または対象列を書き換えることで、ブロック判定を通らずに関係が復活する。
+  → 関係テーブル（likes / favorites / pins / follows）の**ユーザーの UPDATE は「`deleted_at` を入れる（解除）」だけ**。`deleted_at` を NULL に戻す・対象列（entity_type / entity_id / following_id 等）を変える UPDATE は拒否する（trigger）。**やり直しは新しい行の INSERT** — ブロック判定・初回通知の判定が INSERT の 1 か所に集まる（`rig_parts` の「再装着は新しい行」と同じ考え方）
+- RLS: 本人（user_id = auth.uid()）だけ SELECT / INSERT / UPDATE。**相手には見せない**
+- 🔴 v1.6-r10（再監査）: 関係テーブルと同じく、**UPDATE は `deleted_at` を入れる（解除）だけ**。`target_id` の書き換え・解除の取り消しは拒否し、やり直しは新しい行の INSERT（ブロック時のフォロー解除を必ず通すため）。ブロックの INSERT はサーバー処理（フォローの両方向解除と同じトランザクション）
+- 🔴 **一覧の読み方（v1.6-r9・D12）**: 件数無制限の全件描画をしない。**新しい順・段階取得**（cursor = `(created_at, id)`。offset は途中の解除・追加で重複や飛びが出る）。1 回の件数は UI の調整値で正典に固定しない
+- 🔴 **ブロックはミュートの効き目を含む（D6）**: 同じ相手に両方あるときは、画面ではブロックの欄に 1 行（「ミュートも設定中」）。**データは別々に持つ** — ブロックを解いてもミュートは残る（黙って消さない）
+- INDEX: `(user_id, created_at DESC, id DESC) WHERE deleted_at IS NULL`（一覧）/ `(target_id, user_id) WHERE deleted_at IS NULL`（投稿・通知を作るときの判定）
+
+## Domain 11: 退会（🔴 v1.6-r8・D8）
+- **親の門**: 公開面の SELECT（rigs / parts / maintenance_logs / images / comments / entity_links / likes 等の関係と件数）は、既存条件に加えて **持ち主の `profiles.deleted_at IS NULL`** を満たすときだけ。⛔ 退会で子の `deleted_at` を一括更新しない
+  → 🔴 v1.6-r10 で D13（ガレージ非公開）と合わせて **「持ち主の門」** に一般化（RLS 共通原則）
+- 🔴 **状態（v1.6-r10・M1。状態の列は作らず時刻 3 つで表す）**
+  | 状態 | 条件 |
+  |---|---|
+  | 利用中 | `deleted_at IS NULL` |
+  | 猶予中（30 日・再開できる） | `deleted_at IS NOT NULL AND purge_started_at IS NULL AND now() < deleted_at + 30 日` |
+  | 期限切れ・消去の開始待ち（再開できない） | `deleted_at IS NOT NULL AND purge_started_at IS NULL AND now() >= deleted_at + 30 日`（🔴 ASTRA 最終監査 M1: 消去の処理が遅れても、31 日目以降は再開させない） |
+  | 確定処理中（再開できない） | `purge_started_at IS NOT NULL AND purge_completed_at IS NULL` |
+  | 確定済み | `purge_completed_at IS NOT NULL` |
+  - **再開** = `UPDATE profiles SET deleted_at = NULL WHERE id = 本人 AND purge_started_at IS NULL AND now() < deleted_at + interval '30 days'`（サーバー。時刻はサーバーの now()。🔴 期限の条件を入れる = 画面の「期限を過ぎると戻せない」をデータで守る）
+  - **確定処理の開始** = `UPDATE profiles SET purge_started_at = now() WHERE id = … AND deleted_at <= now() - 30 日 AND purge_started_at IS NULL`
+  - 2 つとも**同じ profiles 行への条件付きの 1 回の更新**なので行ロックで順番が決まり、両方が成立することはない。**画像の削除・匿名化・Auth ソフト削除は `purge_started_at` を立てた後だけ**
+  - 確定処理の各段は何度やっても同じ結果になるように作り、全部終わったら `purge_completed_at`。途中で止まったものは `purge_completed_at IS NULL` から再実行
+- 🔴 **猶予中の本人は書き込めない（M1）**: ユーザーの INSERT / UPDATE のポリシーは、共通原則の「本人の profile が利用中」を満たすときだけ。退会前に発行されたトークンで投稿・いいね等を続けさせない（例外 = 再開の処理だけ）
+- **30 日後の確定処理**（元に戻せない・1 回だけ）: profiles の個人情報列を NULL / 既定値へ・username を `withdrawn-<random>` へ / 投稿の自由入力・個人情報性のある列を NULL / 空へ（行は残す）/ 画像の実ファイルを消し images 行は論理削除 / 他人の投稿へのコメントは status='withdrawn'・body=''（🔴 v1.6-r10: **`status='published'` のものだけ**。hidden / deleted / pending は変えない = 非表示・削除済みを復活させない）/ `profile_private` を既定値へ / Auth ソフト削除
+- 🔴 **退会したユーザーのコメントの読み方（v1.6-r10・ASTRA M6）**: RLS は行を見せる / 見せないしか決められず、**同じ行の本文や投稿者だけを隠せない**。
+  → `comments` の生の行の公開 SELECT は今のまま `status='published'` だけ（withdrawn の行は生では読めない）。
+  → **公開のコメント一覧は 1 つの読み取り経路（View / RPC）** から返す: published はそのまま、withdrawn は `id` / `parent_id` / `created_at` / `status` だけ（`user_id` と `body` は NULL）。画面が「退会したユーザーのコメント」と描く。親（rig / part / log）の公開・持ち主の門は published と同じ条件
+- 🔴 **前提なし再監査（v1.6-r10）で足した確定処理の対象**
+  - その人の関係（likes / favorites / pins / follows / user_blocks / user_mutes）は論理削除する（件数・フォロー一覧から消える）
+  - その人のコメントの本文は **status に関係なく** 空にする（published は withdrawn へ・ほかの status はそのまま）
+  - アバター・カバー画像の実ファイルを消し、`avatar_url` / `cover_image_url` を NULL（profiles は images テーブルに入らないので明記）
+  - `username_reservations` への書き込みは確定処理と同じトランザクション。**新規登録とユーザー名の確認時に予約を照合する**
+  - その人が actor の通知は残す（表示は「退会したユーザー」）。通報（reporter）は運営の記録として残す
+- 🔴 **猶予中の見え方（v1.6-r10）**: その人のコメント・いいね・フォローもほかの人に出さない（書いた人が利用中であることを条件にする）。再開すれば元に戻る
+- 🔴 **再開の画面（v1.6-r10・auth-guard-spec §4.3 判定順 ① の具体）**: 猶予中の人がログインしたら、ほかの画面へ行かせず「再開しますか？」を出す（期限は日付で表示・「MyRIG を再開する」/「ログアウト」）。この間の書き込みは再開の処理だけ
+- `username_reservations`（user 名の再利用防止）: `fingerprint` (TEXT, PK) = 正規化 username の **HMAC（サーバー秘密鍵）**・`created_at`。⛔ 素の username・素のハッシュを保存しない。秘密鍵は正典・チャットに書かない
 
 ---
 
@@ -882,9 +1041,19 @@ notifications
   再装着は過去行を書き換えず新しい行を足す。
 - **`deleted_at`（または`rig_parts`の`removed_at`）を持つ全テーブルの**全SELECTポリシーに
   対応する列の `IS NULL` 条件を含める
-- 公開データ: `is_public = true AND deleted_at IS NULL`
+- 公開データ: `is_public = true AND deleted_at IS NULL` **かつ持ち主の門（下）**
 - 自分のデータ: `user_id = auth.uid() AND deleted_at IS NULL`
-- INSERT/UPDATE: `user_id = auth.uid()`
+- INSERT/UPDATE: `user_id = auth.uid()` **かつ本人の profile が利用中**（`deleted_at IS NULL`。🔴 v1.6-r10・M1 — 退会の猶予中は書けない）
+- 🔴 **持ち主の門（v1.6-r10・D13 ＋ D8）**: 本人以外に見せるものは、次の 4 つを全部満たすときだけ
+  1. 持ち主の profile が利用中（`profiles.deleted_at IS NULL`。D8 退会）
+  2. 持ち主のガレージが公開（`profiles.is_public = true`。D13）
+  3. その entity 自身が公開（`is_public = true`）
+  4. その entity が削除されていない（`deleted_at IS NULL`）
+  - **下位の設定は上位の非公開を突き破らない**（entity の `is_public = true` は「ガレージが公開なら、これも出してよい」の意味）
+  - **同じ条件をすべての入口で使う（横漏れ防止）**: 詳細ページ・公開ガレージ・検索・Browse・Feed・Library の「使っている人」等の関連表示・いいね / お気に入りの件数・`rig_parts` / `maintenance_log_parts` / `entity_links` の関係経由・画像・コメント（親の持ち主で判定）・フォロー一覧（一覧の持ち主のガレージが公開のときだけ）
+  - **門の外に残るもの**: その人がほかの人の公開投稿に書いたコメント・付けたいいね（書いた先の持ち主の門で判定）。名前から公開ガレージへ移ると「このガレージは非公開です」。profiles の名前・アバター等の基本情報は利用中なら読める（コメントの表示に要る）
+  - 実装: 門の判定は 1 つの関数（例 `owner_is_visible(owner_id)`）にまとめ、各ポリシーと集計はそれを呼ぶ（入口ごとに条件を書き写さない）
+- 🔴 **関係テーブルの UPDATE（v1.6-r10・M2）**: likes / favorites / pins / follows のユーザーの UPDATE は `deleted_at` を入れる（解除）だけ。復活・対象の書き換えは拒否し、やり直しは新しい行の INSERT（Domain 10）
 - ✅ **2026-08-22 GPT監査で修正**: **DELETEポリシーは作らない。** どのテーブルにも
   `user_id = auth.uid()`によるDELETEポリシーを設けない（CORE.md「物理DELETEは禁止」に例外なし）。
   削除・解除操作（RIG/パーツ/ログの削除、rig_partsの取り外し、いいね/お気に入り/ピン/フォローの解除）は
@@ -893,7 +1062,24 @@ notifications
   ✅ **2026-08-22 GPT総合監査で是正**: 旧記述にあった「運用・移行時はservice roleで物理DELETE」は
   CORE(L1)「物理DELETEは禁止」の例外化にあたるため削除した。**例外経路は設けない。**
 
+### 🔴 判定と書き込みの経路（v1.6-r10・前提なし再監査 2026-09-29）
+**なぜ**: 「ブロックされていたら拒否」「通知オフなら作らない」「初回だけ通知」は、**相手（や本人の過去）の行を読んで判定する**。ところが PostgreSQL では、ポリシーの中の問い合わせや SECURITY INVOKER のトリガーにも RLS がかかる。相手の `user_blocks` や `notification_settings`、自分の論理削除済みの行は読めない → **「見えない = 無い」として判定が素通しになる**（ブロックが効かない・オフでも通知が作られる・解除して付け直すたびに通知）。
+1. **門の関数（ガード）を 1 つにまとめる**: likes / favorites / follows / comments の INSERT は、SECURITY DEFINER の関数（`search_path` 固定・uid は関数の中で `auth.uid()` から取る。引数で受けない）で一度に判定する
+   - 書く人の profile が利用中 / 対象が見える（持ち主の門）/ コメントなら `comments_enabled_*` / **どちらかがブロックしていない**
+   - **判定できないときは止める側に倒す（fail-closed）**
+   - ブロックの確定と相手の INSERT が同時に走ってもフォローが残らないよう、2 人の組に対して順番を決めてロックする
+2. **通知を作る処理も SECURITY DEFINER の関数**: 受け手の `notification_settings`・ミュート / ブロック・論理削除済みを含む履歴（初回判定）を読んで作る
+3. **profiles の書き込みの制限**（RLS は行単位で列を縛れない → 列単位の GRANT かトリガー）: 本人が変えられるのは 表示名・自己紹介・国・サイト / SNS・アバター / カバー・`is_public`・`comments_enabled_*` だけ。`username`・`deleted_at`・`purge_*` はサーバーだけ。**プロフィールの保存は 1 本のサーバー処理**（`profiles` と `profile_private` の地域を同じトランザクションで。片方だけ成功しない）
+4. **profiles の読み方**: 生の行の SELECT は本人だけ。**ほかの人は公開用の読み取り経路（View / RPC）1 本から**: ガレージ公開なら公開してよい列 / **非公開なら ユーザー名・表示名・アバターだけ**（非公開にした人の SNS・サイト・自己紹介を API から取らせない）/ 猶予中・確定済みは返さない（表示は「退会したユーザー」）
+5. **列を 1 つだけ変えてよい UPDATE**: notifications の `read_at`、関係テーブルの `deleted_at` は、列単位の GRANT かトリガーで守る（ポリシーの文言では縛れない）
+6. **notification_settings の書き込み**: 変えた列だけを更新する（行ごとの上書きで別タブの変更を消さない）。お知らせのオフ期間の開閉は、この表の **AFTER INSERT OR UPDATE** トリガー（SECURITY DEFINER）で行う（ブラウザから直接書かれても期間が記録される）。🔴 ASTRA 最終監査 M2: 行は登録時に作らないので、**最初のオフは INSERT で来る** → INSERT のときは「前 = 全部 ON（行が無い）」として、実際に止まった / 動き出したかを判定する
+7. **ログイン方法の追加・削除（security 通知の生成元）**: Supabase Auth の中で起きるので、アプリの表への書き込みを契機にできない → **追加・削除は必ず MyRIG のサーバー API を通し、同じ処理で security 通知を作る**。ブラウザから直接 identity をつなぐ経路は閉じる（Supabase の設定・Auth Hook で閉じられるかは**要確認**）
+   - **乗っ取り対策**: 追加して間もない方法（mock 7 日。値は実装時）では、それより前からある方法を外せない。ログインとセキュリティに「ログイン方法の変更の履歴」を出す（既読で消えない）。取り戻すための問い合わせ窓口をヘルプに書く
+   - メールの追加で「別のアカウントで使われています」は、**コードを確かめた後（そのアドレスを持っていると確かめた後）にだけ**出す（登録済みかどうかの調査に使わせない）
+8. **画像**: RLS は DB の行を隠すだけ。非公開・退会の後も、画像の URL を知っていれば開ける → 署名付き URL（Cloudflare Images で可能かは**要確認**）か、非公開にしたときの配信の扱いを実装前に決める（PENDING）
+
 ### テーブル別の特記事項
+🔴 **v1.6-r10 読み替え**: 下の各行の「親（rig/part/log）が `is_public=true AND deleted_at IS NULL`」は、すべて **持ち主の門の関数 ＋ entity の公開** で判定する（RLS 共通原則）。
 
 ✅ **v1.6-r3 追記 — `entity_links` / 非公開 entity の relation 経由漏洩**
 - `entity_links` の SELECT は**親 entity の `is_public` を JOIN 判定**する（images / comments と同じ方式）。
@@ -929,6 +1115,7 @@ notifications
   entity_typeがcommentなら対象コメントが`status='published'`かつ**そのコメントの親（rig/part/log）も公開**の場合。
   いずれも`deleted_at IS NULL`を条件に含める。解除（アンいいね）は`deleted_at`のUPDATE
 - **follows**: SELECTは全公開（`deleted_at IS NULL`）。INSERTは`follower_id = auth.uid()`。
+  🔴 v1.6-r10: 「全公開」は失効 → **両方の持ち主が利用中 かつ 一覧の持ち主のガレージが公開** のときだけ（非公開の人のフォロー一覧を出さない）。INSERT は門の関数を通す
   解除（UPDATE `deleted_at`）は`follower_id = auth.uid()`の行のみ許可（他人のフォロー関係は解除不可）
 - **マスターデータ**: SELECT全公開。変更は管理者ロールのみ
 - **rig_parts**: `user_id = auth.uid()`でINSERT/UPDATE。物理DELETEなし。
@@ -941,9 +1128,19 @@ notifications
   **App が `log.user_id = part.user_id` を保証する**（他人の PARTS を自分の LOG へ張れない）
 - **comments**: SELECTは`status='published'`かつ親（rig/part/log）が`is_public=true AND deleted_at IS NULL`の場合のみ。
   INSERTはauth.uid()必須。自分のコメントのstatus更新のみ可能
+  🔴 v1.6-r10: 親の判定は持ち主の門（D13）を含む。コメントを書いた人の門では判定しない（非公開ガレージの人のコメントも、公開投稿の上では見える）。
+  **退会したユーザーのコメント（withdrawn）は生の行では読ませず、公開のコメント一覧の読み取り経路でだけ本文・投稿者なしで返す**（Domain 11・M6）
+  🔴 v1.6-r10（再監査）: **自分の entity に付いたコメントは持ち主本人が読める**（非公開にした自分の RIG でも・通知の抜粋のため）。**持ち主による他人のコメントの非表示**（Domain 5 のコメントの節）はサーバー経由の UPDATE（「自分のコメントの status だけ」と矛盾していた）。書いた人が猶予中なら出さない
 - **comment_reports**: INSERTはauth.uid()必須。SELECTは運営者ロールのみ
 - **content_reports**: INSERTはauth.uid()必須。SELECTは運営者ロールのみ。同一ユーザーから同一コンテンツへの重複通報はUNIQUE制約で防止
 - **page_blocks**: SELECT全公開（is_active=trueのみ）。変更は管理者ロールのみ
+- 🔴 **notifications（v1.6-r8）**: SELECTは`user_id = auth.uid()`のみ。UPDATEは`user_id = auth.uid()`かつ`read_at`列のみ。
+  INSERTはユーザーに許可しない（元テーブルへの書き込みを契機にサーバー側で作る）。DELETEポリシーは作らない（共通原則）。
+  `type='favorite'` の行は `actor_id` が NULL のため、受け手も誰が保存したかを読めない
+- 🔴 **notification_settings（v1.6-r8 → r10）**: SELECT は本人のみ。書き込みは変えた列だけ（判定と書き込みの経路 6）。DELETE ポリシーは作らない
+- 🔴 **profile_private（v1.6-r10）**: SELECT は `user_id = auth.uid()` のみ。INSERT / UPDATE のポリシーは作らない（書き込みはサーバー側の処理だけ）。⛔ 本人専用の値を公開される `profiles` の行へ戻さない（RLS は列を隠せない）
+- 🔴 **notifications（v1.6-r10 追記）**: `event` / `meta` / `comment_id` はサーバーだけが書く（ユーザーの UPDATE は従来どおり `read_at` だけ）
+- 🔴 **announcement_reads / announcement_mute_periods（v1.6-r10）**: Domain 9 のとおり
 
 ---
 
@@ -1096,7 +1293,7 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 > ⚠️ **5番 `parts_masters` は所有区分が未確定**（Research の `part_masters` と同一かが決まっていない）。
 > **App↔Research 写像表（cross_ref）が無い状態でマイグレーションを流さないこと。**
 
-### MVP実行分（20テーブル ＋ entity_links ＋ maintenance_log_parts）
+### MVP実行分（20テーブル ＋ entity_links ＋ maintenance_log_parts ＋ notifications）
 1. `manufacturers` ※Research所有
 2. `rig_categories` / `part_categories` ※Research所有
 3. `profiles`（auth.users依存）
@@ -1118,10 +1315,17 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 17. `comment_reports`（comments依存）
 18. `content_reports`
 19. `page_blocks`
+19-b. `notifications`（profiles 依存。🔴 **v1.6-r8 で将来実行分から移動**）
+19-c. `notification_settings`（profiles 依存。🔴 **v1.6-r8 新設**）
+19-d. `announcements` / `announcement_reads`（🔴 v1.6-r8 新設・D7）
+19-e. `user_blocks` / `user_mutes`（🔴 v1.6-r8 新設・D6）
+19-f. `username_reservations`（🔴 v1.6-r8 新設・D8）
+19-g. `profile_private`（profiles 依存。🔴 v1.6-r10 新設・D10 / M3）
+19-h. `announcement_mute_periods`（profiles 依存。🔴 v1.6-r10 新設・M5）。`announcement_reads` は r10 の形（user × announcement）で作る
 
 ### 将来実行分（MVPでは作成しない）
 20. `user_plans`
-21. `notifications`
+~~21. `notifications`~~ → v1.6-r8 で MVP 実行分へ移動（19-b）
 
 ---
 
@@ -1155,6 +1359,9 @@ page_blocks → 参照: rig_categories / part_categories (page_ref_id, NULLABLE)
 
 | 版 | 要点 |
 |---|---|
+| **v1.6-r10** | **ASTRA 監査の是正と D13（2026-09-29 / 正典 120 追補）。** 退会: `profiles.purge_started_at` / `purge_completed_at`・再開と確定処理の競合を行ロックで排除・猶予中は書けない（M1）/ 関係テーブルの UPDATE は解除だけ・やり直しは INSERT（M2 ブロックの抜け道）/ **`profile_private` 新設**（マイカテゴリ・地域・地域の公開。r9 で `profiles` に置いた `preferred_rig_category_slugs` はここへ移した = 未適用の列なので行の移行なし）（M3）/ `announcement_reads` を user × announcement へ・**`announcement_mute_periods` 新設**（M5）/ 退会コメントは published だけを withdrawn へ・公開一覧は専用の読み取り経路（M6）/ `notifications` に `event` / `meta` / `comment_id`（M7・S8）/ **持ち主の門**（ガレージ非公開 = 全部非公開・全入口で同じ関数・D13）/ **前提なし再監査の是正**: 判定と通知の生成を SECURITY DEFINER の関数へ（RLS の下で判定が素通しになる）・profiles の列の書き込み制限と公開用の読み取り経路・username の小文字一意・長さと URL の CHECK・退会の確定処理の対象を補った・猶予中の見え方と再開画面・security 通知はサーバー API から・追加直後の方法で古い方法を外せない・通知の宛先 / 索引 / ページ分け・`announcements.expires_at`。⛔ Production DB migration は行っていない。裁定原本 D13 と「再監査の扱い」 |
+| **v1.6-r9** | **マイカテゴリ（2026-09-29 / 正典 120 追補・D10 / D12）。** **`profiles.preferred_rig_category_slugs TEXT[]` 新設**（最大 5 = CHECK・配列の順 = 並び・書き込みはサーバーの原子的な add / remove だけ・slug の実在確認をサーバーで）/ `profiles.preferred_subcategory` を**非推奨**（型を変えない・DROP しない）/ 同日の別テーブル案 `user_interest_categories` は採らなかった/ `user_blocks`・`user_mutes` に一覧の段階取得と「ブロックはミュートを含む・データは別々」を明記。⛔ Production DB migration は行っていない。裁定原本 `_decisions/2026-09-28_settings-notifications-v1.md` D10〜D12 |
+| **v1.6-r8** | **設定・通知（2026-09-28 / 正典 120・D1〜D9）。** `notifications` を MVP 実行分へ・`is_read` → `read_at`・`type` に `security` / `notification_settings` / `announcements`・`announcement_reads` / `user_blocks`・`user_mutes` / 退会（Domain 11）・`username_reservations` / `comments.status` に `withdrawn`。⛔ Production DB migration は行っていない（この行は r9 で補った。r8 の時点で履歴に書き漏れていた） |
 | v1.1 | `rig_parts` に user_id と部分ユニーク制約 / CHECK 制約整備 / RLS をテーブル別設計へ |
 | v1.2 | `rigs.rig_master_id` `parts.parts_master_id` 追加 / `watchlists`→`pins` / **`log_type` の `setup`・`other` を廃止し `custom`・`memo` へ** / `parts_masters.aliases` と GIN 索引 |
 | v1.3 | `rigs` / `rig_masters` に `product_line` `platform` 追加 |
