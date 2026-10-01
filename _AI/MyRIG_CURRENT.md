@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261002-143
-updated: 2026-10-02 07:07 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261002-144
+updated: 2026-10-02 07:16 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-02 07:07 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟢 **144 = DB Research 回答 #3 を受領・保存** → `_decisions/2026-10-02_db-inquiry-003-reply.md`（実測・主キーと全列・写してはいけない列・D1〜D6 は未適用）。App 側の読み → `_proposals/2026-10-02_admin-sync-after-research-reply_claude-v0.8.md`。要点 = 10 表は updated_at のトリガーあり／パーツ 14.5 万行／複製の表に Research に無い制約を足さない／R9 を満たす許諾の置き場は今は無い（案 `master_image_rights`）。**新しい論点**: 🔴 G31 購入先（commerce_offers）と Research の `master_external_links`（retailer・affiliate_enabled）が重なる → 案 = URL の事実は Research・提携と PR は App／G32 画像をすぐ止める App 側の一時のブレーキ／G33 retailer_official 254 行／G34 Research の読み取り専用ガード未充足。**イタヤの判断待ち Q-R1〜R5**（D1〜D6 を週次ゲートに載せるか ほか）。
 
 > 🟢 **143 = DB Research 照会 #3 を起票** → `_proposals/2026-10-02_db-research-inquiry-003-admin-sync.md`（A = 全 Master 表の `updated_at` とトリガー・B = 同期する表と列 / 公開の判定の写し方 / 写してはいけない列・C = 画像の許諾の記録の置き場）。**返答待ち**（イタヤが Research レーンへ渡す）。返答までは複製の表の列を推測で決めない。次 = r12 のうち Research に依存しない部分（運営の表・停止・保全・Composer・Commerce）。
 
