@@ -79,7 +79,7 @@
 | ad_slot | 広告枠。中身は Commerce の配信が決める（§2.4）。**配信が無ければ何も出さない** | INDEX・Category・SubCategory・Parts Top（**MVP では出さない**） |
 
 ### 1.4 並べ方（query_preset のレジストリ）
-- 名前は**何で並んでいるかをそのまま言う**: `newest_rigs`・`newest_parts`・`newest_logs`・`recently_updated_rigs`・`category_newest(category)`・`manufacturer_newest(maker)`・`rigs_using_master(master)`・`logs_of_category(category)`・`manual(ids)`
+- 名前は**何で並んでいるかをそのまま言う**: `newest_rigs`・`newest_parts`・`newest_logs`・`recently_updated_rigs`・`category_newest(category)`・`manufacturer_newest(maker)`・`rigs_using_master(master)`・`logs_of_category(category)`
 - **定義しないもの**: popular_* / most_liked / most_commented / *-ranking（ランキング全廃）
 - 件数（「N 台」など）はカードの情報として出してよい。**並べる理由にはしない**
 - 🔴 **G27（新）**: mock の Home / Browse に、正典と食い違う「ランキング」の見出しと popular 系プリセットが残っている（`pc/myrig-home-v3.html` :2804 `weekly-like-ranking-rig` ほか・page-role-matrix §7 違反）。mock の作り直しは帰宅後・Home / Browse レーンを開けるとき。**Composer のレジストリには入れない**
@@ -114,11 +114,12 @@
 | merchant_id | お店 |
 | country_code | JP / US / GLOBAL（市場の軸。言語・法域とは別） |
 | url | 購入先 |
-| is_affiliate | **true なら「PR」を必ず出す**（お店の提携の種類から決まる。手で外せない） |
+| ~~is_affiliate~~ | ✏️ **持たない**。PR を出すかは**お店（`commerce_merchants`）の提携の種類だけから導く**（二重の正本にしない）〔136・GPT 横断 M3〕 |
 | priority・is_active | 並び・ON / OFF |
-| link_status・checked_at | リンクの確認（ok / broken / unknown）。**broken は出さない** |
+| link_status・checked_at | リンクの確認（ok / broken / unknown）。✏️ **出すのは ok だけ**（unknown も出さない）〔136〕 |
 
 - 表示: Library Detail と RIG のベースモデルの購入先（`<md-commerce>`）。BUY と INFO（公式）は別枠
+- ✏️ **表示の条件（1 本）**: お店の提携の状態 = 有効 **かつ** 購入先が有効 **かつ** `link_status = ok`。どれかが不明なら出さない〔136〕
 - 出し方: **表示のときにサーバーで今の購入先を引く**（中継の URL を挟まない）。クリックの数を取るなら、表示の部品から軽い記録を送る
 - ⚠️ 中継の URL（`/go/xxx` のような転送）にするかは、**各提携先の規約で転送が許されるかを確かめてから**（要確認・R3 と同じ確認の枠）
 
@@ -154,7 +155,7 @@
 | 流れ | 中身 | 正本 |
 |---|---|---|
 | **App → Catalog（吸い上げ）** | Master に無いもの・表記の揺れの候補・誤りの報告・0 件の検索語を「調査の依頼」として渡す | 候補 = App ／ 依頼と結果 = Research |
-| **Catalog → App（反映）** | Research で確定して公開された Master を、App へ読み取り専用で同期 | Master = Research |
+| **Catalog → App（反映）** | ✏️ **App が使う Master（Register の Picker の候補を含む）**を、App へ読み取り専用で同期。**公開してよいかは同期の条件にしない**（公開面は `master_publication_effective` で別に判定・Picker は `db_register` で判定。109 §9）〔136 で訂正・GPT 横断 M2〕 | Master = Research |
 
 - **App から Master を直さない。Catalog から利用者の投稿を直さない**（Gemini の非対称）
 - 依頼の状態は **Research 側だけが持つ**。App 側の候補は「渡した / 渡していない」と依頼の ID だけを持ち、結果は写さない（写すと二重の正本になる。GPT の見る点）
