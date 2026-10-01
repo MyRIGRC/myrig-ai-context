@@ -6,6 +6,7 @@
 > 追補 v1.3: 面の設計 その 1（イタヤ 19:15・§14）／ 正典 revision: MYRIG-20261001-139
 > 追補 v1.4: 面の設計 その 2（イタヤ 10-02 00:22・§15）／ 正典 revision: MYRIG-20261002-140
 > 追補 v1.5: 運営者 ID と Master の同期（イタヤ 10-02 07:02「全部推奨どおり」・§16）／ 正典 revision: MYRIG-20261002-142
+> 追補 v1.6: Research 回答 #3 を受けた調整（イタヤ 10-02 07:21「すべてはい」・§17）／ 正典 revision: MYRIG-20261002-145
 > 元: _proposals/2026-10-01_admin-operations-map_claude-v0.1〜v0.3（GPT・Gemini SPARK のレビュー反映済み）
 > 状態: 設計の方向 = 確定。schema・migration・mock は未着手。Production DB 非接触
 
@@ -190,3 +191,21 @@
 1. 4 つ目の条件（updated_at のトリガー）
 2. 同期する表と列の確定（`master_images` / `master_external_links` / 公開の判定の列・G30）
 3. 画像の許諾の記録の置き場（§13 M6）
+
+## 17. 追補 v1.6 — Research 回答 #3 を受けた調整（イタヤ 2026-10-02 07:21「すべてはい」）
+
+元: `_decisions/2026-10-02_db-inquiry-003-reply.md`（Research の実測）・`_proposals/2026-10-02_admin-sync-after-research-reply_claude-v0.8.md`
+
+- **Q-R1 Research の D1〜D5 を次の週次ゲートに載せて承認する**（オーナー = イタヤの意思）: D1 updated_at の NOT NULL 化（10 表）／ D2（updated_at, 主キー）の索引（12 表）／ D3 `rig_categories`・`part_categories` に updated_at ＋ トリガー ＋ SELECT ポリシー ／ D4 VIEW `master_publication_effective` の末尾に updated_at ／ D5 同期専用の「読むだけ」の役割（写してはいけない列は列ごとの権限で読めなくする）。**適用は Research レーンが週次ゲートで行う。App 側は Research の DB に触らない**
+- **Q-R2 D6（`master_image_rights`・メーカー単位・追記型）も週次ゲートに載せる**。R9（画像の許諾の記録）の置き場。表名と列は Research の正本で確定
+- **Q-R3 同期の調整**（§16 の細部を上書き）:
+  - 読み直しの幅 = **15 分**（Research の一括更新は 1 トランザクション 10 分未満）
+  - カテゴリ 2 表は毎回全部写す。公開の判定は D4 の適用まで毎回全部・そのあと差分
+  - **最初の全件の取り込みから「一時の置き場 → 検証 → まとめて切り替え」**（パーツ 14.5 万行）
+  - **複製の表に、Research に無い制約（外部キー・NOT NULL・UNIQUE・CHECK）を足さない**。App の表から複製の表の主キーへの参照だけ張る。親の無い行は表示のときに飛ばす
+  - 複製する列 = 回答 B-3 から B-5（写してはいけない列）を除いたもの。`master_publication` 本体は写さず VIEW の結果だけ。`master_relations` は対象外
+  - 型は Research のまま（決まった値の制約が無い列は text で受ける）
+- **Q-R4（G31）購入先の正本の分け方**: 「この製品がこのお店のこの URL にある」という**事実 = Research の `master_external_links` が正本**。「提携している・PR を出す・提携用の URL にする」= **App の `commerce_merchants` が正本**。`commerce_offers` は全件の URL を持たず、**例外の上書きだけ**（§11 Q-C1・§13 M3 の形を上書き）。表示の条件 = お店の提携が有効 かつ Research のリンクが active かつ リンクの確認が ok。**先に Research へ `affiliate_enabled` と `monetization_ready` の意味を確かめる**（照会 #3 の続き）
+- **Q-R5（G32）カタログ画像をすぐ止める App 側の一時のブレーキ**: App に「画像を出さない」だけの小さな表（メーカー・製品・画像の単位）。管理アプリの Catalog 区画で止めると ① App のブレーキにすぐ書く ② Research に 3 点セット（画像 = denied ＋ hidden ／ 公開の判定 = denied ／ `master_image_rights` に止めた日と理由）を書く。**許諾の判断と記録の正本は Research。App は一時のブレーキだけ**
+- G33（retailer_official 254 行）は Research の週次ゲートの確認待ち。確認が済むまで R9 の確認事項
+- G34（Research の読み取り専用のガード未充足）は Research レーンの運用として共有
