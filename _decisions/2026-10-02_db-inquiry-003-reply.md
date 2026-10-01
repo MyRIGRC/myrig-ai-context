@@ -178,3 +178,80 @@ entity_type text / entity_id uuid / library_public_status text / library_page_en
 - 同期の実装と接続: D1〜D5 の適用通知の後
 
 【作業完了】DBR-INQUIRY-003-REPLY
+
+---
+
+> **追記 2026-10-02 07:30 JST**: 回答 #3-2（App 側の返信 07:21 への回答）。本文は無編集（project ref だけ伏せた）。
+
+# DB Research 回答 #3-2 — App 側返信（2026-10-02 07:21）への回答
+回答: 2026-10-02 JST / 主査(Claude)
+
+## 0. 実測の範囲
+- Research DB（project ref は伏せた） / 2026-10-02 07:22 JST / current_user=postgres / 読み取り専用トランザクション（transaction_read_only=on）/ SELECT のみ・書込なし
+- 読んだもの: master_external_links 全 80,001 行の集計（内訳の合計 80,001 と一致）/ master_publication 全 72,896 行の集計（内訳の合計 72,896 と一致）/ change_logs のうち該当 2 列の変更履歴件数
+- 正典の確認: Rules v4.4 FINAL Rev.3 / Schema v1.2 / Knowledge v1.10 を全文読了
+- 読んでいないもの: V3Mock_Master_DB_Schema_Gap_Audit_v0_2_FINAL_rev1.md（Rules の前提資料。Research プロジェクトの知識に無い）
+
+## 1. D1〜D6
+- 受領。次の週次ゲートに載せる。適用は Research レーン。適用後に続報で通知する
+- D2 は 10 表に縮小する（カテゴリ 2 表は App が毎回全部写すため索引不要）
+- D6 の表名と列は週次ゲートのパック作成時に Research 正本で確定し、続報に書く
+
+## 2. App 側で決めたこと
+- 全項目、Research 側の前提と齟齬なし
+- 1 点だけ不足: 管理アプリの Catalog 区画が Research DB に書くためのロールが無い
+  - 現在の書き込みロールは 2 つだけ: rc_mdr_fixer（part_masters の一部列の UPDATE）/ rc_mdr_intake（part_masters の INSERT）
+  - master_images / master_publication / master_image_rights に書けるロールは無い。D1〜D6 にも入っていない
+  - Catalog 区画が書く表・列・操作（INSERT / UPDATE）の一覧を App 側から照会してください。Research 側でロールを設計して週次ゲートに載せる
+  - それまで「3 点セット」はオーナーが SQL Editor で実行する。App のブレーキを先に掛ける順序はそのままでよい
+
+## 3. 追加の照会への回答
+### (1) master_external_links.affiliate_enabled
+- 実測: true 0 行 / false 80,001 行 / NULL 0 行
+- 変更履歴: 0 件。一度も true にされていない
+- 誰がどの基準で: 正典に定義なし。あるのは列定義の注記「true → PR ラベル + rel='sponsored nofollow'」だけ
+- true の link_type / group_name / region: 該当行なし
+- 裁定: 提携の正本は App。意味が重なるので Research 側を凍結する
+  - Research は今後も true にしない
+  - App はこの列を写さない・使わない（回答 #3 の B-5 に追加。D5 の列権限でも読めなくする）
+  - 列は消さない・改名しない
+  - D7（文書のみ）: Rules v4.4 の列定義に「凍結・提携の正本は App」を追記。週次ゲートで行う
+- Research の master_external_links が持つのは「この製品がこの URL にある」事実だけ。価格・在庫・SALE・おすすめ表現は今後も持たない（Rules §A）
+
+参考: 購入先に当たる行の現状（実測）
+- retailer_product / rc_specialty: 1,896 行（active 1,750 / inactive 146）。全て part_master。region は NULL 1,700 / global 196
+- distributor: 2 行（mall 1 行は manufacturer 向け・active / official 1 行は part_master 向け・inactive）
+- retailer_search: 0 行
+- mall の製品向けリンク: 0 行
+- 残り 78,103 行は official 78,058 + manual 45
+- 取扱店リンクの整備は未実施（Rules の移行手順で「後の段階で追加」のまま）。App は購入先の網羅を前提にしないでください
+- retailer_product 1,896 行の由来と品質は未確認。Research 側の宿題にする
+
+### (2) master_publication.monetization_ready
+- 実測: true 0 行 / false 72,896 行（body 674 / manufacturer 44 / part_master 67,714 / rig_master_variant 3,291 / rig_master 1,173）
+- 変更履歴: 0 件
+- 何を表すか: 正典に記述なし。列名と型（boolean）だけがある。誰がどの基準で true にするかも無い。由来は未読の Gap Audit 文書の可能性がある（未確認）
+- 裁定: App は使わない。「購入先を出してよい」の条件にしない
+  - 理由 1: 基準が未定義
+  - 理由 2: 全行 false。条件にすると購入先が 1 件も出ない
+  - 理由 3: 収益・提携の判断は App が正本という分担と重なる
+- Research は今後も値を入れない（凍結）
+- VIEW の列としては残る（列名と順序を変えない条件のため）。複製表に写ってよいが判定に使わない
+- 購入先の表示に使う Research 側の値は master_external_links.display_status='active' と親エンティティの実在だけ
+
+## 4. Research 側の宿題
+- C-4: source_type='retailer_official' の 254 行の確認（週次ゲート）
+- 実測のガード: 今回から読み取り専用トランザクションで実行（on を確認）。postgres ロールの使用はスキーマ実測の規約どおり
+- 追加 1: retailer_product 1,896 行の由来と品質の確認（週次ゲート）
+- 追加 2: master_images.source_type の語彙が 3 か所で不一致。Rules §G-10 は manufacturer_official / manufacturer_press / public_domain、Knowledge は manufacturer_official / retailer_official、実値は 5 種（official_feed / official_jsonld / official_og を含む）。正典の是正を週次ゲートに載せる。App は text で受ける（回答 #3 のとおり）
+
+## 5. 週次ゲートに載せるもの（全て未適用）
+- D1: updated_at NOT NULL 化（10 表）
+- D2: (updated_at, 主キー) 索引（10 表）
+- D3: rig_categories / part_categories に updated_at + トリガー + SELECT ポリシー
+- D4: VIEW master_publication_effective の末尾に updated_at
+- D5: 同期専用の読むだけの役割（B-5 の列と affiliate_enabled は列権限で読めなくする）
+- D6: master_image_rights
+- D7: Rules への追記（affiliate_enabled と monetization_ready の凍結・文書のみ）
+
+【作業完了】DBR-INQUIRY-003-REPLY-2

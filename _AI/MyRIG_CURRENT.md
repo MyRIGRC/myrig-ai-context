@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261002-145
-updated: 2026-10-02 07:21 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261002-146
+updated: 2026-10-02 07:31 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-02 07:21 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟢 **146 = DB Research 回答 #3-2 を保存・照会 #3-3 を起票**: `affiliate_enabled` と `monetization_ready` は全行 false・Research は凍結 → **App は写さない・使わない。提携の正本は App で確定**。週次ゲートは D1〜D7。🔴 **G35（新）: 購入先に当たる Research のリンクは retailer_product 1,896 行（全部パーツ・品質未確認）だけ。RIG 向け 0・モール 0** → Q-K5 は今のままだと出せるリンクがほぼ無い（案 = G31 の分け方は変えず、RIG 向けの取扱店リンクの整備を Research に計画してもらう・無ければ出さない）。照会 #3-3 → `_proposals/2026-10-02_db-research-inquiry-003-3-catalog-write-scope.md`（Catalog 区画が Research に書く範囲 = 第 1 段は画像を止める 3 点セットと許諾の記録だけ）。
 
 > 🔴 **145 = Q-R1〜R5 裁定（イタヤ 10-02 07:21「すべてはい」）** → 裁定原本 §17 追補 v1.6: Research の **D1〜D6 を次の週次ゲートに載せる**（適用は Research レーン）／同期の調整（読み直し 15 分・最初から一時の置き場 → 切り替え・複製の表に制約を足さない）／**G31 = 購入先の URL の事実は Research の `master_external_links`・提携と PR は App・`commerce_offers` は例外の上書きだけ**／G32 = 画像をすぐ止める App 側の一時のブレーキ。Research へ返す文（承認 ＋ `affiliate_enabled` / `monetization_ready` の意味の照会）をイタヤに渡した。次 = r12 の設計。
 
