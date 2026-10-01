@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261001-128
-updated: 2026-10-01 16:01 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261001-129
+updated: 2026-10-01 16:15 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-01 16:01 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟢 **129 = /admin 設計図 v0.2（PROPOSAL）**: **`_proposals/2026-10-01_admin-operations-map_claude-v0.2.md`**。GPT（MUST 7・追加 2）と Gemini SPARK（MUST 5・SHOULD 4）のレビューを統合し、採否を §14 に記録。主な変更 = Case を 1 対多の子表に・保全は範囲つきの独立した表 `legal_holds`・Job は非同期で失敗しうるものだけ（冪等）・ベルの記録 `admin_alerts`・**停止だけでは退会の消去を止めない（Q3 撤回）**・管理画面を唯一の非常口にしない・スパムの一括処置・プロフィールの処置・画像の配信の停止（G21）・管理者の締め出しへの備え・Task Package / Home の 1 行 / 規約の画面は B へ・正典の抜け G1〜G21。**食い違いの裁定案**: ベルの中身 = SPARK 案（理由の区分・対象の種類・#ID・/admin/m の入口）／Q3 = GPT 案／個人サイトの自動公開（SPARK）は採らない。**次 = イタヤの裁定（§12 Q1〜Q9）→ v1.0**。
 
 > 🟢 **128 = /admin レーン: 方向の決定 ＋ 設計図 v0.1（PROPOSAL・mock 未着手）**。**イタヤ 10-01 15:54 決定**: A-1 端末は PC（Mobile は緊急の確認と非表示・停止だけ）／A-2 カテゴリ色を使わず状態を主役に／A-3 **/admin では Master を編集しない**（Research Bridge へ・page-role-matrix の /admin/master は失効）／A-4 管理者はイタヤ 1 人（権限の分割は将来・2 段階認証と操作の記録は最初から）／A-5 作る前に文字の設計図で詰める。設計図 = **`_proposals/2026-10-01_admin-operations-map_claude-v0.1.md`**（Signal / Case / Job / Audit・12 領域・業務ごとの表（45 行）・Task Package・非常ベル・Mobile・画面の骨組み・正典の抜け G1〜G14・問い Q1〜Q7・Gemini 4 点の採否）。**次 = GPT のレビュー → v0.2 → イタヤ裁定**。
 
