@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261001-131
-updated: 2026-10-01 16:24 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261001-132
+updated: 2026-10-01 16:34 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -10,7 +10,9 @@ updated: 2026-10-01 16:24 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 ## 🔴 いまやっていること（NOW）
 
-> 🟢 **131 = /admin 設計図 v0.3（完成形の全体地図・PROPOSAL）**: **`_proposals/2026-10-01_admin-operations-map_claude-v0.3.md`**（v0.2 の業務表・G1〜G21・Q1〜Q9 は有効のまま）。20 領域（Content・Users・Page Composer・Catalog / 表記の揺れ / 画像・アフィリエイト / キーワード / 企業バナー / AdSense の枠・検索の調整・サイトの設定・SEO ほか）／**2 つのコンソールと 1 本の橋**（App Admin ＋ 既存の Research Console `myrig-research/_apps/rc-master-data-app-v2`）／軽く速く動かす決まり 8 つ／G22〜G26／Q-K1・K2・K4・K5。**CORE に追加（イタヤ 10-01 16:22）**: A-6「設計は完成形・実装は MVP で外す」（L1）・3 AI は「ふだんは Claude と進め、固まったら GPT / Gemini に意見を募る」。
+> 🟢 **132 = イタヤ 10-01 16:33: 既存の Research のアプリ（rc-master-data-app-v2）は使わず、Research 側の管理も完全に新しく作る**（旧アプリは参考だけ・コードは引き継がない）。v0.3 §2 を改訂 = **管理アプリを 1 つ新しく作り、App 区画と Catalog（Research）区画に分ける**・DB をまたいで JOIN しない・区画ごとに鍵とデータ層を分ける・橋は決まった受け渡しだけ。**置き場の案 = 利用者のサイトと別（例 admin.myrigrc.com）**→ メンテナンス中も止まらない（G3 解消）・Research の鍵が利用者のサイトに入らない・軽さ。Q-K1 を差し替え。
+
+> 🟢 **131 = /admin 設計図 v0.3（完成形の全体地図・PROPOSAL）**: **`_proposals/2026-10-01_admin-operations-map_claude-v0.3.md`**（v0.2 の業務表・G1〜G21・Q1〜Q9 は有効のまま）。20 領域（Content・Users・Page Composer・Catalog / 表記の揺れ / 画像・アフィリエイト / キーワード / 企業バナー / AdSense の枠・検索の調整・サイトの設定・SEO ほか）／**1 つの管理アプリ・2 つの区画・1 本の橋**（132 で改訂）／軽く速く動かす決まり 8 つ／G22〜G26／Q-K1・K2・K4・K5。**CORE に追加（イタヤ 10-01 16:22）**: A-6「設計は完成形・実装は MVP で外す」（L1）・3 AI は「ふだんは Claude と進め、固まったら GPT / Gemini に意見を募る」。
 
 > 🟠 **130 = 外出中の運用（イタヤ 10-01 16:17〜帰宅まで・約 2 泊）**: イタヤは MacBook / iPhone から依頼。**Mac Studio のローカル（mock の未 commit・`mockup()`・ローカルの gate）は見えないものとして扱い、推測しない**。
 > - 根拠の境界を回答に書く: `GitHub main 確認済み`（canon）／ `mock: GitHub push 済みの状態だけ確認`（MyRIGRC/myrig-mockup・Vercel）／ `ローカル未確認`
