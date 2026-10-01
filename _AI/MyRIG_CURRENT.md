@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261002-140
-updated: 2026-10-02 00:24 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261002-141
+updated: 2026-10-02 00:40 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-02 00:24 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟢 **141 = v0.7 に §D（GPT MUST 5・SHOULD 5 ／ Gemini MUST 2・SHOULD 2 を反映）**: 紐付けは双方向に 1 つを DB 制約で／**非常用の付け替え関数 `admin_rebind_operator`（Supabase の管理画面からだけ）＋ 手順書 = Release Blocker**／JWT は入口だけ・操作ごとに表を読む／AAL2 と直前の再確認（5 分）を分ける／同期の位置 =（updated_at, 主キー）＋ 毎回 10 分前から読み直し／索引の作り直しは別 Job・大きくなったら世代の切り替え／全件照合 = 主キー ＋ 行ハッシュ／「消えた」は読み切れた照合だけで判定／複製の表は DB 権限で同期だけ／公開の判定は Research の VIEW の結果を写す。問い Q-I1〜I5・Q-Y1〜Y5（全部推奨 = はい）。
 
 > 🟢 **140 = Q-S5〜S8 裁定（イタヤ 10-02 00:22・§15 追補 v1.4）＋ r12 の前提の案 v0.7（PROPOSAL）** → `_proposals/2026-10-02_admin-operator-id-and-sync_claude-v0.7.md`。運営者 ID = **`admin_operators.operator_id`（ログインの手段と分ける・v1.2 の auth.users.id 案は撤回）**・管理者の正本はこの表・JWT の印はこの表から作る・**管理者アカウントは利用者アカウントと分ける**／同期 = **App から取りに行く差分 ＋ 1 日 1 回の全件照合**・1 回 = 1 トランザクション・消えた行は消さず Operations へ・複製の表は同期だけが書く・Research へ 4 つ目の条件（変えたら必ず更新される updated_at）を依頼。Supabase の機能は要確認。**GPT の厳密レビュー待ち**。
 
