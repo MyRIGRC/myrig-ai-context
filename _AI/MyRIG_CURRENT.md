@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261001-129
-updated: 2026-10-01 16:15 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261001-130
+updated: 2026-10-01 16:18 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,12 @@ updated: 2026-10-01 16:15 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟠 **130 = 外出中の運用（イタヤ 10-01 16:17〜帰宅まで・約 2 泊）**: イタヤは MacBook / iPhone から依頼。**Mac Studio のローカル（mock の未 commit・`mockup()`・ローカルの gate）は見えないものとして扱い、推測しない**。
+> - 根拠の境界を回答に書く: `GitHub main 確認済み`（canon）／ `mock: GitHub push 済みの状態だけ確認`（MyRIGRC/myrig-mockup・Vercel）／ `ローカル未確認`
+> - 進めてよい = 設計・監査・裁定案・canon の commit / push（Claude はクラウドから GitHub に直接書ける）。**止める = mock の作成・修正・`mockup()`・ローカルの gate 実行** → `帰宅後確認` に積む
+> - 3 AI の流れは変えない（Claude がハブ・GPT はレビュー・Gemini の意見は Claude へ）。**Gemini SPARK は Mac Studio のフォルダを読めない場合、GitHub main を読むか、イタヤが貼った文で判断**
+> - 帰宅後確認: （なし）
 
 > 🟢 **129 = /admin 設計図 v0.2（PROPOSAL）**: **`_proposals/2026-10-01_admin-operations-map_claude-v0.2.md`**。GPT（MUST 7・追加 2）と Gemini SPARK（MUST 5・SHOULD 4）のレビューを統合し、採否を §14 に記録。主な変更 = Case を 1 対多の子表に・保全は範囲つきの独立した表 `legal_holds`・Job は非同期で失敗しうるものだけ（冪等）・ベルの記録 `admin_alerts`・**停止だけでは退会の消去を止めない（Q3 撤回）**・管理画面を唯一の非常口にしない・スパムの一括処置・プロフィールの処置・画像の配信の停止（G21）・管理者の締め出しへの備え・Task Package / Home の 1 行 / 規約の画面は B へ・正典の抜け G1〜G21。**食い違いの裁定案**: ベルの中身 = SPARK 案（理由の区分・対象の種類・#ID・/admin/m の入口）／Q3 = GPT 案／個人サイトの自動公開（SPARK）は採らない。**次 = イタヤの裁定（§12 Q1〜Q9）→ v1.0**。
 
