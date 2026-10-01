@@ -797,7 +797,8 @@ RIG・パーツ・LOG自体の通報。comment_reportsとは別管理。
 - **Suspended は書き込み不可。例外は `kind='account'` だけ**（救済の申し立て。UI は `?kind=account&from=suspended` で種別を固定）
 - **受付と本人確認を分離**: data_request / account は受け付けた後に本人確認の工程へ。確認できるまで開示・移行・ログインの復旧をしない。手順は 🔴 **HOLD（法務）**
 - **client から直接 SELECT 不可**。運営者は `/admin` のサーバー側読み取り経路（service role）だけから参照（RLS はポリシー 0）
-- **退会確定処理（Domain 11）**: `user_id` を NULL に切り離すだけ。email / body は運営記録として残す。**保持期間は 🔴 HOLD（法務・Release Blocker・本番公開前に解消）**。確定まで期限列・自動 NULL 化ジョブ・仮の月数を**作らない**（HOLD を確定値として扱わない）。行は消さない
+- **退会確定処理（Domain 11）**: ~~`user_id` を NULL に切り離すだけ。email / body は運営記録として残す~~ → 🔴 **2026-09-30 定点版（D4 更新・イタヤ委任で Claude 決定）: `user_id` と `email`（ほか本人がわかる列）を NULL にする**。種別・受付日時・対応状況は運営記録として残す。行は消さない（物理 DELETE 禁止）
+- **保持期間**: ~~🔴 HOLD~~ → **定点版（2026-09-30・専門家の確認で変わりうる）: 対応が終わってから 1 年で `email` / `subject` / `body` / `related_url` を NULL にする**（行と種別・日時・状態は残す）。Legal Hold（D12）の対象は除く。期限列・自動 NULL 化ジョブは schema r12 で定義する（まだ作らない）
 ---
 
 ## Domain 6: マネタイズ

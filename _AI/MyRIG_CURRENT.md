@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20260929-122
-updated: 2026-09-29 19:58 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20260929-123
+updated: 2026-10-01 11:02 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -14,7 +14,27 @@ updated: 2026-09-29 19:58 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
 > ここだけ読めば再開できる**状態を保つこと。作業の区切りで必ず更新する。
 
-**最終更新: 2026-09-29 / revision 122（**情報・法務・サポート 方向裁定 D1〜D9・schema v1.6-r11・auth-guard v1.5**）**
+**最終更新: 2026-09-30 / revision 123（**情報・法務・サポート mock 1 回目 ＋ 2 回目（GPT / ASTRA 監査の是正）**）**
+
+> 🟢 **123 = 122 の裁定どおりに mock を作った（1 回目・イタヤ実機確認待ち）。** 裁定原本の「mock 1 回目」節に、実装で決めたこと・裁定からずらしたこと（理由つき）を書いた。
+> - 新しい面: PC `pc/myrig-support-v1.html`（?view=help|contact|report）・`myrig-legal-v1.html`（?view=terms|privacy）・`myrig-news-v1.html` ／ Mobile `help-v1.html`・`legal-v1.html`・`news-v1.html`。中身は **`SoT_info.js` / `.css`**（PC / Mobile 共用）
+> - 導線の真源 **`SoT_site-links.js`**（Footer・PC ユーザーメニュー「ヘルプ」・Mobile ユーザーメニュー「情報」・設定・利用制限・通知・`<site-legal>`）。**各 shell が必要なときに 1 回だけ読む**（面の HTML に script を足さない = CLOSE 済みの面を動かさない）。`enabled:false` = 特商法・応援する（3′）は静的なリンクも隠す
+> - 通報の器 **`SoT_report.js`**（PC = モーダル / Mobile = シート / /report の本文を 1 部品で。理由は schema r11 の CHECK と同じ値）。PC コメント「⋯ → 通報する」・PC 公開ガレージ「報告する」（以前は押しても何も起きなかった）・Mobile のコメントと公開ガレージをここへ
+> - お知らせのデータ **`SoT_announcements.js`** を通知一覧と /news が共用（通知の「重要なお知らせ」→ /news#id）
+> - 応援する: 金額ボタン・alert・「寄付」「特商法」「バッジを渡す予定」を撤去。MyRIG とは: 「運営について」の節（運営者 = 要確認）
+> - Launcher: 「情報・法務・サポート」= 作り直し中 8 ＋ 状態 7（compare も同じ）
+> - gate: 新 `_state/info_browser_check.py`（I1〜I10・`--selftest` 3 種 FAIL を確認）FAIL 0 ／ 既存の回帰は mock 報告に記載
+> - ⚠️ **PENDING**: Detail（RIG / パーツ / LOG）の「⋯」から通報（Detail は CLOSE 済み・DOM 固定の gate）/ 旧い面 3 つ（support-legal-report v0.1・help.html・legal.html）は CLOSE で撤去（Garage Top v7 の静的 href は CLOSE で A22 と一緒に付け替え）
+> - **mock 2 回目（09-30）**: GPT M1〜M4・S1 と ASTRA M1〜M4 ＋ 指摘を反映（裁定原本の「mock 2 回目」表）。D8 の表の書き誤り（Suspended の /news）を訂正
+> - **規約・プライバシーの書き直し（09-30）= Legal Hardening Gate の 1 回目**: 投稿の責任・運営は場所の提供・権利侵害の申し立て（7 日の照会）・求償・責任の範囲（故意・重大な過失を除く上限）ほか。TERMS 18 条 / PRIVACY 13 項 ＋ **投稿ガイドライン `/legal/guidelines` 新設**（みんカラ・CARTUNE の「規約とは別の普通の言葉のルール」・site-links `guidelines`・`consent` フラグで `<site-legal>` は規約・プライバシーの 2 本のまま）・**D11 収益と利用者に生じない権利**（X / YouTube の構造: 投稿が載るページも収益化できる・分配は別制度だけ・広告の近接 ≠ 推奨・持ち分は生じない・ご意見は対価なし）・[DRAFT] のまま。**「一切責任を負わない」は書かない（消費者契約法 8 条）**。D10（登録完了の前に明示の同意 ＋ 追記だけの履歴表 legal_acceptances）・D12（Legal Hold = 退会 30 日消去 D8 の例外）は提案・イタヤ裁定待ち。**文面の真源 = mock リポジトリ `docs/legal/MyRIG_legal_draft.md`（v0.3）→ `_state/legal_doc_build.py` → `SoT_legal-text.js`（生成物・手で直さない）**。GPT 全文監査 M0〜M8 ＋ 独立 agent 校閲を反映。お問い合わせ種別名「データの開示」→「個人情報の開示・訂正など」（kind は data_request のまま）。裁定原本「規約・プライバシーの書き直し」「外部比較」「文書の真源」「GPT 全文監査」節
+> - **グローバル前提の再設計（09-30 14:38・提案 v0.1）**: 日英同時公開は #24 裁定で既決。法務・サポートを「言語 / 法域 / 市場を分ける・共通 1 セット ＋ 地域の追加条項・GDPR 並みを全員に・MVP は同意の要る Cookie を置かない・申告は情プラ法 ＋ DSA ＋ DMCA を 1 つの流れに」で再設計。設計書 = mock `docs/legal/MyRIG_global_legal_design_v0.2.md`（GPT 監査の MUST を反映・EU/UK と年齢は HOLD・§15 同意の取り方）＋ **運営のルールとトラブル対応集 `docs/legal/MyRIG_operations_playbook_v0.1.md`**（言いがかり・嫌がらせ 22 種の対応と日英の返信の型）。**文書が先、画面が後**。裁定原本「グローバル前提の再設計」「GPT 監査 → v0.2」節
+> - **定点版（09-30 16:06・イタヤ委任で Claude 確定）**: 規約 v0.4・設計書 v0.3・対応集 v0.2（mock `docs/legal/`）。確定 = 文書の言語（同意した版）・MVP で AdSense なし・DMCA 運用一式・理由と結果の通知・Legal route 122 比 4 本追加・**みなし同意の廃止と明示の同意 ＋ legal_acceptances（本文ハッシュ）＋ 再同意の判定**。**16:30 保留 5 件を決定**: 海外 = 日本のサービスを日英で提供・海外からは英語表示・**現地代理人は置かない**（リスクを受け入れ、追跡しない・国に向けない作りを保つ）／年齢 **13 歳以上**／運営者情報 = **屋号・東京都・お問い合わせだけ、氏名と住所は請求時に回答**（家族の名前は使わない）／**Legal Hold 採用**／保存期間 = お問い合わせ 1 年・通報と申し立て 3 年・アクセスの記録 6 か月・退会確定で本人がわかる列を NULL（D4・D8 更新・support_inquiries 保持期間の HOLD 解消）。規約 v0.5。残るのは屋号の正式名。**時間を置いて最終チェック → 専門家 → mock 再 OPEN**。裁定原本「定点版」「保留 5 件の決定」節
+> - 🔴 **#24 改訂（09-30 17:30 イタヤ裁定）: MVP は日本語だけで正式に提供**。海外からのアクセス・登録は止めない（自動翻訳は公式でない・住む国の強行法規は妨げない・登録で「日本 / 日本以外」）。作りは i18n-ready のまま。英語版 = **Global Launch Gate**（公開後 2〜3 か月を目安に判定日）。16:30 の海外まわり（英語表示・代理人なし）と DMCA 代理人登録・文書の言語の案 C は Gate へ移す。規約 v0.6・設計書 v0.4 §00・対応集 v0.3。page-role-matrix §9 更新
+> - **最終案 v1.0-rc2（09-30 18:32）**: Gemini（MUST 1・SHOULD 3）と GPT（MUST 12・SHOULD 5）を全部反映。要点 = DMCA は運営自身の名称と物理的な所在地も公開（Gate で判断）／海外は「技術的に制限していない・規約が適用」（積極的に案内しない）／**公開 Legal 6 本**／同意画面 = 地域 → 要点 5 → □13 歳以上 → □規約とガイドラインに同意 → **□プライバシーポリシーを確認**（すべて必須）／`legal_acceptances` は文書ごとに 1 行／Legal Hold の対象を申し立て・資料・対応記録まで／退会は「消去または匿名化」・本文の個人情報も伏せ字。Release Blocker（本番の条件）= 1 万円上限の専門家確認・外部サービスの位置づけと保存国・Cookie 実測・安全管理措置・S16。（→ 下の行で完了）。裁定原本「最終案 v1.0-rc → rc2」節
+> - 🔴 **情報・法務・サポート v1.0 ＋ mock CLOSE（09-30・[DRAFT] のまま）**: ASTRA 最終監査（MUST 13・SHOULD 9）＋ 独立した確認（MUST 5）を反映し 3 者の監査を完了。要点 = 保全の範囲と「データごとの保存と消去」表／制限中・退会中・再同意前でも窓口が使える／申し立ての 4 分類（**急いで対応が必要なもの** = 同意なく公開された性的な画像・子どもの性的な内容・殺害予告）と受付・結果の通知／法令の期限が先・7 日は照会を受けた日から／年齢の区分（13〜17 歳は保護者の同意・13 歳未満は登録できない）／翻訳と外国への提供／外部送信の表は実測で確定／再同意は同意した人から適用・書き込みだけ止める／規約は第三者の権利を消さない。**mock**: 公開 Legal 6 本（cookies・reporting・notice）・みなし同意の廃止・はじめの設定の「登録の前に」・`/reconsent`（新）・お問い合わせの 4 分類・制限中の理由・ヘルプ 5 問・MyRIG とはの運営者情報。page-role-matrix・auth-guard v1.6（同意が要る）。**本番公開は R1〜R11（表紙 §C-2）が終わるまで承認しない**。schema r12 候補は裁定原本。**10-01 イタヤ決定**: 屋号 = MyRIG 運営事務局／不在時は代わりを置かずスマホへ緊急通知／同意の記録に IP・UA を残さない。裁定原本「v1.0 ＋ mock CLOSE」「イタヤの決定（10-01）」節
+> - **次**: イタヤ実機確認 ＋ 運営方針の PENDING（事業者・年齢・宣伝利用・上限額・管轄・申し立ての担当）＋ D10 → 直し → Legal Hardening Gate（全文監査 → 公開前に弁護士 1 回）→ CLOSE（**法務が固まるまで CLOSE しない**）
+
+**revision 122（**情報・法務・サポート 方向裁定 D1〜D9・schema v1.6-r11・auth-guard v1.5**）**
 
 > 🟢 **122 = 情報・法務・サポートレーンの方向を裁定（イタヤ 2026-09-29 19:51「進めましょう」「基本的に全部 OK」）。mock 未着手。**
 > 裁定原本: **`_decisions/2026-09-29_info-legal-support-v1.md`**（D1〜D9・HOLD / PENDING・罠）。Claude 主査案 v1 → GPT ＋ Gemini 監査 → v2 → 再監査 → v3 → 裁定（7 点・3 は 3′）。

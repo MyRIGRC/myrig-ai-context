@@ -8,7 +8,7 @@
 > 差分を明示すればイタヤ裁定で変更できる。
 
 **作成日:** 2026-05-03
-**最終更新:** 2026-09-29（Info / Legal / Support 行・正典 122）
+**最終更新:** 2026-09-30（公開 Legal 6 本・/reconsent・正典 123 下書き）／ 2026-09-29（Info / Legal / Support 行・正典 122）
 **ステータス:** 確定ベース v1.7
 
 **目的:** MyRIG全体のページ構成・役割・優先度を固め、V3モック制作・Next.js実装・管理画面設計で迷わない状態にする
@@ -97,7 +97,8 @@ Utility / Account
 ├─ /notifications                       通知
 ├─ /login                               ログイン
 ├─ /signup                              新規登録
-└─ /onboarding                          初期設定ウィザード
+├─ /onboarding                          初期設定ウィザード（最後に「登録の前に」= 地域・年齢・同意と確認・🔴 123）
+└─ /reconsent                           規約を改定したときの再同意（🔴 123・Auth Shell）
 
 Info / Legal / Support（🔴 2026-09-29・122。全部 P3 公開。サイドバー・BottomNav なしの中央本文型）
 ├─ /about                               MyRIG とは（運営者の節を含む）
@@ -106,7 +107,11 @@ Info / Legal / Support（🔴 2026-09-29・122。全部 P3 公開。サイドバ
 ├─ /report                              通報（URL 指定。主経路は面内ダイアログ）
 ├─ /news                                お知らせ（announcements の公開 read-only）
 ├─ /legal/terms                         利用規約
+├─ /legal/guidelines                    投稿ガイドライン（🔴 123）
 ├─ /legal/privacy                       プライバシーポリシー
+├─ /legal/cookies                       Cookie と外部送信（🔴 123・外部送信規律の公表）
+├─ /legal/reporting                     通報と申し立ての仕方（🔴 123）
+├─ /legal/notice                        運営者情報（🔴 123）
 ├─ /legal/tokushoho                     特定商取引法（予約・非公開）
 └─ /support-us                          応援する（作るが MVP 公開時は非表示・3′）
 ※ redirect: /terms → /legal/terms、/privacy → /legal/privacy、/support → /support-us。/feedback /guide /company は作らない
@@ -155,7 +160,8 @@ Admin
 | Settings | `/settings` | Utility | プロフィール・公開とコメント・興味とおすすめ・通知・ログインとセキュリティ・アカウントの管理 | 設定を変更する | Should | B | 🔴 **2026-09-28 改訂（120）**: 通知設定は MVP に含める（裁定 D5・20:30 改訂）。興味とおすすめ = マイカテゴリ 5 つまで・順序あり（D10・2026-09-29）。テーマ・言語は設定ではなく Shell の表示操作。旧記述「通知・テーマ設定」は失効 |
 | Login | `/login` | Utility | ログイン | ログインする | Must | Later | |
 | Signup | `/signup` | Utility | 新規登録 | アカウントを作る | Must | Later | |
-| Onboarding | `/onboarding` | Utility | 初期設定ウィザード（RIG登録誘導） | サービスを使い始める | Should | Later | |
+| Onboarding | `/onboarding` | Utility | 初期設定ウィザード（RIG登録誘導） | サービスを使い始める | Should | Later | 🔴 **2026-09-30（123 下書き）**: 最後に「登録の前に」（お住まいの地域 日本 / 日本以外・年齢の区分・大事な点 5 つ・規約とガイドラインへの同意・プライバシーの確認）。みなし同意は廃止。裁定原本「CLOSE」節 |
+| Reconsent | `/reconsent` | Utility | 規約・ガイドラインを改定したときの再同意 | 変わった規約に同意する | Must | Later | 🔴 **2026-09-30（123 下書き）**。auth-guard: Maintenance > Suspended > 登録状態 > 同意が要る。止めるのは書き込みだけ（閲覧・お問い合わせ・通報・ブロックとミュート・ログアウト・退会は塞がない）。mock `pc/myrig-auth-reconsent-v1.html` |
 | Admin: Master | `/admin/master` | Admin | RIG Master / Parts Master の追加・編集 | マスターデータを管理する | Must | Later | |
 | Admin: Browse Sections | `/admin/browse-sections` | Admin | INDEX / Category Top のセクション並び順・設定管理 | ページを構成する | Should | Later | Phase 4 候補 |
 | Admin: Moderation | `/admin/moderation` | Admin | 報告されたコンテンツ・ユーザー・問い合わせの確認と処置（通報 3 表 ＋ `support_inquiries` を VIEW / UNION で 1 queue・🔴 122）。削除は論理削除 | コンテンツを管理する | Should | Later | |
@@ -165,7 +171,11 @@ Admin
 | Report | `/report` | Info | URL 指定の通報。ログイン中は面内ダイアログと同じ。未ログインは `support_inquiries(kind=rights)` | 不適切な投稿・ユーザーを知らせる | Must | A | 🔴 122 裁定 D5。主経路は ⋯ メニューの `SoT_report.js`。通報 3 表（comment / content / user） |
 | News | `/news` | Info | 全員宛てのお知らせ（`announcements`）の公開一覧。障害・規約改定・重要な変更 | 何が起きているか知る | Must | B | 🔴 122 裁定 D1。未ログインでも読める。緊急告知をキャッシュしない。通知の「重要なお知らせ」の行き先 |
 | Terms | `/legal/terms` | Legal | 利用規約 | 条件を確かめる | Must | A | 🔴 122。[DRAFT]・法務未確認。PC は legal 面 `?view=terms` / Mobile `legal.html?view=terms`。決まった事実の一覧 = 裁定原本 D6 |
+| Guidelines | `/legal/guidelines` | Legal | 投稿ガイドライン（規約の個別ルール・普通の言葉） | 投稿のルールを知る | Must | A | 🔴 **123 下書き**。同上 `?view=guidelines` |
 | Privacy | `/legal/privacy` | Legal | プライバシーポリシー | 個人情報の扱いを確かめる | Must | A | 🔴 122。同上 `?view=privacy`。Cookie 同意モデルは checklist 4-1 HOLD |
+| Cookies | `/legal/cookies` | Legal | Cookie と外部送信（端末に保存するもの・ほかの事業者へ送られる情報） | 送られる情報を確かめる | Must | A | 🔴 **123 下書き**。電気通信事業法の外部送信規律の公表。**表は公開前に実測で確定**（公開条件 R4） |
+| Reporting | `/legal/reporting` | Legal | 通報と申し立ての仕方（窓口・急いで対応が必要なもの・流れ・7 日の確認） | 申し立ての手順を知る | Must | A | 🔴 **123 下書き**。Footer・メニューには出さない（ヘルプ・通報・お問い合わせ・規約本文・法務のタブから） |
+| Notice | `/legal/notice` | Legal | 運営者情報（屋号・日本・東京都・窓口・提供の状況） | 運営者を知る | Must | A | 🔴 **123 下書き**。氏名と住所は請求があれば回答（個人情報保護法 32 条）。屋号の正式名は要確認 |
 | Tokushoho | `/legal/tokushoho` | Legal | 特定商取引法に基づく表記 | — | Later | Later | 🔴 122 裁定 D7。**route 予約・面は非公開**。enabled = 決済先決定 ＋ 法務確認。要否も要確認 |
 | Support Us | `/support-us` | Support | 応援する。外部サービス（未確定・第一候補 OFUSE）へ 1 本の CTA。金額ボタンなし | プロジェクトを応援する | Should | A | 🔴 122 裁定 D7（3′）。**作るが MVP 公開時は非表示**（site-links `enabled`）。出す時期はイタヤ。特典は Phase 2 `/plans`（MR-PLAN-002）。#37 の `/support` → `/support-us` |
 | Admin: Reports | `/admin/reports` | Admin | PV・登録数・カテゴリ分布の統計 | サイト状況を把握する | Later | Later | |
@@ -378,7 +388,7 @@ Feed が独立したトップレベル体験であるなら、Feed 内に3つの
 | ユーザー識別 | `/user/[username]`（@ なし）。`@` は表示のみ |
 | Master 識別 | `/library/rigs/[masterSlug]`, `/library/parts/[masterSlug]`, `/library/makers/[makerSlug]`。**slug を使う想定**（UUIDは露出させない）。※ただし schema 側は masters を UUID PK で定義しており、**master 用 slug 列の定義は未確認**。実装前に schema と突き合わせること。**全エンティティで複数形に統一**（旧: `/library/rig/`, `/library/maker/` → 廃止） |
 | Admin プレフィックス | `/admin/*`。認証 middleware で保護 |
-| i18n | **MVP時点から日英2言語公開**（#24裁定 2026-07-23）。`/en/*` プレフィックス方式（Next.js i18n routing） |
+| i18n | ~~MVP時点から日英2言語公開（#24裁定 2026-07-23）~~ → 🔴 **2026-09-30 改訂（イタヤ裁定・正典 123）: MVP は日本語だけで正式に提供する。** 海外からのアクセス・登録は止めない（ブラウザの翻訳で使う人がいる前提・規約で自動翻訳は公式でないと明記）。**作りは i18n-ready のまま**（`/en/*` プレフィックス方式の routing を後から開けられる・画面の文字を直書きしない・カテゴリのコードは言語に依存しない）。**英語版の公開 = Global Launch Gate**（日付は約束しない・公開後 2〜3 か月を目安に判定日を置く）。製品の方針（日英 2 言語）は変えず、公開の順番だけを変える。裁定原本 `_decisions/2026-09-29_info-legal-support-v1.md`「#24 改訂」節 |
 
 ---
 

@@ -21,6 +21,7 @@
 > Maintenance/Suspendedは全ページ対象、P1のredirectだけをパス判定で絞る。詳細は §5。
 > ガード優先順位: **Maintenance > Suspended > P1 Auth**。
 > 🔴 **2026-09-28 v1.3**: 登録状態判定を追加し **Maintenance > Suspended > 登録状態判定 > P1 / P2 / P3** とした（§4.4）。
+> 🔴 **2026-09-30 v1.6（123 下書き）**: 登録状態判定の後に **「同意が要る」**（規約・ガイドラインの再同意）を足す → **Maintenance > Suspended > 登録状態判定 > 同意が要る > P1 / P2 / P3**。転送先 `/reconsent`。止めるのは書き込みだけ（変更履歴 v1.6）。
 > ⚠️ **未確定（実装時に確定）**: (1) 対象Next.jsバージョン（16なら`middleware.ts`はdeprecated、
 > `proxy.ts`へ改称する）／(2) Maintenance/Suspendedのredirectとは別のAPI用契約
 > （現在のskeletonは全リクエストを対象にするためAPIルートもHTTP redirectになる。
@@ -448,6 +449,7 @@ Suspendedユーザーが `/account-suspended` を開いた場合の無限redirec
 | v1 | 2026-05-22 | 初版（MR-AUDIT-002 / A7）。P1 / P2 / P3 パターン / Login Required Modal 文言 / `next` 安全性 / `middleware.ts` skeleton + matcher を確定 |
 | v1.1 | 2026-08-21 | #14裁定（context 8種・文言5グループ）を §3.1 / §3.3 本文へ反映。matcher から `/notifications/:path*` `/register/:path*` を除外し **P2＝matcher対象外**で確定 |
 | v1.2 | 2026-08-22 | GPT監査A解消。Maintenance/Suspendedが公開ページで無効だった問題を、matcher拡張＋`isP1Protected()`によるパス内分岐へ変更して解消。P2の挙動（matcher非依存の判定）は無変更 |
+| v1.6（123 下書き） | 2026-09-30 | 情報・法務・サポート v1.0（裁定原本「CLOSE」節）: 登録状態判定の後に **「同意が要る」**（`legal_acceptances` の同意した版 < 必要な版）を足す = Maintenance > Suspended > 登録状態 > 同意が要る > P1 / P2 / P3。判定はログイン・状態の復元・書き込みのとき。転送先 `/reconsent`（Auth Shell）。**止めるのは書き込みだけ**（閲覧・法務の文書・お問い合わせ全種別・照会への回答・通報・ブロックとミュート・ログアウト・退会は塞がない）。Suspended・退会猶予中は既存のルールが先（同意の画面へ送らない） |
 | v1.5 | 2026-09-29 | 情報・法務・サポート D8（裁定原本 `_decisions/2026-09-29_info-legal-support-v1.md`）: Suspended の redirect 除外に `/contact` `/help` `/legal/*` を追加（`SUSPENDED_ALLOW`）。退会猶予中は例外化せず `/resume` に案内文。情報・法務・サポートの面は P3 と明記 |
 | v1.4 | 2026-09-29 | §4.3 判定順 ① の PENDING を解消: 論理削除済み profile = `/resume`（設定・通知 D8・mock `pc/myrig-auth-resume-v2.html`・auth_check A33）。再開後は元のページか /garage へ・「MyRIG を再開しました」を 1 回だけ |
 | v1.3 | 2026-09-28 | 認証・オンボーディング作り直し（イタヤ承認・GPT 同見解）。§4.3 の判定を「username 未設定」→「有効な `profiles`（存在・未論理削除）」へ。登録途中は `profiles` を作らず Onboarding 完了時に作成（`username NOT NULL` と整合）。§4.4 新設: 未ログイン / 認証済み・登録途中 / 登録完了 の 3 状態と `/login`・`/signup`・`/onboarding`・保護操作の転送。ガード優先順位を Maintenance > Suspended > 登録状態判定 > P1/P2/P3 へ。論理削除済み profile は登録途中と扱わない（PENDING） |
