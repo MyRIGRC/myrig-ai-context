@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261002-142
-updated: 2026-10-02 07:03 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261002-143
+updated: 2026-10-02 07:07 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-02 07:03 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟢 **143 = DB Research 照会 #3 を起票** → `_proposals/2026-10-02_db-research-inquiry-003-admin-sync.md`（A = 全 Master 表の `updated_at` とトリガー・B = 同期する表と列 / 公開の判定の写し方 / 写してはいけない列・C = 画像の許諾の記録の置き場）。**返答待ち**（イタヤが Research レーンへ渡す）。返答までは複製の表の列を推測で決めない。次 = r12 のうち Research に依存しない部分（運営の表・停止・保全・Composer・Commerce）。
 
 > 🔴 **142 = 運営者 ID と Master の同期を裁定（イタヤ 10-02 07:02「全部推奨どおり」）** → 裁定原本 `_decisions/2026-10-01_admin-console-v1.md` **§16 追補 v1.5**。r12 の前提が確定: 運営者の恒久 ID = `admin_operators.operator_id`（利用者アカウントと分ける・紐付けは DB 制約・付け替えは Supabase 管理画面の関数だけ・AAL2 ＋ 危ない操作は直前 5 分の再確認）／同期 = App から差分（位置 =（updated_at, 主キー）・10 分前から読み直し）＋ 1 日 1 回の全件照合（主キー ＋ ハッシュ）・複製の表は同期専用の役割だけ・公開の判定は Research の VIEW の結果を写す。**Research レーンへ渡すこと 3 つ**（updated_at のトリガー・同期する表と列・画像の許諾の置き場）。**/admin の文字の設計は r12 の手前まで完了**。次 = ① Research への依頼文 ② r12 の設計（帰宅後でも可）③ mock（帰宅後）。
 
