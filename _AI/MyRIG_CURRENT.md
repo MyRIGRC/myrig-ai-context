@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261001-124
-updated: 2026-10-01 13:41 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261001-125
+updated: 2026-10-01 15:39 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -33,6 +33,8 @@ updated: 2026-10-01 13:41 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 > - **最終案 v1.0-rc2（09-30 18:32）**: Gemini（MUST 1・SHOULD 3）と GPT（MUST 12・SHOULD 5）を全部反映。要点 = DMCA は運営自身の名称と物理的な所在地も公開（Gate で判断）／海外は「技術的に制限していない・規約が適用」（積極的に案内しない）／**公開 Legal 6 本**／同意画面 = 地域 → 要点 5 → □13 歳以上 → □規約とガイドラインに同意 → **□プライバシーポリシーを確認**（すべて必須）／`legal_acceptances` は文書ごとに 1 行／Legal Hold の対象を申し立て・資料・対応記録まで／退会は「消去または匿名化」・本文の個人情報も伏せ字。Release Blocker（本番の条件）= 1 万円上限の専門家確認・外部サービスの位置づけと保存国・Cookie 実測・安全管理措置・S16。（→ 下の行で完了）。裁定原本「最終案 v1.0-rc → rc2」節
 > - 🔴 **情報・法務・サポート v1.0 ＋ mock CLOSE（09-30・[DRAFT] のまま）**: ASTRA 最終監査（MUST 13・SHOULD 9）＋ 独立した確認（MUST 5）を反映し 3 者の監査を完了。要点 = 保全の範囲と「データごとの保存と消去」表／制限中・退会中・再同意前でも窓口が使える／申し立ての 4 分類（**急いで対応が必要なもの** = 同意なく公開された性的な画像・子どもの性的な内容・殺害予告）と受付・結果の通知／法令の期限が先・7 日は照会を受けた日から／年齢の区分（13〜17 歳は保護者の同意・13 歳未満は登録できない）／翻訳と外国への提供／外部送信の表は実測で確定／再同意は同意した人から適用・書き込みだけ止める／規約は第三者の権利を消さない。**mock**: 公開 Legal 6 本（cookies・reporting・notice）・みなし同意の廃止・はじめの設定の「登録の前に」・`/reconsent`（新）・お問い合わせの 4 分類・制限中の理由・ヘルプ 5 問・MyRIG とはの運営者情報。page-role-matrix・auth-guard v1.6（同意が要る）。**本番公開は R1〜R11（表紙 §C-2）が終わるまで承認しない**。schema r12 候補は裁定原本。**10-01 イタヤ決定**: 屋号 = MyRIG 運営事務局／不在時は代わりを置かずスマホへ緊急通知／同意の記録に IP・UA を残さない。裁定原本「v1.0 ＋ mock CLOSE」「イタヤの決定（10-01）」節
 > - 🔴 **情報・法務・サポートの状態（10-01・124）: UI/mock = CLOSE ／ Legal text = DRAFT ／ Production release = R1〜R11 完了まで BLOCK**。10-01 の総合監査（GEMINI SPARK MUST 5・SHOULD 10 ／ ASTRA MUST 2・SHOULD 7）を反映して mock を再 CLOSE。**イタヤ 10-01 13:40: この流れのフォーム関連ページ（お問い合わせ・はじめの設定・再同意など）を CLOSE**。次に触るのは実機確認で直すものが出たとき（re-OPEN）か R1〜R11。裁定原本「総合監査（10-01）」節
+> - 🔴 **commit / push の常設許可（10-01 15:38 イタヤ・125）**: 正典は Cowork が作業の区切りごとに commit・push まで行う（確認しない）。mock は Mac の `mockup`（Claude は Mac へ反映して 1 行伝えるだけ）。`mockup()` は正典を push しない。CORE「🔴 commit / push の常設許可」
+> - 🔴 **情報・法務・サポートの mock を PC / Mobile とも CLOSE・Launcher 確定（10-01 15:28 イタヤ・125）**。直前に MyRIG とは・応援する・お知らせの 3 面だけ re-OPEN して直した（14:14）:PC / Mobile を同じ部品（SoT_info.js `about` `supporters`）にして同じ文・同じ順番／3 つの柱の色を v8 へ（GARAGE = RIG 黄・CATALOG = 中立・LOG = 青。旧 v7 の緑・紫・橙と青いボタンを撤去）／**応援する = MVP の公開時はどこからもリンクしない**（`support` enabled:false のまま・公開の約 1 か月後に出す）／**お知らせ = 気づいてほしいページ**（重要の枠に日時と状態・新しい機能を写真で・種類で絞る）。`announcements` の列 kind・area・images・cta・starts_at／ends_at は schema r12 候補。**Home の上の 1 行の告知は Home レーンの候補**。**応援する の中身は公開するときに詰め直す**（MVP の初期公開では出さない）。法務の文は [DRAFT]・本番の公開は R1〜R11 まで BLOCK のまま。裁定原本「About・応援・お知らせ（10-01）」節
 
 **revision 122（**情報・法務・サポート 方向裁定 D1〜D9・schema v1.6-r11・auth-guard v1.5**）**
 

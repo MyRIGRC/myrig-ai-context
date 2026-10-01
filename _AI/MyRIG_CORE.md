@@ -176,8 +176,24 @@ RIG詳細で3ボタンの色を直したとき、page-local の JS が絵文字�
 
 DB書込・ファイル操作・大量変更は実行レーンに渡す。
 チャット内で「実行済み」と言わない。
-commit / push は明示指示がある場合のみ。
+commit / push は下の「🔴 commit / push の常設許可」に従う。
 git add -A は使わない。常に明示的にファイルを列挙する。
+
+### 🔴 commit / push の常設許可（2026-10-01 イタヤ / L1）
+
+イタヤ「push・mockup・commit は全部やっちゃっていい。いちいち指示しないで。戻すことは無いので、もっとスムーズな運用に」。
+**毎回の確認を求めない。**
+
+| 対象 | だれが | いつ |
+|---|---|---|
+| 正典 `myrig-ai-context` | Cowork（Claude）が commit・push する | 作業の区切りごと（revision を上げたら、その場で push まで済ませる） |
+| mock `myrig-mockup` | イタヤが Mac で `mockup`（commit・push・Vercel 本番をまとめて行う） | Claude が Mac へ反映したあと。Claude は「`mockup` してください」と 1 行だけ伝える |
+
+- mock の commit を Claude がしない理由（許可が無いからではない）: Vercel のトークンと author（`MyRIGRC`）が Mac の `mockup()` にある／
+  Cowork の Mac 側シェルは `.git/index.lock` を消せず、git の操作のたびに古い lock が残って次の `mockup` を止める（2026-10-01 にも発生）。**Mac の mock リポジトリで git を叩かない**
+- `mockup()` は mock だけを扱う。**正典は push しない**（正典の push は Cowork が GitHub へ直接行う。Mac の正典の clone は見るだけ = `git pull` で追いつく）
+- 変わらないもの: force push 禁止・author を書き換えない・最新 main を確かめてから編集・Production DB 禁止・物理 DELETE 禁止・secret をチャットに出さない
+- 対象外（従来どおり確認する）: Production DB・本番の公開判断・取り消せない操作常に明示的にファイルを列挙する。
 
 ### 🔴 2026-08-31 事故: commit author を変えて Vercel の本番デプロイを止めた
 
@@ -304,7 +320,7 @@ https://raw.githubusercontent.com/MyRIGRC/myrig-ai-context/main/revision.txt?cb=
 - WRITE経路にかかわらず、最新mainを確認してから編集する
 - 他AIが直前に更新した可能性を常に考慮する
 - force push / 強制上書きは禁止
-- commit / push / GitHub WRITEはイタヤの明示指示がある場合のみ
+- commit / push / GitHub WRITE: Cowork は常設許可（上の「🔴 commit / push の常設許可」）。GPT は READ 専用のまま
 
 ## セキュリティ
 

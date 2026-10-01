@@ -427,6 +427,23 @@ Claude が現物（PC 3 面 / Mobile 4 面 / footer / mobile-shell / settings / 
 - ゲート: `legal_doc_build --check` PASS・`info_browser_check` FAIL 0 / 250（I12 に 9 項目追加）・`auth_check` 0・`auth_browser_check` 0 / 101・`shell_interaction` 418 / 0・`mobile_feed` 63 / 0・`mobile_detail` 59 / 0・`mobile_garage_list` 804 / 0・`mobile_garage_detail` 150 / 0・`web_fundamentals_final` 2090 / 0・`web_meaning` 1290 / 0・`launcher_link` 357 / 0。Mac へ 16 ファイル（sha256 一致）
 - **イタヤ 10-01 13:40 決定: この一連の mock 制作のフォーム関連ページ（お問い合わせ・はじめの設定の「登録の前に」・再同意・ログイン / 新規登録の同意行）を CLOSE**。正典 124 を push。re-OPEN の条件 = イタヤの実機確認（Safari・VoiceOver を含む）で直すものが出たとき。本番の公開は R1〜R11 まで BLOCK のまま
 
+### About・応援・お知らせ（2026-10-01 14:14 イタヤ → 125）— 3 面だけ re-OPEN
+- イタヤ: ヘルプ・お問い合わせ・通報・法務 6 本・運営者情報は「これでいい（お任せ）」。直すのは **MyRIG とは・応援する・お知らせ** と、その **Mobile との一致**
+- **決めたこと（イタヤ）**
+  - MyRIG とはの 3 つの柱の色が昔のトークン（v7 の緑・紫・橙）のまま → **v8 へ**。Claude: GARAGE = RIG の黄（`--cat-rig` ＋ 対の文字色）／**CATALOG = 中立**（Library は中立レイヤー = 正典 D2・D3。紫は使わない）／LOG = 青。操作のボタンは中立（青いボタンをやめた）
+  - **応援する = MVP の公開時はリンクしない**。ページは作る。公開の約 1 か月後に、しれっと出す（`SoT_site-links.js` の `support` を `enabled:true` にするだけで Footer・メニュー・MyRIG とはに出る。既存の 3′ と同じ）
+  - **お知らせ = 気づいてほしいページ**。新しい機能（例: LOG に写真 3 枚）は打ち出す。メンテナンスも気づいてほしい
+  - Home の上に 1 行の告知（新しい機能・メンテナンス）= **Home レーンの候補**（この面では作らない。出すなら `SoT_announcements.js` の同じ配列から描く）
+- **mock**
+  - `SoT_info.js` に `about`・`supporters` を足し、4 面（PC `pc/myrig-about-v0.1.html`・`pc/myrig-support-us-v0.1.html`／Mobile `about.html`・`support-us.html`）を器だけにした（旧版 = mock `_archive/2026-10-01_about-supporters/`）。PC と Mobile で同じ見出し・同じ文・同じ並び（Mobile は詰めるだけ）。Mobile の「RIGを登録する」を初めての人向けの「ガレージを作る」（新規登録）へそろえた
+  - お知らせ: ①いま知っておいてほしいこと（重要・大きな日時・状態 予定 / 実施中 / 終了）②新しい機能（30 日以内の最新 1 件・運営の見本写真 最大 3 枚・関わる種類のバッジ・操作 1 本）③これまでのお知らせ（種類で絞る `?kind=`）。色で塗らず、枠・大きさ・順番で気づかせる
+  - 応援する: 写真の帯 ＋ 応援の箱（受付先が未定なのでボタンは押せない）＋ 理由と使い道 ＋ よくある質問 4 つ（「お支払いの情報は MyRIG に残りますか」を追加）
+- **schema r12 の候補（まだ作らない）**: `announcements` に kind（maintenance / incident / feature / policy / info）・area（rig / parts / log）・images（最大 3）・cta_label / cta_target・starts_at / ends_at（ほかに Home の 1 行を出すなら home_until など）
+- ゲート: `info_browser_check` FAIL 0 / 298（I9 を新しい形へ・I13 = 46 項目を追加: PC と Mobile の見出しが同じ・柱の色・旧 v7 の塗りが無い・応援へのリンクが見えない・320px・ダーク・お知らせの順番と状態と絞り込み。故障を入れて FAIL することを確認）・`launcher_link` 366 / 0・`footer_single_source` 4 / 0・`shell_interaction` 418 / 0・`category_role` 120 / 0・`web_fundamentals_final` 2090 / 0・`web_meaning` 1290 / 0・`auth_check` 0・`auth_browser_check` 0 / 101・`mobile_feed` 63 / 0・`mobile_detail` 59 / 0（`hit_test` の 1 件 = library-search @720 は以前からのもの）。Mac へ 14 ファイル（sha256 一致）
+- **イタヤ 10-01 15:28: 3 面 OK → 情報・法務・サポートの mock を PC / Mobile とも CLOSE、Launcher を確定**（`index.html` の群 = group--done・カード 13 枚 = card--done）。mock は 15:26 に `mockup` 済み（`b950866`）
+- **応援する = HOLD（公開するときに詰め直す）**: イタヤ「応援するのページはもう少し違う感じでいい。MVP の初期公開では作らない・出さないので、公開するときに詰める」。いまの mock は置き場所として残す（どこからもリンクしない）
+- 状態: UI/mock = CLOSE ／ Legal text = DRAFT ／ Production release = R1〜R11 完了まで BLOCK（124 の 3 状態のまま）
+
 ### PENDING（イタヤが決める運営方針・文面では埋めない）
 運営する事業者（名称・所在地・連絡先）/ 利用できる年齢と未成年の扱い / 投稿写真を宣伝に使うか（推奨: 規約では取らず別に許可）/ 責任の上限の金額 / 準拠法・管轄（GPT 案: 日本法 ＋ 東京地裁）/ 権利侵害の申し立てに対応する担当と不在時 / 異議の申し立ての手続き / 広告・PR の表示の仕方 / 保存期間（HOLD のまま）
 - 別に: お問い合わせの種別名「ログインせずに通報する・権利侵害」「データの開示」の見直し（agent 提案: 申し立てと通報を分ける・開示だけでなく訂正も）/ 権利侵害の申し立てフォームの項目（氏名・本人か代理人か・内容が真実であることの確認）= schema `support_inquiries` の変更を伴う
