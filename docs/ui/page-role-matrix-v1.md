@@ -162,7 +162,7 @@ Admin
 | Signup | `/signup` | Utility | 新規登録 | アカウントを作る | Must | Later | |
 | Onboarding | `/onboarding` | Utility | 初期設定ウィザード（RIG登録誘導） | サービスを使い始める | Should | Later | 🔴 **2026-09-30（123 下書き）**: 最後に「登録の前に」（お住まいの地域 日本 / 日本以外・年齢の区分・大事な点 5 つ・規約とガイドラインへの同意・プライバシーの確認）。みなし同意は廃止。裁定原本「CLOSE」節 |
 | Reconsent | `/reconsent` | Utility | 規約・ガイドラインを改定したときの再同意 | 変わった規約に同意する | Must | Later | 🔴 **2026-09-30（123 下書き）**。auth-guard: Maintenance > Suspended > 登録状態 > 同意が要る。止めるのは書き込みだけ（閲覧・お問い合わせ・通報・ブロックとミュート・ログアウト・退会は塞がない）。mock `pc/myrig-auth-reconsent-v1.html` |
-| Admin: Master | `/admin/master` | Admin | RIG Master / Parts Master の追加・編集 | マスターデータを管理する | Must | Later | |
+| Admin: Master | ~~`/admin/master`~~ | Admin | ~~RIG Master / Parts Master の追加・編集~~ | ~~マスターデータを管理する~~ | — | Later | 🔴 **2026-10-01 失効（イタヤ A-3・128）**: /admin では Master を編集しない（正本は Research・109 境界契約。App 側で直しても再同期で上書きされ、書き込み主体が 2 つになる）。役割は **Research Bridge**（Master に無いもの・誤りを Research へ渡す）として `_proposals/2026-10-01_admin-operations-map_claude-v0.1.md` §5.7 で再定義中 |
 | Admin: Browse Sections | `/admin/browse-sections` | Admin | INDEX / Category Top のセクション並び順・設定管理 | ページを構成する | Should | Later | Phase 4 候補 |
 | Admin: Moderation | `/admin/moderation` | Admin | 報告されたコンテンツ・ユーザー・問い合わせの確認と処置（通報 3 表 ＋ `support_inquiries` を VIEW / UNION で 1 queue・🔴 122）。削除は論理削除 | コンテンツを管理する | Should | Later | |
 | About | `/about` | Info | サービス紹介・運営者の節。未ログイン・初訪問者向け | MyRIG が何かを知る | Must | A | 🔴 **2026-09-29（122）** 裁定 D1。PC `pc/myrig-about-v0.1.html` / Mobile `about.html`。#36 PROPOSED → 確定 |

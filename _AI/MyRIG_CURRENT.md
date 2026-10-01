@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261001-127
-updated: 2026-10-01 15:52 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261001-128
+updated: 2026-10-01 16:01 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-01 15:52 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟢 **128 = /admin レーン: 方向の決定 ＋ 設計図 v0.1（PROPOSAL・mock 未着手）**。**イタヤ 10-01 15:54 決定**: A-1 端末は PC（Mobile は緊急の確認と非表示・停止だけ）／A-2 カテゴリ色を使わず状態を主役に／A-3 **/admin では Master を編集しない**（Research Bridge へ・page-role-matrix の /admin/master は失効）／A-4 管理者はイタヤ 1 人（権限の分割は将来・2 段階認証と操作の記録は最初から）／A-5 作る前に文字の設計図で詰める。設計図 = **`_proposals/2026-10-01_admin-operations-map_claude-v0.1.md`**（Signal / Case / Job / Audit・12 領域・業務ごとの表（45 行）・Task Package・非常ベル・Mobile・画面の骨組み・正典の抜け G1〜G14・問い Q1〜Q7・Gemini 4 点の採否）。**次 = GPT のレビュー → v0.2 → イタヤ裁定**。
 
 > 🟢 **127 = 3 AI の協働体制を CORE に明記（イタヤ 10-01）**: 主査・ファイル編集・確定 = Claude ／ GPT = 盲点の指摘と歯止め（＋ ASTRA 監査）／ Gemini（SPARK）= 補助・意見は Claude にだけ送る。/admin の議論は継続中（`_state/HANDOFF_20261001_admin-console.md`）。
 
