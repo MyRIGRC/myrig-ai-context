@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261001-138
-updated: 2026-10-01 19:13 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261001-139
+updated: 2026-10-01 19:16 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-01 19:13 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟢 **139 = Q-S1〜S4 裁定（イタヤ 19:15・裁定原本 §14 追補 v1.3）**: URL 貼り付けはサーバーで MyRIG の URL として解析 → 種類と ID に解決（外へ取りに行かない・許可したドメインとパスだけ・解決できなければ止める）／まとめは候補 → 人が確定／左右 2 列／キーボード／**緊急の画像はぼかして押したときだけ 1 回表示・端末に残さない・表示を Audit に記録**。**面の設計 その 2（v0.6・PROPOSAL）** → `_proposals/2026-10-01_admin-screens_claude-v0.6.md`: ユーザー・投稿の管理・データ（退会 / 保存期間 / 保全）・お知らせ・購入先（K0）・処理と費用。問い Q-S5〜S8。**これで A の面は一通り**。
 
 > 🟢 **138 = /admin 面の設計 その 1（PROPOSAL・文字だけ）** → `_proposals/2026-10-01_admin-screens_claude-v0.5.md`: 骨組み（左の列・上の検索に URL を貼って直接処置）・状態の見せ方・Admin Home の並び（急ぎ → 期限 → 処理の失敗 → 新しい受付 → 承認待ち・全部 0 なら 1 行）・受付箱・案件の詳細（左 = 見る・右 = 決める）・/admin/m。問い Q-S1〜S4。次 = v0.6（ユーザー・投稿・データ・お知らせ・購入先・処理と費用）。
 
