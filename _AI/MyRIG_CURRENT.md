@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261001-133
-updated: 2026-10-01 16:39 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261001-134
+updated: 2026-10-01 16:50 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-01 16:39 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟢 **134 = /admin v0.4（PROPOSAL）: Page Composer / Commerce / Research Bridge のデータの形** → **`_proposals/2026-10-01_admin-composer-commerce-bridge_claude-v0.4.md`**。要点 = 置けるものはコードのレジストリ・置き方は DB（`page_layouts` 版・下書き / 公開 ＋ `page_layout_blocks` 棚ごとの期間）・部品 7 種（自由 HTML なし・ランキング系プリセットなし）／購入先は `commerce_merchants` ＋ `commerce_offers`（is_affiliate なら PR を必ず出す・表示のときにサーバーで引く）・バナーと AdSense は枠のレジストリ（MVP は全部 none）／橋は片方向 2 本・依頼の状態は Research だけ（`catalog_candidates` → `research_requests`）。G27〜G30。**問い Q-P1・P2・Q-C1・C2・Q-K5（推奨 = 提携が有効なお店だけ PR つきで出す）・Q-B1・B2**。
 
 > 🔴 **133 = /admin の設計の方向を裁定（イタヤ 10-01 16:38「すべて推奨で」）**。裁定原本 **`_decisions/2026-10-01_admin-console-v1.md`**（A-1〜A-6・Q1〜Q9・Q-K1／K2／K4）。要点 = 管理アプリを 1 つ新規に作り利用者のサイトと別に置く（App 区画 ＋ Catalog 区画）・Case / Job / Audit ＋ 子表・範囲つきの保全・停止では消去を止めない・ベルは理由の区分と #ID と /admin/m の入口だけ・Task Package と Home の 1 行は B。**Q-K5（アフィリエイトリンクを公開時に出すか）だけ未決**（それまで B）。schema・mock 未着手。**次 = v0.4（Page Composer・Commerce・橋のデータの形）**。
 
@@ -20,7 +22,7 @@ updated: 2026-10-01 16:39 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 > - 根拠の境界を回答に書く: `GitHub main 確認済み`（canon）／ `mock: GitHub push 済みの状態だけ確認`（MyRIGRC/myrig-mockup・Vercel）／ `ローカル未確認`
 > - 進めてよい = 設計・監査・裁定案・canon の commit / push（Claude はクラウドから GitHub に直接書ける）。**止める = mock の作成・修正・`mockup()`・ローカルの gate 実行** → `帰宅後確認` に積む
 > - 3 AI の流れは変えない（Claude がハブ・GPT はレビュー・Gemini の意見は Claude へ）。**Gemini SPARK は Mac Studio のフォルダを読めない場合、GitHub main を読むか、イタヤが貼った文で判断**
-> - 帰宅後確認: （なし）
+> - 帰宅後確認: ① mock の Home / Browse に残る「ランキング」見出しと popular 系プリセット（`pc/myrig-home-v3.html` :2807 `weekly-like-ranking-rig` ほか・page-role-matrix §7 違反・G27）→ Home / Browse レーンを開けるときに直す
 
 > 🟢 **129 = /admin 設計図 v0.2（PROPOSAL）**: **`_proposals/2026-10-01_admin-operations-map_claude-v0.2.md`**。GPT（MUST 7・追加 2）と Gemini SPARK（MUST 5・SHOULD 4）のレビューを統合し、採否を §14 に記録。主な変更 = Case を 1 対多の子表に・保全は範囲つきの独立した表 `legal_holds`・Job は非同期で失敗しうるものだけ（冪等）・ベルの記録 `admin_alerts`・**停止だけでは退会の消去を止めない（Q3 撤回）**・管理画面を唯一の非常口にしない・スパムの一括処置・プロフィールの処置・画像の配信の停止（G21）・管理者の締め出しへの備え・Task Package / Home の 1 行 / 規約の画面は B へ・正典の抜け G1〜G21。**食い違いの裁定案**: ベルの中身 = SPARK 案（理由の区分・対象の種類・#ID・/admin/m の入口）／Q3 = GPT 案／個人サイトの自動公開（SPARK）は採らない。**次 = イタヤの裁定（§12 Q1〜Q9）→ v1.0**。
 
