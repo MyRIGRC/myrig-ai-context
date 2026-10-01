@@ -255,3 +255,107 @@ entity_type text / entity_id uuid / library_public_status text / library_page_en
 - D7: Rules への追記（affiliate_enabled と monetization_ready の凍結・文書のみ）
 
 【作業完了】DBR-INQUIRY-003-REPLY-2
+
+---
+
+> **追記 2026-10-02 07:36 JST**: 回答 #3-3（Catalog 区画が Research DB に書く範囲）。本文は無編集（project ref だけ伏せた）。
+
+# DB Research 回答 #3-3 — 管理アプリ（Catalog 区画）が Research DB に書く範囲
+回答: 2026-10-02 JST / 主査(Claude) / 照会: 2026-10-02_db-research-inquiry-003-3-catalog-write-scope.md
+
+## 0. 実測の範囲
+- Research DB（project ref は伏せた） / 2026-10-02 07:33 JST / current_user=postgres / 読み取り専用トランザクション（transaction_read_only=on）/ SELECT のみ・書込なし
+- 読んだもの: change_logs と import_runs の全列・制約 / change_logs の書き手別件数 / master_publication.verification_user_id の非 NULL 件数 / master_images の entity_type 別件数（合計 79,938 と一致）/ ロゴ状態の分布（master_publication 72,896 行・manufacturers 863 行）/ retailer_product 1,896 行のホスト別件数（合計 1,896 と一致）/ RIG 向けリンクの種別別件数 / rig_master_variants の SKU 有無
+- 読んでいないもの: 各リンク先ページの中身（製品との一致は未確認）
+
+## 1. 前提（照会 §0）
+- 了解。自動処理は書かない・物理 DELETE なし・役割は 2 段階
+
+## 2. 第 1 段（D8）
+### 2-1. 結論
+- D8 として D1〜D7 と同じ週次ゲートに載せる。順序は D6（master_image_rights）の後
+- 関数方式にする。catalog_rights_writer は関数を呼ぶだけで、表への UPDATE / INSERT 権限は持たない
+- 役割ができるまではオーナーが SQL Editor で実行（照会どおり）
+
+### 2-2. D8 の中身（未適用。細部は週次ゲートのパックで確定し続報に書く）
+- ロール catalog_rights_writer: 関数の実行権限と SELECT だけ
+- SELECT の範囲: D5（同期専用の読むだけの役割）と同じ範囲 ＋ master_image_rights。照会の 4 表だけでは「このメーカーの画像」を辿れない（master_images は entity_id しか持たず、メーカーへは part_masters / rig_masters 経由）ため
+- 関数 1: 止める・再開する（3 点セットを 1 つのトランザクションで実行）。引数は 対象の種類（manufacturer / image）・対象 ID・決定・理由・operator_id
+- 関数 2: 許諾の確認を記録するだけ（master_image_rights への追記）。引数は 対象の種類・対象 ID・決定・根拠・参照・operator_id
+- 関数 1 には「件数だけ返す確認モード」を付ける（対象の画像数と公開判定の行数を返し、何も書かない）。管理アプリは実行前にこれを表示する
+
+### 2-3. 照会の案から変える点
+- ロゴ（logo_permission_status / logo_display_status）は第 1 段から外す
+  - master_publication は全 72,896 行が unknown / hidden
+  - manufacturers は全 863 行が unknown / hidden で、logo_url は 0 件
+  - 止める対象が無い。ロゴの状態は master_publication と manufacturers の両方に列があり、正本の整理が先。ロゴを使い始めるときに追加する
+- 対象の種類に image（画像 ID 指定）を足す
+  - master_images の内訳: part_master 79,455 / rig_master_variant 189 / body 177 / rig_master 117
+  - bodies には manufacturer_id 列が無い（body_manufacturer は text）。body の画像 177 行はメーカー単位では辿れない
+- 再開で戻すのは「その停止で止めた行」だけ。リンク切れなどで元から hidden の行は再開しても戻さない
+
+## 3. 教えてほしいこと への回答
+### 3-1. 「誰が書いたか」の渡し方
+- 関数の引数で渡す（operator_id uuid）。接続ごとの設定値は使わない
+  - 理由: 設定値方式は既存の監査トリガーの改修が要る。接続の使い回しで付け忘れ・取り違えも起きる
+- 残し方（既存の仕組みを使う。トリガーは変えない）:
+  1. 関数が import_runs に 1 行作る。run_type='manual_edit' / executed_by に operator_id / notes に理由
+  2. 変更する行の import_run_id にその ID を入れる。既存トリガーが change_logs.import_run_id に自動で記録する。行の元の import_run_id は change_logs に旧値として残る
+  3. master_image_rights の確認者・停止者の列に operator_id を入れる（uuid 列にする）
+- change_logs.changed_by には DB のロール名が入る（現在の実値は postgres と rc_mdr_fixer の 2 種）。運営者は import_run_id から import_runs.executed_by を引いて特定する
+- verification_user_id は公開面の確認者の列（現在は全行 NULL）。第 1 段では使わない。第 2 段で運営者が公開面の確認をしたときに operator_id を入れる
+- Research DB には運営者の表が無い。operator_id が誰かの対応は App が正本
+
+### 3-2. 週次ゲートに載せられるか
+- 載せられる（D8）。§2 のとおり
+
+### 3-3. 第 2 段で直接書かせたくない表・列
+原則: 第 2 段も全て関数経由。表への直接権限は付けない。そのうえで、次は関数でも「取り込みの手順」を必ず通す。
+- 主キー全部: 再採番しない
+- 来歴の列（import_run_id / verification_status / research_verification_method / verification_updated_at / updated_at）: 関数とトリガーだけが書く
+- Master の新規追加（manufacturers / rig_masters / rig_master_variants / part_masters / part_master_variants / bodies）: import_runs の親行 → 重複チェック → メーカー帰属の確認、の順を必ず通す。part_masters.part_slug に UNIQUE が無く、二重登録は物理 DELETE 禁止のため消せない
+- manufacturer_id の付け替え（帰属の変更）と メーカーの統合: オーナー判断。管理アプリから直接は不可
+- manufacturers.official_url: ブランド確認の手順が必須。直接は不可
+- compatible_platforms: 公式根拠が必須。根拠 URL つきの専用手順だけ
+- status の discontinued: 公式に明示がある場合だけ
+- spec_data: キーの定義が未確定。確定まで不可
+- msrp_usd: 触らない
+- master_aliases: 「確実に同一物」の基準を通す。alias_kind は 11 値の CHECK あり。import_runs の親行が先に要る
+- master_external_links: official の URL は一覧ページ・小売ドメイン不可。価格・在庫・SALE は書かない
+- master_relations: App の集計（使われている RIG など）を書き戻さない
+- master_publication: public 化と index_status の index 化は週次ゲートの判断。直接は不可
+- change_logs / import_runs / source_snapshots / master_field_verifications: 直接書かない
+- 調査の依頼を受け取る表: Research 側に新設する。Master の表とは分け、追記だけ。Master への昇格は Research の取り込み手順で行う。名前と列は第 2 段の照会時に確定する
+
+### 3-4. 購入先のリンクの整備
+計画は立てられる。週次ゲートの議題に載せる。優先度と時期はオーナーが決める。
+
+RIG 側の現状（実測）:
+- rig_master: official 887 行（active 793 / inactive 94）/ manual 45 行（全て inactive）
+- rig_master_variant: official 87 行（active 85 / inactive 2）
+- 取扱店リンク（retailer_product / retailer_search / distributor）: 0 行
+- rig_master_variants は 3,366 行。SKU ありは 3,257 行
+
+Research 側の方針:
+- 単位は rig_master_variants（SKU 単位）。SKU の完全一致だけ採用する。名前の一致ではリンクを張らない
+- 価格・在庫・SALE は取らない
+- 対象のお店は Research が選ばない。App の「提携が有効なお店」の一覧（店名・ドメイン・地域）をください。計画の入力にする
+- 収集は日次の自走で候補置き場まで。DB への投入は週次ゲート
+- モールを単品ページで持つか検索結果ページ（retailer_search）で持つかは計画時に決める
+
+既存の retailer_product 1,896 行について:
+- ホスト別（active）: www.thextraspeed.com 795 / www.amainhobbies.com 468 / www.vajjexrc.com 222 / www.hobbyrecreationproducts.com 46 / alshobbies.co.uk 45 / shop.robitronic.com 36 / www.rc-modell-shop.de 34 / www.towerhobbies.com 24 / rcaddict.com 23 / www.rakuseimodel.co.jp 11 / beachrc.com 8 / www.bigsquidrc.com 8 / www.rcmart.com 7 / www.wl-toys.com 6 / gpmodels.co.za 6 / super-rc.co.jp 5 / www.redcatracing.com 2 / www.enginediy.com 1 / www.fmshobby.com 1 / www.ebay.com 1 / funyat.com 1（計 1,750）
+- ホスト別（inactive）: www.amainhobbies.com 119 / 60years.associatedelectrics.com 27（計 146）
+- メーカー自社とみられるサイト・メディア・ebay が混じっている。取扱店リンクとしては未整理
+- App へのお願い: この 1,896 行は、提携が有効なお店のドメインに一致する行だけを対象にし、Research の確認が済むまで購入先に出さないでください。確認は週次ゲートの宿題（回答 #3-2 §4 追加 1）
+
+## 4. 第 2 段の予告（照会 §2）
+- 受領。確定ではない前提で、設計が固まったらあらためて照会してください
+
+## 5. 週次ゲートに載せるもの（全て未適用）
+- D1〜D7: 回答 #3-2 §5 のとおり
+- D8: catalog_rights_writer ロール ＋ 関数 2 本（D6 の後）
+- 議題: RIG 向け取扱店リンクの整備（優先度と時期）
+- 宿題: retailer_product 1,896 行の確認 / source_type='retailer_official' 254 行の確認 / source_type の語彙の是正
+
+【作業完了】DBR-INQUIRY-003-3-REPLY

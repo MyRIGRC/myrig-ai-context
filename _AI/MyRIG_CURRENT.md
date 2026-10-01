@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261002-146
-updated: 2026-10-02 07:31 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261002-147
+updated: 2026-10-02 07:36 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-02 07:31 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟢 **147 = DB Research 回答 #3-3 を保存**: 第 1 段 = **D8（関数方式・管理アプリは表に直接書けない・確認モードつき・ロゴは外す・画像 ID 指定を足す）**／「誰が」= 関数の引数 operator_id → Research の `import_runs` に残る・**operator_id が誰かの対応は App が正本**／第 2 段も全部関数経由（Master の新規追加は取り込みの手順を必ず通す）。週次ゲート = D1〜D8 ＋ 議題（RIG 向け取扱店リンク）。**イタヤ待ち**: Q-R6（整備を頼むか）・Q-R7（間に合わなければ購入先なしで公開）・**Q-R8（提携が有効なお店の一覧 = Research の計画の入力）**。既存の retailer_product 1,896 行は Research の確認まで購入先に出さない。
 
 > 🟢 **146 = DB Research 回答 #3-2 を保存・照会 #3-3 を起票**: `affiliate_enabled` と `monetization_ready` は全行 false・Research は凍結 → **App は写さない・使わない。提携の正本は App で確定**。週次ゲートは D1〜D7。🔴 **G35（新）: 購入先に当たる Research のリンクは retailer_product 1,896 行（全部パーツ・品質未確認）だけ。RIG 向け 0・モール 0** → Q-K5 は今のままだと出せるリンクがほぼ無い（案 = G31 の分け方は変えず、RIG 向けの取扱店リンクの整備を Research に計画してもらう・無ければ出さない）。照会 #3-3 → `_proposals/2026-10-02_db-research-inquiry-003-3-catalog-write-scope.md`（Catalog 区画が Research に書く範囲 = 第 1 段は画像を止める 3 点セットと許諾の記録だけ）。
 
