@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261001-125
-updated: 2026-10-01 15:39 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261001-126
+updated: 2026-10-01 15:43 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-01 15:39 JST（生成: Cowork ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟢 **126 = 次レーンの引き継ぎ（運営側の管理画面 /admin の設計・議論 → mock）**。情報・法務・サポートは 125 で CLOSE 済み。引き継ぎ: **`_state/HANDOFF_20261001_admin-console.md`**（面・PENDING 9 件・読む正典・守ること）。議論してから設計・mock の順。
 
 > **スレッドをまたぐとき最初に読む節。** イタヤは環境（デスクトップCowork / ブラウザCowork /
 > ブラウザ通常チャット）を切り替えながら作業するため、**前スレッドの記憶に依存せず
