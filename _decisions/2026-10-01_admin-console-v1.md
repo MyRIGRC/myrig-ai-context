@@ -1,6 +1,7 @@
 # MyRIG 管理画面（Admin）設計仕様 v1.0
 
 > 裁定: イタヤ 2026-10-01 16:38「すべて推奨で」／ 正典 revision: MYRIG-20261001-133
+> 追補 v1.1: イタヤ 2026-10-01 16:52（v0.4 の裁定・§11）／ 正典 revision: MYRIG-20261001-135
 > 元: _proposals/2026-10-01_admin-operations-map_claude-v0.1〜v0.3（GPT・Gemini SPARK のレビュー反映済み）
 > 状態: 設計の方向 = 確定。schema・migration・mock は未着手。Production DB 非接触
 
@@ -35,7 +36,7 @@
 - Q-K1 管理アプリを 1 つ新しく作り（App 区画 ＋ Catalog 区画）、利用者のサイトと別に置く（例 admin.myrigrc.com）
 - Q-K2 A-3 の言い直しを採用
 - Q-K4 投稿の管理（通報が無くても探す・開く・非表示）を MVP に入れる
-- Q-K5 アフィリエイトリンクを公開時に出すか = 未決（推奨なし・イタヤ判断待ち）。それまでは区分 B として扱う
+- Q-K5 → **§11 で確定**（提携が有効なお店の購入先だけ・PR 強制・Library Detail と RIG ベースモデルだけ）
 - 既存の Research アプリ（rc-master-data-app-v2）は使わない。参考だけ（イタヤ 16:33）
 
 ## 3. 構成
@@ -87,6 +88,21 @@
 ## 9. 残っている抜け（r12 / 他レーン）
 - G1 停止の状態の保存先／G6・G15 運営の非表示（投稿・コメント）／G7 退会と対応中の連絡先／G8 退会で NULL にする列の一覧／G9 r12 候補／G10 修正報告の付け替え／G11 page_blocks の作り直し／G14 運営の処置の通知の語彙／G16 運営者 ID／G18 Home の 1 行（Home レーン）／G21 画像の URL／G23 予約語／G24 広告表示／G25 0 件の検索語／G26 表記の揺れの受け渡し
 
-## 10. 次
-- v0.4 相当: Page Composer と Commerce のデータの形・橋の形・○ の領域の業務表
-- 固まったら GPT / Gemini にレビューを募る
+## 10. 次（→ §12 に移した）
+
+## 11. 追補 v1.1 — Page Composer / Commerce / Research Bridge（イタヤ 2026-10-01 16:52）
+
+元: `_proposals/2026-10-01_admin-composer-commerce-bridge_claude-v0.4.md`（GPT 確認済み）。**すべて推奨どおり。補正 2 点つき**
+
+- Q-P1 `page_blocks` を作り直す → `page_layouts`（ページ × 版・draft / scheduled / published / archived・プレビュー・前の版に戻す）＋ `page_layout_blocks`（棚・layout_type・card_variant・query_preset・params・棚ごとの starts_at / ends_at）
+- Q-P2 部品の種類は**現行のレジストリを 7 種類で始める**（content_shelf / manual_pick / feature_banner / editorial_banner / library_links / announcement_slot / ad_slot）。**永久に固定ではない**。新しい block_type は**コード側のレジストリへ明示的に足したときだけ**増やせる（管理画面から作れない）。自由 HTML なし・ランキング系のプリセットなし・「注目に選ぶ」は選んだ順のまま
+- Q-C1 購入先は表示のときにサーバーで引く。転送 URL は提携先の規約を確かめるまで使わない
+- Q-C2 検索結果の広告は MVP では 0
+- **Q-K5 公開時に購入先を出す**: 提携が「有効」なお店の購入先だけ／PR 表示は部品で強制（消す設定なし）／**Library Detail と RIG のベースモデルだけ**／提携前・不確実・リンク切れ（broken）は出さない。公式サイトは INFO として別枠で出せる
+- Q-B1 橋は片方向 2 本（App の候補 → Research の依頼 → Research の Master → App へ同期）。依頼の状態は Research 側だけが持つ
+- Q-B2 0 件の検索語を、利用者を特定しない形（言葉と日ごとの件数）で残す。**保存期間は Audit の 5 年と同じにしない**。利用の傾向のデータとして、運用に要る期間を別に決める（法務の確認の対象には含める・期間は後で決める）
+
+これで MVP 区分は: 購入先（commerce_merchants / commerce_offers ＋ PR を強制する部品）= **A** ／ Page Composer の画面 = B（MVP はコードの既定の編成）／ キーワード・バナー・AdSense = C ／ 橋の候補と依頼 = B ／ **同期の方式 = MVP までに必須**
+
+## 12. 次
+- Admin の文字設計はこれで一周。次の 3 AI レビューは個々の機能ではなく、**Admin 全体を横断して「責務の穴・二重の正本・MVP で実装できない依存」**を見る（GPT の提案）

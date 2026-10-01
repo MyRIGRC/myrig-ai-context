@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261001-134
-updated: 2026-10-01 16:50 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261001-135
+updated: 2026-10-01 16:53 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-01 16:50 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🔴 **135 = v0.4 を裁定（イタヤ 10-01 16:52「すべて推奨どおり・補正 2 点」）** → 裁定原本 `_decisions/2026-10-01_admin-console-v1.md` **§11 追補 v1.1**。補正 = ①部品は 7 種類で始め、新しい種類はコードのレジストリに明示的に足したときだけ増やせる ②0 件の検索語の保存期間は Audit の 5 年と別に決める。**Q-K5 確定 = 提携が有効なお店の購入先だけ・PR 強制・Library Detail と RIG ベースモデルだけ**（購入先は MVP の A）。**Admin の文字設計は一周**。次 = 3 AI で Admin 全体の横断レビュー（責務の穴・二重の正本・MVP で実装できない依存）。
 
 > 🟢 **134 = /admin v0.4（PROPOSAL）: Page Composer / Commerce / Research Bridge のデータの形** → **`_proposals/2026-10-01_admin-composer-commerce-bridge_claude-v0.4.md`**。要点 = 置けるものはコードのレジストリ・置き方は DB（`page_layouts` 版・下書き / 公開 ＋ `page_layout_blocks` 棚ごとの期間）・部品 7 種（自由 HTML なし・ランキング系プリセットなし）／購入先は `commerce_merchants` ＋ `commerce_offers`（is_affiliate なら PR を必ず出す・表示のときにサーバーで引く）・バナーと AdSense は枠のレジストリ（MVP は全部 none）／橋は片方向 2 本・依頼の状態は Research だけ（`catalog_candidates` → `research_requests`）。G27〜G30。**問い Q-P1・P2・Q-C1・C2・Q-K5（推奨 = 提携が有効なお店だけ PR つきで出す）・Q-B1・B2**。
 
