@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261001-136
-updated: 2026-10-01 17:07 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261001-137
+updated: 2026-10-01 19:05 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -10,7 +10,9 @@ updated: 2026-10-01 17:07 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 ## 🔴 いまやっていること（NOW）
 
-> 🟢 **136 = Admin 横断レビュー（GPT・MUST 6・SHOULD 6）を反映** → 裁定原本 §13 追補 v1.2・v0.4 を訂正。要点 = やりとりの本文は `admin_correspondence` 1 か所／**同期は公開済みに限らない（109 §9 を守る訂正）**／`is_affiliate` を持たずお店から導く・表示は「提携有効 かつ 購入先有効 かつ link ok」／運営者 ID = auth.users.id（r12 前に確定）／公開の条件に「本人確認 HOLD の間は救済と書き出しを押せない」「画像の許諾の器（Research）」を追加／`manual_pick` に一本化。Gemini の横断レビューが来たら同じ §13 に足す。
+> ⏸ **137 = Gemini（SPARK）は当面使わない（イタヤ 10-01 19:05）**。レビューは GPT（＋必要なら ASTRA）だけ。CORE「3 AI の協働体制」に反映。
+
+> 🟢 **136 = Admin 横断レビュー（GPT・MUST 6・SHOULD 6）を反映** → 裁定原本 §13 追補 v1.2・v0.4 を訂正。要点 = やりとりの本文は `admin_correspondence` 1 か所／**同期は公開済みに限らない（109 §9 を守る訂正）**／`is_affiliate` を持たずお店から導く・表示は「提携有効 かつ 購入先有効 かつ link ok」／運営者 ID = auth.users.id（r12 前に確定）／公開の条件に「本人確認 HOLD の間は救済と書き出しを押せない」「画像の許諾の器（Research）」を追加／`manual_pick` に一本化。
 
 > 🔴 **135 = v0.4 を裁定（イタヤ 10-01 16:52「すべて推奨どおり・補正 2 点」）** → 裁定原本 `_decisions/2026-10-01_admin-console-v1.md` **§11 追補 v1.1**。補正 = ①部品は 7 種類で始め、新しい種類はコードのレジストリに明示的に足したときだけ増やせる ②0 件の検索語の保存期間は Audit の 5 年と別に決める。**Q-K5 確定 = 提携が有効なお店の購入先だけ・PR 強制・Library Detail と RIG ベースモデルだけ**（購入先は MVP の A）。**Admin の文字設計は一周**。次 = 3 AI で Admin 全体の横断レビュー（責務の穴・二重の正本・MVP で実装できない依存）。
 
