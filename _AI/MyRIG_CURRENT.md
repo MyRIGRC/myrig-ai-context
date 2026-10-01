@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261001-139
-updated: 2026-10-01 19:16 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261002-140
+updated: 2026-10-02 00:24 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-01 19:16 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟢 **140 = Q-S5〜S8 裁定（イタヤ 10-02 00:22・§15 追補 v1.4）＋ r12 の前提の案 v0.7（PROPOSAL）** → `_proposals/2026-10-02_admin-operator-id-and-sync_claude-v0.7.md`。運営者 ID = **`admin_operators.operator_id`（ログインの手段と分ける・v1.2 の auth.users.id 案は撤回）**・管理者の正本はこの表・JWT の印はこの表から作る・**管理者アカウントは利用者アカウントと分ける**／同期 = **App から取りに行く差分 ＋ 1 日 1 回の全件照合**・1 回 = 1 トランザクション・消えた行は消さず Operations へ・複製の表は同期だけが書く・Research へ 4 つ目の条件（変えたら必ず更新される updated_at）を依頼。Supabase の機能は要確認。**GPT の厳密レビュー待ち**。
 
 > 🟢 **139 = Q-S1〜S4 裁定（イタヤ 19:15・裁定原本 §14 追補 v1.3）**: URL 貼り付けはサーバーで MyRIG の URL として解析 → 種類と ID に解決（外へ取りに行かない・許可したドメインとパスだけ・解決できなければ止める）／まとめは候補 → 人が確定／左右 2 列／キーボード／**緊急の画像はぼかして押したときだけ 1 回表示・端末に残さない・表示を Audit に記録**。**面の設計 その 2（v0.6・PROPOSAL）** → `_proposals/2026-10-01_admin-screens_claude-v0.6.md`: ユーザー・投稿の管理・データ（退会 / 保存期間 / 保全）・お知らせ・購入先（K0）・処理と費用。問い Q-S5〜S8。**これで A の面は一通り**。
 
