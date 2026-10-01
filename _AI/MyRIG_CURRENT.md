@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261001-137
-updated: 2026-10-01 19:05 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261001-138
+updated: 2026-10-01 19:13 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-01 19:05 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟢 **138 = /admin 面の設計 その 1（PROPOSAL・文字だけ）** → `_proposals/2026-10-01_admin-screens_claude-v0.5.md`: 骨組み（左の列・上の検索に URL を貼って直接処置）・状態の見せ方・Admin Home の並び（急ぎ → 期限 → 処理の失敗 → 新しい受付 → 承認待ち・全部 0 なら 1 行）・受付箱・案件の詳細（左 = 見る・右 = 決める）・/admin/m。問い Q-S1〜S4。次 = v0.6（ユーザー・投稿・データ・お知らせ・購入先・処理と費用）。
 
 > ⏸ **137 = Gemini（SPARK）は当面使わない（イタヤ 10-01 19:05）**。レビューは GPT（＋必要なら ASTRA）だけ。CORE「3 AI の協働体制」に反映。
 
