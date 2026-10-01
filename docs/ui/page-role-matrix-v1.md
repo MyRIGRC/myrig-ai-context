@@ -387,7 +387,7 @@ Feed が独立したトップレベル体験であるなら、Feed 内に3つの
 | PARTS カテゴリ slug | `/parts/category/tire`, `/parts/category/esc` 等 |
 | ユーザー識別 | `/user/[username]`（@ なし）。`@` は表示のみ |
 | Master 識別 | `/library/rigs/[masterSlug]`, `/library/parts/[masterSlug]`, `/library/makers/[makerSlug]`。**slug を使う想定**（UUIDは露出させない）。※ただし schema 側は masters を UUID PK で定義しており、**master 用 slug 列の定義は未確認**。実装前に schema と突き合わせること。**全エンティティで複数形に統一**（旧: `/library/rig/`, `/library/maker/` → 廃止） |
-| Admin プレフィックス | `/admin/*`。認証 middleware で保護 |
+| Admin プレフィックス | `/admin/*`。認証 middleware で保護。🔴 **2026-10-01（133）: 管理アプリは利用者のサイトと別に置く方針**（例 admin.myrigrc.com・裁定原本 `_decisions/2026-10-01_admin-console-v1.md`）。URL 体系は実装時に確定 |
 | i18n | ~~MVP時点から日英2言語公開（#24裁定 2026-07-23）~~ → 🔴 **2026-09-30 改訂（イタヤ裁定・正典 123）: MVP は日本語だけで正式に提供する。** 海外からのアクセス・登録は止めない（ブラウザの翻訳で使う人がいる前提・規約で自動翻訳は公式でないと明記）。**作りは i18n-ready のまま**（`/en/*` プレフィックス方式の routing を後から開けられる・画面の文字を直書きしない・カテゴリのコードは言語に依存しない）。**英語版の公開 = Global Launch Gate**（日付は約束しない・公開後 2〜3 か月を目安に判定日を置く）。製品の方針（日英 2 言語）は変えず、公開の順番だけを変える。裁定原本 `_decisions/2026-09-29_info-legal-support-v1.md`「#24 改訂」節 |
 
 ---

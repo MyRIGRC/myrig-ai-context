@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261001-132
-updated: 2026-10-01 16:34 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261001-133
+updated: 2026-10-01 16:39 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-01 16:34 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🔴 **133 = /admin の設計の方向を裁定（イタヤ 10-01 16:38「すべて推奨で」）**。裁定原本 **`_decisions/2026-10-01_admin-console-v1.md`**（A-1〜A-6・Q1〜Q9・Q-K1／K2／K4）。要点 = 管理アプリを 1 つ新規に作り利用者のサイトと別に置く（App 区画 ＋ Catalog 区画）・Case / Job / Audit ＋ 子表・範囲つきの保全・停止では消去を止めない・ベルは理由の区分と #ID と /admin/m の入口だけ・Task Package と Home の 1 行は B。**Q-K5（アフィリエイトリンクを公開時に出すか）だけ未決**（それまで B）。schema・mock 未着手。**次 = v0.4（Page Composer・Commerce・橋のデータの形）**。
 
 > 🟢 **132 = イタヤ 10-01 16:33: 既存の Research のアプリ（rc-master-data-app-v2）は使わず、Research 側の管理も完全に新しく作る**（旧アプリは参考だけ・コードは引き継がない）。v0.3 §2 を改訂 = **管理アプリを 1 つ新しく作り、App 区画と Catalog（Research）区画に分ける**・DB をまたいで JOIN しない・区画ごとに鍵とデータ層を分ける・橋は決まった受け渡しだけ。**置き場の案 = 利用者のサイトと別（例 admin.myrigrc.com）**→ メンテナンス中も止まらない（G3 解消）・Research の鍵が利用者のサイトに入らない・軽さ。Q-K1 を差し替え。
 
