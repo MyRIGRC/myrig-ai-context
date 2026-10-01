@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261001-126
-updated: 2026-10-01 15:43 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261001-127
+updated: 2026-10-01 15:52 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-01 15:43 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟢 **127 = 3 AI の協働体制を CORE に明記（イタヤ 10-01）**: 主査・ファイル編集・確定 = Claude ／ GPT = 盲点の指摘と歯止め（＋ ASTRA 監査）／ Gemini（SPARK）= 補助・意見は Claude にだけ送る。/admin の議論は継続中（`_state/HANDOFF_20261001_admin-console.md`）。
 
 > 🟢 **126 = 次レーンの引き継ぎ（運営側の管理画面 /admin の設計・議論 → mock）**。情報・法務・サポートは 125 で CLOSE 済み。引き継ぎ: **`_state/HANDOFF_20261001_admin-console.md`**（面・PENDING 9 件・読む正典・守ること）。議論してから設計・mock の順。
 
