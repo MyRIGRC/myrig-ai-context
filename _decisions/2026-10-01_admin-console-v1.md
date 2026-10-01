@@ -5,6 +5,7 @@
 > 追補 v1.2: GPT 横断レビュー（MUST 6・SHOULD 6）を Claude 主査が反映（§13）／ 正典 revision: MYRIG-20261001-136
 > 追補 v1.3: 面の設計 その 1（イタヤ 19:15・§14）／ 正典 revision: MYRIG-20261001-139
 > 追補 v1.4: 面の設計 その 2（イタヤ 10-02 00:22・§15）／ 正典 revision: MYRIG-20261002-140
+> 追補 v1.5: 運営者 ID と Master の同期（イタヤ 10-02 07:02「全部推奨どおり」・§16）／ 正典 revision: MYRIG-20261002-142
 > 元: _proposals/2026-10-01_admin-operations-map_claude-v0.1〜v0.3（GPT・Gemini SPARK のレビュー反映済み）
 > 状態: 設計の方向 = 確定。schema・migration・mock は未着手。Production DB 非接触
 
@@ -49,7 +50,7 @@
 - 2 つの DB をまたいで JOIN しない。区画ごとにデータ層と鍵を分ける
 - 橋（Research Bridge）: App → Catalog = Master に無いもの・表記の揺れの候補・誤りの報告・0 件の検索語／Catalog → App = 同期
 - 書き込みはサーバー側の操作ごとの狭い関数だけ。何でも通る service role の窓口は作らない。物理 DELETE なし（例外はストレージの実ファイル）
-- 管理者の判定 = Auth の app_metadata。運営者は通常の退会・停止の対象外。運営者 ID の正本は r12 で決める
+- ~~管理者の判定 = Auth の app_metadata。運営者 ID の正本は r12 で決める~~ → **§16 で確定**（正本 = `admin_operators`）。運営者は通常の退会・停止の対象外
 
 ## 4. データの形（r12 で設計・名前は案）
 - admin_cases: 案件（種類・優先度・状態・対象・決定・内部メモ）。状態の正本
@@ -157,3 +158,35 @@
 - **Q-S6** カテゴリの誤りは運営が直さず本人に知らせる。ただし**違法・危険・明らかな規約違反は「直してほしい」ではなく Moderation の処置**にする（ただの分け間違いと分ける）
 - **Q-S7** お店の提携の状態を変える前に、影響する件数を見せる。**「表示中 → 出なくなる」と「出ていない → 表示される」を分けて**出す。**実行のときにサーバー側で数え直してから変える**（プレビューの数字を信用しない）
 - **Q-S8** 縮退モードは管理画面では見るだけ（今の段階・最後に変わった時刻・外の手順への案内）。切り替えは管理画面の外の手順が正
+
+## 16. 追補 v1.5 — 運営者 ID と Master の同期（イタヤ 2026-10-02 07:02「全部推奨どおり」）
+
+元: `_proposals/2026-10-02_admin-operator-id-and-sync_claude-v0.7.md`（§D = GPT MUST 5・SHOULD 5 ／ Gemini MUST 2・SHOULD 2 を反映）。**r12 の前提として確定**。§13 M5 の「auth.users.id をそのまま使う」案は**失効**
+
+### 運営者 ID
+- **Q-I1** 運営者の恒久 ID = `admin_operators.operator_id`（display_name・status active / disabled・消さない）。Audit・保全・公開・Research 側の記録の「誰が」はすべてこれ（Research へは論理参照）。理由: Research の DB は App の Auth を知らない／Auth ユーザーを作り直しても記録が切れない
+- **Q-I2** 管理者かどうかの正本 = `admin_operators` ＋ 有効な紐付け（`admin_operator_logins`: operator_id ↔ auth_user_id・bound_at / unbound_at）。JWT の印は入口の判定だけ。**操作のたびにサーバーで「今の Auth ユーザー ↔ 有効な紐付け ↔ 有効な運営者」を読む（キャッシュしない）**。食い違えば管理者ではない
+- **Q-I3** 管理者のアカウントは、ふだんの利用者アカウントと分ける（profiles を作らない）
+- **Q-I4** 有効な紐付けは双方向に 1 つだけを **DB の制約**で守る（operator ごとに 1 つ・auth_user ごとに 1 つ・過去は unbound_at で残す）。非常用の付け替えは関数 `admin_rebind_operator(operator_id, new_auth_user_id, reason)` を **Supabase の管理画面からだけ**実行（新しい紐付け → 古い紐付けを外す → 古いセッションを全部切る → Audit）。管理アプリに裏口は作らない
+- **Q-I5** 管理アプリに入る = 2 段階認証を済ませたセッション（AAL2）／ **危ない操作（停止・解除・保全の解除・削除・書き出し・購入先の一斉変更）= AAL2 ＋ 直前 5 分以内の再確認**（コードをもう一度入れる・サーバー側で時刻を持って判定）
+- 既存の `resolved_by → profiles.id` などは r12 で `operator_id` に合わせる
+
+### Master の同期（Research → App）
+- **Q-Y1** App から差分を取りに行く。読んだ位置は **（updated_at, 主キー）の組**で持ち、**毎回 10 分前から読み直す**。入れ方は主キーで「あれば上書き・無ければ足す」。定期（例: 1 時間）＋ Catalog で直したあとの「今すぐ同期」。記録は `admin_jobs`・止まったら非常ベル
+- **Q-Y2** Research へ **4 つ目の条件**を依頼: すべての Master の表に、行を変えたら必ず更新される `updated_at`（トリガー）。既存の 3 条件（PK を振り直さない・列名を変えない・App で物理 DELETE しない）に足す
+- **Q-Y3** App の複製の表に書けるのは**同期専用の役割だけ**（DB の権限で閉じる。App のふだんのサーバーの役割・管理アプリの役割も書けない）。App が Master について持つ値は別の表
+- **Q-Y4** 1 日 1 回の全件照合 = **主キーの集合 ＋ 行の中身のハッシュ**。「Research から消えた」と判定するのは**全件を読み切れた照合の回だけ**。消えた行は App で消さず Operations に異常として出す
+- **Q-Y5** 公開の判定は **Research の VIEW `master_publication_effective` の結果の行をそのまま写す**（App で作り直さない・109 §9）。Research と確認
+- 取り込みは 1 つのまとまりで確定。**索引・表示用の写し・キャッシュの作り直しは、確定のあとの別の Job**。大きくなったら「一時の置き場に取り込む → 全表を検証 → 世代をまとめて切り替え」（表ごとに本番の表へ入れない）
+- 同期する表の候補（Research と確定）: manufacturers ・ rig_categories ・ part_categories ・ rig_masters ・ rig_master_variants ・ part_masters ・ part_master_variants ・ bodies ・ master_aliases ・ master_images ・ master_external_links ・ 公開の判定
+- **公開してよいかは同期の条件にしない**（109 §9・§13 M2）。PARTS は cross_ref が無い間は同期できても接続できない（H-1）
+
+### 公開の条件（Release Blocker）に足すもの
+- 非常用の付け替えの関数と手順書（新しい Auth ユーザーを作る → 関数 → 2 段階認証を登録し直す → 入れることを確かめる）
+- 同期の公開前の確認 6 つ: ① 全件のあと差分で回る ② 1 行直して次の同期で届く ③ 途中で止めても前の状態のまま ④ Research に無い行が Operations に出る ⑤ 同じ時刻の大量の行を取りこぼさない ⑥ わざと入れ替えた行を全件照合で見つける
+- ⚠️ 実装前に公式の資料で確かめる: Supabase の Custom Access Token Hook・TOTP と AAL2 の判定
+
+### Research レーンへ渡すこと
+1. 4 つ目の条件（updated_at のトリガー）
+2. 同期する表と列の確定（`master_images` / `master_external_links` / 公開の判定の列・G30）
+3. 画像の許諾の記録の置き場（§13 M6）

@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261002-141
-updated: 2026-10-02 00:40 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261002-142
+updated: 2026-10-02 07:03 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-02 00:40 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🔴 **142 = 運営者 ID と Master の同期を裁定（イタヤ 10-02 07:02「全部推奨どおり」）** → 裁定原本 `_decisions/2026-10-01_admin-console-v1.md` **§16 追補 v1.5**。r12 の前提が確定: 運営者の恒久 ID = `admin_operators.operator_id`（利用者アカウントと分ける・紐付けは DB 制約・付け替えは Supabase 管理画面の関数だけ・AAL2 ＋ 危ない操作は直前 5 分の再確認）／同期 = App から差分（位置 =（updated_at, 主キー）・10 分前から読み直し）＋ 1 日 1 回の全件照合（主キー ＋ ハッシュ）・複製の表は同期専用の役割だけ・公開の判定は Research の VIEW の結果を写す。**Research レーンへ渡すこと 3 つ**（updated_at のトリガー・同期する表と列・画像の許諾の置き場）。**/admin の文字の設計は r12 の手前まで完了**。次 = ① Research への依頼文 ② r12 の設計（帰宅後でも可）③ mock（帰宅後）。
 
 > 🟢 **141 = v0.7 に §D（GPT MUST 5・SHOULD 5 ／ Gemini MUST 2・SHOULD 2 を反映）**: 紐付けは双方向に 1 つを DB 制約で／**非常用の付け替え関数 `admin_rebind_operator`（Supabase の管理画面からだけ）＋ 手順書 = Release Blocker**／JWT は入口だけ・操作ごとに表を読む／AAL2 と直前の再確認（5 分）を分ける／同期の位置 =（updated_at, 主キー）＋ 毎回 10 分前から読み直し／索引の作り直しは別 Job・大きくなったら世代の切り替え／全件照合 = 主キー ＋ 行ハッシュ／「消えた」は読み切れた照合だけで判定／複製の表は DB 権限で同期だけ／公開の判定は Research の VIEW の結果を写す。問い Q-I1〜I5・Q-Y1〜Y5（全部推奨 = はい）。
 
