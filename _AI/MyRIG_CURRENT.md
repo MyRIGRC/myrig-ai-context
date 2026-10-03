@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261003-148
-updated: 2026-10-03 10:20 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261003-149
+updated: 2026-10-03 18:32 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,11 @@ updated: 2026-10-03 10:20 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟢 **149 = 外出中の運用を終了（イタヤ 10-03 18:29 帰宅・PC 作業を再開）**。ふだんの決まりに戻す: ほかの AI も正典の revision を照合する／mock の作成・修正・`mockup()`・ローカルの gate を再開できる。
+> - Mac のローカル clone（`~/Desktop/MyRIG/myrig-ai-context`）= 148 で origin/main と一致を確認（10-03 18:31）。mock（`App/MOKUP/myrig_pc_Ver3`）= `30c89bd`・origin/main と差なし
+> - **帰宅後確認（ここから着手できる）**: ⓪ 実際の DB を見て確かめること（テスト環境での実測・Supabase の Custom Access Token Hook / TOTP と AAL2 / 同期専用の役割の権限 / 最初の全件取り込みの時間）① mock の Home / Browse に残る「ランキング」（G27・`pc/myrig-home-v3.html` :2807 ほか）② /admin の mock（設計 = 裁定原本 §1〜§18 ＋ v0.5・v0.6）③ Q-R8 提携が実際に通っているお店
+> - ⚠️ **罠（10-03 実測）: この Cowork（クラウド）から Mac の clone で git を動かすと、`.git/index.lock` と `.git/objects/maintenance.lock` が残る**（Mac 側のシェルは削除ができないため）。残ると Mac で git が止まる。今回は 2 つを `~/Desktop/MyRIG/_scratch/_to_delete_20261003/` へ移して解消。**正典の commit / push はクラウドの clone から GitHub へ直接行い、Mac の clone は Mac 側で `git pull` する**。読むだけのときは `GIT_OPTIONAL_LOCKS=0` を付ける
 
 > 🔴 **148 = Q-R6・R7 を Claude が推奨どおり決定（イタヤ 10-03 10:19「任せます」）** → 裁定原本 §18 追補 v1.7: RIG 向けの取扱店リンクの整備を Research に頼む／間に合わなければ購入先なしで公開。**Q-R8（提携が実際に通っているお店）はイタヤの事実の確認が要るので未確定** → 想定のお店を「候補・未確認」として Research に渡し、App では全部「未確認」（イタヤが有効にするまで表示されない）。**外出中の確認（10-03）: DB を実際に調べる作業は帰宅後**。r12 は正典（GitHub）だけで進む文字の設計で、DB には触らない。
 
@@ -46,7 +51,7 @@ updated: 2026-10-03 10:20 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 > 🟢 **131 = /admin 設計図 v0.3（完成形の全体地図・PROPOSAL）**: **`_proposals/2026-10-01_admin-operations-map_claude-v0.3.md`**（v0.2 の業務表・G1〜G21・Q1〜Q9 は有効のまま）。20 領域（Content・Users・Page Composer・Catalog / 表記の揺れ / 画像・アフィリエイト / キーワード / 企業バナー / AdSense の枠・検索の調整・サイトの設定・SEO ほか）／**1 つの管理アプリ・2 つの区画・1 本の橋**（132 で改訂）／軽く速く動かす決まり 8 つ／G22〜G26／Q-K1・K2・K4・K5。**CORE に追加（イタヤ 10-01 16:22）**: A-6「設計は完成形・実装は MVP で外す」（L1）・3 AI は「ふだんは Claude と進め、固まったら GPT / Gemini に意見を募る」。
 
-> 🟠 **130 = 外出中の運用（イタヤ 10-01 16:17〜帰宅まで・約 2 泊）**: イタヤは MacBook / iPhone から依頼。**Mac Studio のローカル（mock の未 commit・`mockup()`・ローカルの gate）は見えないものとして扱い、推測しない**。
+> ⚪ **（149 で終了）130 = 外出中の運用（イタヤ 10-01 16:17〜10-03 18:29）**: イタヤは MacBook / iPhone から依頼。**Mac Studio のローカル（mock の未 commit・`mockup()`・ローカルの gate）は見えないものとして扱い、推測しない**。
 > - 根拠の境界を回答に書く: `GitHub main 確認済み`（canon）／ `mock: GitHub push 済みの状態だけ確認`（MyRIGRC/myrig-mockup・Vercel）／ `ローカル未確認`
 > - 進めてよい = 設計・監査・裁定案・canon の commit / push（Claude はクラウドから GitHub に直接書ける）。**止める = mock の作成・修正・`mockup()`・ローカルの gate 実行** → `帰宅後確認` に積む
 > - 3 AI の流れは変えない（Claude がハブ・GPT はレビュー・Gemini の意見は Claude へ）。**Gemini SPARK は Mac Studio のフォルダを読めない場合、GitHub main を読むか、イタヤが貼った文で判断**
