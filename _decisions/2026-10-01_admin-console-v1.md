@@ -7,6 +7,7 @@
 > 追補 v1.4: 面の設計 その 2（イタヤ 10-02 00:22・§15）／ 正典 revision: MYRIG-20261002-140
 > 追補 v1.5: 運営者 ID と Master の同期（イタヤ 10-02 07:02「全部推奨どおり」・§16）／ 正典 revision: MYRIG-20261002-142
 > 追補 v1.6: Research 回答 #3 を受けた調整（イタヤ 10-02 07:21「すべてはい」・§17）／ 正典 revision: MYRIG-20261002-145
+> 追補 v1.7: 購入先のリンクの整備（イタヤ 10-03 10:19「任せます」→ Claude 決定・§18）／ 正典 revision: MYRIG-20261003-148
 > 元: _proposals/2026-10-01_admin-operations-map_claude-v0.1〜v0.3（GPT・Gemini SPARK のレビュー反映済み）
 > 状態: 設計の方向 = 確定。schema・migration・mock は未着手。Production DB 非接触
 
@@ -209,3 +210,16 @@
 - **Q-R5（G32）カタログ画像をすぐ止める App 側の一時のブレーキ**: App に「画像を出さない」だけの小さな表（メーカー・製品・画像の単位）。管理アプリの Catalog 区画で止めると ① App のブレーキにすぐ書く ② Research に 3 点セット（画像 = denied ＋ hidden ／ 公開の判定 = denied ／ `master_image_rights` に止めた日と理由）を書く。**許諾の判断と記録の正本は Research。App は一時のブレーキだけ**
 - G33（retailer_official 254 行）は Research の週次ゲートの確認待ち。確認が済むまで R9 の確認事項
 - G34（Research の読み取り専用のガード未充足）は Research レーンの運用として共有
+
+## 18. 追補 v1.7 — 購入先のリンクの整備（イタヤ 2026-10-03 10:19「任せます」→ Claude が推奨どおり決定）
+
+元: `_decisions/2026-10-02_db-inquiry-003-reply.md`（回答 #3-2・#3-3）・`_proposals/2026-10-02_admin-sync-after-research-reply_claude-v0.8.md` §5〜§7
+
+- **Q-R6** RIG 向けの取扱店リンクの整備を Research に頼む。単位は `rig_master_variants`（SKU の完全一致だけ）。優先度と時期は Research の週次ゲートでイタヤが決める
+- **Q-R7** 公開までに間に合わなければ、**購入先なしで公開する**（#34「迷ったら出さない」）。§11 Q-K5 は「出せる条件がそろった製品にだけ出す」であり、購入先が 1 件も無い公開も裁定の範囲
+- **Q-R8 提携が有効なお店の一覧 = イタヤの事実の確認が要る（未確定）**。「任せます」では決められないので、次の扱いにする:
+  - Research へは、正典にある**想定のお店を「候補・提携の状態は未確認」として**渡す（計画の入力）: 日本 = Amazon JP / 楽天 / Yahoo / AMain ・ 米国など = Amazon US / AMain / Tower Hobbies ・ その他 = Amazon Onelink / AMain
+  - App の `commerce_merchants` には、**全部を「未確認」で登録**する。イタヤが「有効」にするまで、どのお店の購入先も表示されない（§13 M3 の表示の条件がそのまま守る）
+  - Research がリンクを集め始める前に、イタヤが「実際に提携が通っているお店」を確かめて候補を絞る（週次ゲートの議題の中で）
+- 既存の retailer_product 1,896 行は、Research の確認が済むまで購入先に出さない（§17・回答 #3-3）
+- G35（購入先に出せるリンクがほぼ無い）はこの決定で扱いが確定

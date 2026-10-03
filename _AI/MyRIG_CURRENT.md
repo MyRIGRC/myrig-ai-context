@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261002-147
-updated: 2026-10-02 07:36 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261003-148
+updated: 2026-10-03 10:20 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-02 07:36 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🔴 **148 = Q-R6・R7 を Claude が推奨どおり決定（イタヤ 10-03 10:19「任せます」）** → 裁定原本 §18 追補 v1.7: RIG 向けの取扱店リンクの整備を Research に頼む／間に合わなければ購入先なしで公開。**Q-R8（提携が実際に通っているお店）はイタヤの事実の確認が要るので未確定** → 想定のお店を「候補・未確認」として Research に渡し、App では全部「未確認」（イタヤが有効にするまで表示されない）。**外出中の確認（10-03）: DB を実際に調べる作業は帰宅後**。r12 は正典（GitHub）だけで進む文字の設計で、DB には触らない。
 
 > 🟢 **147 = DB Research 回答 #3-3 を保存**: 第 1 段 = **D8（関数方式・管理アプリは表に直接書けない・確認モードつき・ロゴは外す・画像 ID 指定を足す）**／「誰が」= 関数の引数 operator_id → Research の `import_runs` に残る・**operator_id が誰かの対応は App が正本**／第 2 段も全部関数経由（Master の新規追加は取り込みの手順を必ず通す）。週次ゲート = D1〜D8 ＋ 議題（RIG 向け取扱店リンク）。**イタヤ待ち**: Q-R6（整備を頼むか）・Q-R7（間に合わなければ購入先なしで公開）・**Q-R8（提携が有効なお店の一覧 = Research の計画の入力）**。既存の retailer_product 1,896 行は Research の確認まで購入先に出さない。
 
@@ -49,7 +51,7 @@ updated: 2026-10-02 07:36 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 > - 進めてよい = 設計・監査・裁定案・canon の commit / push（Claude はクラウドから GitHub に直接書ける）。**止める = mock の作成・修正・`mockup()`・ローカルの gate 実行** → `帰宅後確認` に積む
 > - 3 AI の流れは変えない（Claude がハブ・GPT はレビュー・Gemini の意見は Claude へ）。**Gemini SPARK は Mac Studio のフォルダを読めない場合、GitHub main を読むか、イタヤが貼った文で判断**
 > - **（10-01 19:10 イタヤ）帰宅まで、GPT・Gemini などほかの AI は正典の revision 照合をしなくてよい**。貼られた文だけで意見してよい。正典との照合は Claude が取り込むときに行う（Claude は GitHub を直接読めるので、照合と記録は続ける）
-> - 帰宅後確認: ① mock の Home / Browse に残る「ランキング」見出しと popular 系プリセット（`pc/myrig-home-v3.html` :2807 `weekly-like-ranking-rig` ほか・page-role-matrix §7 違反・G27）→ Home / Browse レーンを開けるときに直す
+> - 帰宅後確認: ⓪ **実際の DB を見て確かめること全部**（App のテスト環境での実測・Supabase の機能の確認 = Custom Access Token Hook / TOTP と AAL2 / 同期専用の役割の権限 / 最初の全件取り込みの所要時間）。外出中は Claude も DB に触らない ① mock の Home / Browse に残る「ランキング」見出しと popular 系プリセット（`pc/myrig-home-v3.html` :2807 `weekly-like-ranking-rig` ほか・page-role-matrix §7 違反・G27）→ Home / Browse レーンを開けるときに直す
 
 > 🟢 **129 = /admin 設計図 v0.2（PROPOSAL）**: **`_proposals/2026-10-01_admin-operations-map_claude-v0.2.md`**。GPT（MUST 7・追加 2）と Gemini SPARK（MUST 5・SHOULD 4）のレビューを統合し、採否を §14 に記録。主な変更 = Case を 1 対多の子表に・保全は範囲つきの独立した表 `legal_holds`・Job は非同期で失敗しうるものだけ（冪等）・ベルの記録 `admin_alerts`・**停止だけでは退会の消去を止めない（Q3 撤回）**・管理画面を唯一の非常口にしない・スパムの一括処置・プロフィールの処置・画像の配信の停止（G21）・管理者の締め出しへの備え・Task Package / Home の 1 行 / 規約の画面は B へ・正典の抜け G1〜G21。**食い違いの裁定案**: ベルの中身 = SPARK 案（理由の区分・対象の種類・#ID・/admin/m の入口）／Q3 = GPT 案／個人サイトの自動公開（SPARK）は採らない。**次 = イタヤの裁定（§12 Q1〜Q9）→ v1.0**。
 
