@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261003-149
-updated: 2026-10-03 18:32 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261003-150
+updated: 2026-10-03 18:39 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,8 @@ updated: 2026-10-03 18:32 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟢 **150 = 3 AI の現在地を共有（10-03 18:39）**: Claude の認識 A〜I は GPT・Gemini とも一致。相違は次の順番だけ。裁定原本 **§19 追補 v1.8** に、r12 と同期の契約で決める点（R-1 付け替えの順序を訂正・**G36 リンクの確認の持ち主**・R-3 行のハッシュの式・R-4 表ごと差し替えない）と Gemini の点（取り込みは小分け・購入先 0 件は枠ごと出さない・認証を省く URL は採らない）を記録。Gemini は PC 作業で再開（CORE）。**次の順番の案 = 小さな実測 → r12 → /admin の mock → G27 → 本格的な DB の確認**（実測に使うテスト用プロジェクトはイタヤの指示待ち）。
 
 > 🟢 **149 = 外出中の運用を終了（イタヤ 10-03 18:29 帰宅・PC 作業を再開）**。ふだんの決まりに戻す: ほかの AI も正典の revision を照合する／mock の作成・修正・`mockup()`・ローカルの gate を再開できる。
 > - Mac のローカル clone（`~/Desktop/MyRIG/myrig-ai-context`）= 148 で origin/main と一致を確認（10-03 18:31）。mock（`App/MOKUP/myrig_pc_Ver3`）= `30c89bd`・origin/main と差なし
