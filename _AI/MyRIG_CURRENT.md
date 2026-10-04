@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261003-151
-updated: 2026-10-03 18:54 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261004-152
+updated: 2026-10-04 12:03 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -9,6 +9,14 @@ updated: 2026-10-03 18:54 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 ---
 
 ## 🔴 いまやっていること（NOW）
+
+> 🟠 **152 = Supabase の Free プランに由来する運用の注意（10-04・Supabase 公式資料で確認・DB には触っていない）**。イタヤ 10-04: 「Production DB は外出中触っていない／5 月ごろから Research を継続・膨大なデータが Supabase とローカルにある」。
+> - 組織は Free プラン。プロジェクト 3 つ = 「MyRIG Production DB」**停止中**／「Research DB」動作中／「MyRIG Test (r12 probe)」動作中（10-03 作成）
+> - ① **停止したプロジェクトを画面から戻せるのは停止から 90 日**。過ぎるとバックアップのダウンロードだけ（資料: platform/free-project-pausing・platform/upgrading）。Production DB がいつ止まったかは API からは分からない → **Supabase の画面で残り日数を確認**
+> - ② **Free は DB のサイズが 500 MB を超えると読み取り専用になる**（資料: platform/database-size）。Research DB の今のサイズは未確認（Claude は Research DB に問い合わせていない）
+> - ③ **自動バックアップを使えるのは Pro 以上**。Free は自分で書き出す（`supabase db dump`）ことが勧められている（資料: platform/backups）
+> - ④ Free で動かせるのは 2 つまで（停止中は数えない）。いま Research ＋ Test で 2 つ → **Production DB を戻すときは、先に Test を止める**
+> - 正典の MVP 構成は Supabase Pro（09-06 infra 裁定）。いつ Pro にするかはイタヤの判断
 
 > 🟢 **151 = r12 の前の小さな実測を完了** → `_state/PROBE_20261003_r12-preconditions.md`。場所 = テスト用の Supabase プロジェクト「MyRIG Test (r12 probe)」（イタヤ 10-03 18:46 の指示で新規作成・Free・**Production / Research には非接触**）。✅ 列ごとの権限つきの読むだけの役割／✅ 運営者の表・紐付けの一意制約・付け替えの関数（外す → 作る）／✅ 管理者の印を作る関数／✅ パーツ 14.5 万行の反映 = 最悪 46 秒（2 分の制限の中）／✅ 差分の読み出し 87 ms。🟡 TOTP と AAL・Hook の有効化は器の確認まで（実際のログインは実装の最初に確かめる）。分かったこと = `select *` が使えない（列を並べて読む）・変わっていない行は反映の前に絞る。**次 = r12 の下書き**。
 
