@@ -1,7 +1,7 @@
 # MyRIG CURRENT
 
-revision: MYRIG-20261004-152
-updated: 2026-10-04 12:03 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
+revision: MYRIG-20261004-153
+updated: 2026-10-04 12:37 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 恒久ルールは MyRIG_CORE.md を参照。
 このファイルは索引＋差分。詳細仕様全文は含まない。
@@ -10,9 +10,16 @@ updated: 2026-10-04 12:03 JST（生成: Claude ZoneInfo("Asia/Tokyo")）
 
 ## 🔴 いまやっていること（NOW）
 
+> 🔴 **153 = Research の現状確認（10-04）** → `_state/RESEARCH_STATUS_20261004.md`（Claude の Research プロジェクトと GPT / Codex の 2 報告を保存 ＋ App 側の読み）。
+> - **Research DB は 500 MB まで残り 25〜47 MB**（453.1 MiB）。`change_logs` が 44%。08-23 以降は書き込みなし。次の一括更新 1 回で超える見込み
+> - **DB 全体のバックアップが 1 つも無い**（07-28 の CSV 18 表だけ・定義も権限も無い・戻せるか未検証）。9/27 のバックアップ手順は未実行・**イタヤの実行待ち** → 最優先
+> - **App 側のテスト用プロジェクトが 339 MB**（10-03 の実測の作り物）。合計で数えられるなら 792 MiB で超過 → 2 表を消す ／ プロジェクトを止める（イタヤの判断待ち。Claude の DROP は実行されていない）
+> - 食い違い: Research DB の一時停止の計画（9/27）と App の同期の設計（§16）／ Research 側の持ち越し（旧 anon キー・RLS 無効 32 表）
+> - **/admin の r12 は、バックアップと容量の扱いが決まるまで待つ**（優先順位を入れ替え）
+
 > 🟠 **152 = Supabase の Free プランに由来する運用の注意（10-04・Supabase 公式資料で確認・DB には触っていない）**。イタヤ 10-04: 「Production DB は外出中触っていない／5 月ごろから Research を継続・膨大なデータが Supabase とローカルにある」。
 > - 組織は Free プラン。プロジェクト 3 つ = 「MyRIG Production DB」**停止中**／「Research DB」動作中／「MyRIG Test (r12 probe)」動作中（10-03 作成）
-> - ① **停止したプロジェクトを画面から戻せるのは停止から 90 日**。過ぎるとバックアップのダウンロードだけ（資料: platform/free-project-pausing・platform/upgrading）。Production DB がいつ止まったかは API からは分からない → **Supabase の画面で残り日数を確認**
+> - ① ~~停止から 90 日~~ → 🔴 **訂正（153）: 戻せるのは停止から 1 年**（公式ページ 2026-10-02 更新を直接確認。152 の 90 日はコネクタの資料検索が返した古い版）。Production DB がいつ止まったかは API からは分からない → **Supabase の画面で残り日数を確認**
 > - ② **Free は DB のサイズが 500 MB を超えると読み取り専用になる**（資料: platform/database-size）。Research DB の今のサイズは未確認（Claude は Research DB に問い合わせていない）
 > - ③ **自動バックアップを使えるのは Pro 以上**。Free は自分で書き出す（`supabase db dump`）ことが勧められている（資料: platform/backups）
 > - ④ Free で動かせるのは 2 つまで（停止中は数えない）。いま Research ＋ Test で 2 つ → **Production DB を戻すときは、先に Test を止める**
